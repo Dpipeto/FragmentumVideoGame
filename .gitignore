@@ -1,0 +1,70 @@
+# ---------------------------------------------------------------
+# Unity — carpetas que Unity regenera (nunca se versionan)
+# ---------------------------------------------------------------
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Carpetas "Recovery"/"Asset Store Tools" y otras generadas
+/[Aa]ssets/AssetStoreTools*
+/[Aa]ssets/Plugins/Editor/JetBrains*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+/[Aa]ssets/AddressableAssetsData/*/*.bin*
+
+# ---------------------------------------------------------------
+# IDEs (Visual Studio, Rider, VS Code)
+# ---------------------------------------------------------------
+.vs/
+.idea/
+.vscode/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# ---------------------------------------------------------------
+# Salidas de build y reportes de crash
+# ---------------------------------------------------------------
+*.apk
+*.aab
+*.unitypackage
+*.app
+sysinfo.txt
+crashlytics-build.properties
+ExportedObj/
+
+# ---------------------------------------------------------------
+# Archivos locales de este proyecto
+# ---------------------------------------------------------------
+# Log suelto de un proceso externo en la raíz
+/debug.log
+# Archivos de trabajo de arte fuera de Assets (pesados; no los usa Unity).
+# Si quieres versionarlos, usa Git LFS en lugar de quitar esta línea.
+*.pxo
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+.DS_Store

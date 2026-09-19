@@ -1,0 +1,39 @@
+# Assets serializados de Unity (YAML en modo Force Text).
+# merge=unityyamlmerge solo actúa si configuras el driver (ver abajo);
+# sin configurarlo, git usa el merge de texto normal.
+*.unity         text merge=unityyamlmerge
+*.prefab        text merge=unityyamlmerge
+*.asset         text merge=unityyamlmerge
+*.meta          text merge=unityyamlmerge
+*.controller    text merge=unityyamlmerge
+*.anim          text merge=unityyamlmerge
+*.mat           text merge=unityyamlmerge
+*.physicsMaterial2D text merge=unityyamlmerge
+*.physicMaterial text merge=unityyamlmerge
+*.scenetemplate text merge=unityyamlmerge
+*.inputactions  text
+
+# Código y documentos
+*.cs            text diff=csharp
+*.md            text
+*.json          text
+*.txt           text
+
+# Binarios: nunca intentar diff ni conversión de fin de línea
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.psd           binary
+*.aseprite      binary
+*.mp3           binary
+*.ogg           binary
+*.wav           binary
+*.ttf           binary
+*.otf           binary
+*.zip           binary
+*.pxo           binary
+
+# Para activar el merge semántico de escenas/prefabs de Unity:
+#   git config merge.unityyamlmerge.name "Unity SmartMerge"
+#   git config merge.unityyamlmerge.driver "\"<ruta-unity>/Editor/Data/Tools/UnityYAMLMerge.exe\" merge -p %O %B %A %A"
