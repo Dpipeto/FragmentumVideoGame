@@ -10,7 +10,7 @@
 - **Escala fijada:** el tileset nuevo son 32 px por tile a 32 PPU, así que **1 tile = 1 unidad**. Todo el arte que se importe desde la v1 hay que reimportarlo a esa escala. Las hojas de Kael de la v1 estaban a 500 PPU y el jugador dependía de un `localScale` de 0,215; eso desaparece.
 - **Tags y capas ya creados** en el proyecto por el menú *Fragmentum → Configurar proyecto*: tags `Enemy`, `Boss`, `Weapon`, `suelo`, `Lava`, `HotPlatform`, `IcePlatform`, `FalsePlatform`, `Checkpoint` y `Memory`; capas `suelo` (6), `Wall` (7), `Player` (8), `Enemy` (9), `PlayerWeapon` (10) y `EnemyWeapon` (11), con la matriz de colisión del Anexo A aplicada.
 
-### Arte nuevo generado con Gemini (carpeta `Imagestesis2/` de la v1)
+### Arte nuevo generado con Gemini (carpeta `Referencias/Arte/`)
 
 Son **hojas de referencia en JPEG**, no sprites listos: llevan el cuadriculado de transparencia
 incrustado en la propia imagen, así que **hay que recortar cada pose y quitar el fondo** antes de
@@ -18,7 +18,7 @@ importarlas. Eso no lo puedo hacer yo: no genero ni edito imágenes.
 
 | Archivo | Qué contiene | Qué hay que hacer | Prioridad |
 |---|---|---|---|
-| `tileset_32.png` | Tileset volcánico de basalto con lava | **Ya importado** en `Tesis2.0` con su paleta | — |
+| `tileset_32 (1).png` | Tileset volcánico de basalto con lava | **Ya importado** en `Tesis2.0` con su paleta | — |
 | `posiblesanimaciiones kael.jpeg` | 8 poses de Kael: quieto, correr, saltar, caer, atacar, dash, herido y derrota | Recortar pose a pose, fondo transparente, PNG a 32 px por unidad, y montar los clips | P1 (fase 3) |
 | `AnimacionesGeneralesEnemigos.jpeg`, `EnemigosNiveles.jpeg` | Enemigos genéricos y por nivel | Igual | P1 (fase 4) |
 | `Jefes/Jefe1.jpeg`, `Fase2Jefe1.jpeg`, `PosiblesAnimacionesJefe1.jpeg` | Centinela Ardiente y su fase 2 | Igual | P2 (fase 7) |
@@ -26,6 +26,18 @@ importarlas. Eso no lo puedo hacer yo: no genero ni edito imágenes.
 | `Jefes/cinematicJefe1.jpeg`, `CinematicaJefefinal.jpeg` | Cinemáticas (imágenes fijas) | Recortar a 16:9 y guardar como PNG; van en `CutsceneData` | P2 (fase 8) |
 | `Jefes/fragmentos de alma.jpeg` | Iconos de los fragmentos de identidad | Recortar uno por fragmento | P2 |
 | `Mapas/` (9 imágenes) | Capas de parallax: cielo, plano lejano, medio, cercano y primer plano, en dos variantes | Recortar, decidir qué variante es canónica y marcar las capas que deben repetirse en horizontal | P1 (fase 3, fondo del Nivel 1) |
+
+### Maquetas de menús (`Referencias/Menus/`)
+
+`fragmentum_pause_worlds.jsx` es un prototipo en React con una escena SVG animada por cada uno de
+los 6 mundos y su paleta. **Es la referencia visual de los menús de pausa y de muerte**, que se
+traducen a uGUI en la Fase 6 (`UIManager`, `MenuPausa` y `PantallaGameOver`), con un fondo por
+mundo tomado de `LevelData.paleta`. No es código de Unity y no se importa.
+
+Falta por decidir: si el fondo de cada menú será el SVG convertido a imagen, o un degradado
+generado en Unity a partir de la paleta del nivel. Lo segundo no necesita ningún asset nuevo.
+
+---
 
 **Sigue faltando por completo:** los diálogos escritos, la música de los niveles 2 al final, **todos**
 los efectos de sonido, los iconos de la UI y el concepto del jugador con sus habilidades en acción.
@@ -174,7 +186,7 @@ Estado actual: en juego se usa el **Samurai** de un pack (idle, run, attack, hur
 
 | Asset | Sistema | Existe | Prioridad |
 |---|---|---|---|
-| Viñeta en gradiente radial (pausa y Game Over) | `UIManager` | ✗ | P3 |
+| Viñeta en gradiente radial (pausa y Game Over) | `UIManager` | Maqueta en `Referencias/Menus/` | P3 |
 | Ícono de pausa | `UIManager` | ✗ | P3 |
 | Materiales de glow para TMP | `UIManager` | ✗ | P3 |
 | Íconos por mundo para el selector (×6) + candado | `SelectorNivel` → `LevelData.icono` | ✗ | P2 |
