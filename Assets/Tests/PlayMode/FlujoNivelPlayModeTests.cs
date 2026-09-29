@@ -200,6 +200,8 @@ namespace Fragmentum.Tests.PlayMode
 
             yield return LlevarJugadorA(new Vector2(salida.transform.position.x, 0.05f));
 
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Primero, la cinemática de cierre del mundo.");
+            yield return SaltarCinematicaSiHay();
             Assert.AreEqual(ESTADOS_JUEGO.LEVEL_COMPLETE, Juego.EstadoActual);
             Assert.IsTrue(Nivel.Completado);
             Assert.IsTrue(Interfaz.PantallaFinNivel.Visible);
@@ -209,7 +211,7 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarReal(2f);
             Assert.AreEqual(ESTADOS_JUEGO.LEVEL_COMPLETE, Juego.EstadoActual, "Con pantalla, el fin de nivel espera al jugador.");
 
-            Interfaz.PantallaFinNivel.Opciones[0].onClick.Invoke(); // Continuar
+            ContinuarDesdeFinDeNivel();
             yield return EsperarEstado(ESTADOS_JUEGO.LEVEL_SELECT, 6f);
             Assert.IsFalse(Interfaz.Hud.gameObject.activeSelf, "Fuera de los niveles no hay HUD.");
         }

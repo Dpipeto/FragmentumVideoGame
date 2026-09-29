@@ -24,6 +24,9 @@ namespace Fragmentum.UI
         private GameObject _panelJefe;
         private Text _nombreJefe;
         private LifeBar _barraJefe;
+        private GameObject _panelDialogo;
+        private Text _hablante;
+        private Text _linea;
         private float _ocultarAvisoEn;
         private bool _construido;
 
@@ -33,6 +36,11 @@ namespace Fragmentum.UI
         public bool JefeVisible => _panelJefe != null && _panelJefe.activeSelf;
 
         public string NombreJefe => _nombreJefe != null ? _nombreJefe.text : string.Empty;
+
+        /// <summary>Línea de diálogo visible ahora mismo, o vacío.</summary>
+        public string LineaActual => _panelDialogo != null && _panelDialogo.activeSelf ? _linea.text : string.Empty;
+
+        public string HablanteActual => _panelDialogo != null && _panelDialogo.activeSelf ? _hablante.text : string.Empty;
 
         /// <summary>Texto del aviso visible ahora mismo, o vacío.</summary>
         public string AvisoActual => _aviso != null && _aviso.gameObject.activeSelf ? _aviso.text : string.Empty;
@@ -85,6 +93,46 @@ namespace Fragmentum.UI
             _aviso.gameObject.SetActive(false);
 
             ConstruirBarraJefe(raiz);
+            ConstruirDialogo(raiz);
+        }
+
+        // Diálogos internos de Kael: una banda abajo, sobre el aviso, con quien habla y la línea.
+        private void ConstruirDialogo(RectTransform raiz)
+        {
+            var panel = FabricaUI.Objeto("Dialogo", raiz);
+            FabricaUI.Colocar(panel, new Vector2(0.5f, 0f), new Vector2(0f, 190f), new Vector2(1200f, 120f), new Vector2(0.5f, 0f));
+            var fondo = panel.gameObject.AddComponent<Image>();
+            fondo.color = new Color(0f, 0f, 0f, 0.6f);
+            fondo.raycastTarget = false;
+            _panelDialogo = panel.gameObject;
+
+            _hablante = FabricaUI.Texto(panel, "Hablante", string.Empty, 22, Color.white, TextAnchor.UpperLeft);
+            FabricaUI.Colocar(_hablante.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -12f), new Vector2(600f, 30f), new Vector2(0f, 1f));
+            _hablante.fontStyle = FontStyle.Bold;
+
+            _linea = FabricaUI.Texto(panel, "Linea", string.Empty, 26, new Color(0.94f, 0.93f, 0.85f, 1f), TextAnchor.UpperLeft);
+            FabricaUI.Colocar(_linea.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -44f), new Vector2(1144f, 70f), new Vector2(0f, 1f));
+            _linea.fontStyle = FontStyle.Italic;
+
+            _panelDialogo.SetActive(false);
+        }
+
+        /// <summary>Muestra una línea de diálogo interno; el nombre, en el color del mundo.</summary>
+        public void MostrarLinea(string hablante, string texto, Color acento)
+        {
+            Construir();
+            _hablante.text = (hablante ?? string.Empty).ToUpperInvariant();
+            _hablante.color = acento;
+            _linea.text = texto ?? string.Empty;
+            _panelDialogo.SetActive(true);
+        }
+
+        public void OcultarLinea()
+        {
+            if (_construido)
+            {
+                _panelDialogo.SetActive(false);
+            }
         }
 
         // Barra del jefe arriba en el centro, con su nombre canónico; oculta fuera del combate.

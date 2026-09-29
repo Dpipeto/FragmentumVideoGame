@@ -52,6 +52,7 @@ namespace Fragmentum.Core
                 sistemas.AddComponent<GameManager>();
                 sistemas.AddComponent<SceneLoader>();
                 sistemas.AddComponent<GameStateMachine>();
+                sistemas.AddComponent<Narrative.DialogueManager>();
                 sistemas.AddComponent<UI.UIManager>();
             }
 

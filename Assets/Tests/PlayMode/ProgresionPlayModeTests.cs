@@ -44,12 +44,13 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreSame(bd.niveles[0], Gestor.NivelActual);
 
             Assert.IsTrue(Juego.CompletarNivel());
+            yield return SaltarCinematicaSiHay();
             Assert.AreEqual(ESTADOS_JUEGO.LEVEL_COMPLETE, Juego.EstadoActual);
             Assert.AreEqual(0f, Time.timeScale, "El fin de nivel detiene el tiempo.");
 
             // La pantalla de fin de nivel espera al jugador; el nivel 2 no tiene escena → selector.
             Assert.IsTrue(Interfaz.PantallaFinNivel.Visible);
-            Interfaz.PantallaFinNivel.Opciones[0].onClick.Invoke();
+            ContinuarDesdeFinDeNivel();
             yield return EsperarEstado(ESTADOS_JUEGO.LEVEL_SELECT, 8f);
 
             Assert.AreEqual(2, Gestor.Datos.nivelMaximoAlcanzado);

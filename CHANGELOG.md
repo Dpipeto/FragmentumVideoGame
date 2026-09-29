@@ -9,6 +9,141 @@
 
 ---
 
+## Fase 8 — Narrativa (2026-09-29)
+
+Rama `fase-8-narrativa`, que sale de `fase-7-jefes`. Cubre la tarea G: la cinemática inicial
+como sistema, los diálogos internos de Kael, el registro emocional y la pantalla «yo
+reconstruido». Criterios de aceptación: la cinemática inicial funciona sin imágenes y ningún
+asset ausente bloquea el juego.
+
+### 1. La historia no tenía dónde vivir
+
+- **Problema.** La v1 no tenía cinemáticas ni diálogos. La cinemática inicial del diseño no
+  existía, y el único arte narrativo era una imagen de fondo del menú.
+- **Causa.** No había ningún modelo de datos para la narrativa ni nada que la reprodujera.
+- **Solución.** Las cinemáticas son datos (**`CutsceneData`**: diapositivas con imagen, texto,
+  duración y audio opcional), y las reproduce **`PantallaCinematica`**:
+  - **Funciona sin arte.** Una diapositiva sin imagen se ve en negro con su texto, y sin texto
+    dice qué falta. Así la cinemática inicial ya se puede ver, cronometrar y saltar.
+  - **Controles:** clic o Enter pasa de diapositiva, y Esc o Start la salta si es saltable.
+  - **Integración con la FSM global:**
+    - La cinemática de entrada va entre LOADING y PLAYING. La inicial es la entrada del
+      Nivel 1 y solo se ve la primera vez; queda guardado en la partida.
+    - La de cierre va entre la victoria y el fin de nivel.
+    - Las memorias (Fase 10) usarán `IniciarCinematica`.
+  - **Sin reproductor** (sin `UIManager`), la FSM global avanza sola: nunca se queda atascada.
+  - Lo verifican `LaCinematicaInicial_SeVeAntesDelNivel1_SinImagenes`,
+    `LaCinematicaInicial_NoSeRepite`, `UnaCinematica_AvanzaSola_YVuelveAlJuego` y
+    `SinReproductor_LaCinematicaNoBloqueaElJuego`.
+
+### 2. Los diálogos internos de Kael
+
+- **`DialogueData`**, uno por mundo, con líneas para cuatro momentos: apertura, eco de memoria,
+  antes del jefe y cierre. Viven en datos, nunca en la escena.
+- **`DialogueManager`** los pone en cola y el HUD los muestra abajo, con el nombre de quien
+  habla en el color del mundo:
+  - No detienen el juego: son pensamientos, no conversaciones.
+  - Esperan durante las cinemáticas y la pausa.
+  - La **apertura** suena al empezar el nivel y la línea **antes del jefe**, al entrar en la
+    arena. La de **cierre** acompaña al fragmento en el fin de nivel, porque tras la victoria
+    ya no se juega. El **eco de memoria** lo usarán las memorias (Fase 10).
+- **Los textos son del guion** (PENDIENTES B2). Mientras falten, cada línea dice que está
+  pendiente y ya nombra la emoción de su mundo, como pide la tarea G.
+- Lo verifican `LasLineasDeApertura_AparecenAlEmpezarAJugar` y `AntesDelJefe_HablaElArquitecto`.
+
+### 3. El registro emocional: datos cualitativos desde el propio juego
+
+- **Problema.** El instrumento de la tesis solo tenía cuestionarios externos (TMMS-24 y SCCS).
+  No recogía nada de lo que el jugador vive en cada mundo.
+- **Solución.** Al terminar cada nivel, la pantalla de fin de nivel empieza por el registro
+  emocional:
+  - Pregunta «¿Con qué intensidad sentiste ira en este mundo?», con una escala de 1 a 5.
+  - Un comentario opcional y, la primera vez, un código de participante opcional para el
+    pilotaje.
+  - **«Omitir»** pasa sin guardar nada: nunca bloquea el juego.
+
+  **`RegistroEmocional`** guarda cada respuesta en local, en un archivo aparte de la partida
+  (`registro_emocional.json`), y la exporta a la vez a `registro_emocional.csv`:
+  - separado por «;» y con BOM, para que Excel lea bien las tildes;
+  - con escritura atómica;
+  - si el archivo está dañado, se conserva como `.danado` y se empieza uno nuevo.
+
+  La pregunta y las etiquetas de la escala son datos (`ConfiguracionRegistro`), para ajustarlas
+  al instrumento sin tocar código. Lo verifican `RegistroEmocionalTests`,
+  `AlSuperarElNivel_CierreYRegistroEmocional` y `ElRegistroEmocional_SePuedeOmitir`.
+
+### 4. La pantalla «yo reconstruido»
+
+- Muestra de forma acumulativa los fragmentos de identidad: Kael en el centro y los cinco
+  fragmentos alrededor.
+  - Los integrados brillan con el color de su mundo y dicen qué habilidad dieron.
+  - Los que faltan son un contorno apagado.
+- Se abre desde el menú principal (botón nuevo «Yo reconstruido»).
+- El fin de nivel muestra la misma cuenta en una fila de rombos.
+- Lo verifica `YoReconstruido_MuestraLosFragmentosIntegrados`.
+
+### Decisiones que ajustan el plan de la Fase 1
+
+1. **El reproductor de cinemáticas es una pantalla más del `UIManager`** (`PantallaCinematica`),
+   no un sistema aparte. La FSM global guarda qué cinemática toca y si es de cierre, y
+   `TerminarCinematica()` ya no necesita parámetros.
+2. **El nivel se completa antes de la cinemática de cierre:** el fragmento ya está otorgado y la
+   cinemática solo retrasa la pantalla de fin de nivel.
+3. **La línea de cierre se muestra en el fin de nivel,** porque tras la victoria ya no se juega.
+4. **La configuración del registro es un ScriptableObject** (`ConfiguracionRegistro`, el
+   `EmotionalLogConfig` propuesto), y el código de participante se pide dentro del propio
+   registro la primera vez, en lugar de en una pantalla de opciones.
+5. **Placeholders evidentes:** las cinemáticas y los diálogos generados dicen «pendiente de
+   guion». Solo se usa texto del Anexo A donde el Anexo lo da: el cierre del Jardín, la entrada
+   al final y la pregunta de los créditos.
+
+### Además
+
+- **Nuevo menú *Fragmentum → Narrativa*:** generar y restablecer los placeholders. *Regenerar
+  todo* los incluye y los enlaza a los `LevelData` sin pisar lo que se haya asignado a mano.
+- **`FabricaUI.Campo`:** campo de texto con marcador, para el registro.
+- **`PantallaSuperpuesta.PrimeraSeleccion`:** cada pantalla elige qué queda seleccionado al
+  abrirse. En el registro es «Omitir», para que pulsar Enter sin mirar no guarde una respuesta.
+- La escena `Menu_Inicial` se regeneró con el botón nuevo (conserva su GUID).
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **179 de 179 correctas** (15 nuevas: datos de cinemáticas y diálogos,
+  registro emocional en JSON y CSV, y la narrativa generada y enlazada).
+- Pruebas PlayMode: **69 de 69 correctas**:
+  - 9 nuevas de narrativa, con los sistemas reales y el Nivel 1;
+  - las de progresión y flujo se adaptaron a la cinemática de cierre y al registro del fin de
+    nivel.
+
+### Pasos manuales en el Editor
+
+Ninguno obligatorio. Los placeholders están en `Assets/Data/Narrativa`, ya enlazados a cada
+`LevelData`.
+
+- **Para escribir el guion:** edita el texto de las diapositivas de `Cinematica_*` y de las
+  líneas de `Dialogos_*`. Las imágenes van en el campo `imagen` de cada diapositiva (16:9).
+- **Para ajustar el registro emocional:** en `Assets/Data/Narrativa/RegistroEmocional.asset`
+  están la pregunta (`{emocion}` se sustituye por la del mundo), las etiquetas de la escala y
+  los campos opcionales. Desmarca `activo` para no preguntar.
+- **Dónde quedan las respuestas:**
+  `%USERPROFILE%\AppData\LocalLow\DefaultCompany\Tesis2.0\registro_emocional.csv`, y el `.json`
+  al lado. «Nueva partida» no las borra.
+
+### Qué probar a mano (desde `Menu_Inicial`, «Nueva partida»)
+
+- Antes del Nivel 1 se ve la cinemática inicial: pantalla negra con el texto pendiente. Enter
+  pasa de diapositiva y Esc la salta. Si vuelves a entrar, ya no sale.
+- Al empezar a jugar aparece abajo la línea de apertura de Kael, que nombra la ira.
+- Al entrar en la arena habla la Centinela Ardiente.
+- Tras cruzar la salida: la cinemática de cierre y luego el registro emocional. Elige un número,
+  escribe algo y «Guardar». Después sale el fragmento con la línea de cierre y la fila de
+  rombos. Comprueba el `.csv`.
+- En el menú, «Yo reconstruido» muestra el Fragmento de la Ira encendido. Esc lo cierra.
+
+---
+
 ## Fase 7 — Jefes (2026-09-29)
 
 Rama `fase-7-jefes`, que sale de `fase-6-flujo-nivel`. Cubre la tarea C: jefes con FSM por

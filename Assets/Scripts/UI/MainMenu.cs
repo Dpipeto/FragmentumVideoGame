@@ -16,6 +16,10 @@ namespace Fragmentum.UI
         [SerializeField] private Button botonContinuar;
         [SerializeField] private Button botonNuevaPartida;
         [SerializeField] private Button botonSelector;
+
+        [Tooltip("Opcional: abre la pantalla «yo reconstruido» con los fragmentos integrados.")]
+        [SerializeField] private Button botonYoReconstruido;
+
         [SerializeField] private Button botonSalir;
 
         [Tooltip("Opcional: resumen del progreso guardado.")]
@@ -26,6 +30,7 @@ namespace Fragmentum.UI
             Enganchar(botonContinuar, Continuar);
             Enganchar(botonNuevaPartida, NuevaPartida);
             Enganchar(botonSelector, SeleccionarNivel);
+            Enganchar(botonYoReconstruido, VerYoReconstruido);
             Enganchar(botonSalir, Salir);
             Refrescar();
         }
@@ -78,6 +83,14 @@ namespace Fragmentum.UI
         }
 
         public void SeleccionarNivel() => Juego()?.IrAlSelector();
+
+        public void VerYoReconstruido()
+        {
+            if (UIManager.Instancia != null)
+            {
+                UIManager.Instancia.MostrarYoReconstruido();
+            }
+        }
 
         public void Salir()
         {

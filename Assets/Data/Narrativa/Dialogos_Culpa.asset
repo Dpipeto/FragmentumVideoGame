@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c727d9fca1fed874ca8536539ef7890b, type: 3}
+  m_Name: Dialogos_Culpa
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.DialogueData
+  lineas:
+  - hablante: Kael
+    texto: "[Apertura \xB7 Culpa \xB7 pendiente de guion] Kael nombra la culpa al entrar en Campos de Batalla Arrasados."
+    momento: 0
+    duracion: 4.5
+  - hablante: Kael
+    texto: "[Eco de memoria \xB7 Culpa \xB7 pendiente de guion]"
+    momento: 1
+    duracion: 4.5
+  - hablante: Juez Silente
+    texto: "[Antes del jefe \xB7 Culpa \xB7 pendiente de guion] Juez Silente encarna la culpa."
+    momento: 2
+    duracion: 4.5
+  - hablante: Kael
+    texto: "[Cierre \xB7 Culpa \xB7 pendiente de guion] Kael reconoce la culpa como parte de s\xED."
+    momento: 3
+    duracion: 4.5

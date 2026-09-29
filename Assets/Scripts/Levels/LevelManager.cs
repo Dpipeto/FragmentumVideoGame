@@ -4,6 +4,7 @@ using Fragmentum.Bosses;
 using Fragmentum.Core;
 using Fragmentum.Data;
 using Fragmentum.Levels.Escenario;
+using Fragmentum.Narrative;
 using Fragmentum.Player;
 using UnityEngine;
 
@@ -114,6 +115,12 @@ namespace Fragmentum.Levels
             if (_camara != null)
             {
                 _camara.Encuadrar();
+            }
+
+            // Las líneas de apertura esperan a que se juegue (tras la cinemática de entrada, si la hay).
+            if (nivel != null && DialogueManager.Instancia != null)
+            {
+                DialogueManager.Instancia.Reproducir(nivel.dialogos, MOMENTOS_DIALOGO.APERTURA);
             }
         }
 

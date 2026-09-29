@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.7 — Fase 7, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.8 — Fase 8, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,11 +14,20 @@ Ordenado por urgencia.
 | N3 | **Recorta las poses de Kael** de `Referencias/Arte/posiblesanimaciiones kael.jpeg`. | El jugador ya tiene todos sus estados; hoy se ve como una cápsula clara. | Un PNG por pose con fondo transparente, a 32 px por unidad (el cuerpo mide 0,8 × 1,8 u, es decir, unos 26 × 58 px). Detalle en el apartado B3. |
 | N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
 | N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel` y `fase-7-jefes` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel`, `fase-7-jefes` y `fase-8-narrativa` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
 | N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
 | N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael: PNG con fondo transparente, a 32 px por unidad, pivote en los pies. Detalle en el apartado B4. |
 | N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`**, jefe incluido. | Menú, selector, guardado, checkpoints, pausa, Game Over, la Centinela Ardiente y el fin de nivel ya funcionan juntos (Fases 5 a 7). | Sigue las listas «Qué probar a mano» de las Fases 5, 6 y 7 en `CHANGELOG.md`. Dime qué pantalla no se entiende, qué se siente mal o si la Centinela es demasiado fácil o difícil (sus valores están en `Assets/Data/Jefes`). |
 | N10 | **Pinta el layout del Nivel 1** (~80 u, Anexo A) cuando quieras. | Hoy se juega sobre un recorrido provisional de bloques. | Pasos en «Pasos manuales en el Editor» de la Fase 6: preparar el tilemap como suelo, borrar «Provisional» y ajustar la altura de la bandera y la salida. No bloquea: la Fase 9 lo necesita, la 7 y la 8 no. |
+| N11 | **Escribe el guion**: la cinemática inicial, los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | El sistema de cinemáticas y diálogos ya funciona con textos marcados como «pendiente de guion» (Fase 8). | Edita los assets `Cinematica_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2). Prioridad: la inicial y el mundo de la Ira. Si prefieres pasarme el texto, lo vuelco yo. |
+| N12 | **Revisa la pregunta del registro emocional.** | Hoy pregunta «¿Con qué intensidad sentiste {emoción} en este mundo?», de 1 (Nada) a 5 (Muchísimo). Debe encajar con el instrumento de la tesis (TMMS-24 y SCCS). | Cámbiala en `Assets/Data/Narrativa/RegistroEmocional.asset`, o dime cuál quieres. También puedes pedir que no se pida código de participante. |
+
+## Revisión 0.8: qué cambió respecto de la v0.7
+
+- **Hay narrativa** (Fase 8). La cinemática inicial se ve antes del Nivel 1, solo la primera vez. Cada mundo tiene su cinemática de cierre y sus diálogos internos, todo con texto pendiente de guion.
+- **Hay registro emocional** al terminar cada nivel: escala de 1 a 5, comentario y código de participante opcionales. Se guarda en `registro_emocional.json` y `.csv` junto a la partida, y se puede omitir.
+- **Nueva pantalla «yo reconstruido»**, con botón en el menú principal.
+- **Nuevos N11** (escribir el guion) **y N12** (revisar la pregunta del registro). B1, B2 y B9 están al día con lo que ya existe.
 
 ## Revisión 0.7: qué cambió respecto de la v0.6
 
@@ -134,28 +143,38 @@ Las decisiones abiertas están arriba, en «Lo que necesito de ti».
 
 ## B. Assets faltantes por sistema
 
-### B1. Narrativa y cinemáticas — sistema `CutscenePlayer` + `CutsceneData` *(propuesto)*
+### B1. Narrativa y cinemáticas — `CutsceneData` + `PantallaCinematica` (Fase 8)
 
-| Asset | Sistema que lo espera | Campo *(propuesto)* | Formato | Prioridad | Placeholder |
-|---|---|---|---|---|---|
-| Imágenes de la **cinemática inicial** | `CutscenePlayer` | `CutsceneData.diapositivas[i].imagen` | PNG 16:9 | P2 | Pantalla negra con el texto del guion |
-| **Guion** de la cinemática inicial (texto y duración por diapositiva) | `CutsceneData` | `diapositivas[i].texto`, `.duracion` | Texto | P2 | Texto «[CINEMÁTICA INICIAL PENDIENTE]» |
-| Cinemáticas de **cierre de cada mundo** (Ira, Tristeza, Miedo, Culpa) | `LevelManager` → `CutscenePlayer` | `LevelData.cinematicaCierre` | PNG 16:9 + texto | P2 (Ira: P1) | Negro + texto |
-| Cinemática de cierre del Jardín (~30 s, Kael ve al Soldado) | idem | `LevelData.cinematicaCierre` (Nivel 5) | PNG + texto | P2 | Negro + texto |
-| Cinemática de **entrada al final** (~45 s) | idem | `LevelData.cinematicaEntrada` (Final) | PNG + texto | P2 | Negro + texto |
-| **Secuencia final + créditos** («¿Eres un error… o una nueva identidad?») | idem | `LevelData.cinematicaCierre` (Final) | PNG + texto | P2 | Negro + texto |
-| **Memorias del Nivel 4** (4 × ~5 s) | `MemoryObject` → `CutscenePlayer` | `MemoryObject.cinematica` | PNG + texto | P2 | Negro + texto |
-| **Memorias del Nivel 5** (4) | idem | idem | PNG + texto | P2 | Negro + texto |
+**Estado en la v2.** El sistema funciona: las cinemáticas se reproducen, se pueden saltar y
+recuerdan si ya se vieron. Todas existen en `Assets/Data/Narrativa`, enlazadas a su nivel, con
+**texto pendiente** y sin imágenes: se ven en negro con el texto. Para completarlas, edita el
+texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 
-> Hoy no existe ningún asset de Timeline ni `PlayableDirector`, aunque el paquete `com.unity.timeline` está instalado. El único arte narrativo es `Images/artbreeder-image-…jpeg`, que se usa como fondo del menú.
-
-### B2. Diálogos — `DialogueData` *(propuesto)*
-
-| Asset | Campo *(propuesto)* | Formato | Prioridad |
+| Cinemática (asset) | Dónde suena | Falta | Prioridad |
 |---|---|---|---|
-| Líneas de Kael y de los Arquitectos por mundo: **apertura, eco de memoria, pre-jefe, cierre** (×6 mundos) | `DialogueData.lineas[]` referenciado desde `LevelData.dialogos` | Texto (hablante + línea) | Ira P1, resto P2 |
-| Líneas del registro emocional (preguntas y escala) | `EmotionalLogConfig` *(propuesto)* | Texto | P2 |
-| Retratos opcionales (Kael + 5 Arquitectos + Soldado) | `DialogueSpeaker.retrato` | PNG 256×256 | P3 (sin retrato se muestra solo el nombre) |
+| `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | Guion completo e imágenes 16:9 | P1 |
+| `Cinematica_Cierre_Ira` | Al superar el mundo de la Ira | Guion e imágenes | P1 |
+| `Cinematica_Cierre_Tristeza`, `_Miedo`, `_Culpa` | Al superar cada mundo | Guion e imágenes | P2 |
+| `Cinematica_Cierre_Jardin` (~30 s: Kael ve al Soldado) | Al superar el Jardín | Guion e imágenes (la idea, del Anexo A, ya está) | P2 |
+| `Cinematica_Entrada_Final` (~45 s) | Antes del final | Guion e imágenes (la idea, del Anexo A, ya está) | P2 |
+| `Cinematica_Final` y créditos («¿Eres un error… o una nueva identidad?») | Al terminar el juego | Imágenes; texto del Anexo A ya incluido | P2 |
+| Memorias de los Niveles 4 y 5 (4 + 4, ~5 s) | Al activar cada memoria (`MemoryObject`, Fase 10) | Todo: se crearán con la mecánica | P2 |
+
+> La v2 no usa Timeline: las cinemáticas son diapositivas. Si alguna necesita animación, una
+> diapositiva puede apuntar más adelante a un clip de Timeline sin cambiar el resto del sistema.
+
+### B2. Diálogos — `DialogueData` + `DialogueManager` (Fase 8)
+
+**Estado en la v2.** Cada mundo tiene su `Dialogos_<Emoción>` en `Assets/Data/Narrativa`, con una
+línea pendiente por momento: apertura, eco de memoria, antes del jefe (si hay jefe) y cierre.
+Todas nombran ya la emoción del mundo. Se muestran abajo en el HUD (el cierre, en el fin de
+nivel).
+
+| Asset | Dónde | Formato | Prioridad |
+|---|---|---|---|
+| Líneas de Kael y de los Arquitectos, **×6 mundos**. Pueden ser varias por momento: se muestran en orden. | `Dialogos_*` → `lineas` (hablante, texto, momento, duración) | Texto | Ira P1, resto P2 |
+| Pregunta y escala del registro emocional, ajustadas al instrumento de la tesis (N12) | `Assets/Data/Narrativa/RegistroEmocional.asset` | Texto | P1 |
+| Retratos opcionales (Kael, los 5 Arquitectos y el Soldado) | Pendiente de campo (hoy solo se muestra el nombre) | PNG 256×256 | P3 |
 
 ### B3. Jugador — Kael
 
@@ -311,9 +330,9 @@ ningún clip importado en la v2.
 | Brillo (glow) de la opción seleccionada, como en la maqueta | `UIManager` | ✗ Hoy la opción seleccionada toma el color de acento, sin halo. El halo necesita TextMeshPro (fila de abajo). | P3 |
 | Escena animada de fondo por mundo (los SVG de la maqueta) | `MenuPausa` | ✗ Detrás del velo se ve el propio nivel congelado, que cumple la misma función. | P3 |
 | Íconos por mundo para el selector (×6) + candado | `SelectorNivel` → `LevelData.icono` | ✗ | P2 |
-| Íconos de los 5 fragmentos de identidad | Pantalla «yo reconstruido» | ✗ | P2 |
-| Arte de la pantalla «yo reconstruido» | idem | ✗ | P2 |
-| UI del registro emocional (escala + campo de texto) | `EmotionalLog` | ✗ (se puede montar con uGUI sin arte) | P2 |
+| Íconos de los 5 fragmentos de identidad | `PantallaYoReconstruido` y fin de nivel | ✗ Hoy son rombos del color de cada mundo. Fuente posible: `Referencias/Arte/Jefes/fragmentos de alma.jpeg` (hay que recortarlo). | P2 |
+| Arte de la pantalla «yo reconstruido» (Kael en el centro) | `PantallaYoReconstruido` | ✗ Hoy es una silueta clara | P2 |
+| UI del registro emocional (escala y campo de texto) | `PantallaFinNivel` | ✔ Montada con uGUI, sin arte (Fase 8) | — |
 | Pantalla de carga / fade | `SceneLoader` | ✗ (negro sólido basta) | P3 |
 | Panel de opciones | `MainMenu` | ✗ **No existe**: el botón «Configuration» no hace nada | P3 |
 | Corazones y monedas | HUD | ✔ `Elementos/Corazones.png`, `coins.png`, `Animaciones/hearths.anim`, `Coin.anim` | — |
@@ -357,6 +376,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.8 (2026-09-29)** — Fase 8 (narrativa). Nuevos N11 y N12; B1 y B2 reescritos para la v2; B9 con la UI del registro y de «yo reconstruido».
 - **0.7 (2026-09-29)** — Fase 7 (jefes). Apartado B5 reescrito para la v2, N9 con el jefe, nota de la música del jefe en B8.
 - **0.6 (2026-09-29)** — Fase 6 (flujo de nivel). Nuevo N10 (pintar el Nivel 1), N9 ampliado, y B6, B8, B9 y B10 al día con el checkpoint, la salida, la música por `LevelData` y la UI de la maqueta.
 - **0.5 (2026-09-29)** — Fase 5 (progresión). N2 resuelta, nuevo N9, apartado B6 reescrito para la v2 y nota sobre TextMeshPro en B9.

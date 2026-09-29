@@ -31,6 +31,9 @@ MonoBehaviour:
   jefe: {fileID: 0}
   fragmento: {fileID: 11400000, guid: c2c1fbd02ba1bb347a6dad191bfb11d9, type: 2}
   habilidadOtorgada: {fileID: 0}
+  cinematicaEntrada: {fileID: 0}
+  cinematicaCierre: {fileID: 11400000, guid: 4d8683bcd500c7b47a50e655e13c9671, type: 2}
+  dialogos: {fileID: 11400000, guid: 761776c101ac9d34e93c4104c5339cf0, type: 2}
   reglas:
     agacharse: 0
     sigilo: 0

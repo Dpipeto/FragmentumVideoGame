@@ -58,7 +58,46 @@ namespace Fragmentum.Tests.PlayMode
 
             Sistemas = Bootstrap.CrearSistemas();
             Gestor.UsarCarpetaDeGuardado(_carpeta);
+
+            // Las pruebas que no son de narrativa no deben esperar a la cinemática inicial.
+            if (CinematicaInicialVista)
+            {
+                foreach (var nivel in BaseDeDatos.niveles)
+                {
+                    if (nivel != null && nivel.cinematicaEntrada != null && nivel.cinematicaEntrada.soloPrimeraVez)
+                    {
+                        Gestor.Datos.cinematicasVistas.Add(nivel.cinematicaEntrada.Id);
+                    }
+                }
+            }
+
             yield return EsperarEstado(ESTADOS_JUEGO.MAIN_MENU, 3f);
+        }
+
+        /// <summary>Partir de una partida en la que ya se vio la cinemática inicial.</summary>
+        protected virtual bool CinematicaInicialVista => true;
+
+        /// <summary>Si hay una cinemática en curso (por ejemplo, la de cierre), la salta.</summary>
+        protected static IEnumerator SaltarCinematicaSiHay()
+        {
+            if (Juego.EstadoActual == ESTADOS_JUEGO.CUTSCENE)
+            {
+                Assert.IsTrue(Juego.TerminarCinematica());
+            }
+
+            yield return null;
+        }
+
+        /// <summary>En el fin de nivel: omite el registro emocional y pulsa «Continuar».</summary>
+        protected void ContinuarDesdeFinDeNivel()
+        {
+            var pantalla = Interfaz.PantallaFinNivel;
+            if (pantalla.MostrandoRegistro)
+            {
+                pantalla.OmitirRegistro();
+            }
+
+            pantalla.BotonContinuar.onClick.Invoke();
         }
 
         [UnityTearDown]

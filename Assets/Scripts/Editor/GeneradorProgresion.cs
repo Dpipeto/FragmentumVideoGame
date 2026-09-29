@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Fragmentum.Core;
 using Fragmentum.Data;
+using Fragmentum.Narrative;
 using Fragmentum.Player;
 using Fragmentum.UI;
 using UnityEditor;
@@ -97,6 +98,9 @@ namespace Fragmentum.EditorTools
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaMenu) == null) CrearEscenaMenu(false);
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaSelector) == null) CrearEscenaSelector(false);
             var bd = GenerarDatos(false);
+
+            // Cinemáticas, diálogos y registro emocional (Fase 8): antes del prefab, que los usa.
+            GeneradorNarrativa.GenerarDatos(false);
             ConfigurarBuildSettings(bd);
             CrearPrefabSistemas(bd);
 
@@ -386,8 +390,10 @@ namespace Fragmentum.EditorTools
                 Asignar(gestor, "baseDeDatos", p => p.objectReferenceValue = bd);
                 raiz.AddComponent<SceneLoader>();
                 raiz.AddComponent<GameStateMachine>();
+                raiz.AddComponent<DialogueManager>();
                 var interfaz = raiz.AddComponent<UIManager>();
                 Asignar(interfaz, "acciones", p => p.objectReferenceValue = AssetDatabase.LoadMainAssetAtPath(ConstructorJugador.RutaAccionesInput));
+                Asignar(interfaz, "registro", p => p.objectReferenceValue = GeneradorNarrativa.CargarConfiguracionRegistro());
                 raiz.AddComponent<AtajosDepuracion>();
                 return PrefabUtility.SaveAsPrefabAsset(raiz, RutaSistemas);
             }
@@ -411,11 +417,12 @@ namespace Fragmentum.EditorTools
             Colocar(subtitulo.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -270f), new Vector2(1200f, 60f));
 
             var columna = FabricaUI.Objeto("Botones", lienzo);
-            Colocar(columna, new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), new Vector2(520f, 420f));
+            Colocar(columna, new Vector2(0.5f, 0.5f), new Vector2(0f, -100f), new Vector2(520f, 500f));
             FabricaUI.Columna(columna, 18f);
             var continuar = FabricaUI.Boton(columna, "Continuar", "Continuar", Hex("8B1A1A"), 78f);
             var nueva = FabricaUI.Boton(columna, "NuevaPartida", "Nueva partida", Hex("5C4033"), 78f);
             var selector = FabricaUI.Boton(columna, "Selector", "Seleccionar mundo", Hex("2C3E50"), 78f);
+            var yo = FabricaUI.Boton(columna, "YoReconstruido", "Yo reconstruido", Hex("2D1B4E"), 78f);
             var salir = FabricaUI.Boton(columna, "Salir", "Salir", Hex("3A3A4A"), 78f);
 
             var progreso = FabricaUI.Texto(lienzo, "Progreso", string.Empty, 26, new Color(1f, 1f, 1f, 0.7f));
@@ -425,6 +432,7 @@ namespace Fragmentum.EditorTools
             Asignar(menu, "botonContinuar", p => p.objectReferenceValue = continuar);
             Asignar(menu, "botonNuevaPartida", p => p.objectReferenceValue = nueva);
             Asignar(menu, "botonSelector", p => p.objectReferenceValue = selector);
+            Asignar(menu, "botonYoReconstruido", p => p.objectReferenceValue = yo);
             Asignar(menu, "botonSalir", p => p.objectReferenceValue = salir);
             Asignar(menu, "textoProgreso", p => p.objectReferenceValue = progreso);
 

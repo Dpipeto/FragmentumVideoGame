@@ -2,6 +2,7 @@ using System;
 using Fragmentum.Core.FSM;
 using Fragmentum.Core.Juego;
 using Fragmentum.Data;
+using Fragmentum.Narrative;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -48,6 +49,17 @@ namespace Fragmentum.Core
 
         /// <summary>Lo activa el UIManager cuando crea la pantalla de fin de nivel.</summary>
         public static bool HayPantallaFinNivel { get; set; }
+
+        /// <summary>Lo activa el UIManager cuando crea el reproductor de cinemáticas.</summary>
+        public static bool HayReproductorCinematicas { get; set; }
+
+        /// <summary>Cinemática que se reproduce (o se va a reproducir) en CUTSCENE.</summary>
+        public CutsceneData CinematicaActual { get; private set; }
+
+        /// <summary>¿La cinemática actual es la de cierre del mundo? Entonces lleva al fin de nivel.</summary>
+        public bool CinematicaDeCierre { get; private set; }
+
+        internal ESTADOS_JUEGO DestinoTrasCinematica => CinematicaDeCierre ? ESTADOS_JUEGO.LEVEL_COMPLETE : ESTADOS_JUEGO.PLAYING;
 
         public event Action<ESTADOS_JUEGO, ESTADOS_JUEGO> OnStateChanged;
 
@@ -188,6 +200,8 @@ namespace Fragmentum.Core
                     return new EstadoEsperaPantalla(id, ESTADOS_JUEGO.PLAYING, () => HayPantallaGameOver, this, _maquina);
                 case ESTADOS_JUEGO.LEVEL_COMPLETE:
                     return new EstadoEsperaPantalla(id, ESTADOS_JUEGO.LOADING, () => HayPantallaFinNivel, this, _maquina);
+                case ESTADOS_JUEGO.CUTSCENE:
+                    return new EstadoCinematica(this, _maquina);
                 default:
                     return new EstadoJuego(id, this, _maquina);
             }
@@ -265,7 +279,10 @@ namespace Fragmentum.Core
         /// <summary>Tras el Game Over: vuelve a jugar desde el checkpoint.</summary>
         public bool Reintentar() => Transitar(ESTADOS_JUEGO.PLAYING, desde: ESTADOS_JUEGO.GAME_OVER);
 
-        /// <summary>Victoria: registra el nivel como completado y pasa a LEVEL_COMPLETE.</summary>
+        /// <summary>
+        /// Victoria: registra el nivel como completado y pasa a LEVEL_COMPLETE, o antes a la
+        /// cinemática de cierre del mundo si la tiene.
+        /// </summary>
         public bool CompletarNivel()
         {
             if (!Puede(ESTADOS_JUEGO.LEVEL_COMPLETE))
@@ -274,9 +291,17 @@ namespace Fragmentum.Core
                 return false;
             }
 
-            if (GameManager.Instancia != null)
+            var gestor = GameManager.Instancia;
+            var nivel = gestor != null ? gestor.NivelActual : null;
+            if (gestor != null)
             {
-                GameManager.Instancia.CompletarNivel(GameManager.Instancia.NivelActual);
+                gestor.CompletarNivel(nivel);
+            }
+
+            var cierre = nivel != null ? nivel.cinematicaCierre : null;
+            if (gestor != null && gestor.DebeVerse(cierre) && Puede(ESTADOS_JUEGO.CUTSCENE))
+            {
+                return IniciarCinematica(cierre, true);
             }
 
             return _maquina.TransitionTo(ESTADOS_JUEGO.LEVEL_COMPLETE);
@@ -294,22 +319,34 @@ namespace Fragmentum.Core
             return _maquina.TransitionTo(ESTADOS_JUEGO.LOADING);
         }
 
-        public bool IniciarCinematica() => Transitar(ESTADOS_JUEGO.CUTSCENE);
+        /// <summary>
+        /// Reproduce una cinemática durante el juego (una memoria; la de cierre la pide
+        /// <see cref="CompletarNivel"/>). <paramref name="deCierre"/>: al terminar se va al fin de nivel.
+        /// </summary>
+        public bool IniciarCinematica(CutsceneData cinematica, bool deCierre = false)
+        {
+            if (cinematica == null || !Puede(ESTADOS_JUEGO.CUTSCENE))
+            {
+                return false;
+            }
 
-        /// <summary>Fin de una cinemática: de cierre → LEVEL_COMPLETE; de entrada o memoria → PLAYING.</summary>
-        public bool TerminarCinematica(bool eraDeCierre)
+            CinematicaActual = cinematica;
+            CinematicaDeCierre = deCierre;
+            return _maquina.TransitionTo(ESTADOS_JUEGO.CUTSCENE);
+        }
+
+        /// <summary>
+        /// Fin de la cinemática (terminó o se saltó): la de cierre lleva a LEVEL_COMPLETE; la de
+        /// entrada o de memoria, a PLAYING. La llama el reproductor.
+        /// </summary>
+        public bool TerminarCinematica()
         {
             if (EstadoActual != ESTADOS_JUEGO.CUTSCENE)
             {
                 return false;
             }
 
-            if (eraDeCierre && GameManager.Instancia != null)
-            {
-                GameManager.Instancia.CompletarNivel(GameManager.Instancia.NivelActual);
-            }
-
-            return _maquina.TransitionTo(eraDeCierre ? ESTADOS_JUEGO.LEVEL_COMPLETE : ESTADOS_JUEGO.PLAYING);
+            return _maquina.TransitionTo(DestinoTrasCinematica);
         }
 
         public bool Puede(ESTADOS_JUEGO destino) => _maquina.Iniciada && _tabla.EsValida(_maquina.EstadoActual, destino);
@@ -323,6 +360,33 @@ namespace Fragmentum.Core
             if (bd != null && escena == bd.escenaMenu.Nombre) return ESTADOS_JUEGO.MAIN_MENU;
             if (bd != null && escena == bd.escenaSelector.Nombre) return ESTADOS_JUEGO.LEVEL_SELECT;
             return ESTADOS_JUEGO.PLAYING;
+        }
+
+        /// <summary>
+        /// A dónde ir cuando termina la carga: el destino pedido o, si el nivel tiene una
+        /// cinemática de entrada pendiente (la inicial, la primera vez), antes a CUTSCENE.
+        /// </summary>
+        internal ESTADOS_JUEGO DestinoTrasCarga()
+        {
+            var gestor = GameManager.Instancia;
+            var entrada = NivelDestino != null ? NivelDestino.cinematicaEntrada : null;
+            if (DestinoDeCarga == ESTADOS_JUEGO.PLAYING && gestor != null && gestor.DebeVerse(entrada))
+            {
+                CinematicaActual = entrada;
+                CinematicaDeCierre = false;
+                return ESTADOS_JUEGO.CUTSCENE;
+            }
+
+            return DestinoDeCarga;
+        }
+
+        /// <summary>Al salir de CUTSCENE: anota la cinemática como vista (si es de una sola vez).</summary>
+        internal void AlSalirDeCinematica()
+        {
+            if (GameManager.Instancia != null)
+            {
+                GameManager.Instancia.MarcarVista(CinematicaActual);
+            }
         }
 
         internal void IniciarCarga()

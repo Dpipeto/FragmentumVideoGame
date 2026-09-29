@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Fragmentum.Core.Save;
 using Fragmentum.Data;
+using Fragmentum.Narrative;
 using Fragmentum.Player;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -36,6 +37,12 @@ namespace Fragmentum.Core
         public LevelDatabase BaseDeDatos => baseDeDatos;
 
         public SaveSystem Guardado { get; private set; }
+
+        /// <summary>
+        /// Registro emocional (tarea G), en la misma carpeta que la partida pero en su propio
+        /// archivo: «Nueva partida» no lo borra.
+        /// </summary>
+        public RegistroEmocional Registro { get; private set; }
 
         /// <summary>La partida en curso. Nunca es null.</summary>
         public DatosGuardado Datos { get; private set; } = new DatosGuardado();
@@ -112,6 +119,7 @@ namespace Fragmentum.Core
         public void UsarCarpetaDeGuardado(string carpeta)
         {
             Guardado = new SaveSystem(carpeta);
+            Registro = new RegistroEmocional(carpeta);
             Datos = Guardado.Cargar();
             Economia.Vincular(Datos);
             OnProgresoCambiado?.Invoke();
@@ -193,6 +201,19 @@ namespace Fragmentum.Core
                 _jugadorEnganchado != null && _jugadorEnganchado.Habilidades != null)
             {
                 _jugadorEnganchado.Habilidades.Desbloquear(habilidad.id);
+            }
+        }
+
+        /// <summary>¿Hay que reproducir esta cinemática? No, si es de «solo la primera vez» y ya se vio.</summary>
+        public bool DebeVerse(CutsceneData cinematica) =>
+            cinematica != null && (!cinematica.soloPrimeraVez || !Datos.cinematicasVistas.Contains(cinematica.Id));
+
+        /// <summary>Anota que se vio una cinemática de «solo la primera vez» y guarda.</summary>
+        public void MarcarVista(CutsceneData cinematica)
+        {
+            if (cinematica != null && cinematica.soloPrimeraVez && DatosGuardado.Anadir(Datos.cinematicasVistas, cinematica.Id))
+            {
+                Guardar();
             }
         }
 

@@ -74,7 +74,17 @@ con Gemini, y dejar `Tesis` congelado como **v1** de referencia para la comparac
 | Esqueletos | El Juez Silente (inmune salvo con la memoria correcta) y el Verdadero Soldado (derrota por integración) ya incorporan su regla propia; sus patrones llegan en la Fase 10. |
 | Datos (§6.1) | `JefeData` añade velocidad, daño por contacto, duración de la derrota y el aspecto provisional (tinte, tamaño y orientación del sprite). |
 
-Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** · **6 hecha** · **7 hecha** (de la 3 a la 7, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 8 en adelante por hacer.
+### Ajustes tras la Fase 8 (2026-09-29)
+
+| Qué cambia | Detalle |
+|---|---|
+| Cinemáticas (§3.6) | El `CutscenePlayer` es `PantallaCinematica`, una pantalla más del `UIManager`. La FSM global guarda la cinemática actual y si es de cierre; la de entrada se decide al terminar la carga (LOADING → CUTSCENE) y la de cierre al completar el nivel (PLAYING → CUTSCENE → LEVEL_COMPLETE). Sin reproductor, CUTSCENE avanza sola. |
+| Victoria | El nivel queda completado (y guardado) antes de la cinemática de cierre; la cinemática solo retrasa el fin de nivel. |
+| Diálogos | Se muestran en el HUD sin pausar el juego y solo avanzan en PLAYING. La línea de cierre va en la pantalla de fin de nivel. |
+| Registro emocional (§6.2) | Primer paso de la pantalla de fin de nivel, siempre omitible. Su configuración es un ScriptableObject (`ConfiguracionRegistro`); el código de participante se pide ahí la primera vez. |
+| Datos (§6.1) | `LevelData` añade `cinematicaEntrada`, `cinematicaCierre` y `dialogos`. Los placeholders de narrativa se generan en `Assets/Data/Narrativa`. |
+
+Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** · **6 hecha** · **7 hecha** · **8 hecha** (de la 3 a la 8, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 9 en adelante por hacer.
 
 ---
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Fragmentum.Core;
+using Fragmentum.Narrative;
 using UnityEngine;
 
 namespace Fragmentum.Data
@@ -71,6 +72,16 @@ namespace Fragmentum.Data
 
         public FragmentoData fragmento;
         public HabilidadData habilidadOtorgada;
+
+        [Header("Narrativa")]
+        [Tooltip("Se reproduce al entrar (la cinemática inicial es la del Nivel 1, solo la primera vez).")]
+        public CutsceneData cinematicaEntrada;
+
+        [Tooltip("Se reproduce al superar el nivel, antes del fin de nivel.")]
+        public CutsceneData cinematicaCierre;
+
+        [Tooltip("Diálogos internos del mundo: apertura, eco de memoria, antes del jefe y cierre.")]
+        public DialogueData dialogos;
 
         [Header("Reglas y layout")]
         public ReglasNivel reglas;

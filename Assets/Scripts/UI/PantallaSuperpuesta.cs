@@ -121,6 +121,20 @@ namespace Fragmentum.UI
             return opcion;
         }
 
+        /// <summary>Opción con otro tamaño (por ejemplo, los números de una escala).</summary>
+        protected Button AgregarOpcionEn(Transform padre, string etiqueta, UnityAction accion, float ancho, float alto)
+        {
+            var opcion = FabricaUI.Opcion(padre, $"Opcion_{_opciones.Count}", etiqueta, AcentoNeutro, accion, ancho, alto);
+            _opciones.Add(opcion);
+            return opcion;
+        }
+
+        /// <summary>
+        /// Qué queda seleccionado al abrirse (para el teclado y el mando). Por defecto, la primera
+        /// opción disponible; una pantalla puede preferir otra, por ejemplo una inofensiva.
+        /// </summary>
+        protected virtual Selectable PrimeraSeleccion() => null;
+
         /// <summary>Texto que toma el color de acento del mundo.</summary>
         protected Text TextoAcento(Transform columna, string nombre, int tamano, float alfa = 1f)
         {
@@ -153,6 +167,13 @@ namespace Fragmentum.UI
         {
             if (EventSystem.current == null)
             {
+                return;
+            }
+
+            var preferida = PrimeraSeleccion();
+            if (preferida != null && preferida.gameObject.activeInHierarchy && preferida.interactable)
+            {
+                EventSystem.current.SetSelectedGameObject(preferida.gameObject);
                 return;
             }
 

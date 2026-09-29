@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cba49e80cd9bdc4fba0fe38f34ea4bb, type: 3}
+  m_Name: Cinematica_Cierre_Miedo
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.CutsceneData
+  id: Cierre_Miedo
+  diapositivas:
+  - imagen: {fileID: 0}
+    texto: "[CIERRE DEL MUNDO DE LA MIEDO \xB7 pendiente de guion e im\xE1genes (PENDIENTES B1)]"
+    duracion: 4
+    audio: {fileID: 0}
+  - imagen: {fileID: 0}
+    texto: Kael integra el Fragmento del Miedo.
+    duracion: 4
+    audio: {fileID: 0}
+  saltable: 1
+  soloPrimeraVez: 0

@@ -63,7 +63,41 @@ namespace Fragmentum.Core.Juego
         }
 
         public override ESTADOS_JUEGO? EvaluarTransiciones() =>
-            Dueno.CargaTerminada ? Dueno.DestinoDeCarga : (ESTADOS_JUEGO?)null;
+            Dueno.CargaTerminada ? Dueno.DestinoTrasCarga() : (ESTADOS_JUEGO?)null;
+    }
+
+    /// <summary>
+    /// CUTSCENE: el reproductor de la UI muestra la cinemática y, al acabar o al saltarla, llama a
+    /// <c>TerminarCinematica</c>. Sin reproductor (falta el UIManager) o sin cinemática, avanza
+    /// sola tras una breve espera («construir para ausencia»): el juego nunca se queda atascado.
+    /// Al salir, anota la cinemática como vista.
+    /// </summary>
+    public sealed class EstadoCinematica : EstadoJuego
+    {
+        private bool _avisado;
+
+        public EstadoCinematica(GameStateMachine dueno, MaquinaEstados<ESTADOS_JUEGO> maquina)
+            : base(ESTADOS_JUEGO.CUTSCENE, dueno, maquina)
+        {
+        }
+
+        public override void OnExit() => Dueno.AlSalirDeCinematica();
+
+        public override ESTADOS_JUEGO? EvaluarTransiciones()
+        {
+            if (GameStateMachine.HayReproductorCinematicas && Dueno.CinematicaActual != null)
+            {
+                return null;
+            }
+
+            if (!_avisado)
+            {
+                _avisado = true;
+                Debug.LogWarning("[Juego] No hay reproductor de cinemáticas (falta el UIManager) o no hay cinemática: se continúa sin ella.");
+            }
+
+            return TiempoEnEstado >= Dueno.EsperaSinPantalla ? Dueno.DestinoTrasCinematica : (ESTADOS_JUEGO?)null;
+        }
     }
 
     /// <summary>

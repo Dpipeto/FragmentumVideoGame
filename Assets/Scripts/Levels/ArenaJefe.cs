@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Fragmentum.Bosses;
 using Fragmentum.Core;
+using Fragmentum.Narrative;
 using Fragmentum.Player;
 using UnityEngine;
 
@@ -148,6 +149,11 @@ namespace Fragmentum.Levels
             }
 
             EventosJuego.NotificarJefeEnCombate(jefe.Datos != null ? jefe.Datos.nombreCanonico : jefe.name, jefe.Vida);
+            if (_nivel != null && _nivel.Nivel != null && DialogueManager.Instancia != null)
+            {
+                DialogueManager.Instancia.Reproducir(_nivel.Nivel.dialogos, MOMENTOS_DIALOGO.PRE_JEFE);
+            }
+
             OnCombateIniciado?.Invoke();
         }
 

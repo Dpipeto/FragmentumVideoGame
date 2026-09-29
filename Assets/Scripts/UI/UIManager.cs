@@ -2,6 +2,7 @@ using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Core.Juego;
 using Fragmentum.Data;
+using Fragmentum.Narrative;
 using Fragmentum.Player;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -38,15 +39,23 @@ namespace Fragmentum.UI
         [Tooltip("Orden del lienzo: por encima de la UI de las escenas y por debajo del fundido de carga (1000).")]
         [SerializeField] private int ordenLienzo = 100;
 
+        [Tooltip("Textos del registro emocional del fin de nivel. Vacío = los valores por defecto.")]
+        [SerializeField] private ConfiguracionRegistro registro;
+
         private Hud _hud;
         private MenuPausa _pausa;
         private PantallaGameOver _gameOver;
         private PantallaFinNivel _finNivel;
+        private PantallaYoReconstruido _yo;
+        private PantallaCinematica _cinematica;
         private GameObject _sistemaEventos;
         private InputAction _pausaAccion;
         private bool _accionPropia;
         private GameStateMachine _juego;
         private GameManager _gestor;
+        private DialogueManager _dialogos;
+
+        public static UIManager Instancia { get; private set; }
 
         public Hud Hud => _hud;
 
@@ -56,15 +65,21 @@ namespace Fragmentum.UI
 
         public PantallaFinNivel PantallaFinNivel => _finNivel;
 
+        public PantallaYoReconstruido YoReconstruido => _yo;
+
+        public PantallaCinematica Cinematica => _cinematica;
+
         private void Awake()
         {
+            Instancia = this;
             Construir();
             PrepararPausa();
             CrearSistemaEventos();
 
-            // Con estas pantallas, el Game Over y el fin de nivel esperan a que el jugador elija.
+            // Con estas pantallas, el Game Over, el fin de nivel y las cinemáticas esperan al jugador.
             GameStateMachine.HayPantallaGameOver = true;
             GameStateMachine.HayPantallaFinNivel = true;
+            GameStateMachine.HayReproductorCinematicas = true;
             SceneManager.sceneLoaded += AlCargarEscena;
         }
 
@@ -84,11 +99,25 @@ namespace Fragmentum.UI
                 AlRegistrarJugador(_gestor.Jugador);
             }
 
+            _dialogos = DialogueManager.Instancia;
+            if (_dialogos != null)
+            {
+                _dialogos.OnLineaMostrada += AlMostrarLinea;
+                _dialogos.OnLineasTerminadas += _hud.OcultarLinea;
+            }
+
             EventosJuego.CheckpointActivado += AlActivarCheckpoint;
             EventosJuego.JefeEnCombate += AlEmpezarCombateJefe;
             EventosJuego.JefeFueraDeCombate += AlTerminarCombateJefe;
             AjustarSistemaEventos();
             Mostrar(_juego != null ? _juego.EstadoActual : ESTADOS_JUEGO.BOOT);
+        }
+
+        /// <summary>Abre la pantalla «yo reconstruido» (desde el menú principal).</summary>
+        public void MostrarYoReconstruido()
+        {
+            AjustarSistemaEventos();
+            _yo.Mostrar(_gestor != null ? _gestor.NivelActual : null);
         }
 
         private void OnEnable() => _pausaAccion?.Enable();
@@ -112,13 +141,25 @@ namespace Fragmentum.UI
                 _gestor.OnFragmentoObtenido -= AlObtenerFragmento;
             }
 
+            if (_dialogos != null)
+            {
+                _dialogos.OnLineaMostrada -= AlMostrarLinea;
+                _dialogos.OnLineasTerminadas -= _hud.OcultarLinea;
+            }
+
             if (_accionPropia)
             {
                 _pausaAccion?.Dispose();
             }
 
+            if (Instancia == this)
+            {
+                Instancia = null;
+            }
+
             GameStateMachine.HayPantallaGameOver = false;
             GameStateMachine.HayPantallaFinNivel = false;
+            GameStateMachine.HayReproductorCinematicas = false;
         }
 
         private void Update()
@@ -129,15 +170,28 @@ namespace Fragmentum.UI
             }
         }
 
-        /// <summary>Esc o Start: pausa si se está jugando; reanuda si está en pausa.</summary>
+        /// <summary>
+        /// Esc o Start: pausa si se está jugando y reanuda si está en pausa. En una cinemática la
+        /// salta, y con «yo reconstruido» abierto lo cierra.
+        /// </summary>
         public void AlternarPausa()
         {
+            if (_yo.Visible)
+            {
+                _yo.Ocultar();
+                return;
+            }
+
             if (_juego == null)
             {
                 return;
             }
 
-            if (_juego.EstadoActual == ESTADOS_JUEGO.PLAYING)
+            if (_juego.EstadoActual == ESTADOS_JUEGO.CUTSCENE)
+            {
+                _cinematica.Saltar();
+            }
+            else if (_juego.EstadoActual == ESTADOS_JUEGO.PLAYING)
             {
                 _juego.Pausar();
             }
@@ -158,7 +212,14 @@ namespace Fragmentum.UI
 
             _pausa = Crear<MenuPausa>(lienzo.transform, "MenuPausa");
             _gameOver = Crear<PantallaGameOver>(lienzo.transform, "GameOver");
-            _finNivel = Crear<PantallaFinNivel>(lienzo.transform, "FinNivel");
+            _finNivel = FabricaUI.Objeto("FinNivel", lienzo.transform).gameObject.AddComponent<PantallaFinNivel>();
+            _finNivel.Configuracion = registro;
+            _finNivel.Construir();
+            _yo = Crear<PantallaYoReconstruido>(lienzo.transform, "YoReconstruido");
+
+            // La cinemática va encima de todo lo demás.
+            _cinematica = FabricaUI.Objeto("Cinematica", lienzo.transform).gameObject.AddComponent<PantallaCinematica>();
+            _cinematica.Construir();
         }
 
         private static T Crear<T>(Transform padre, string nombre) where T : PantallaSuperpuesta
@@ -189,7 +250,23 @@ namespace Fragmentum.UI
             Alternar(_pausa, estado == ESTADOS_JUEGO.PAUSED, nivel);
             Alternar(_gameOver, estado == ESTADOS_JUEGO.GAME_OVER, nivel);
             Alternar(_finNivel, estado == ESTADOS_JUEGO.LEVEL_COMPLETE, nivel);
+            _yo.Ocultar();
+
+            if (estado == ESTADOS_JUEGO.CUTSCENE)
+            {
+                if (!_cinematica.Reproduciendo)
+                {
+                    _cinematica.Reproducir(_juego != null ? _juego.CinematicaActual : null);
+                }
+            }
+            else if (_cinematica.Visible)
+            {
+                _cinematica.Ocultar();
+            }
         }
+
+        private void AlMostrarLinea(LineaDialogo linea) =>
+            _hud.MostrarLinea(linea.hablante, linea.texto, _gestor != null && _gestor.NivelActual != null ? _gestor.NivelActual.ColorAcento : PantallaSuperpuesta.AcentoNeutro);
 
         private static void Alternar(PantallaSuperpuesta pantalla, bool visible, LevelData nivel)
         {

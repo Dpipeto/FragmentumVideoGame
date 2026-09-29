@@ -124,6 +124,38 @@ namespace Fragmentum.UI
             return boton;
         }
 
+        /// <summary>
+        /// Campo de texto de una línea con marcador (placeholder), para el registro emocional.
+        /// </summary>
+        public static InputField Campo(Transform padre, string nombre, string marcador, float ancho, float alto = 54f)
+        {
+            var rect = Objeto(nombre, padre);
+            var fondo = rect.gameObject.AddComponent<Image>();
+            fondo.color = new Color(1f, 1f, 1f, 0.08f);
+
+            var elemento = rect.gameObject.AddComponent<LayoutElement>();
+            elemento.preferredWidth = ancho;
+            elemento.preferredHeight = alto;
+            elemento.minHeight = alto;
+
+            var texto = Texto(rect, "Texto", string.Empty, 24, Color.white, TextAnchor.MiddleLeft);
+            texto.supportRichText = false;
+            texto.horizontalOverflow = HorizontalWrapMode.Overflow;
+            Estirar(texto.rectTransform, 16f);
+
+            var ayuda = Texto(rect, "Marcador", marcador, 22, new Color(1f, 1f, 1f, 0.35f), TextAnchor.MiddleLeft);
+            ayuda.fontStyle = FontStyle.Italic;
+            Estirar(ayuda.rectTransform, 16f);
+
+            var campo = rect.gameObject.AddComponent<InputField>();
+            campo.textComponent = texto;
+            campo.placeholder = ayuda;
+            campo.targetGraphic = fondo;
+            campo.lineType = InputField.LineType.SingleLine;
+            campo.characterLimit = 280;
+            return campo;
+        }
+
         /// <summary>Colores de una opción según el acento del mundo.</summary>
         public static void AplicarAcento(Selectable opcion, Color acento)
         {
