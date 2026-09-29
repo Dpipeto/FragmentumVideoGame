@@ -43,6 +43,9 @@ namespace Fragmentum.Core.Input
         /// <summary>Se pulsó interactuar (antorchas y memorias, tecla E).</summary>
         bool InteractuarPulsado { get; }
 
+        /// <summary>Se pulsó la habilidad activa (Invisibilidad Parcial, tecla Q).</summary>
+        bool HabilidadPulsado { get; }
+
         /// <summary>
         /// ¿Hay un salto pulsado hace menos de <paramref name="ventana"/> segundos y sin consumir?
         /// Es el jump buffer: pulsar justo antes de aterrizar también salta.

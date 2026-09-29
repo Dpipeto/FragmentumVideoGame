@@ -1,7 +1,29 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.2 — Fase 2, 2026-09-19.** Este archivo vive ahora en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.3 — Fase 3, 2026-09-28.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
+
+## ▶ Lo que necesito de ti
+
+Nada de esto bloquea el trabajo: sigo con las fases siguientes y lo que falte usa placeholders.
+Ordenado por urgencia.
+
+| # | Qué | Por qué | Cómo |
+|---|---|---|---|
+| N1 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaJugador.unity`** y dime cómo se siente el control. | Los valores de salto, carrera y dash están calculados, no probados por una persona. | Play, recorre el circuito (el panel F1 dice qué probar en cada zona). Si algo se siente mal, dime qué («salta poco», «patina») o cambia `PlayerController → Parametros` en el prefab. |
+| N2 | **Decide qué hacer con la v1 (`Tesis`) actualizada a Unity 6000.6.3f1.** | Al abrirla en este PC, Unity reimportó 33 archivos de ajustes y `.meta` (ningún script). La v1 se suponía congelada en 6000.2.14f1. | **Recomendado:** guardar esa actualización en un commit aparte de `Tesis`, porque en este PC solo está instalado 6000.6.3. La alternativa es descartarla con git e instalar 6000.2.14 para abrir la v1. Dime cuál prefieres y lo hago. |
+| N3 | **Recorta las poses de Kael** de `Referencias/Arte/posiblesanimaciiones kael.jpeg`. | El jugador ya tiene todos sus estados; hoy se ve como una cápsula clara. | Un PNG por pose con fondo transparente, a 32 px por unidad (el cuerpo mide 0,8 × 1,8 u, es decir, unos 26 × 58 px). Detalle en el apartado B3. |
+| N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
+| N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos` y `fase-3-jugador`. | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, dime «fusiona» y lo hago. |
+
+## Revisión 0.3: qué cambió respecto de la v0.2
+
+- **Plataforma:** el proyecto quedó en **Unity 6000.6.3f1**, la versión instalada en el PC nuevo. Se actualizó en un commit aparte.
+- **El jugador ya existe** (Fase 3): prefab `Assets/Prefabs/Player.prefab`, escena de prueba `Assets/Scenes/Pruebas/PruebaJugador.unity` y FSM completa. Los huecos de arte del jugador quedan concretados en el apartado B3.
+- **Git** está instalado en este PC. Los dos repositorios tienen la identidad de los commits anteriores y finales de línea LF.
+- **Input:** nueva acción `Ability` (Q o botón RB) y Ctrl izquierdo como segunda tecla de agacharse.
+- **Escena `Nivel1`:** tiene 2 tiles pintados y el Tilemap todavía no colisiona. Cuando la pintes, usa *Fragmentum → Jugador → Preparar tilemap seleccionado como suelo*.
 
 ## Revisión 0.2: qué cambió respecto de la v0.1
 
@@ -49,28 +71,30 @@ los efectos de sonido, los iconos de la UI y el concepto del jugador con sus hab
 - **P2** — bloquea otro nivel o un sistema narrativo.
 - **P3** — pulido: el sistema funciona con placeholder.
 
-**Convención de formato recomendada** (a confirmar en Fase 1)
-- Tiles: 16 px a 100 PPU (1 tile = 0,16 u), que es lo que usa hoy `Level1` (`Grid.cellSize = 0.16`).
-- Sprites de personaje: exportar ya a la escala del juego. Hoy el `Player` depende de `localScale = 0.215`, y eso rompe el wall jump. Las hojas de Kael se importan a 500 PPU con frames enormes.
+**Convención de formato** (fijada en la v2)
+- Tiles: 32 px a 32 PPU, así que 1 tile = 1 unidad (`Grid.cellSize = 1`). Filtro *Point*, sin compresión.
+- Sprites de personaje: también a 32 PPU, con el pivote en los pies (*Bottom Center*). El jugador mide 0,8 × 1,8 u; su sprite puede sobresalir del collider, pero no debe depender de `localScale` (en la v1 dependía de 0,215 y eso rompía el wall jump).
 - Imágenes de cinemática: PNG 16:9, 1920×1080, o 480×270 escalado ×4 con filtro *Point* si se quiere pixel art.
 - Música: OGG, 44,1 kHz, estéreo, con loop limpio. SFX: WAV mono, 44,1 kHz, menos de 2 s.
 
 ---
 
-## A. Decisiones (todas resueltas en la Fase 2; se conservan como registro)
+## A. Decisiones (resueltas; se conservan como registro)
+
+Las decisiones abiertas están arriba, en «Lo que necesito de ti».
 
 | # | Decisión | Evidencia encontrada | Resolución |
 |---|----------|----------------------|------------|
-| D1 | **Versión de Unity.** El documento dice 2022 LTS; el proyecto es **Unity 6000.2.14f1** (Unity 6.2). | `ProjectSettings/ProjectVersion.txt`. El código ya usa `linearVelocity`, que solo existe en Unity 6. | Adoptar Unity 6.2 como plataforma oficial y corregir la tesis. |
-| D2 | **Control de versiones.** La carpeta **no es un repositorio git**. | No hay `.git`. | `git init` con `.gitignore` de Unity **antes** de la Fase 2. Sin eso no hay vuelta atrás si un refactor rompe escenas. |
-| D3 | **Input System.** El paquete `com.unity.inputsystem 1.16.0` **ya está instalado**. `activeInputHandler = Both` y los `EventSystem` ya usan `InputSystemUIInputModule`. El gameplay usa el `Input` clásico. | `Packages/manifest.json`, `ProjectSettings.asset`, escenas. | Mantener el `Input` clásico en gameplay, envuelto en un `PlayerInput` propio, y plantear la migración como opción separada en Fase 1. |
+| D1 | **Versión de Unity.** El documento dice 2022 LTS; la v1 estaba en **Unity 6000.2.14f1** (Unity 6.2). | `ProjectSettings/ProjectVersion.txt`. El código ya usaba `linearVelocity`, que solo existe en Unity 6. | La v2 usa **Unity 6000.6.3f1** (desde la Fase 3; antes 6000.6.0f1). Hay que corregir la versión en la tesis. |
+| D2 | **Control de versiones.** La carpeta **no era un repositorio git**. | No había `.git`. | Hecho: los dos proyectos están en git, con una rama por fase. |
+| D3 | **Input System.** El paquete ya estaba instalado; el gameplay de la v1 usaba el `Input` clásico. | `Packages/manifest.json`, `ProjectSettings.asset`, escenas. | En la v2 el Input System es el **único** sistema de entrada, detrás del adaptador `IFuenteInput` (`FuenteInputJugador`). |
 | D4 | **Título canónico.** | `Assets/Images/tituloxd.png` dice «FRAGMENTUM — *ECHOES OF IDENTITY*». No existe ningún texto en código ni escenas con otro título. | **Fragmentum: Ecos de la Identidad**. El logo actual es su versión en inglés. |
 | D5 | **Jefe de Ira: Centinela Ardiente / Pyrokratos.** | No aparece ninguno de los dos nombres en el proyecto. | **Centinela Ardiente**, como en el GDD. |
 | D6 | **Jefe de Culpa: Juez Silente / Juez Silencioso.** | Ninguno aparece en el proyecto. | **Juez Silente**, como en el GDD. |
 | D7 | **Nivel 5: Esperanza / Aceptación.** | Ninguno aparece en el proyecto. | Emoción **Esperanza**, con «aceptación» como descriptor del `LevelData`. |
-| D8 | **Nombre de la escena del menú.** Build Settings y código usan `Menu_Inicial`; el Anexo A dice `MainMenu`. | `EditorBuildSettings.asset`, `GameManager.cs`, `Pause.cs`. | Conservar `Menu_Inicial` para no romper referencias; el nombre vive solo en `LevelDatabase`. |
+| D8 | **Nombre de la escena del menú.** Build Settings y código usan `Menu_Inicial`; el Anexo A dice `MainMenu`. | `EditorBuildSettings.asset`, `GameManager.cs`, `Pause.cs`. | Se usa `Menu_Inicial`, y el nombre vive solo en `LevelDatabase` (Fase 5). En la v2 las escenas se crean de cero. |
 | D9 | **Correspondencia de conceptos de jefe.** | `Jefe2 (2).png` es una figura encapuchada azul/cian con esquirlas. `Jefe3 (2).png` es una figura oscura con espada y brillo verde azulado. | Suposición: Jefe2 = Doncella del Lamento (Tristeza), Jefe3 = Espectro del Pavor (Miedo). **Confirmar.** |
-| D10 | **Tecla E.** Hoy es el dash. El Anexo A la usa para encender antorchas en el Nivel 3. | `PlayerMovement.cs:121` | Reasignar el dash (p. ej. Shift) y dejar E como «interactuar». |
+| D10 | **Tecla E.** En la v1 era el dash. El Anexo A la usa para encender antorchas en el Nivel 3. | `PlayerMovement.cs:121` | Dash en **Shift izquierdo** (acción *Sprint*); E es «interactuar». Invisibilidad en **Q** (acción *Ability*). |
 | D11 | **Idioma de la UI.** El menú está en inglés («Play», «Level Selector», «Configuration», «Exit»); pausa y Game Over mezclan español e inglés. | Textos TMP de las escenas. | Todo en español, con textos en datos. |
 
 ---
@@ -102,25 +126,47 @@ los efectos de sonido, los iconos de la UI y el concepto del jugador con sus hab
 
 ### B3. Jugador — Kael
 
-Estado actual: en juego se usa el **Samurai** de un pack (idle, run, attack, hurt, dead) con `Animaciones/Player.controller`. El arte propio de Kael **existe** pero no está conectado al jugador: `Characters/Mc/camin-ando.png` (8 frames de caminata), `Elsaltodel.png` (16 de salto) y `finalsignodepregunta.png` (7; clip `agachao`). Hoy está puesto como sprite decorativo en `Level1/Enemys/Player`.
+**Estado en la v2 (Fase 3).** El jugador está completo en lógica: prefab `Assets/Prefabs/Player.prefab`
+con FSM de 12 estados, región de sigilo, vida con escudo y habilidades. **Visualmente** es una
+cápsula clara (el sprite `Capsule` del paquete 2D), porque todavía no hay arte de Kael importado.
 
-| Animación que falta (Kael) | Estado de la FSM que la usará | Prioridad | Placeholder |
+- **Dónde va el arte:** en el hijo `Pivote/Sprite` del prefab. Ese objeto tiene un `SpriteRenderer`,
+  un `Animator` **sin controlador** y un `SpriteProvisional` que dibuja el placeholder si el sprite
+  falta.
+- **Qué hay que hacer:** crear `Animaciones/Kael.controller` y asignarlo a ese `Animator`. Los
+  parámetros que el código ya escribe son estos; si el controlador no los tiene, el código avisa
+  una vez y sigue.
+  - `Movement` (float): velocidad horizontal en u/s. Es 0 en IDLE; por encima de 0,1 hay que pasar a
+    correr.
+  - `Attack` (bool): mientras dura ATTACK.
+  - `Damage` (bool): mientras dura DAMAGED.
+  - `Death` (bool): en DEAD.
+- **Parámetros futuros:** `EnSuelo` (bool) y `VelocidadY` (float) ya están declarados en
+  `AnimatorParams`. Se empezarán a escribir cuando existan los clips de salto y caída.
+- **Arte fuente:** las 8 poses de `Referencias/Arte/posiblesanimaciiones kael.jpeg` (hay que
+  recortarlas; ver «Arte nuevo generado con Gemini»). Las hojas de la v1 (`camin-ando.png`,
+  `Elsaltodel.png`, `finalsignodepregunta.png`) están a 500 PPU y habría que reimportarlas a 32.
+
+| Clip de Kael | Estado de la FSM | Prioridad | Placeholder actual |
 |---|---|---|---|
-| Idle | `IDLE` | P1 | Frame 0 de `walk` |
-| Run (¿o reutilizar walk?) | `RUN` | P1 | `walk` |
-| Fall / doble salto | `FALL`, `DOUBLE_JUMP` | P1 | Frames finales de `Jump` |
-| Ataque básico | `ATTACK` | P1 | `AttackSamurai` |
-| Daño | `DAMAGED` | P1 | `HurtSamurai` |
-| Muerte | `DEAD` | P1 | `Samuraidead` |
-| Dash | `DASH` | P2 | `walk` + tinte |
-| Wall slide / wall jump | `WALL_SLIDE`, `WALL_JUMP` | P2 | `Jump` |
-| Ataque cargado (Ira) | modificador `ATTACK` | P1 | `AttackSamurai` + tinte rojo |
-| Nado / movimiento bajo el agua (Tristeza) | modificador `UNDERWATER` | P2 | `walk` lento |
-| Invisibilidad parcial (Miedo) | modificador | P2 | Alfa 0,4 en el `SpriteRenderer` (no necesita arte) |
-| Defensa reforzada (Culpa) | modificador | P2 | Contorno o tinte |
-| Agacharse (Culpa) | modificador `CROUCH` | P2 | **Ya existe** `agachao.anim` |
+| Idle | `IDLE` | P1 | Cápsula quieta |
+| Correr | `RUN` | P1 | Cápsula |
+| Salto / caída / doble salto | `JUMP`, `FALL`, `DOUBLE_JUMP` | P1 | Cápsula |
+| Ataque básico | `ATTACK` | P1 | Cápsula (la hitbox se ve en la vista Scene) |
+| Daño | `DAMAGED` | P1 | Parpadeo (no necesita arte) |
+| Muerte | `DEAD` | P1 | Cápsula quieta |
+| Dash | `DASH` | P2 | Cápsula |
+| Wall slide / wall jump | `WALL_SLIDE`, `WALL_JUMP` | P2 | Cápsula |
+| Agacharse | `CROUCH` | P2 | Cápsula (el collider sí se encoge) |
+| Carga y ataque cargado (Ira) | modificador de `ATTACK` | P1 | Tinte rojizo con la carga completa |
+| Nado (Tristeza) | modificador de movimiento `BajoElAgua` | P2 | Cápsula |
+| Invisibilidad parcial (Miedo) | habilidad | — | Opacidad al 40 % (no necesita arte) |
+| Defensa reforzada (Culpa) | escudo de `PlayerHealth` | P2 | Sin efecto visual: falta un VFX de escudo |
 
-> Ni el Samurai ni Kael tienen hoy salto, caída, wall slide ni dash en el Animator del jugador.
+**Audio del jugador (todo falta, P1 con silencio como placeholder):** pasos, salto, doble salto,
+dash, espada, carga completa, ataque cargado, golpe recibido, escudo absorbe y muerte. Los eventos
+ya existen (`OnStateChanged`, `OnGolpeRecibido`, `OnEscudoAbsorbio`, `OnCargaCompleta`,
+`OnInvisibilidadCambiada`); el `AudioManager` los escuchará.
 
 ### B4. Enemigos por mundo — `EnemyData` *(propuesto)*
 
@@ -234,5 +280,6 @@ Estado actual: en juego se usa el **Samurai** de un pack (idle, run, attack, hur
 
 ## Historial
 
+- **0.3 (2026-09-28)** — Fase 3 (jugador). Nueva sección «Lo que necesito de ti», apartado B3 reescrito para la v2 y corrección de la convención de escala y de la tabla de decisiones, que se habían quedado desfasadas.
 - **0.2 (2026-09-19)** — Traslado a `Tesis2.0`, decisiones resueltas, inventario del arte de Gemini.
 - **0.1 (2026-09-19)** — Primera versión, generada en la auditoría de la Fase 0.

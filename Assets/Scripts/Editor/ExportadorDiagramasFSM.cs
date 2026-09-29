@@ -31,7 +31,8 @@ namespace Fragmentum.EditorTools
             var exportadas = 0;
             foreach (var (nombre, tabla) in BuscarTablas())
             {
-                var texto = GenerarDocumento(nombre, tabla);
+                // Saltos LF siempre, para que el archivo no cambie según el sistema operativo.
+                var texto = GenerarDocumento(nombre, tabla).Replace("\r\n", "\n");
                 File.WriteAllText(Path.Combine(carpeta, $"{nombre}.md"), texto, new UTF8Encoding(false));
                 exportadas++;
             }
@@ -47,49 +48,37 @@ namespace Fragmentum.EditorTools
             Debug.Log($"[Fragmentum] {exportadas} diagrama(s) exportado(s) a {CarpetaSalida}/.");
         }
 
-        /// <summary>Busca por reflexión todas las FSM declaradas en el proyecto.</summary>
+        /// <summary>
+        /// Busca todas las FSM declaradas en el proyecto con el índice de tipos del Editor
+        /// (<see cref="TypeCache"/>), ordenadas por nombre para que la exportación sea estable.
+        /// </summary>
         public static IEnumerable<(string nombre, ITablaLegible tabla)> BuscarTablas()
         {
-            foreach (var ensamblado in AppDomain.CurrentDomain.GetAssemblies())
+            var tipos = new List<Type>(TypeCache.GetTypesWithAttribute<DeclaraFSMAttribute>());
+            tipos.Sort((a, b) => string.CompareOrdinal(a.FullName, b.FullName));
+
+            foreach (var tipo in tipos)
             {
-                Type[] tipos;
-                try
+                var atributo = tipo.GetCustomAttribute<DeclaraFSMAttribute>();
+                if (atributo == null)
                 {
-                    tipos = ensamblado.GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)
-                {
-                    tipos = e.Types;
+                    continue;
                 }
 
-                foreach (var tipo in tipos)
+                var metodo = tipo.GetMethod(atributo.Metodo,
+                    BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null);
+
+                if (metodo == null)
                 {
-                    if (tipo == null)
-                    {
-                        continue;
-                    }
+                    Debug.LogWarning(
+                        $"[Fragmentum] {tipo.Name} está marcada con [DeclaraFSM] pero no tiene el método " +
+                        $"estático público {atributo.Metodo}().");
+                    continue;
+                }
 
-                    var atributo = tipo.GetCustomAttribute<DeclaraFSMAttribute>();
-                    if (atributo == null)
-                    {
-                        continue;
-                    }
-
-                    var metodo = tipo.GetMethod(atributo.Metodo,
-                        BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null);
-
-                    if (metodo == null)
-                    {
-                        Debug.LogWarning(
-                            $"[Fragmentum] {tipo.Name} está marcada con [DeclaraFSM] pero no tiene el método " +
-                            $"estático público {atributo.Metodo}().");
-                        continue;
-                    }
-
-                    if (metodo.Invoke(null, null) is ITablaLegible tabla)
-                    {
-                        yield return (atributo.Nombre, tabla);
-                    }
+                if (metodo.Invoke(null, null) is ITablaLegible tabla)
+                {
+                    yield return (atributo.Nombre, tabla);
                 }
             }
         }
@@ -117,109 +106,213 @@ namespace Fragmentum.EditorTools
             return sb.ToString();
         }
 
-        /// <summary>Solo el bloque Mermaid (stateDiagram-v2) de una tabla.</summary>
+        /// <summary>
+        /// Solo el bloque Mermaid (stateDiagram-v2) de una tabla.
+        ///
+        /// Los grupos se dibujan como estados compuestos y se <b>anidan</b> cuando un grupo
+        /// contiene todos los estados de otro (LOCOMOCION dentro de VIVO en el jugador): así el
+        /// diagrama muestra la máquina jerárquica tal como está declarada. Cada estado se
+        /// dibuja dentro del grupo más pequeño que lo contiene, y cada transición dentro del
+        /// bloque más interno que contiene sus dos extremos.
+        /// </summary>
         public static string GenerarMermaid(ITablaLegible tabla)
         {
-            var grupoDeEstado = new Dictionary<string, string>();
-            var estadosPorGrupo = new Dictionary<string, List<string>>();
-
+            // 1. Grupos, en orden de declaración.
+            var nombres = new List<string>();
+            var miembros = new Dictionary<string, List<string>>();
             foreach (var (grupo, estados) in tabla.GruposLegibles)
             {
-                var lista = new List<string>();
-                foreach (var estado in estados)
+                if (miembros.ContainsKey(grupo))
                 {
-                    if (grupoDeEstado.ContainsKey(estado))
-                    {
-                        continue; // un estado se dibuja dentro de un solo grupo
-                    }
-
-                    grupoDeEstado[estado] = grupo;
-                    lista.Add(estado);
+                    continue;
                 }
 
-                estadosPorGrupo[grupo] = lista;
+                nombres.Add(grupo);
+                miembros[grupo] = new List<string>(estados);
             }
 
-            var internas = new Dictionary<string, List<string>>();
-            var externas = new List<string>();
+            // 2. Grupo padre de cada grupo: el más pequeño que lo contiene estrictamente.
+            var padreDeGrupo = new Dictionary<string, string>();
+            foreach (var hijo in nombres)
+            {
+                string mejor = null;
+                foreach (var candidato in nombres)
+                {
+                    if (candidato == hijo || miembros[candidato].Count <= miembros[hijo].Count)
+                    {
+                        continue;
+                    }
+
+                    if (ContieneTodos(miembros[candidato], miembros[hijo]) &&
+                        (mejor == null || miembros[candidato].Count < miembros[mejor].Count))
+                    {
+                        mejor = candidato;
+                    }
+                }
+
+                padreDeGrupo[hijo] = mejor;
+            }
+
+            // 3. Grupo dueño de cada estado: el más pequeño que lo contiene (empate: el primero).
+            var duenoDeEstado = new Dictionary<string, string>();
+            var estadosDeGrupo = new Dictionary<string, List<string>>();
+            foreach (var grupo in nombres)
+            {
+                estadosDeGrupo[grupo] = new List<string>();
+            }
+
+            foreach (var grupo in nombres)
+            {
+                foreach (var estado in miembros[grupo])
+                {
+                    if (duenoDeEstado.TryGetValue(estado, out var actual) &&
+                        miembros[actual].Count <= miembros[grupo].Count)
+                    {
+                        continue;
+                    }
+
+                    if (actual != null)
+                    {
+                        estadosDeGrupo[actual].Remove(estado);
+                    }
+
+                    duenoDeEstado[estado] = grupo;
+                    estadosDeGrupo[grupo].Add(estado);
+                }
+            }
+
+            // Cadena de contenedores de un nodo (estado o grupo), del más interno al más externo.
+            List<string> Contenedores(string nodo, bool esGrupo)
+            {
+                var cadena = new List<string>();
+                var actual = esGrupo
+                    ? (padreDeGrupo.TryGetValue(nodo, out var p) ? p : null)
+                    : (duenoDeEstado.TryGetValue(nodo, out var d) ? d : null);
+
+                while (actual != null)
+                {
+                    cadena.Add(actual);
+                    actual = padreDeGrupo.TryGetValue(actual, out var siguiente) ? siguiente : null;
+                }
+
+                return cadena;
+            }
+
+            // 4. Cada transición va al bloque más interno que contiene a sus dos extremos.
+            //    Las declaradas desde un superestado se dibujan una sola vez, desde el grupo.
+            const string raiz = "";
+            var lineasPorBloque = new Dictionary<string, List<string>> { [raiz] = new List<string>() };
             var yaEmitidas = new HashSet<string>();
 
             foreach (var (desde, hacia, condicion, grupoOrigen) in tabla.TransicionesLegibles)
             {
                 var etiqueta = string.IsNullOrEmpty(condicion) ? string.Empty : $" : {Limpiar(condicion)}";
+                var esDeGrupo = !string.IsNullOrEmpty(grupoOrigen);
+                var origen = esDeGrupo ? grupoOrigen : desde;
+                var linea = $"{origen} --> {hacia}{etiqueta}";
 
-                if (!string.IsNullOrEmpty(grupoOrigen))
+                if (!yaEmitidas.Add(linea))
                 {
-                    // Transición declarada desde un superestado: se dibuja desde el grupo.
-                    var linea = $"    {grupoOrigen} --> {hacia}{etiqueta}";
-                    if (yaEmitidas.Add(linea))
-                    {
-                        externas.Add(linea);
-                    }
-
                     continue;
                 }
 
-                grupoDeEstado.TryGetValue(desde, out var grupoDesde);
-                grupoDeEstado.TryGetValue(hacia, out var grupoHacia);
-
-                if (!string.IsNullOrEmpty(grupoDesde) && grupoDesde == grupoHacia)
+                var destinos = Contenedores(hacia, false);
+                var bloque = raiz;
+                foreach (var contenedor in Contenedores(origen, esDeGrupo))
                 {
-                    if (!internas.TryGetValue(grupoDesde, out var lista))
+                    if (destinos.Contains(contenedor))
                     {
-                        lista = new List<string>();
-                        internas[grupoDesde] = lista;
+                        bloque = contenedor;
+                        break;
                     }
+                }
 
-                    lista.Add($"        {desde} --> {hacia}{etiqueta}");
-                }
-                else
+                if (!lineasPorBloque.TryGetValue(bloque, out var lista))
                 {
-                    externas.Add($"    {desde} --> {hacia}{etiqueta}");
+                    lista = new List<string>();
+                    lineasPorBloque[bloque] = lista;
                 }
+
+                lista.Add(linea);
+            }
+
+            // 5. Escritura recursiva: estado inicial, grupos hijos, estados propios y transiciones.
+            var inicial = tabla.EstadoInicial;
+            var caminoInicial = string.IsNullOrEmpty(inicial) ? new List<string>() : Contenedores(inicial, false);
+            caminoInicial.Reverse(); // del grupo más externo al más interno
+
+            string SiguienteHaciaInicial(string bloque)
+            {
+                var indice = bloque == raiz ? 0 : caminoInicial.IndexOf(bloque) + 1;
+                if (bloque != raiz && indice == 0)
+                {
+                    return null; // el estado inicial no está dentro de este bloque
+                }
+
+                return indice < caminoInicial.Count ? caminoInicial[indice] : inicial;
             }
 
             var sb = new StringBuilder();
             sb.AppendLine("stateDiagram-v2");
 
-            var inicial = tabla.EstadoInicial;
-            if (!string.IsNullOrEmpty(inicial))
+            void EscribirBloque(string bloque, int nivel)
             {
-                grupoDeEstado.TryGetValue(inicial, out var grupoInicial);
-                sb.AppendLine($"    [*] --> {(string.IsNullOrEmpty(grupoInicial) ? inicial : grupoInicial)}");
-            }
+                var sangria = new string(' ', 4 * (nivel + 1));
 
-            foreach (var par in estadosPorGrupo)
-            {
-                sb.AppendLine($"    state {par.Key} {{");
-
-                if (!string.IsNullOrEmpty(inicial) && par.Value.Contains(inicial))
+                if (!string.IsNullOrEmpty(inicial))
                 {
-                    sb.AppendLine($"        [*] --> {inicial}");
-                }
-
-                foreach (var estado in par.Value)
-                {
-                    sb.AppendLine($"        {estado}");
-                }
-
-                if (internas.TryGetValue(par.Key, out var lineas))
-                {
-                    foreach (var linea in lineas)
+                    var siguiente = SiguienteHaciaInicial(bloque);
+                    if (siguiente != null)
                     {
-                        sb.AppendLine(linea);
+                        sb.AppendLine($"{sangria}[*] --> {siguiente}");
                     }
                 }
 
-                sb.AppendLine("    }");
+                foreach (var grupo in nombres)
+                {
+                    var padre = padreDeGrupo[grupo] ?? raiz;
+                    if (padre != bloque)
+                    {
+                        continue;
+                    }
+
+                    sb.AppendLine($"{sangria}state {grupo} {{");
+                    EscribirBloque(grupo, nivel + 1);
+                    sb.AppendLine($"{sangria}}}");
+                }
+
+                if (bloque != raiz)
+                {
+                    foreach (var estado in estadosDeGrupo[bloque])
+                    {
+                        sb.AppendLine($"{sangria}{estado}");
+                    }
+                }
+
+                if (lineasPorBloque.TryGetValue(bloque, out var lineas))
+                {
+                    foreach (var linea in lineas)
+                    {
+                        sb.AppendLine($"{sangria}{linea}");
+                    }
+                }
             }
 
-            foreach (var linea in externas)
-            {
-                sb.AppendLine(linea);
-            }
-
+            EscribirBloque(raiz, 0);
             return sb.ToString();
+        }
+
+        private static bool ContieneTodos(List<string> contenedor, List<string> contenido)
+        {
+            foreach (var elemento in contenido)
+            {
+                if (!contenedor.Contains(elemento))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>Quita de las etiquetas los caracteres que rompen el diagrama.</summary>

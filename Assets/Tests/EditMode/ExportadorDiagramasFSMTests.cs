@@ -51,6 +51,48 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void GenerarMermaid_AnidaUnGrupoContenidoEnOtro()
+        {
+            var tabla = new TablaTransiciones<ESTADOS_PRUEBA>("Anidada")
+                .Inicial(ESTADOS_PRUEBA.IDLE)
+                .DefinirGrupo("VIVO", ESTADOS_PRUEBA.IDLE, ESTADOS_PRUEBA.RUN, ESTADOS_PRUEBA.DASH)
+                .DefinirGrupo("SUELO", ESTADOS_PRUEBA.IDLE, ESTADOS_PRUEBA.RUN)
+                .Permitir(ESTADOS_PRUEBA.IDLE, ESTADOS_PRUEBA.RUN, "hay input")
+                .PermitirDesdeGrupo("SUELO", ESTADOS_PRUEBA.DASH, "dash")
+                .Permitir(ESTADOS_PRUEBA.DASH, ESTADOS_PRUEBA.IDLE, "fin del dash")
+                .PermitirDesdeGrupo("VIVO", ESTADOS_PRUEBA.DEAD, "vida 0");
+
+            var mermaid = ExportadorDiagramasFSM.GenerarMermaid(tabla);
+
+            var vivo = mermaid.IndexOf("state VIVO {", System.StringComparison.Ordinal);
+            var suelo = mermaid.IndexOf("state SUELO {", System.StringComparison.Ordinal);
+            Assert.GreaterOrEqual(vivo, 0);
+            Assert.Greater(suelo, vivo, "SUELO debe escribirse dentro del bloque de VIVO.");
+
+            // El estado inicial se alcanza bajando por los grupos: VIVO -> SUELO -> IDLE.
+            StringAssert.Contains("[*] --> VIVO", mermaid);
+            StringAssert.Contains("[*] --> SUELO", mermaid);
+            StringAssert.Contains("[*] --> IDLE", mermaid);
+
+            StringAssert.Contains("SUELO --> DASH : dash", mermaid);
+            StringAssert.Contains("VIVO --> DEAD : vida 0", mermaid);
+            Assert.IsFalse(mermaid.Contains("IDLE --> DASH"));
+        }
+
+        [Test]
+        public void BuscarTablas_EncuentraLasFSMDelJugador()
+        {
+            var nombres = new System.Collections.Generic.List<string>();
+            foreach (var (nombre, _) in ExportadorDiagramasFSM.BuscarTablas())
+            {
+                nombres.Add(nombre);
+            }
+
+            CollectionAssert.Contains(nombres, "Jugador");
+            CollectionAssert.Contains(nombres, "JugadorModoMovimiento");
+        }
+
+        [Test]
         public void GenerarDocumento_IncluyeElBloqueMermaidYLaTabla()
         {
             var documento = ExportadorDiagramasFSM.GenerarDocumento("Prueba", TablaDePrueba());

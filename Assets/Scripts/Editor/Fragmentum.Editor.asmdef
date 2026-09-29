@@ -2,7 +2,8 @@
     "name": "Fragmentum.Editor",
     "rootNamespace": "Fragmentum.EditorTools",
     "references": [
-        "Fragmentum.Runtime"
+        "Fragmentum.Runtime",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"

@@ -21,6 +21,20 @@ con Gemini, y dejar `Tesis` congelado como **v1** de referencia para la comparac
 | Compatibilidad con escenas viejas | La sección §8 se simplifica: no hay que conservar GUID ni escribir migradores para las escenas del prototipo, porque las escenas se construyen de cero. El cuidado con los `.meta` se mantiene solo para los assets que se importen desde `Tesis`. |
 | Decisiones | P1 (patrón State con clases), P2 (orden de fases), P3 (limpieza), P4 (modo batch) y P5 (pruebas automáticas) quedaron aprobadas. S6: el dash va en **Shift izquierdo**, que es la tecla que ya trae la acción *Sprint*. |
 
+## Revisión 1.2: ajustes tras la Fase 3 (2026-09-28)
+
+| Qué cambia | Detalle |
+|---|---|
+| Motor | Unity **6000.6.3f1**, la versión instalada en el PC nuevo. `Object.FindFirstObjectByType` está obsoleto en 6000.6: se usa `FindAnyObjectByType`. |
+| FSM del jugador (§3.2) | DASH y ATTACK salen de los **8** subestados de LOCOMOCION, no de 5. El superestado implementa la salida una vez y cada subestado solo refina la condición. |
+| FSM del jugador (§3.1) | Se añade **FALL → WALL_JUMP** (coyote de pared, 0,1 s tras soltar la pared). |
+| FSM del jugador (§3.2) | DASH, ATTACK y DAMAGED vuelven a IDLE o FALL; IDLE → RUN se encadena en el mismo frame. |
+| Diagramas | El exportador anida los superestados (LOCOMOCION dentro de VIVO). Los diagramas reales están en `Docs/FSM/`. |
+| Verificación (§8.5) | Además de las pruebas EditMode, hay **pruebas PlayMode** que comprueban con física real los criterios de aceptación del jugador. Se amplían en cada fase jugable. |
+| Input | Nueva acción `Ability` (Q o RB) para la invisibilidad; Ctrl izquierdo también agacha. |
+
+Estado de las fases: **2 hecha** · **3 hecha** (pendiente de tu prueba en el Editor, ver `PENDIENTES.md` N1) · 4 en adelante por hacer.
+
 ---
 
 ## 0. Supuestos de partida

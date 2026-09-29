@@ -10,11 +10,16 @@ namespace Fragmentum.Core.Input
     /// Usa el mapa "Player" del asset <c>InputSystem_Actions</c>, que ya trae las acciones
     /// que necesita el juego:
     /// Move (WASD y flechas), Jump (espacio), Attack (clic izquierdo o Enter),
-    /// Sprint (Shift izquierdo, aquí el dash), Crouch (C) e Interact (E).
+    /// Sprint (Shift izquierdo, aquí el dash), Crouch (C o Ctrl izquierdo), Interact (E)
+    /// y Ability (Q, añadida en la Fase 3 para la Invisibilidad Parcial).
     ///
     /// Si falta el asset o alguna acción, avisa una vez por consola y devuelve input neutro:
     /// el juego no se rompe, solo no responde a esa acción.
+    ///
+    /// Se ejecuta antes que el resto de scripts para que el jump buffer registre la pulsación
+    /// en el mismo frame en que la FSM del jugador la consulta.
     /// </summary>
+    [DefaultExecutionOrder(-100)]
     [DisallowMultipleComponent]
     public class FuenteInputJugador : MonoBehaviour, IFuenteInput
     {
@@ -32,6 +37,7 @@ namespace Fragmentum.Core.Input
         private InputAction _dash;
         private InputAction _agacharse;
         private InputAction _interactuar;
+        private InputAction _habilidad;
 
         private float _tiempoUltimoSalto = float.NegativeInfinity;
         private bool _saltoConsumido = true;
@@ -55,6 +61,8 @@ namespace Fragmentum.Core.Input
         public bool AgacharseMantenido => !Bloqueado && _agacharse != null && _agacharse.IsPressed();
 
         public bool InteractuarPulsado => !Bloqueado && _interactuar != null && _interactuar.WasPerformedThisFrame();
+
+        public bool HabilidadPulsado => !Bloqueado && _habilidad != null && _habilidad.WasPressedThisFrame();
 
         private void Awake()
         {
@@ -80,6 +88,7 @@ namespace Fragmentum.Core.Input
             _dash = Buscar("Sprint");
             _agacharse = Buscar("Crouch");
             _interactuar = Buscar("Interact");
+            _habilidad = Buscar("Ability");
         }
 
         private void OnEnable() => _mapa?.Enable();

@@ -150,5 +150,15 @@ namespace Fragmentum.Core.Combate
         /// absorbe un golpe cada 15 s.
         /// </summary>
         protected virtual bool PuedeRecibir(in Golpe golpe) => true;
+
+        /// <summary>
+        /// Abre una ventana de invulnerabilidad sin quitar vida. La usa el escudo del jugador
+        /// para que un golpe absorbido no se repita en el frame siguiente. Nunca acorta una
+        /// ventana que ya estuviera abierta.
+        /// </summary>
+        protected void ConcederInvulnerabilidad(float segundos)
+        {
+            _finInvulnerabilidad = Mathf.Max(_finInvulnerabilidad, Reloj() + Mathf.Max(0f, segundos));
+        }
     }
 }

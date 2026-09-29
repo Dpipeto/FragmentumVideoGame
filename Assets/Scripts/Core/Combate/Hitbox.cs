@@ -44,6 +44,24 @@ namespace Fragmentum.Core.Combate
             set => danio = Mathf.Max(0, value);
         }
 
+        /// <summary>Capas a las que golpea. Para hitbox creadas por código (proyectiles, pruebas).</summary>
+        public LayerMask Objetivos
+        {
+            get => objetivos;
+            set => objetivos = value;
+        }
+
+        /// <summary>
+        /// Con <c>true</c> golpea a cada objetivo una vez por activación (espadas); con
+        /// <c>false</c> golpea mientras haya contacto y los i-frames del objetivo marcan el ritmo
+        /// (pinchos, daño por contacto).
+        /// </summary>
+        public bool GolpearUnaVezPorActivacion
+        {
+            get => golpearUnaVezPorActivacion;
+            set => golpearUnaVezPorActivacion = value;
+        }
+
         /// <summary>Impacto aceptado por el objetivo. Lo escuchan el audio y los VFX.</summary>
         public event Action<IGolpeable, Golpe> OnImpacto;
 
