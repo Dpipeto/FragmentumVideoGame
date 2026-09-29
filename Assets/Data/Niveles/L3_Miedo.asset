@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c20286d82e72eb4c98097b2f168371e, type: 3}
+  m_Name: L3_Miedo
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.LevelData
+  id: 3
+  escena:
+    escena: {fileID: 0}
+    ruta: 
+  nombreMundo: Bosque Tenebroso
+  emocion: {fileID: 11400000, guid: 75a8f2376c848d64995713f996c79aef, type: 2}
+  sinopsis: "Ansiedad, inseguridad. Explota la desorientaci\xF3n y la incertidumbre."
+  dificultad: 4
+  paleta:
+  - {r: 0.039215688, g: 0.039215688, b: 0.05882353, a: 1}
+  - {r: 0.1764706, g: 0.105882354, b: 0.30588236, a: 1}
+  - {r: 0.101960786, g: 0.18039216, b: 0.101960786, a: 1}
+  - {r: 0.22745098, g: 0.22745098, b: 0.2901961, a: 1}
+  icono: {fileID: 0}
+  musica: {fileID: 0}
+  musicaJefe: {fileID: 0}
+  jefe: {fileID: 11400000, guid: bbb7d2feacd37014f8e23ff161f5b343, type: 2}
+  fragmento: {fileID: 11400000, guid: 8b39dba873a829d49bdf2627500dd57c, type: 2}
+  habilidadOtorgada: {fileID: 11400000, guid: 168565b4345443644a6efae65940a527, type: 2}
+  reglas:
+    agacharse: 0
+    sigilo: 1
+    oscuridad: 1
+    radioLuzJugador: 3
+  secciones:
+  - nombre: "Secci\xF3n 1"
+    desdeX: 0
+    hastaX: 20
+    contenido: Luz moderada y tutorial de antorchas. 2 Espectros y 3 trampas ocultas.
+  - nombre: "Secci\xF3n 2"
+    desdeX: 20
+    hastaX: 50
+    contenido: 'Oscuridad completa: laberinto con 2 rutas. 3 Centinelas Ciegos y 4 Espectros.'
+  - nombre: Arena del jefe
+    desdeX: 50
+    hastaX: 70
+    contenido: Oscuridad total; solo la luz del jugador.

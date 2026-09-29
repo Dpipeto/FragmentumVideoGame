@@ -3,7 +3,8 @@
     "rootNamespace": "Fragmentum.EditorTools",
     "references": [
         "Fragmentum.Runtime",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

@@ -41,8 +41,17 @@ namespace Fragmentum.Core.Input
 
         private float _tiempoUltimoSalto = float.NegativeInfinity;
         private bool _saltoConsumido = true;
+        private bool _bloqueado;
 
-        public bool Bloqueado { get; set; }
+        /// <summary>
+        /// Bloqueo propio de esta fuente, o el global que fija la FSM del juego (pausa,
+        /// cinemáticas, cargas, Game Over).
+        /// </summary>
+        public bool Bloqueado
+        {
+            get => _bloqueado || EventosJuego.EntradaBloqueada;
+            set => _bloqueado = value;
+        }
 
         public float EjeHorizontal => Bloqueado || _mover == null ? 0f : _mover.ReadValue<Vector2>().x;
 

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c20286d82e72eb4c98097b2f168371e, type: 3}
+  m_Name: L5_Esperanza
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.LevelData
+  id: 5
+  escena:
+    escena: {fileID: 0}
+    ruta: 
+  nombreMundo: "Jard\xEDn Et\xE9reo"
+  emocion: {fileID: 11400000, guid: 3e29c826aaffa0e4d8c4f29f7ad7d84c, type: 2}
+  sinopsis: "Aceptaci\xF3n, reconciliaci\xF3n. Por primera vez el entorno no es hostil."
+  dificultad: 1
+  paleta:
+  - {r: 0.101960786, g: 0.22745098, b: 0.18039216, a: 1}
+  - {r: 0.78431374, g: 0.6431373, b: 0.2901961, a: 1}
+  - {r: 0.9411765, g: 0.93333334, b: 0.84705883, a: 1}
+  - {r: 0.47843137, g: 0.67058825, b: 0.8, a: 1}
+  icono: {fileID: 0}
+  musica: {fileID: 0}
+  musicaJefe: {fileID: 0}
+  jefe: {fileID: 0}
+  fragmento: {fileID: 11400000, guid: c2c1fbd02ba1bb347a6dad191bfb11d9, type: 2}
+  habilidadOtorgada: {fileID: 0}
+  reglas:
+    agacharse: 0
+    sigilo: 0
+    oscuridad: 0
+    radioLuzJugador: 0
+  secciones:
+  - nombre: "Jard\xEDn"
+    desdeX: 0
+    hastaX: 50
+    contenido: "Plataformeo puro en 4 secciones, una por habilidad previa. 3 Guardianes del Jard\xEDn."

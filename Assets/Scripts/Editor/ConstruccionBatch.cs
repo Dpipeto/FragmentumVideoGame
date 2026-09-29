@@ -24,7 +24,8 @@ namespace Fragmentum.EditorTools
         {
             ConfiguradorProyecto.ConfigurarTodo();
 
-            var ok = ConstructorJugador.CrearEscenaPrueba(false);
+            var ok = GeneradorProgresion.Construir();
+            ok &= ConstructorJugador.CrearEscenaPrueba(false);
             ok &= GeneradorEnemigos.CrearEscenaPrueba(false);
             ExportadorDiagramasFSM.Exportar();
             AssetDatabase.SaveAssets();

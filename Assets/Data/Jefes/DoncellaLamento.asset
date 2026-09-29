@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5987dd5907d2d694a96e5dfb6b32bbf4, type: 3}
+  m_Name: DoncellaLamento
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.JefeData
+  nombreCanonico: Doncella del Lamento
+  emocion: {fileID: 11400000, guid: 27591dd8993db0d4b9467e5071fdbcab, type: 2}
+  descripcion: Arquitecto del Alma del mundo de la Tristeza.
+  concepto: {fileID: 0}
