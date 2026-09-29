@@ -16,3 +16,30 @@ MonoBehaviour:
   emocion: {fileID: 11400000, guid: 690cdda19fde4f2489ac8b3d26cf7fbb, type: 2}
   descripcion: "Arquitecto del Alma del mundo de la Integraci\xF3n."
   concepto: {fileID: 0}
+  vidaMaxima: 40
+  invulnerabilidad: 0.15
+  danioContacto: 1
+  velocidad: 2
+  fases:
+  - nombre: Combate espejo
+    umbralVida: 1
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  - nombre: Secciones de cada mundo (60 %)
+    umbralVida: 0.6
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  - nombre: "Integraci\xF3n (30 %)"
+    umbralVida: 0.3
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  duracionVulnerable: 1.2
+  multiplicadorVulnerable: 2
+  inmuneFueraDeVulnerable: 0
+  duracionDerrota: 2
+  tinte: {r: 0.3529412, g: 0.3529412, b: 0.3529412, a: 1}
+  tamano: {x: 2, y: 3.2}
+  spriteMiraDerecha: 1

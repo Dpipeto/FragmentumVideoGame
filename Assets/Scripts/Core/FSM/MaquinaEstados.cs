@@ -86,6 +86,23 @@ namespace Fragmentum.Core.FSM
         }
 
         /// <summary>
+        /// Para la máquina: ejecuta el <c>OnExit</c> del estado actual y la deja sin iniciar, lista
+        /// para volver a arrancar con <see cref="Iniciar"/>. La usa un jefe cuando el jugador
+        /// muere en la arena y el combate vuelve a empezar. No es una transición: no emite
+        /// <see cref="OnStateChanged"/>.
+        /// </summary>
+        public void Detener()
+        {
+            if (!Iniciada)
+            {
+                return;
+            }
+
+            _estados[EstadoActual].OnExit();
+            Iniciada = false;
+        }
+
+        /// <summary>
         /// ÚNICO punto de cambio de estado de todo el juego. Devuelve <c>true</c> si el cambio
         /// se aplicó; <c>false</c> si la transición no estaba declarada o el estado no existe.
         /// </summary>

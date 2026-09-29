@@ -41,8 +41,11 @@ namespace Fragmentum.Core
                 "en su lugar. Ver PENDIENTES.md.", this);
         }
 
-        /// <summary>Sprite blanco de 1×1 unidad, generado una vez en memoria (no es un asset).</summary>
-        private static Sprite Cuadrado()
+        /// <summary>
+        /// Sprite blanco de 1×1 unidad, generado una vez en memoria (no es un asset). Lo usan
+        /// también las zonas de daño de los jefes, que aún no tienen VFX.
+        /// </summary>
+        public static Sprite Cuadrado()
         {
             if (_cuadrado != null)
             {

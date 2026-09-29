@@ -16,3 +16,25 @@ MonoBehaviour:
   emocion: {fileID: 11400000, guid: 75a8f2376c848d64995713f996c79aef, type: 2}
   descripcion: Arquitecto del Alma del mundo de la Miedo.
   concepto: {fileID: 0}
+  vidaMaxima: 22
+  invulnerabilidad: 0.15
+  danioContacto: 1
+  velocidad: 2
+  fases:
+  - nombre: Ataques con destello
+    umbralVida: 1
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  - nombre: Tres clones (50 %)
+    umbralVida: 0.5
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  duracionVulnerable: 1.2
+  multiplicadorVulnerable: 2
+  inmuneFueraDeVulnerable: 0
+  duracionDerrota: 2
+  tinte: {r: 0.41960785, g: 0.30980393, b: 0.627451, a: 1}
+  tamano: {x: 2, y: 3.2}
+  spriteMiraDerecha: 1

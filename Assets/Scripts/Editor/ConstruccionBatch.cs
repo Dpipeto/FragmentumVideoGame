@@ -39,6 +39,7 @@ namespace Fragmentum.EditorTools
             // Los prefabs se regeneran siempre: Unity conserva sus identificadores.
             ok &= ConstructorJugador.CrearPrefab() != null;
             ok &= GeneradorEnemigos.CrearPrefabs() != null;
+            ok &= GeneradorJefes.Construir();
 
             if (regenerarEscenasDePrueba || !Existe(ConstructorJugador.RutaEscena))
             {

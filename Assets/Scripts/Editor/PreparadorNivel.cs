@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Fragmentum.Bosses;
 using Fragmentum.Core;
 using Fragmentum.Data;
 using Fragmentum.Enemies;
@@ -20,7 +21,8 @@ namespace Fragmentum.EditorTools
     /// - la salida al final de la última sección;
     /// - la zona mortal bajo el nivel y el seguimiento de la cámara;
     /// - si la escena todavía no tiene suelo que colisione, un <b>suelo provisional</b> con fosos
-    ///   y algunos enemigos del mundo, dentro de un objeto que se borra al pintar el nivel.
+    ///   y algunos enemigos del mundo, dentro de un objeto que se borra al pintar el nivel;
+    /// - si el nivel tiene jefe, la <b>arena</b> (Fase 7): entrada, puerta y el prefab del jefe.
     ///
     /// Es idempotente: ejecutarla otra vez sobre una escena preparada no cambia nada, y la
     /// escena solo se guarda si cambió.
@@ -191,7 +193,62 @@ namespace Fragmentum.EditorTools
                 cambios = true;
             }
 
+            // 6. Arena del jefe (Fase 7), en la última sección, si el nivel tiene jefe.
+            if (nivel.jefe != null && Buscar<ArenaJefe>(escena) == null && nivel.secciones != null && nivel.secciones.Count > 0)
+            {
+                CrearArena(escena, raiz, nivel);
+                cambios = true;
+            }
+
             return cambios;
+        }
+
+        /// <summary>
+        /// Arena en la última sección: la entrada a 6 u de su comienzo, una puerta que se cierra
+        /// detrás del jugador y el jefe algo más allá del centro. Si todavía no existe el prefab del
+        /// jefe, la arena se crea igual (sin combate) y se avisa.
+        /// </summary>
+        private static void CrearArena(Scene escena, Transform raiz, LevelData nivel)
+        {
+            var seccion = nivel.secciones[nivel.secciones.Count - 1];
+            var desde = seccion.desdeX;
+            var hasta = seccion.hastaX;
+
+            var arena = new GameObject("Arena").transform;
+            arena.SetParent(raiz, false);
+            arena.position = new Vector3(desde + 6f, AlturaSuelo, 0f);
+
+            var entrada = arena.gameObject.AddComponent<BoxCollider2D>();
+            entrada.isTrigger = true;
+            entrada.size = new Vector2(1.2f, 20f);
+            entrada.offset = new Vector2(0f, 10f);
+
+            var colorPuerta = nivel.paleta != null && nivel.paleta.Length > 1 ? nivel.paleta[1] : Color.gray;
+            var puerta = Bloque(arena, "Puerta", desde + 4f, desde + 5f, AlturaSuelo, 20f, Capa(Capas.Wall), colorPuerta, SpriteCuadrado);
+            puerta.SetActive(false);
+
+            GameObject jefe = null;
+            var prefab = GeneradorJefes.CargarPrefab(nivel.jefe);
+            if (prefab != null)
+            {
+                jefe = (GameObject)PrefabUtility.InstantiatePrefab(prefab, escena);
+                jefe.name = System.IO.Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(prefab));
+                jefe.transform.SetParent(arena, true);
+                jefe.transform.position = new Vector3((desde + hasta) * 0.5f + 4f, AlturaPies, 0f);
+            }
+            else
+            {
+                Debug.LogWarning($"[Fragmentum] No existe el prefab de {nivel.jefe.nombreCanonico}: la arena se crea sin jefe. Ejecuta Fragmentum → Jefes → Generar datos y prefabs de jefes.");
+            }
+
+            var componente = arena.gameObject.AddComponent<ArenaJefe>();
+            Asignar(componente, "jefe", p => p.objectReferenceValue = jefe != null ? jefe.GetComponent<BossController>() : null);
+            Asignar(componente, "puertas", p =>
+            {
+                p.arraySize = 1;
+                p.GetArrayElementAtIndex(0).objectReferenceValue = puerta;
+            });
+            Asignar(componente, "limites", p => p.vector2Value = new Vector2(desde + 5f, hasta + 5f));
         }
 
         /// <summary>El nivel de la LevelDatabase que usa esa escena, o null.</summary>

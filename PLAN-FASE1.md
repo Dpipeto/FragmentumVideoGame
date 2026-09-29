@@ -64,7 +64,17 @@ con Gemini, y dejar `Tesis` congelado como **v1** de referencia para la comparac
 | Escenas | Nueva herramienta *Fragmentum → Niveles → Preparar la escena de nivel*: añade a una escena de nivel lo que le falte (LevelManager, checkpoints, salida, zona mortal y, si no hay suelo, un recorrido provisional). Sustituye al «migrador de escenas» de §8.3 para las escenas de la v2. |
 | Checkpoints | Al entrar en un nivel desde «Continuar» o desde el selector se empieza en su checkpoint guardado. |
 
-Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** · **6 hecha** (de la 3 a la 6, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 7 en adelante por hacer.
+### Ajustes tras la Fase 7 (2026-09-29)
+
+| Qué cambia | Detalle |
+|---|---|
+| FSM del jefe (§3.5) | La máquina arranca en PHASE_1 cuando la arena activa al jefe; no hay estado previo. Para reiniciar el combate tras la muerte del jugador se usa la nueva `MaquinaEstados.Detener()`. El diagrama real está en `Docs/FSM/Jefe.md`. |
+| Victoria (§3.6, §4) | La derrota del jefe otorga el fragmento y la habilidad en el acto (`OnJefeDerrotado` → arena → `LevelManager` → `GameManager.OtorgarRecompensa`). El nivel se completa después, al cruzar la salida, que la arena abre. |
+| Patrones (§3.5) | La onda de suelo es una zona de daño que viaja, no un raycast instantáneo, para poder esquivarla. Todos los ataques crean `ZonaDeDanio` (aviso, movimiento y duración), reutilizable en las Fases 9 y 10. |
+| Esqueletos | El Juez Silente (inmune salvo con la memoria correcta) y el Verdadero Soldado (derrota por integración) ya incorporan su regla propia; sus patrones llegan en la Fase 10. |
+| Datos (§6.1) | `JefeData` añade velocidad, daño por contacto, duración de la derrota y el aspecto provisional (tinte, tamaño y orientación del sprite). |
+
+Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** · **6 hecha** · **7 hecha** (de la 3 a la 7, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 8 en adelante por hacer.
 
 ---
 

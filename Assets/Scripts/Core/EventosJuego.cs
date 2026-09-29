@@ -1,4 +1,5 @@
 using System;
+using Fragmentum.Core.Combate;
 using UnityEngine;
 
 namespace Fragmentum.Core
@@ -25,6 +26,12 @@ namespace Fragmentum.Core
         /// <summary>Se activó un checkpoint del nivel: (id). Lo escucha el HUD para avisar.</summary>
         public static event Action<string> CheckpointActivado;
 
+        /// <summary>Empezó un combate de jefe: (nombre canónico, vida). El HUD muestra su barra.</summary>
+        public static event Action<string, Health> JefeEnCombate;
+
+        /// <summary>Terminó el combate de jefe (derrota o reinicio). El HUD oculta su barra.</summary>
+        public static event Action JefeFueraDeCombate;
+
         /// <summary>
         /// ¿Está bloqueado el input de juego? Lo fija la FSM global (pausa, cinemáticas, cargas,
         /// Game Over) y lo respeta <c>FuenteInputJugador</c>.
@@ -45,6 +52,10 @@ namespace Fragmentum.Core
         public static void SolicitarReintento() => ReintentoSolicitado?.Invoke();
 
         public static void NotificarCheckpoint(string id) => CheckpointActivado?.Invoke(id);
+
+        public static void NotificarJefeEnCombate(string nombre, Health vida) => JefeEnCombate?.Invoke(nombre, vida);
+
+        public static void NotificarJefeFueraDeCombate() => JefeFueraDeCombate?.Invoke();
 
         public static void FijarEntradaBloqueada(bool bloqueada)
         {
@@ -70,6 +81,8 @@ namespace Fragmentum.Core
             ReintentoSolicitado = null;
             EntradaBloqueadaCambiada = null;
             CheckpointActivado = null;
+            JefeEnCombate = null;
+            JefeFueraDeCombate = null;
             EntradaBloqueada = false;
             FotogramaDesbloqueo = -1;
         }

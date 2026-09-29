@@ -16,3 +16,25 @@ MonoBehaviour:
   emocion: {fileID: 11400000, guid: f4ae9a97edfe3434494e8ff5187280cf, type: 2}
   descripcion: Arquitecto del Alma del mundo de la Culpa.
   concepto: {fileID: 0}
+  vidaMaxima: 28
+  invulnerabilidad: 0.15
+  danioContacto: 1
+  velocidad: 2
+  fases:
+  - nombre: Memorias
+    umbralVida: 1
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  - nombre: Memoria real y trampa (50 %)
+    umbralVida: 0.5
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  duracionVulnerable: 3
+  multiplicadorVulnerable: 2
+  inmuneFueraDeVulnerable: 1
+  duracionDerrota: 2
+  tinte: {r: 0.54509807, g: 0.2, b: 0.2, a: 1}
+  tamano: {x: 2, y: 3.2}
+  spriteMiraDerecha: 1

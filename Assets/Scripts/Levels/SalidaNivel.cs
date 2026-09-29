@@ -5,8 +5,12 @@ namespace Fragmentum.Levels
 {
     /// <summary>
     /// Final del recorrido: cuando el jugador la cruza, el <see cref="LevelManager"/> declara la
-    /// victoria. En los niveles con jefe (Fase 7) la victoria llegará al derrotarlo; la salida
-    /// sirve mientras tanto y en los niveles sin jefe (Jardín Etéreo).
+    /// victoria.
+    ///
+    /// En los niveles con jefe, la salida está oculta y no hace nada hasta que la
+    /// <see cref="ArenaJefe"/> se abre tras la derrota del jefe: no se puede terminar el nivel
+    /// esquivando el combate. En los niveles sin jefe (Jardín Etéreo) está disponible desde el
+    /// principio.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class SalidaNivel : MonoBehaviour
@@ -14,13 +18,53 @@ namespace Fragmentum.Levels
         [Tooltip("Vacío = el LevelManager de la escena.")]
         [SerializeField] private LevelManager nivel;
 
+        [Tooltip("Vacío = la arena de jefe de la escena, si la hay.")]
+        [SerializeField] private ArenaJefe arena;
+
         private bool _usada;
+
+        /// <summary>¿Se puede usar ya? (No, mientras haya un jefe sin derrotar.)</summary>
+        public bool Abierta { get; private set; } = true;
 
         private void Reset() => GetComponent<Collider2D>().isTrigger = true;
 
+        private void Start()
+        {
+            if (arena == null)
+            {
+                arena = FindAnyObjectByType<ArenaJefe>();
+            }
+
+            if (arena != null && !arena.Superada)
+            {
+                Mostrar(false);
+                arena.OnArenaSuperada += AlSuperarArena;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (arena != null)
+            {
+                arena.OnArenaSuperada -= AlSuperarArena;
+            }
+        }
+
+        private void AlSuperarArena() => Mostrar(true);
+
+        private void Mostrar(bool abierta)
+        {
+            Abierta = abierta;
+            GetComponent<Collider2D>().enabled = abierta;
+            foreach (var renderer2d in GetComponentsInChildren<Renderer>(true))
+            {
+                renderer2d.enabled = abierta;
+            }
+        }
+
         private void OnTriggerEnter2D(Collider2D otro)
         {
-            if (_usada || otro.isTrigger || otro.attachedRigidbody == null)
+            if (_usada || !Abierta || otro.isTrigger || otro.attachedRigidbody == null)
             {
                 return;
             }

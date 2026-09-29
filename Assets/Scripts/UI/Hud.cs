@@ -1,3 +1,4 @@
+using Fragmentum.Core.Combate;
 using Fragmentum.Data;
 using Fragmentum.Player;
 using UnityEngine;
@@ -6,8 +7,8 @@ using UnityEngine.UI;
 namespace Fragmentum.UI
 {
     /// <summary>
-    /// HUD de los niveles: barra de vida del jugador, monedas, el mundo actual y un aviso breve
-    /// al activar un checkpoint. Vive con los sistemas persistentes (lo crea el UIManager), así
+    /// HUD de los niveles: barra de vida del jugador, monedas, el mundo actual, un aviso breve
+    /// (checkpoint, fragmento obtenido) y la barra del jefe durante su combate. Vive con los sistemas persistentes (lo crea el UIManager), así
     /// que ninguna escena de nivel necesita su propio HUD, y se engancha al jugador que registra
     /// el GameManager en cada escena.
     ///
@@ -20,10 +21,18 @@ namespace Fragmentum.UI
         private LifeBar _barra;
         private Text _mundo;
         private Text _aviso;
+        private GameObject _panelJefe;
+        private Text _nombreJefe;
+        private LifeBar _barraJefe;
         private float _ocultarAvisoEn;
         private bool _construido;
 
         public LifeBar Barra => _barra;
+
+        /// <summary>¿Se ve la barra del jefe? (Solo durante un combate de jefe.)</summary>
+        public bool JefeVisible => _panelJefe != null && _panelJefe.activeSelf;
+
+        public string NombreJefe => _nombreJefe != null ? _nombreJefe.text : string.Empty;
 
         /// <summary>Texto del aviso visible ahora mismo, o vacío.</summary>
         public string AvisoActual => _aviso != null && _aviso.gameObject.activeSelf ? _aviso.text : string.Empty;
@@ -74,6 +83,61 @@ namespace Fragmentum.UI
             _aviso = FabricaUI.Texto(raiz, "Aviso", string.Empty, 30, new Color(1f, 1f, 1f, 0.9f));
             FabricaUI.Colocar(_aviso.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(1000f, 50f));
             _aviso.gameObject.SetActive(false);
+
+            ConstruirBarraJefe(raiz);
+        }
+
+        // Barra del jefe arriba en el centro, con su nombre canónico; oculta fuera del combate.
+        private void ConstruirBarraJefe(RectTransform raiz)
+        {
+            var panel = FabricaUI.Objeto("Jefe", raiz);
+            FabricaUI.Colocar(panel, new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(760f, 70f), new Vector2(0.5f, 1f));
+            _panelJefe = panel.gameObject;
+
+            _nombreJefe = FabricaUI.Texto(panel, "Nombre", string.Empty, 24, new Color(1f, 0.85f, 0.7f, 0.95f));
+            FabricaUI.Colocar(_nombreJefe.rectTransform, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(760f, 32f), new Vector2(0.5f, 1f));
+
+            var fondo = FabricaUI.Objeto("Barra", panel).gameObject.AddComponent<Image>();
+            fondo.color = new Color(0f, 0f, 0f, 0.65f);
+            fondo.raycastTarget = false;
+            FabricaUI.Colocar(fondo.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 6f), new Vector2(760f, 22f), new Vector2(0.5f, 0f));
+
+            var relleno = FabricaUI.Objeto("Relleno", fondo.transform).gameObject.AddComponent<Image>();
+            relleno.color = new Color(1f, 0.42f, 0.2f, 1f);
+            relleno.raycastTarget = false;
+            relleno.type = Image.Type.Filled;
+            relleno.fillMethod = Image.FillMethod.Horizontal;
+            relleno.fillOrigin = (int)Image.OriginHorizontal.Left;
+            relleno.sprite = SpriteBlanco();
+            relleno.rectTransform.anchorMin = Vector2.zero;
+            relleno.rectTransform.anchorMax = Vector2.one;
+            relleno.rectTransform.offsetMin = new Vector2(3f, 3f);
+            relleno.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            _barraJefe = fondo.gameObject.AddComponent<LifeBar>();
+            _barraJefe.BuscarJugador = false;
+            _barraJefe.FijarRelleno(relleno);
+            _panelJefe.SetActive(false);
+        }
+
+        /// <summary>Muestra la barra de vida del jefe durante su combate.</summary>
+        public void MostrarJefe(string nombre, Health vida)
+        {
+            Construir();
+            _nombreJefe.text = (nombre ?? string.Empty).ToUpperInvariant();
+            _panelJefe.SetActive(true);
+            _barraJefe.Vincular(vida);
+        }
+
+        public void OcultarJefe()
+        {
+            if (!_construido)
+            {
+                return;
+            }
+
+            _barraJefe.Vincular(null);
+            _panelJefe.SetActive(false);
         }
 
         /// <summary>Engancha la barra de vida al jugador (null la deja vacía).</summary>

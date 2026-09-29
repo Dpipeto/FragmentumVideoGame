@@ -154,6 +154,34 @@ namespace Fragmentum.Core
                 Datos.nivelMaximoAlcanzado = Mathf.Max(Datos.nivelMaximoAlcanzado, siguiente.id);
             }
 
+            Recompensar(nivel);
+            Datos.checkpoint = new DatosCheckpoint();
+            Guardar();
+            OnNivelCompletado?.Invoke(nivel);
+            OnProgresoCambiado?.Invoke();
+        }
+
+        /// <summary>
+        /// Otorga ya el fragmento y la habilidad del nivel, y guarda. La llama la derrota del jefe
+        /// (tarea C: «al derrotar a un jefe se otorga el fragmento y se desbloquea la habilidad»),
+        /// así que el jugador puede usar la habilidad nueva antes de salir del nivel. Completar el
+        /// nivel después no repite nada.
+        /// </summary>
+        public void OtorgarRecompensa(LevelData nivel)
+        {
+            if (nivel == null)
+            {
+                return;
+            }
+
+            Recompensar(nivel);
+            Guardar();
+            OnProgresoCambiado?.Invoke();
+        }
+
+        // Fragmento y habilidad sin duplicar; la habilidad se desbloquea también en el jugador vivo.
+        private void Recompensar(LevelData nivel)
+        {
             if (nivel.fragmento != null && DatosGuardado.Anadir(Datos.fragmentos, nivel.fragmento.id.ToString()))
             {
                 OnFragmentoObtenido?.Invoke(nivel.fragmento);
@@ -166,11 +194,6 @@ namespace Fragmentum.Core
             {
                 _jugadorEnganchado.Habilidades.Desbloquear(habilidad.id);
             }
-
-            Datos.checkpoint = new DatosCheckpoint();
-            Guardar();
-            OnNivelCompletado?.Invoke(nivel);
-            OnProgresoCambiado?.Invoke();
         }
 
         /// <summary>Guarda el checkpoint activado. Lo llama el CheckpointManager.</summary>

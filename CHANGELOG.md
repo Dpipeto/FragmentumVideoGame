@@ -9,6 +9,165 @@
 
 ---
 
+## Fase 7 — Jefes (2026-09-29)
+
+Rama `fase-7-jefes`, que sale de `fase-6-flujo-nivel`. Cubre la tarea C: jefes con FSM por
+fases, la Centinela Ardiente completa como referencia, los otros cuatro como esqueletos
+documentados y el evento que otorga el fragmento y la habilidad al derrotar al jefe.
+
+### 1. El jefe era un enemigo con otro sprite
+
+- **Problema.** El `BossController` de la v1 era una copia del enemigo:
+  - 3 puntos de vida y ninguna fase;
+  - un único ataque, que además solo lanzaba si el jugador estaba a su izquierda;
+  - el retroceso de cada golpe lo empujaba como a cualquier enemigo.
+- **Causa.** No había ningún modelo de jefe: ni fases, ni patrones, ni datos.
+- **Solución.** **`BossController`** abstracto con una FSM por fases sobre el mismo núcleo que el
+  jugador y los enemigos:
+  - **Estados:** PHASE_1, PHASE_2 y PHASE_3, que avanzan según la vida que le queda, y
+    VULNERABLE. Los cuatro forman el superestado COMBATE, del que se sale a DEFEATED.
+  - **Patrón Template Method:** la base lleva el flujo, y cada jefe redefine solo sus pasos
+    (`CondicionDerrota`, `AlActivarse`, `AlCambiarDeFase`, `AlSerDerrotado` y `AlReiniciarse`).
+  - **Patrón Strategy:** lo que hace cada fase es un dato, la lista de `PatronAtaque` de su
+    `FaseJefe` en el `JefeData`. Cambiar una fase es cambiar un asset, no el código.
+  - El diagrama `Docs/FSM/Jefe.md` se genera desde la tabla.
+  - Lo verifican `TablaJefeTests`, `DatosJefesTests` y
+    `AlBajarDeLaMitadDeVida_PasaALaFase2_UnaSolaVez`.
+
+### 2. Un golpe podía dejar al jefe congelado
+
+- **Problema.** En la v1, si el evento de animación `DesactiveDamage` no llegaba, el jefe se
+  quedaba para siempre inmóvil e inmune.
+- **Causa.** `takingDamage` solo lo apagaba ese evento, y mientras estuviera encendido el jefe ni
+  se movía ni recibía daño.
+- **Solución.** Los jefes **no tienen estado DAMAGED**. Un golpe solo los hace parpadear y no
+  interrumpe el ataque en curso. La única forma de «abrirlos» es la **ventana vulnerable**:
+  - La abre un patrón (el martillo clavado de la Centinela) o el propio jefe (la memoria correcta
+    del Juez Silente).
+  - Dura un tiempo fijo y multiplica el daño recibido (×2).
+  - Con `inmuneFueraDeVulnerable`, el jefe solo recibe daño durante la ventana.
+  - Lo verifican `UnGolpe_NoInterrumpeElAtaqueDelJefe`,
+    `LaVentanaVulnerable_DuplicaElDanio_YVuelveALaFaseQueToca` y `SaludJefeTests`.
+
+### 3. La Centinela Ardiente, implementación de referencia
+
+Sigue el Anexo A. Tiene 24 de vida y dos fases:
+
+- **Fase 1:**
+  - **Martillazo:** se acerca, avisa con un destello y golpea delante. El martillo queda
+    clavado 1,2 s: es la ventana vulnerable.
+  - **Onda de suelo:** una onda baja recorre el piso hacia los dos lados y se esquiva saltando.
+    El Anexo A la describe como un «raycast horizontal». Aquí es una zona que viaja, para que el
+    jugador la vea venir y pueda saltarla.
+- **Fase 2 (50 % de vida):** además, **plataformas en erupción**. Son columnas de lava bajo el
+  jugador y a su alrededor, que se anuncian antes de quemar y obligan a moverse. Al entrar en
+  la fase, la Centinela ruge con un aviso largo.
+- **Muerte:** destello y desvanecido, provisionales hasta que haya arte. Todas sus zonas de daño
+  desaparecen: «el suelo se estabiliza».
+
+Todos los ataques se telegrafían y ninguno sale de la arena. Lo verifican
+`Martillazo_GolpeaAlJugadorDelante_YDejaAlJefeVulnerable`,
+`OndaDeSuelo_RecorreElSuelo_YAlcanzaAlJugador` y
+`PlataformasEnErupcion_BrotanBajoElJugador_ConAvisoPrevio`.
+
+### 4. Derrotar al jefe no daba nada
+
+- **Problema.** En la v1, la muerte del jefe solo lo detenía: no había recompensa ni forma de
+  terminar el nivel.
+- **Causa.** Nada escuchaba la derrota.
+- **Solución.** El jefe emite **`OnJefeDerrotado`** y la **`ArenaJefe`** lo convierte en la
+  recompensa del nivel:
+  - El `LevelManager` otorga **en el acto** el fragmento y la habilidad, y los guarda. El Ataque
+    Cargado se puede usar antes de salir, y el HUD avisa «Fragmento de la Ira integrado».
+  - Tras 2 s, la arena abre sus puertas y aparece la **salida**. Mientras el jefe vive, la salida
+    está oculta: no se puede terminar el nivel esquivando el combate.
+  - Lo verifican `Derrota_EmiteElEvento_ApagaElDanio_YDesvanece` y
+    `DerrotarALaCentinela_OtorgaFragmentoYHabilidad_YAbreLaSalida`.
+
+### 5. La arena del jefe
+
+- **`ArenaJefe`:** cuando el jugador cruza su entrada, cierra la puerta, activa al jefe con los
+  límites de la arena, cambia a la música del jefe (`LevelData.musicaJefe`, si la hay) y muestra
+  su barra de vida en el HUD.
+- **Si el jugador muere en la arena,** al reaparecer el combate vuelve a empezar: el jefe
+  recupera la vida y su sitio, y la puerta se abre. Lo verifica `MorirEnLaArena_ReiniciaElCombate`.
+- ***Preparar la escena de nivel*** crea la arena en la última sección de los niveles con jefe.
+  El Nivel 1 ya la tiene: entrada en x = 61, puerta detrás y la Centinela en x = 71,5.
+
+### 6. Los otros cuatro jefes, como esqueletos documentados
+
+Compilan, tienen datos (vida y fases del Anexo A), prefab y el flujo completo, pero sus fases
+aún no tienen patrones: esperan sin atacar. Cada uno documenta lo que le falta y ya incorpora
+su regla propia:
+
+- **Juez Silente:** inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()`. Es la
+  mecánica de la tesis: enfrentar la culpa es lo que permite avanzar. Lo verifica
+  `ElJuezSilente_EsInmuneHastaLaMemoriaCorrecta`.
+- **El Verdadero Soldado:** no cae al quitarle la vida (se queda con 1 y pasa a la fase 3), sino
+  con la integración (`CompletarIntegracion()`). El combate termina sin violencia. Lo verifica
+  `ElVerdaderoSoldado_NoCaeSinLaIntegracion`.
+- **Espectro del Pavor:** casi invisible durante el combate.
+- **Doncella del Lamento:** solo el flujo base.
+
+### Decisiones que ajustan el plan de la Fase 1
+
+1. **El jefe no tiene estado previo al combate.** La máquina arranca en PHASE_1 cuando la arena
+   lo activa, y `MaquinaEstados.Detener()` (nueva) la para para reiniciar el combate. El plan
+   dibujaba `[*] --> COMBATE : Activar()`, que es lo mismo.
+2. **La recompensa llega al derrotar al jefe y el nivel se completa al salir.** El plan hacía
+   depender la victoria del jefe. Separarlas cumple la tarea C (el evento otorga el fragmento) y
+   conserva la salida de la Fase 6 como único final del nivel.
+3. **La onda de suelo es una zona que viaja,** no un rayo instantáneo, para poder esquivarla.
+4. **`ZonaDeDanio`** (en `Core/Combate`) es la pieza común de los ataques de jefe: puede avisar,
+   moverse y desaparecer sola. Servirá también para trampas y proyectiles (Fases 9 y 10).
+5. `JefeData` añade vida, fases, ventana vulnerable, velocidad, daño por contacto y el aspecto
+   provisional. Se completan también en los assets que ya existían, sin pisar lo editado.
+
+### Además
+
+- **Nuevo menú *Fragmentum → Jefes*:** generar datos, patrones y prefabs, y restablecerlos al
+  Anexo A. *Regenerar todo* lo incluye.
+- **HUD:** barra de vida del jefe con su nombre canónico durante el combate.
+- **`EventosJuego`** añade `JefeEnCombate` y `JefeFueraDeCombate`, para que la UI no conozca a
+  los jefes.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **164 de 164 correctas** (30 nuevas: tabla del jefe, fase según la vida, datos
+  del Anexo A, prefabs, vida de los jefes, `MaquinaEstados.Detener` y la arena del Nivel 1).
+- Pruebas PlayMode: **60 de 60 correctas**:
+  - 11 nuevas de jefes, con física real y los prefabs reales;
+  - 3 nuevas de flujo, sobre la arena del Nivel 1;
+  - la prueba de la salida de la Fase 6 pasa a exigir antes la derrota del jefe.
+
+### Pasos manuales en el Editor
+
+Ninguno obligatorio. Los datos (`Assets/Data/Jefes` y `Assets/Data/Jefes/Patrones`), los prefabs
+(`Assets/Prefabs/Jefes`) y la arena del Nivel 1 ya están generados.
+
+- **Para ajustar a la Centinela:** su vida y sus fases están en
+  `Assets/Data/Jefes/CentinelaArdiente.asset`, y cada ataque en `Assets/Data/Jefes/Patrones`
+  (aviso, daño, alcance, velocidad de la onda, número de erupciones…).
+- **Cuando haya arte del jefe:** va en `Pivote/Sprite` del prefab. Pon `tinte` en blanco en su
+  `JefeData`, y desmarca `spriteMiraDerecha` si el dibujo mira a la izquierda.
+
+### Qué probar a mano (Nivel 1, desde el checkpoint de x = 40)
+
+- Avanza hasta la arena (x ≈ 61): la puerta se cierra detrás y arriba aparece «CENTINELA
+  ARDIENTE» con su barra.
+- Colócate delante: destella en rojo y descarga el martillo. Mientras el martillo está clavado
+  (el jefe brilla en amarillo), cada golpe vale el doble.
+- Onda de suelo: salta para esquivarla.
+- A mitad de vida ruge; desde entonces brotan columnas de lava bajo tus pies, primero
+  translúcidas. Muévete.
+- Muere en la arena: reapareces en la bandera y el jefe tiene otra vez toda la vida.
+- Derrótalo: aparece «Fragmento de la Ira integrado» y ya puedes usar el Ataque Cargado. Unos
+  segundos después se abre la puerta y aparece el portal de salida.
+
+---
+
 ## Fase 6 — Flujo de nivel (2026-09-29)
 
 Rama `fase-6-flujo-nivel`, que sale de `fase-5-progresion`. Cierra la tarea D con el

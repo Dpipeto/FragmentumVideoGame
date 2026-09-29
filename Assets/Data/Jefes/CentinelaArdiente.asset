@@ -16,3 +16,31 @@ MonoBehaviour:
   emocion: {fileID: 11400000, guid: 17175354203dda045bb8bcb704495762, type: 2}
   descripcion: Arquitecto del Alma del mundo de la Ira.
   concepto: {fileID: 0}
+  vidaMaxima: 24
+  invulnerabilidad: 0.15
+  danioContacto: 1
+  velocidad: 2.2
+  fases:
+  - nombre: Martillazo y onda de suelo
+    umbralVida: 1
+    patrones:
+    - {fileID: 11400000, guid: 3130ca1e98550ce4ab1db9f94e3a2524, type: 2}
+    - {fileID: 11400000, guid: 6c7563efd3fd41b429758b1214103699, type: 2}
+    pausaEntrePatrones: 0.9
+    aleatorio: 0
+  - nombre: "Plataformas en erupci\xF3n (50 %)"
+    umbralVida: 0.5
+    patrones:
+    - {fileID: 11400000, guid: 3130ca1e98550ce4ab1db9f94e3a2524, type: 2}
+    - {fileID: 11400000, guid: 64d4534f1a9808442b302297d23ab088, type: 2}
+    - {fileID: 11400000, guid: 6c7563efd3fd41b429758b1214103699, type: 2}
+    - {fileID: 11400000, guid: 64d4534f1a9808442b302297d23ab088, type: 2}
+    pausaEntrePatrones: 0.6
+    aleatorio: 0
+  duracionVulnerable: 1.2
+  multiplicadorVulnerable: 2
+  inmuneFueraDeVulnerable: 0
+  duracionDerrota: 2
+  tinte: {r: 0.8, g: 0.26666668, b: 0, a: 1}
+  tamano: {x: 2.2, y: 3.4}
+  spriteMiraDerecha: 1

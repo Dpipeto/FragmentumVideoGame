@@ -1,4 +1,5 @@
 using Fragmentum.Core;
+using Fragmentum.Core.Combate;
 using Fragmentum.Core.Juego;
 using Fragmentum.Data;
 using Fragmentum.Player;
@@ -79,10 +80,13 @@ namespace Fragmentum.UI
             if (_gestor != null)
             {
                 _gestor.OnJugadorRegistrado += AlRegistrarJugador;
+                _gestor.OnFragmentoObtenido += AlObtenerFragmento;
                 AlRegistrarJugador(_gestor.Jugador);
             }
 
             EventosJuego.CheckpointActivado += AlActivarCheckpoint;
+            EventosJuego.JefeEnCombate += AlEmpezarCombateJefe;
+            EventosJuego.JefeFueraDeCombate += AlTerminarCombateJefe;
             AjustarSistemaEventos();
             Mostrar(_juego != null ? _juego.EstadoActual : ESTADOS_JUEGO.BOOT);
         }
@@ -95,6 +99,8 @@ namespace Fragmentum.UI
         {
             SceneManager.sceneLoaded -= AlCargarEscena;
             EventosJuego.CheckpointActivado -= AlActivarCheckpoint;
+            EventosJuego.JefeEnCombate -= AlEmpezarCombateJefe;
+            EventosJuego.JefeFueraDeCombate -= AlTerminarCombateJefe;
             if (_juego != null)
             {
                 _juego.OnStateChanged -= AlCambiarEstado;
@@ -103,6 +109,7 @@ namespace Fragmentum.UI
             if (_gestor != null)
             {
                 _gestor.OnJugadorRegistrado -= AlRegistrarJugador;
+                _gestor.OnFragmentoObtenido -= AlObtenerFragmento;
             }
 
             if (_accionPropia)
@@ -200,6 +207,19 @@ namespace Fragmentum.UI
 
         private void AlActivarCheckpoint(string id) => _hud.Avisar("Punto de control");
 
+        private void AlEmpezarCombateJefe(string nombre, Health vida) => _hud.MostrarJefe(nombre, vida);
+
+        private void AlTerminarCombateJefe() => _hud.OcultarJefe();
+
+        // Al derrotar al jefe el fragmento llega en el acto: se anuncia antes de salir del nivel.
+        private void AlObtenerFragmento(FragmentoData fragmento)
+        {
+            if (fragmento != null)
+            {
+                _hud.Avisar($"{fragmento.nombre} integrado");
+            }
+        }
+
         // --- Pausa ---
 
         private void PrepararPausa()
@@ -234,7 +254,11 @@ namespace Fragmentum.UI
             _sistemaEventos.AddComponent<InputSystemUIInputModule>();
         }
 
-        private void AlCargarEscena(Scene escena, LoadSceneMode modo) => AjustarSistemaEventos();
+        private void AlCargarEscena(Scene escena, LoadSceneMode modo)
+        {
+            _hud.OcultarJefe();
+            AjustarSistemaEventos();
+        }
 
         // El propio solo se usa si la escena no trae uno: dos EventSystem a la vez dan avisos.
         private void AjustarSistemaEventos()

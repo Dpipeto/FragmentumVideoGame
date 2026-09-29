@@ -155,11 +155,48 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator CruzarLaSalida_CompletaElNivel_YContinuarLlevaAlSelector()
+        public IEnumerator EntrarEnLaArena_CierraLaPuerta_YActivaALaCentinela()
         {
             yield return EntrarEnNivel1();
+            var arena = Object.FindAnyObjectByType<ArenaJefe>();
             var salida = Object.FindAnyObjectByType<SalidaNivel>();
-            Assert.IsNotNull(salida, "El Nivel 1 tiene salida.");
+            Assert.IsFalse(salida.Abierta, "Con el jefe vivo, la salida está cerrada: no se puede esquivar el combate.");
+            Assert.IsFalse(arena.PuertasCerradas);
+
+            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+
+            Assert.IsTrue(arena.EnCombate);
+            Assert.IsTrue(arena.Jefe.EnCombate);
+            Assert.IsTrue(arena.PuertasCerradas, "La puerta se cierra detrás del jugador.");
+            Assert.IsTrue(Interfaz.Hud.JefeVisible, "El HUD muestra la vida del jefe.");
+            StringAssert.Contains("CENTINELA ARDIENTE", Interfaz.Hud.NombreJefe);
+        }
+
+        [UnityTest]
+        public IEnumerator DerrotarALaCentinela_OtorgaFragmentoYHabilidad_YAbreLaSalida()
+        {
+            yield return EntrarEnNivel1();
+            var arena = Object.FindAnyObjectByType<ArenaJefe>();
+            var salida = Object.FindAnyObjectByType<SalidaNivel>();
+            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            Assert.IsFalse(Jugador.Habilidades.Tiene(HABILIDADES.ATAQUE_CARGADO));
+
+            arena.Jefe.Vida.Matar();
+            yield return null;
+            yield return null;
+
+            // Tarea C: al derrotar al jefe se otorgan el fragmento y la habilidad, en el acto.
+            Assert.IsTrue(arena.JefeDerrotado);
+            CollectionAssert.Contains(Gestor.Datos.fragmentos, "IRA");
+            Assert.IsTrue(Jugador.Habilidades.Tiene(HABILIDADES.ATAQUE_CARGADO), "El Ataque Cargado se puede usar ya, antes de salir.");
+            CollectionAssert.Contains(new SaveSystem(CarpetaGuardado).Cargar().fragmentos, "IRA", "Y queda guardado.");
+            Assert.AreEqual("Fragmento de la Ira integrado", Interfaz.Hud.AvisoActual);
+            Assert.IsFalse(Interfaz.Hud.JefeVisible);
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual, "Derrotar al jefe no termina el nivel: hay que salir.");
+
+            yield return EsperarHastaReal(() => arena.Superada, 4f, "que se abra la arena");
+            Assert.IsFalse(arena.PuertasCerradas);
+            Assert.IsTrue(salida.Abierta, "Tras la derrota aparece la salida.");
 
             yield return LlevarJugadorA(new Vector2(salida.transform.position.x, 0.05f));
 
@@ -175,6 +212,50 @@ namespace Fragmentum.Tests.PlayMode
             Interfaz.PantallaFinNivel.Opciones[0].onClick.Invoke(); // Continuar
             yield return EsperarEstado(ESTADOS_JUEGO.LEVEL_SELECT, 6f);
             Assert.IsFalse(Interfaz.Hud.gameObject.activeSelf, "Fuera de los niveles no hay HUD.");
+        }
+
+        [UnityTest]
+        public IEnumerator MorirEnLaArena_ReiniciaElCombate()
+        {
+            yield return EntrarEnNivel1();
+            var arena = Object.FindAnyObjectByType<ArenaJefe>();
+            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            arena.Jefe.Vida.RecibirGolpe(new Fragmentum.Core.Combate.Golpe(10, arena.Jefe.Centro));
+
+            Jugador.Vida.Matar();
+            yield return EsperarEstado(ESTADOS_JUEGO.GAME_OVER, 3f);
+            Interfaz.PantallaGameOver.Opciones[0].onClick.Invoke(); // Reintentar
+
+            Assert.IsFalse(arena.EnCombate);
+            Assert.IsFalse(arena.Jefe.EnCombate, "El jefe espera otra vez a que entre el jugador.");
+            Assert.AreEqual(arena.Jefe.Vida.VidaMaxima, arena.Jefe.Vida.Vida, "Y recupera toda la vida.");
+            Assert.IsFalse(arena.PuertasCerradas);
+            Assert.IsFalse(Interfaz.Hud.JefeVisible);
+            Assert.Less(Jugador.transform.position.x, arena.Limites.x, "El jugador reaparece fuera de la arena.");
+
+            // Unos pasos de física fuera de la entrada: sin ellos, Box2D no registra la salida del
+            // trigger y no volvería a avisar de la entrada (un jugador real vuelve caminando).
+            for (var i = 0; i < 3; i++)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+
+            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            Assert.IsTrue(arena.EnCombate, "Se puede volver a entrar.");
+        }
+
+        private static IEnumerator EsperarHastaReal(System.Func<bool> condicion, float maximo, string descripcion)
+        {
+            var limite = Time.unscaledTime + maximo;
+            while (!condicion())
+            {
+                if (Time.unscaledTime > limite)
+                {
+                    Assert.Fail($"Tiempo agotado ({maximo:0.0} s) esperando {descripcion}.");
+                }
+
+                yield return null;
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Fragmentum.Bosses;
 using Fragmentum.Core;
 using Fragmentum.Data;
 using Fragmentum.Levels.Escenario;
@@ -22,8 +23,9 @@ namespace Fragmentum.Levels
     ///   (<see cref="EventosJuego.ReintentoSolicitado"/>) y el jugador vuelve al checkpoint
     ///   activo. Fuera de los niveles del juego (escenas de prueba) no hay Game Over: el jugador
     ///   reaparece solo tras una espera. Sustituye a la <c>ReaparicionSimple</c> provisional.
-    /// - <b>Victoria:</b> <see cref="Completar"/> (la llama la <see cref="SalidaNivel"/>, y en la
-    ///   Fase 7 la arena del jefe). La FSM global otorga el fragmento y muestra el fin de nivel.
+    /// - <b>Victoria:</b> <see cref="Completar"/>, que llama la <see cref="SalidaNivel"/>. La FSM
+    ///   global muestra el fin de nivel. En los niveles con jefe, la salida solo se abre al
+    ///   derrotarlo, y el fragmento y la habilidad llegan en ese momento (<see cref="JefeDerrotado"/>).
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CheckpointManager))]
@@ -71,6 +73,9 @@ namespace Fragmentum.Levels
 
         /// <summary>Se declaró la victoria del nivel.</summary>
         public event Action OnNivelCompletado;
+
+        /// <summary>El jefe del nivel fue derrotado (ya se otorgó su fragmento y su habilidad).</summary>
+        public event Action<BossController> OnJefeDerrotado;
 
         public LevelData Nivel => nivel;
 
@@ -165,6 +170,50 @@ namespace Fragmentum.Levels
             _completado = true;
             OnNivelCompletado?.Invoke();
             return true;
+        }
+
+        /// <summary>
+        /// El jefe cayó: otorga ya el fragmento y la habilidad del nivel (tarea C). La victoria
+        /// llega después, al cruzar la salida que la arena abre.
+        /// </summary>
+        public void JefeDerrotado(BossController jefe)
+        {
+            var nivelActual = nivel != null ? nivel : GameManager.Instancia != null ? GameManager.Instancia.NivelActual : null;
+            if (GameManager.Instancia != null)
+            {
+                GameManager.Instancia.OtorgarRecompensa(nivelActual);
+            }
+
+            OnJefeDerrotado?.Invoke(jefe);
+        }
+
+        /// <summary>Cambia entre la música del nivel y la del jefe (<c>LevelData.musicaJefe</c>), si existen.</summary>
+        public void MusicaDeJefe(bool enCombate)
+        {
+            if (nivel == null)
+            {
+                return;
+            }
+
+            var clip = enCombate && nivel.musicaJefe != null ? nivel.musicaJefe : nivel.musica;
+            if (clip == null)
+            {
+                return;
+            }
+
+            if (fuenteMusica == null)
+            {
+                fuenteMusica = gameObject.AddComponent<AudioSource>();
+                fuenteMusica.loop = true;
+                fuenteMusica.playOnAwake = false;
+                fuenteMusica.volume = volumenMusica;
+            }
+
+            if (fuenteMusica.clip != clip)
+            {
+                fuenteMusica.clip = clip;
+                fuenteMusica.Play();
+            }
         }
 
         // --- Preparación ---

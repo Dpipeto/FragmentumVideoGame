@@ -140,5 +140,27 @@ namespace Fragmentum.Tests
                 "PermitirDesdeGrupo debe habilitar la transición desde todos los estados del grupo.");
         }
 
+        [Test]
+        public void Detener_EjecutaLaSalida_YPermiteVolverAIniciar()
+        {
+            // Lo usa un jefe cuando el combate vuelve a empezar tras la muerte del jugador.
+            _maquina.TransitionTo(ESTADOS_PRUEBA.RUN);
+            _registro.Clear();
+            var cambios = 0;
+            _maquina.OnStateChanged += (_, __) => cambios++;
+
+            _maquina.Detener();
+
+            Assert.IsFalse(_maquina.Iniciada);
+            CollectionAssert.AreEqual(new[] { "RUN.OnExit" }, _registro);
+            Assert.AreEqual(0, cambios, "Detener no es una transición.");
+
+            _maquina.Actualizar();
+            Assert.AreEqual(1, _registro.Count, "Parada, la máquina no ejecuta estados.");
+
+            _maquina.Iniciar(ESTADOS_PRUEBA.IDLE);
+            Assert.IsTrue(_maquina.Iniciada);
+            Assert.AreEqual(ESTADOS_PRUEBA.IDLE, _maquina.EstadoActual);
+        }
     }
 }

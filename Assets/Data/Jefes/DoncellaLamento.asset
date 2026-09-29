@@ -16,3 +16,25 @@ MonoBehaviour:
   emocion: {fileID: 11400000, guid: 27591dd8993db0d4b9467e5071fdbcab, type: 2}
   descripcion: Arquitecto del Alma del mundo de la Tristeza.
   concepto: {fileID: 0}
+  vidaMaxima: 26
+  invulnerabilidad: 0.15
+  danioContacto: 1
+  velocidad: 2
+  fases:
+  - nombre: "Olas e inundaci\xF3n"
+    umbralVida: 1
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  - nombre: Congelamiento (50 %)
+    umbralVida: 0.5
+    patrones: []
+    pausaEntrePatrones: 1
+    aleatorio: 0
+  duracionVulnerable: 1.2
+  multiplicadorVulnerable: 2
+  inmuneFueraDeVulnerable: 0
+  duracionDerrota: 2
+  tinte: {r: 0.2901961, g: 0.49803922, b: 0.64705884, a: 1}
+  tamano: {x: 2, y: 3.2}
+  spriteMiraDerecha: 1

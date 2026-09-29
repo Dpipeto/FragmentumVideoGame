@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.6 — Fase 6, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.7 — Fase 7, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,11 +14,18 @@ Ordenado por urgencia.
 | N3 | **Recorta las poses de Kael** de `Referencias/Arte/posiblesanimaciiones kael.jpeg`. | El jugador ya tiene todos sus estados; hoy se ve como una cápsula clara. | Un PNG por pose con fondo transparente, a 32 px por unidad (el cuerpo mide 0,8 × 1,8 u, es decir, unos 26 × 58 px). Detalle en el apartado B3. |
 | N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
 | N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion` y `fase-6-flujo-nivel` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel` y `fase-7-jefes` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
 | N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
 | N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael: PNG con fondo transparente, a 32 px por unidad, pivote en los pies. Detalle en el apartado B4. |
-| N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`.** | Menú, selector, guardado, checkpoints, pausa, Game Over y fin de nivel ya funcionan juntos (Fases 5 y 6). | Sigue las listas «Qué probar a mano» de las Fases 5 y 6 en `CHANGELOG.md`. Dime qué pantalla no se entiende o qué se siente mal. |
+| N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`**, jefe incluido. | Menú, selector, guardado, checkpoints, pausa, Game Over, la Centinela Ardiente y el fin de nivel ya funcionan juntos (Fases 5 a 7). | Sigue las listas «Qué probar a mano» de las Fases 5, 6 y 7 en `CHANGELOG.md`. Dime qué pantalla no se entiende, qué se siente mal o si la Centinela es demasiado fácil o difícil (sus valores están en `Assets/Data/Jefes`). |
 | N10 | **Pinta el layout del Nivel 1** (~80 u, Anexo A) cuando quieras. | Hoy se juega sobre un recorrido provisional de bloques. | Pasos en «Pasos manuales en el Editor» de la Fase 6: preparar el tilemap como suelo, borrar «Provisional» y ajustar la altura de la bandera y la salida. No bloquea: la Fase 9 lo necesita, la 7 y la 8 no. |
+
+## Revisión 0.7: qué cambió respecto de la v0.6
+
+- **Hay jefes** (Fase 7). La Centinela Ardiente está completa y espera en la arena del Nivel 1 (x ≈ 61). Los otros cuatro son esqueletos con datos y prefab (B5).
+- **La salida del Nivel 1 aparece al derrotar a la Centinela.** El fragmento y el Ataque Cargado se obtienen en ese mismo momento.
+- **Nuevo apartado B5** para la v2, con dónde va el arte de cada jefe. B8 anota que la música del jefe ya tiene dónde asignarse.
+- **N9** incluye ahora el combate contra el jefe.
 
 ## Revisión 0.6: qué cambió respecto de la v0.5
 
@@ -225,15 +232,26 @@ mundo.
 **Audio de enemigos (todo falta, P2):** pasos, aviso de ataque, golpe, dolor y muerte, por tipo. El
 evento `OnStateChanged` de cada enemigo ya permite dispararlos sin tocar la IA.
 
-### B5. Jefes — `BossController` *(propuesto: base abstracta)*
+### B5. Jefes — `BossController` (Fase 7)
 
-| Jefe | Hay hoy | Falta | Prioridad |
+**Estado en la v2.** La lógica de los cinco jefes existe: FSM por fases, ventana vulnerable,
+derrota que otorga el fragmento y arena. Cada uno tiene datos en `Assets/Data/Jefes` y prefab en
+`Assets/Prefabs/Jefes`. **Visualmente** son cápsulas grandes tintadas, y sus ataques son
+rectángulos de color: avisan translúcidos y queman casi opacos.
+
+- **Dónde va el arte:** en `Pivote/Sprite` del prefab de cada jefe, con un Animator. Después
+  pon `tinte` en blanco en su `JefeData` y, si el dibujo mira a la izquierda, desmarca
+  `spriteMiraDerecha`.
+- **Cuando haya VFX:** cada patrón (`Assets/Data/Jefes/Patrones`) tiene su color provisional. Los
+  efectos se engancharán a `ZonaDeDanio`, que es la pieza que crean todos los ataques.
+
+| Jefe | Estado | Falta | Prioridad |
 |---|---|---|---|
-| **Centinela Ardiente** (Ira) | `Characters/Bosses/Boss1/jefe1.1.png` y clips `Idle`, `Walk`, `Attack` (~50 frames cada uno), `Animaciones/Jefe1.controller` | Daño, muerte/explosión, martillazo, VFX de onda de suelo, VFX de plataformas en erupción, animación de transición de fase | P1 |
-| **Doncella del Lamento** (Tristeza) | Solo concepto estático `Jefe2 (2).png` (300×300), inactivo en `Level1` | Todas las animaciones, proyectil de ola, VFX de inundación y congelamiento | P2 |
-| **Espectro del Pavor** (Miedo) | Solo concepto estático `Jefe3 (2).png` (256×300), inactivo en `Level1` | Todas las animaciones, destello de aviso, partícula que distingue al real de sus clones | P2 |
-| **Juez Silente** (Culpa) | ✗ | Todo | P2 |
-| **El Verdadero Soldado** (Final) | ✗ (el concepto **no está** en el proyecto) | Todo, incluidas variantes espejo de los ataques de Kael | P2 |
+| **Centinela Ardiente** (Ira) | ✔ Completo: martillazo, onda de suelo y erupciones; arena en el Nivel 1 | Sprites y animaciones: en la v1 existen `Characters/Bosses/Boss1/jefe1.1.png` y los clips `Idle`, `Walk` y `Attack`, que hay que reimportar a 32 PPU. Faltan martillazo, daño, rugido de fase 2 y muerte/explosión, y los VFX de la onda y de las erupciones. | P1 |
+| **Doncella del Lamento** (Tristeza) | Esqueleto: datos, prefab y dos fases sin patrones | Patrones de olas, inundación y congelamiento (Fase 10); todas las animaciones. Concepto: `Jefe2 (2).png` en la v1. | P2 |
+| **Espectro del Pavor** (Miedo) | Esqueleto: casi invisible en combate | Patrón de ataque con destello y clones (Fase 10); animaciones; la partícula que distingue al real. Concepto: `Jefe3 (2).png` en la v1. | P2 |
+| **Juez Silente** (Culpa) | Esqueleto: inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()` | Proyectar las memorias y conectarlas (`MemoryObject`, Fase 10); todo el arte. | P2 |
+| **El Verdadero Soldado** (Final) | Esqueleto: tres fases; no cae sin `CompletarIntegracion()` | Combate espejo, secciones de cada mundo y el plataformeo final (Fase 10); todo el arte (el concepto **no está** en el proyecto). | P2 |
 
 ### B6. Escenas — `LevelDatabase` / Build Settings
 
@@ -279,7 +297,7 @@ ningún clip importado en la v2.
 | Música del Nivel 1 | En la v1: `Music/level1.mp3`. Para usarla, impórtala y arrástrala al campo `musica` de `Assets/Data/Niveles/L1_Ira`. **Verificar** si cumple el Anexo A (industrial, ~160 BPM). | P1 |
 | Música de los niveles 2, 3, 4 y 5 | ✗ | P2 |
 | Música del final en 3 fases | ✗ | P2 |
-| Temas de jefe (Centinela, Doncella, Espectro, Juez) | ✗ | Centinela P1, resto P2 |
+| Temas de jefe (Centinela, Doncella, Espectro, Juez) | ✗. La arena ya cambia a `LevelData.musicaJefe` al empezar el combate y vuelve a `musica` al terminar: basta con asignar el clip. | Centinela P1, resto P2 |
 | Stinger de antorcha (Miedo) | ✗ | P2 |
 | Música del selector de niveles | ✗ (la escena no tiene `AudioSource`) | P3 |
 | **Todos los SFX**: salto, doble salto, dash, ataque, ataque cargado, daño, muerte, moneda, poción, caja, checkpoint, clics de UI, golpes a enemigos, muerte de enemigo | ✗ **No existe ni un solo efecto de sonido** | P1 (silencio como placeholder) |
@@ -339,6 +357,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.7 (2026-09-29)** — Fase 7 (jefes). Apartado B5 reescrito para la v2, N9 con el jefe, nota de la música del jefe en B8.
 - **0.6 (2026-09-29)** — Fase 6 (flujo de nivel). Nuevo N10 (pintar el Nivel 1), N9 ampliado, y B6, B8, B9 y B10 al día con el checkpoint, la salida, la música por `LevelData` y la UI de la maqueta.
 - **0.5 (2026-09-29)** — Fase 5 (progresión). N2 resuelta, nuevo N9, apartado B6 reescrito para la v2 y nota sobre TextMeshPro en B9.
 - **0.4 (2026-09-28)** — Fase 4 (enemigos). Apartado B4 reescrito para la v2; nuevos N7 (probar `PruebaEnemigos`) y N8 (arte de enemigos).

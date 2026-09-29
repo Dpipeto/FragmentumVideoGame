@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Fragmentum.Bosses;
 using Fragmentum.Core;
 using Fragmentum.Data;
 using Fragmentum.EditorTools;
@@ -101,6 +102,26 @@ namespace Fragmentum.Tests
         }
 
         internal static List<T> TodosEn<T>(Scene escena) where T : Component => Todos<T>(escena);
+
+        [Test]
+        public void ElNivel1_TieneLaArenaConLaCentinelaArdiente()
+        {
+            var arenas = Todos<ArenaJefe>(_nivel1);
+            Assert.AreEqual(1, arenas.Count);
+            var arena = arenas[0];
+
+            Assert.IsInstanceOf<CentinelaArdiente>(arena.Jefe, "El jefe de la Ira es la Centinela Ardiente.");
+            Assert.AreEqual(new Vector2(60f, 85f), arena.Limites, "La arena ocupa la última sección (55-80 u).");
+            Assert.That(arena.Jefe.transform.position.x, Is.InRange(arena.Limites.x, arena.Limites.y));
+            Assert.IsTrue(arena.GetComponent<Collider2D>().isTrigger, "La entrada es un trigger.");
+
+            var puertas = new SerializedObject(arena).FindProperty("puertas");
+            Assert.AreEqual(1, puertas.arraySize);
+            var puerta = puertas.GetArrayElementAtIndex(0).objectReferenceValue as GameObject;
+            Assert.IsNotNull(puerta);
+            Assert.IsFalse(puerta.activeSelf, "La puerta está abierta hasta que empieza el combate.");
+            Assert.Less(puerta.transform.position.x, arena.transform.position.x, "La puerta queda detrás del jugador al entrar.");
+        }
 
         [Test]
         public void PrepararOtraVez_NoCambiaNada()
