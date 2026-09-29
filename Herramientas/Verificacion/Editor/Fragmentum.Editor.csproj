@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Comun.props" />
+  <PropertyGroup>
+    <AssemblyName>Fragmentum.Editor</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Proyecto)\Assets\Scripts\Editor\**\*.cs" />
+    <ProjectReference Include="..\Runtime\Fragmentum.Runtime.csproj" />
+  </ItemGroup>
+</Project>

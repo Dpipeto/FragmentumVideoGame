@@ -33,7 +33,17 @@ con Gemini, y dejar `Tesis` congelado como **v1** de referencia para la comparac
 | Verificación (§8.5) | Además de las pruebas EditMode, hay **pruebas PlayMode** que comprueban con física real los criterios de aceptación del jugador. Se amplían en cada fase jugable. |
 | Input | Nueva acción `Ability` (Q o RB) para la invisibilidad; Ctrl izquierdo también agacha. |
 
-Estado de las fases: **2 hecha** · **3 hecha** (pendiente de tu prueba en el Editor, ver `PENDIENTES.md` N1) · 4 en adelante por hacer.
+### Ajustes tras la Fase 4 (2026-09-28)
+
+| Qué cambia | Detalle |
+|---|---|
+| FSM del enemigo (§3.4) | La elección inicial «¿hay waypoints?» se resuelve arrancando en IDLE sin espera: con ruta, IDLE → PATROL ocurre en el primer frame. El diagrama real está en `Docs/FSM/Enemigo.md`. |
+| Colisiones | El cuerpo del jugador no choca con el de los enemigos, ni los enemigos entre sí (Player × Enemy y Enemy × Enemy en la matriz). El daño por contacto va por una hitbox `Contacto`. |
+| Enemigos | Se añade `evitarBordes`: no avanzan hacia un borde ni contra una pared. |
+| Datos | `EnemyData` añade `danioContacto`, `alturaAtaque`, `factorHisteresis`, ventana de golpe y `tinte` provisional. |
+| Verificación (§8.5) | El proyecto de verificación vive ahora en el repositorio: `Herramientas/verificar.ps1` compila sin abrir Unity y, con `-Unity`, regenera todo y ejecuta las pruebas EditMode y PlayMode. |
+
+Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** (las dos últimas pendientes de tu prueba en el Editor, ver `PENDIENTES.md` N1 y N7) · 5 en adelante por hacer.
 
 ---
 

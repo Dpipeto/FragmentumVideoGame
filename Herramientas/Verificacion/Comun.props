@@ -1,0 +1,26 @@
+<Project>
+  <!--
+    Proyecto de verificación: compila los scripts del juego contra las DLL de Unity sin abrir el
+    editor. No forma parte del juego (vive fuera de Assets, Unity no lo importa).
+    UnityData se puede cambiar al invocar: dotnet build -p:UnityData="...\Editor\Data"
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>$(NoWarn);CS1591;CS0649;MSB3277</NoWarn>
+    <DefineConstants>UNITY_6000_6;UNITY_6000;UNITY_6000_0_OR_NEWER;UNITY_6000_1_OR_NEWER;UNITY_6000_2_OR_NEWER;UNITY_6000_3_OR_NEWER;UNITY_6000_4_OR_NEWER;UNITY_6000_5_OR_NEWER;UNITY_6000_6_OR_NEWER;UNITY_64;UNITY_EDITOR;ENABLE_INPUT_SYSTEM;UNITY_INCLUDE_TESTS</DefineConstants>
+    <UnityData Condition="'$(UnityData)' == ''">C:\Program Files\Unity\Hub\Editor\6000.6.3f1\Editor\Data</UnityData>
+    <Proyecto>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..'))</Proyecto>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- En el Editor, Unity compila todos los ensamblados contra UnityEngine y UnityEditor. -->
+    <Reference Include="$(UnityData)\Managed\UnityEngine\UnityEngine*.dll" Private="false" />
+    <Reference Include="$(UnityData)\Managed\UnityEngine\UnityEditor*.dll" Private="false" />
+    <Reference Include="$(Proyecto)\Library\ScriptAssemblies\Unity.InputSystem.dll" Private="false" />
+    <Reference Include="$(Proyecto)\Library\ScriptAssemblies\UnityEngine.UI.dll" Private="false" />
+  </ItemGroup>
+</Project>

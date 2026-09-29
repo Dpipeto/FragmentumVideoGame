@@ -63,13 +63,19 @@ namespace Fragmentum.Core.Combate
 
         /// <summary>
         /// Deja la vida al máximo y quita la invulnerabilidad. Se llama sola en Awake, y a mano
-        /// cuando la vida viene de un dato (por ejemplo, <c>EnemyData.vidaMaxima</c>).
+        /// cuando la vida viene de un dato (por ejemplo, <c>EnemyData.vidaMaxima</c>). Con
+        /// <paramref name="invulnerabilidad"/> ≥ 0 también fija los i-frames tras cada golpe.
         /// </summary>
-        public void Inicializar(int vidaMaximaNueva = -1)
+        public void Inicializar(int vidaMaximaNueva = -1, float invulnerabilidad = -1f)
         {
             if (vidaMaximaNueva > 0)
             {
                 vidaMaxima = vidaMaximaNueva;
+            }
+
+            if (invulnerabilidad >= 0f)
+            {
+                invulnerabilidadTrasGolpe = invulnerabilidad;
             }
 
             vidaMaxima = Mathf.Max(1, vidaMaxima);

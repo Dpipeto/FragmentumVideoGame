@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.3 — Fase 3, 2026-09-28.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.4 — Fase 4, 2026-09-28.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -15,7 +15,15 @@ Ordenado por urgencia.
 | N3 | **Recorta las poses de Kael** de `Referencias/Arte/posiblesanimaciiones kael.jpeg`. | El jugador ya tiene todos sus estados; hoy se ve como una cápsula clara. | Un PNG por pose con fondo transparente, a 32 px por unidad (el cuerpo mide 0,8 × 1,8 u, es decir, unos 26 × 58 px). Detalle en el apartado B3. |
 | N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
 | N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos` y `fase-3-jugador`. | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, dime «fusiona» y lo hago. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador` y `fase-4-enemigos` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1 y N7, dime «fusiona» y lo hago. |
+| N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
+| N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael: PNG con fondo transparente, a 32 px por unidad, pivote en los pies. Detalle en el apartado B4. |
+
+## Revisión 0.4: qué cambió respecto de la v0.3
+
+- **Los enemigos ya existen** (Fase 4): prefab base `Assets/Prefabs/Enemigos/Enemigo.prefab`, 5 variantes, datos en `Assets/Data/Enemigos` y escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`. Los huecos de arte de los enemigos quedan concretados en el apartado B4.
+- **Matriz de colisión:** el cuerpo del jugador ya no choca con el de los enemigos, ni los enemigos entre sí. El daño llega por la hitbox de contacto.
+- **Nuevo menú** *Fragmentum → Regenerar todo*: reconstruye los prefabs, las escenas de prueba y los diagramas.
 
 ## Revisión 0.3: qué cambió respecto de la v0.2
 
@@ -168,18 +176,36 @@ dash, espada, carga completa, ataque cargado, golpe recibido, escudo absorbe y m
 ya existen (`OnStateChanged`, `OnGolpeRecibido`, `OnEscudoAbsorbio`, `OnCargaCompleta`,
 `OnInvisibilidadCambiada`); el `AudioManager` los escuchará.
 
-### B4. Enemigos por mundo — `EnemyData` *(propuesto)*
+### B4. Enemigos por mundo — `EnemyData` + prefabs (Fase 4)
 
-| Mundo | Enemigo del Anexo A | Arte disponible hoy | Prioridad |
-|---|---|---|---|
-| Ira | Soldado de lava ×7 | **Candidato:** `Characters/FireWorm` (attack, death, get hit, idle, move, walk). Sin controller propio. | P1 |
-| Ira | Torreta de fuego fija | **Candidato:** `Pixel Adventure 1/Traps/Fire` (On/Off/Hit) + proyectil ✗ | P1 |
-| Ira | Mini-jefe **Golem de Ceniza** (vida 10) | ✔ `Characters/Golems` + `Animaciones/Golem1`/`Golem2` con idle/walk/attack/hurt/die | P1 |
-| Tristeza | Lamentos, Esculturas Vivientes, Medusas de Hielo | ✗ | P2 |
-| Miedo | Espectros, Centinelas Ciegos | ✗ (candidatos: `Fliying Demon`, `Enemy/Bringer-of-Death`) | P2 |
-| Culpa | Penitentes, Artilleros (+ proyectil) | ✗ (candidatos: `Enemy/NECRHOMANCER`, `EvilWizard`) | P2 |
-| Esperanza | Guardianes del Jardín (pacíficos) | ✗ | P2 |
-| Genérico | Enemigo actual `Prefabs/Enemy.prefab` (Bringer of Death) | ✔ idle/walk/attack/hurt/death/cast | — |
+**Estado en la v2.** La lógica está completa: FSM de 6 estados, 4 estrategias de detección y
+6 `EnemyData`. Visualmente, cada enemigo es una cápsula tintada con un color de la paleta de su
+mundo.
+
+- **Dónde va el arte:** en `Pivote/Sprite` del prefab base (`Assets/Prefabs/Enemigos/Enemigo.prefab`),
+  o en cada variante si cambia el sprite. Hay que crear un controlador de Animator por enemigo con
+  los parámetros bool `MovEn`, `Attack`, `Damage` y `Death`.
+- **Orientación del arte:** si mira a la izquierda, desmarca `spriteMiraDerecha` en su `EnemyData`.
+- **Color:** cuando tenga arte final, pon `tinte` en blanco.
+- **Arte fuente:** `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`
+  (hay que recortarlas). Los packs de la v1 (FireWorm, Golems, Bringer of Death…) sirven como
+  alternativa, reimportados a 32 PPU.
+
+| Mundo | Enemigo | Datos y prefab | Arte | Falta además | Prioridad |
+|---|---|---|---|---|---|
+| — | Genérico | ✔ `Generico` / `Enemigo.prefab` | Cápsula gris | — | — |
+| Ira | Soldado de lava | ✔ `SoldadoLava` / `Enemigo_SoldadoLava` | Cápsula naranja | — | P1 |
+| Ira | Golem de Ceniza (mini-jefe, vida 10) | ✔ `GolemCeniza` / `Enemigo_GolemCeniza` (más grande) | Cápsula ceniza | — | P1 |
+| Ira | Torreta de fuego fija | ✗ | ✗ | Componente `Proyectil` (Fase 9) | P1 |
+| Tristeza | Lamento | ✔ `Lamento` / `Enemigo_Lamento` | Cápsula azul | Ralentizar al jugador al tocarlo (Anexo: «reducen velocidad al contacto»), Fase 10 | P2 |
+| Tristeza | Esculturas Vivientes, Medusas de Hielo | ✗ | ✗ | Movimiento sinusoidal de las medusas (Fase 10) | P2 |
+| Miedo | Espectro | ✔ `Espectro` / `Enemigo_Espectro` (detección en oscuridad) | Cápsula oscura translúcida | Que sea invisible salvo al atacar (Fase 10) | P2 |
+| Miedo | Centinela Ciego | ✔ `CentinelaCiego` / `Enemigo_CentinelaCiego` (detección por ruido) | Cápsula violeta | Tecla de caminar con teclado (N5) | P2 |
+| Culpa | Penitentes, Artilleros (+ proyectil) | ✗ | ✗ | `Proyectil` y cobertura (Fase 10) | P2 |
+| Esperanza | Guardianes del Jardín (pacíficos) | ✗ | ✗ | `GardenGuardian` (Fase 10) | P2 |
+
+**Audio de enemigos (todo falta, P2):** pasos, aviso de ataque, golpe, dolor y muerte, por tipo. El
+evento `OnStateChanged` de cada enemigo ya permite dispararlos sin tocar la IA.
 
 ### B5. Jefes — `BossController` *(propuesto: base abstracta)*
 
@@ -280,6 +306,7 @@ ya existen (`OnStateChanged`, `OnGolpeRecibido`, `OnEscudoAbsorbio`, `OnCargaCom
 
 ## Historial
 
+- **0.4 (2026-09-28)** — Fase 4 (enemigos). Apartado B4 reescrito para la v2; nuevos N7 (probar `PruebaEnemigos`) y N8 (arte de enemigos).
 - **0.3 (2026-09-28)** — Fase 3 (jugador). Nueva sección «Lo que necesito de ti», apartado B3 reescrito para la v2 y corrección de la convención de escala y de la tabla de decisiones, que se habían quedado desfasadas.
 - **0.2 (2026-09-19)** — Traslado a `Tesis2.0`, decisiones resueltas, inventario del arte de Gemini.
 - **0.1 (2026-09-19)** — Primera versión, generada en la auditoría de la Fase 0.

@@ -8,6 +8,180 @@
 
 ---
 
+## Fase 4 — Enemigos (2026-09-28)
+
+Rama `fase-4-enemigos`, que sale de `fase-3-jugador`. Cubre la tarea A del encargo, una de las
+dos de prioridad máxima.
+
+### 1. La máquina de estados del enemigo era decorativa
+
+- **Problema.** La v1 tenía un `enum STATES` con solo IDLE y ATTACK. `currentState` se asignaba
+  en `Start()` y no volvía a cambiar, el `switch` estaba comentado y la IA vivía en condicionales
+  anidados dentro de `EnemyMovement()`.
+- **Causa.** El enum no gobernaba nada: la conducta dependía de banderas (`attack`, `takingDamage`,
+  `death`) que se escribían en varios sitios.
+- **Solución.** `EnemyController` es una FSM real de 6 estados (IDLE, PATROL, CHASE, ATTACK,
+  DAMAGED y DEAD) sobre el mismo núcleo que el jugador:
+  - Todos los cambios pasan por el único `TransitionTo`, validado contra la tabla.
+  - El diagrama `Docs/FSM/Enemigo.md` se genera desde esa tabla.
+  - Cada estado fija el Animator en su `OnEnter`, en lugar de los cuatro `SetBool` por frame de la
+    v1. Los parámetros conservan su nombre (`MovEn`, `Attack`, `Damage` y `Death`).
+  - Se mantienen `CancelAttack()` y `DesactiveDamage()` como receptores de los eventos de
+    animación de la v1. Solo pueden **acortar** un estado; su final está garantizado por tiempo.
+
+### 2. El enemigo solo atacaba si el jugador estaba a su izquierda
+
+- **Problema.** Si el jugador se acercaba por la derecha, el enemigo lo perseguía pero nunca lo
+  golpeaba. Además, el volteo del sprite estaba invertido.
+- **Causa.** El bloque de ataque estaba anidado dentro de `if (direction.x < 0)`, y la escala se
+  fijaba con el signo contrario al de la dirección.
+- **Solución.**
+  - CHASE → ATTACK se decide por distancia horizontal y diferencia de altura, sin mirar el lado.
+  - ATTACK se gira hacia el jugador al entrar.
+  - El volteo se hace sobre un hijo `Pivote` y respeta `EnemyData.spriteMiraDerecha`.
+  - Lo verifican `AtacaAlJugador_PorLaIzquierda` y `AtacaAlJugador_PorLaDerecha`.
+
+### 3. Fuera del radio el enemigo se quedaba inmóvil
+
+- **Problema.** Todos los enemigos se sentían iguales y predecibles; así lo recogieron las
+  pruebas de usabilidad.
+- **Causa.** No había patrulla ni parámetros por tipo de enemigo.
+- **Solución.**
+  - PATROL entre waypoints (`Transform[]`), con tolerancia y espera configurables. Si un borde o
+    una pared le cortan el paso, da la vuelta.
+  - Sin waypoints, el enemigo se queda en IDLE sin lanzar ninguna excepción.
+  - Lo verifican `SinJugadorCerca_PatrullaEntreSusWaypoints` y `SinWaypoints_SeQuedaEnIdleSinErrores`.
+
+### 4. El enemigo parpadeaba en el borde del radio y atacaba sin pausa
+
+- **Problema.** En el borde del radio de detección el enemigo alternaba entre perseguir y parar.
+  Tampoco había cooldown de ataque.
+- **Causa.** Se usaba el mismo radio para empezar y para dejar de perseguir, y `attack` solo se
+  apagaba por un evento de animación.
+- **Solución.**
+  - **Histéresis:** el enemigo empieza a perseguir dentro de `detectionRadius` y solo suelta al
+    jugador más allá de `detectionRadius × 1,5`.
+  - **Cooldown** por tiempo: empieza al salir de ATTACK.
+  - Lo verifican `Histeresis_NoSueltaAlJugadorHastaUnRadioYMedio` (una sola entrada en CHASE) y
+    `Ataques_RespetanElCooldown`.
+
+### 5. El daño y la muerte no eran estados reales
+
+- **Problema.** En la v1:
+  - `death` congelaba al enemigo, pero seguía colisionando y haciendo daño.
+  - Recibir un golpe no interrumpía el ataque.
+- **Causa.** Eran banderas sin comportamiento de entrada ni de salida.
+- **Solución.**
+  - DAMAGED interrumpe ATTACK y cierra el arma. Aplica un retroceso atenuado por
+    `resistenciaRetroceso`, y los i-frames vienen de los datos.
+  - DEAD apaga todos los colliders y hitbox, deja el cuerpo cinemático, dispara `Death` y
+    destruye el objeto tras `deathDelay`.
+  - Lo verifican `Golpe_InterrumpeElAtaqueYCierraElArma` y `Muerte_ApagaColisionesYDestruyeElObjeto`.
+
+### 6. Parámetros duplicados por escena y referencia al jugador manual
+
+- **Problema.** `public Transform player` había que asignarlo a mano en cada escena, o saltaba un
+  `NullReferenceException`. `life` era un float y los parámetros vivían sueltos en cada instancia.
+- **Causa.** No existía un modelo de datos del enemigo.
+- **Solución.**
+  - **`EnemyData`** (patrón Type Object) reúne vida entera, daño, velocidades, radios, cooldown,
+    duraciones, retroceso, detección y tinte provisional.
+  - El jugador se busca por tag en tiempo de ejecución. Si no lo encuentra, avisa una vez,
+    patrulla y reintenta cada segundo.
+
+### 7. Variantes por mundo emocional sin duplicar scripts
+
+- **Problema.** El encargo pide enemigos distintos por emoción (Ira agresiva, Tristeza lenta,
+  Miedo que solo ataca en la oscuridad) sin copiar el controlador.
+- **Causa.** En la v1 la única forma de variar un enemigo era editar su script.
+- **Solución.** Detección como **patrón Strategy** (`DeteccionData`, ScriptableObject sin estado).
+  Todas las estrategias salvo la del ruido fallan si el jugador está invisible, así que la
+  Invisibilidad Parcial tiene efecto real:
+  - `PorDistancia`: genérica.
+  - `ConVision`: no ve a través del suelo ni de las paredes.
+  - `EnOscuridad`: ignora al jugador si está iluminado. Usa el nuevo registro `Iluminacion` y el
+    componente `ZonaIluminada`, base de la antorcha del Nivel 3.
+  - `PorRuido`: oye el `OnRuido` de la región de sigilo del jugador.
+
+  Hay 6 variantes con valores del Anexo A: Genérico, Soldado de lava, Golem de Ceniza (vida 10),
+  Lamento, Espectro y Centinela Ciego. `VariantesEmocionales_SeComportanDeFormaDistinta` mide que
+  el Soldado de lava persigue más del doble de rápido que el Lamento, y `DatosEnemigosTests`
+  vigila que los datos mantengan esa correspondencia emoción ↔ mecánica.
+
+### Decisiones que ajustan el plan de la Fase 1
+
+1. **El cuerpo del jugador ya no choca con el de los enemigos, ni los enemigos entre sí.** Se
+   añaden dos parejas a la matriz (Player × Enemy y Enemy × Enemy). El daño por contacto llega por
+   una hitbox `Contacto` (capa EnemyWeapon), que sustituye al `OnCollisionEnter2D` de la v1. Si los
+   cuerpos chocaran, el jugador podría quedarse de pie sobre un enemigo, que no es suelo, y los
+   enemigos se atascarían al patrullar.
+2. El pseudoestado de elección del diagrama del plan («¿hay waypoints?») se resuelve arrancando
+   siempre en IDLE, sin espera inicial: si hay ruta, IDLE → PATROL ocurre en el primer frame.
+3. Se añade la **evitación de bordes y paredes** (`EnemyData.evitarBordes`), que no estaba en el
+   plan. Sin ella, un enemigo que persigue cae a la lava o se queda empujando una pared.
+4. El enum se llama `ESTADOS_ENEMIGO`, igual que `ESTADOS_JUGADOR`, en lugar del `STATES` de la v1.
+
+### Además
+
+- `Health.Inicializar` acepta también la duración de los i-frames, que ahora vienen de los datos.
+- `EnemyController.Activos` es un registro de los enemigos vivos. Lo usa `DepuracionEnemigos`,
+  que muestra con F2 el estado y la vida de cada enemigo sobre su cabeza.
+- Herramientas de Editor:
+  - Menú *Fragmentum → Enemigos*: generar y restablecer los datos, crear los prefabs (base y 5
+    variantes) y crear la escena de prueba `PruebaEnemigos`.
+  - *Fragmentum → Regenerar todo* reconstruye, también en modo batch, todo lo que generan las
+    herramientas del proyecto.
+  - Las piezas comunes están en `UtilidadesEditor`.
+- Las pruebas PlayMode comparten la base `PruebaPlayModeBase`.
+- **`Herramientas/verificar.ps1`** deja la verificación dentro del repositorio.
+  - Sin parámetros, compila el juego, el Editor y las pruebas con el SDK de .NET que trae Unity,
+    sin abrir el editor.
+  - Con `-Unity`, además regenera todo y ejecuta las pruebas EditMode y PlayMode en modo batch.
+  - En el PC anterior este proyecto de verificación vivía fuera del repositorio y se perdió.
+
+### Correcciones de fases anteriores
+
+- **Los diagramas del jugador estaban vacíos en el commit de la Fase 3.** Un paso manual que
+  normalizaba los saltos de línea falló por una ruta relativa y dejó los dos archivos en blanco.
+  Se regeneraron, y el exportador ya escribe siempre saltos LF, así que ese paso deja de hacer falta.
+- **Regenerar una escena de prueba le cambiaba el GUID**, porque se borraba y se volvía a copiar.
+  Ahora se sobrescribe el contenido conservando el `.meta`, así que las referencias a la escena
+  (Build Settings, `LevelDatabase`) no se romperán. Se comprobó regenerando dos veces seguidas.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **79 de 79 correctas** (18 nuevas: tabla del enemigo, estrategias de detección
+  y datos del Anexo A).
+- Pruebas PlayMode: **31 de 31 correctas** (15 nuevas de enemigos).
+- Regeneración completa en modo batch sin avisos; matriz de colisión con 10 parejas.
+
+### Pasos manuales en el Editor
+
+Ninguno obligatorio. Los datos (`Assets/Data/Enemigos`), los prefabs (`Assets/Prefabs/Enemigos`)
+y la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity` ya están generados.
+
+- **Para colocar un enemigo en un nivel:**
+  1. Arrastra el prefab de la variante.
+  2. Crea dos objetos vacíos como puntos de la ruta y asígnalos en `Waypoints`.
+  3. Opcional: cambia su `EnemyData`.
+- **Parámetros del Animator** (no cambia ninguno): `MovEn` en PATROL y CHASE; `Attack`, `Damage`
+  y `Death` (bool).
+
+### Qué probar a mano (escena `PruebaEnemigos`, F2 muestra los estados)
+
+- Acércate a cada enemigo por la izquierda y por la derecha: debe atacar por ambos lados.
+- Sal de su radio y vuelve a entrar despacio: no debe parpadear entre perseguir y patrullar.
+- Compara el Soldado de lava (x = 30) con el Lamento (x = 62): se nota la diferencia de ritmo.
+- Golpea a un enemigo mientras levanta el arma: el ataque se corta.
+- Mata a uno: desaparece al segundo y ya no hace daño al tocarlo.
+- Espectro (x = 78): dentro del círculo de luz (x = 71) no se acerca; fuera, sí.
+- Centinela Ciego (x = 94): si corres cerca te oye; la invisibilidad (Q) no lo engaña.
+- Enemigo de la plataforma (x = 110): te persigue hasta el borde, pero no se tira.
+
+---
+
 ## Fase 3 — Jugador (2026-09-28)
 
 Rama `fase-3-jugador`, que sale de `fase-2-cimientos`. Es la primera fase jugable de la v2: el

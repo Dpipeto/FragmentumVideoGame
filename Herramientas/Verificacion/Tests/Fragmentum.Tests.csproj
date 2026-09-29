@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Compila las pruebas EditMode y PlayMode (Unity las separa en dos ensamblados; aquí basta uno). -->
+  <Import Project="..\Comun.props" />
+  <PropertyGroup>
+    <AssemblyName>Fragmentum.Tests</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Proyecto)\Assets\Tests\**\*.cs" />
+    <Reference Include="$(Proyecto)\Library\ScriptAssemblies\UnityEngine.TestRunner.dll" Private="false" />
+    <Reference Include="$(Proyecto)\Library\ScriptAssemblies\UnityEditor.TestRunner.dll" Private="false" />
+    <Reference Include="$(Proyecto)\Library\PackageCache\com.unity.ext.nunit@*\net472\unity-custom\nunit.framework.dll" Private="false" />
+    <ProjectReference Include="..\Runtime\Fragmentum.Runtime.csproj" />
+    <ProjectReference Include="..\Editor\Fragmentum.Editor.csproj" />
+  </ItemGroup>
+</Project>

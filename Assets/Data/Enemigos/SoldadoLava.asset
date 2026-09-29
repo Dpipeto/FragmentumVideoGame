@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe741b5edf391fa419b30bd0f7522bcb, type: 3}
+  m_Name: SoldadoLava
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.EnemyData
+  nombreCanonico: Soldado de lava
+  descripcion: "Ira: agresivo y r\xE1pido. Apenas se detiene, persige de lejos y ataca a menudo."
+  vidaMaxima: 3
+  danio: 1
+  danioContacto: 1
+  invulnerabilidad: 0.3
+  velocidadPatrulla: 2.5
+  velocidadPersecucion: 5
+  toleranciaWaypoint: 0.2
+  esperaEnWaypoint: 0.3
+  evitarBordes: 1
+  deteccion: {fileID: 11400000, guid: 69124c2f72dee55459659af73a977899, type: 2}
+  detectionRadius: 7
+  factorHisteresis: 1.5
+  attackRadius: 1.3
+  alturaAtaque: 1.5
+  attackCooldown: 0.7
+  duracionAtaque: 0.4
+  inicioVentanaGolpe: 0.15
+  finVentanaGolpe: 0.3
+  damagedDuration: 0.25
+  retroceso: {x: 4, y: 3}
+  resistenciaRetroceso: 0
+  deathDelay: 1
+  spriteMiraDerecha: 1
+  tinte: {r: 0.8, g: 0.26666668, b: 0, a: 1}

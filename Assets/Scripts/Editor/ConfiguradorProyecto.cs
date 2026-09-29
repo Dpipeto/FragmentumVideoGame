@@ -22,8 +22,13 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// Parejas de capas que NO deben colisionar.
-        /// Las tres primeras vienen del Anexo A; las otras evitan que las zonas de daño
-        /// choquen con el escenario o entre ellas.
+        /// - Las tres primeras vienen del Anexo A.
+        /// - Las cuatro siguientes evitan que las zonas de daño choquen con el escenario o
+        ///   entre ellas.
+        /// - Las dos últimas (Fase 4): el cuerpo del jugador atraviesa el de los enemigos y el
+        ///   daño llega por la hitbox de contacto. Si chocaran, el jugador podría quedarse
+        ///   de pie encima de un enemigo, que no es suelo, y los enemigos se atascarían unos
+        ///   con otros al patrullar.
         /// </summary>
         private static readonly (string a, string b)[] SinColision =
         {
@@ -34,7 +39,9 @@ namespace Fragmentum.EditorTools
             (Capas.PlayerWeapon, Capas.Suelo),
             (Capas.PlayerWeapon, Capas.Wall),
             (Capas.EnemyWeapon, Capas.Suelo),
-            (Capas.EnemyWeapon, Capas.Wall)
+            (Capas.EnemyWeapon, Capas.Wall),
+            (Capas.Player, Capas.Enemy),
+            (Capas.Enemy, Capas.Enemy)
         };
 
         [MenuItem("Fragmentum/Configurar proyecto/Todo", priority = 0)]

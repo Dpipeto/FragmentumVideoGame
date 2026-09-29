@@ -64,6 +64,12 @@ ExportedObj/
 # Si quieres versionarlos, usa Git LFS en lugar de quitar esta línea.
 *.pxo
 
+# Proyecto de verificación (Herramientas/): se versionan los .csproj, no sus salidas
+!/Herramientas/Verificacion/**/*.csproj
+/Herramientas/Verificacion/**/bin/
+/Herramientas/Verificacion/**/obj/
+/Herramientas/Verificacion/Salida/
+
 # Sistema operativo
 Thumbs.db
 Desktop.ini

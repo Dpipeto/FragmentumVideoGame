@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe741b5edf391fa419b30bd0f7522bcb, type: 3}
+  m_Name: Espectro
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.EnemyData
+  nombreCanonico: Espectro
+  descripcion: "Miedo: solo se acerca si el jugador est\xE1 a oscuras; la luz de una antorcha lo mantiene a raya."
+  vidaMaxima: 2
+  danio: 1
+  danioContacto: 1
+  invulnerabilidad: 0.3
+  velocidadPatrulla: 1.5
+  velocidadPersecucion: 3.8
+  toleranciaWaypoint: 0.2
+  esperaEnWaypoint: 0.8
+  evitarBordes: 1
+  deteccion: {fileID: 11400000, guid: 02d8011712586644c8bad6f9631bdec6, type: 2}
+  detectionRadius: 6
+  factorHisteresis: 1.5
+  attackRadius: 1.2
+  alturaAtaque: 1.5
+  attackCooldown: 1
+  duracionAtaque: 0.45
+  inicioVentanaGolpe: 0.2
+  finVentanaGolpe: 0.35
+  damagedDuration: 0.3
+  retroceso: {x: 4, y: 3}
+  resistenciaRetroceso: 0
+  deathDelay: 1
+  spriteMiraDerecha: 1
+  tinte: {r: 0.23, g: 0.23, b: 0.29, a: 0.8}

@@ -1,18 +1,14 @@
 using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Core.Input;
-using Fragmentum.Levels;
-using Fragmentum.Levels.Escenario;
 using Fragmentum.Levels.Mecanicas;
 using Fragmentum.Levels.Pruebas;
 using Fragmentum.Player;
-using Fragmentum.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
+using static Fragmentum.EditorTools.UtilidadesEditor;
 
 namespace Fragmentum.EditorTools
 {
@@ -30,10 +26,8 @@ namespace Fragmentum.EditorTools
         public const string RutaPrefab = "Assets/Prefabs/Player.prefab";
         public const string RutaEscena = "Assets/Scenes/Pruebas/PruebaJugador.unity";
 
-        private const string RutaPlantillaEscena = "Assets/Settings/Scenes/URP2DSceneTemplate.unity";
         private const string RutaMaterialSinFriccion = "Assets/Settings/Fisica/JugadorSinFriccion.physicsMaterial2D";
         private const string RutaAccionesInput = "Assets/Settings/InputSystem_Actions.inputactions";
-        private const string CarpetaSpritesBase = "Packages/com.unity.2d.sprite/Editor/ObjectMenuCreation/DefaultAssets/Textures/v2/";
 
         // Paleta del Anexo A (Ira) para que la escena de prueba ya hable el idioma del Nivel 1.
         private static readonly Color ColorSuelo = Hex("5C4033");
@@ -82,24 +76,8 @@ namespace Fragmentum.EditorTools
         private static bool ValidarPrepararTilemap() =>
             Selection.activeGameObject != null && Selection.activeGameObject.GetComponent<Tilemap>() != null;
 
-        /// <summary>
-        /// Entrada para modo batch, sin diálogos: configura el proyecto, genera el prefab y la
-        /// escena de prueba y exporta los diagramas FSM.
-        /// <c>Unity.exe -batchmode -projectPath … -executeMethod Fragmentum.EditorTools.ConstructorJugador.ConstruirEnModoBatch -quit</c>
-        /// </summary>
-        public static void ConstruirEnModoBatch()
-        {
-            ConfiguradorProyecto.ConfigurarTodo();
-            var escenaCreada = CrearEscenaPrueba(false);
-            ExportadorDiagramasFSM.Exportar();
-            AssetDatabase.SaveAssets();
-
-            if (!escenaCreada)
-            {
-                Debug.LogError("[Fragmentum] La construcción en modo batch falló.");
-                EditorApplication.Exit(1);
-            }
-        }
+        /// <summary>Compatibilidad con la Fase 3: ahora lo hace <see cref="ConstruccionBatch.Todo"/>.</summary>
+        public static void ConstruirEnModoBatch() => ConstruccionBatch.Todo();
 
         // --- Prefab del jugador ---
 
@@ -162,7 +140,7 @@ namespace Fragmentum.EditorTools
                 objetoSprite.transform.localPosition = new Vector3(0f, 0.9f, 0f);
 
                 var sprite = objetoSprite.AddComponent<SpriteRenderer>();
-                sprite.sprite = CargarSprite(CarpetaSpritesBase + "Capsule.png");
+                sprite.sprite = SpriteCapsula;
                 sprite.color = ColorJugador;
                 sprite.sortingOrder = 10;
                 if (sprite.sprite != null)
@@ -213,6 +191,13 @@ namespace Fragmentum.EditorTools
             }
         }
 
+        /// <summary>El prefab del jugador; lo crea si todavía no existe.</summary>
+        public static GameObject PrefabJugador()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RutaPrefab);
+            return prefab != null ? prefab : CrearPrefab();
+        }
+
         // --- Escena de prueba ---
 
         /// <summary>
@@ -229,112 +214,53 @@ namespace Fragmentum.EditorTools
                 return false;
             }
 
-            AsegurarCarpeta("Assets/Scenes/Pruebas");
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscena) != null)
+            var creada = CrearEscenaDesdePlantilla(RutaEscena, preguntarSiExiste);
+            if (creada == null)
             {
-                if (preguntarSiExiste && !EditorUtility.DisplayDialog("Fragmentum",
-                        $"{RutaEscena} ya existe. ¿Regenerarla? Se perderán los cambios hechos a mano en ella.",
-                        "Regenerar", "Cancelar"))
-                {
-                    return false;
-                }
-
-                AssetDatabase.DeleteAsset(RutaEscena);
+                return false;
             }
 
-            Scene escena;
-            if (AssetDatabase.CopyAsset(RutaPlantillaEscena, RutaEscena))
-            {
-                escena = EditorSceneManager.OpenScene(RutaEscena, OpenSceneMode.Single);
-            }
-            else
-            {
-                Debug.LogWarning(
-                    $"[Fragmentum] No se encontró la plantilla {RutaPlantillaEscena}. La escena se crea sin " +
-                    "Global Light 2D: añade una si los sprites se ven oscuros.");
-                escena = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-            }
-
-            var cuadrado = CargarSprite(CarpetaSpritesBase + "Square.png");
-            var suelo = Capa(Capas.Suelo);
+            var escena = creada.Value;
+            var cuadrado = SpriteCuadrado;
             var pared = Capa(Capas.Wall);
             var nivel = new GameObject("Nivel").transform;
 
             // Zona 1: suelos solapados (criterio: dos plataformas solapadas no rompen el suelo).
-            Bloque(nivel, "SueloInicio", -24f, 10f, -1f, 0f, suelo, ColorSuelo, cuadrado, GameTags.Suelo);
-            Bloque(nivel, "SueloSolapado", 6f, 18f, -1.5f, 0f, suelo, ColorSolapado, cuadrado, GameTags.Suelo);
+            Suelo(nivel, "SueloInicio", -24f, 10f, -1f, 0f, ColorSuelo);
+            Suelo(nivel, "SueloSolapado", 6f, 18f, -1.5f, 0f, ColorSolapado);
 
             // Zona 2: techo bajo para agacharse (cabe agachado, no de pie).
-            Bloque(nivel, "TechoBajo", -8f, -4f, 1.2f, 2.2f, suelo, ColorTecho, cuadrado, GameTags.Suelo);
+            Suelo(nivel, "TechoBajo", -8f, -4f, 1.2f, 2.2f, ColorTecho);
 
             // Zona 3: agua (gravedad ×0,3, velocidad ×0,6; el dash solo con Dash Acuático) y hielo.
             Zona(nivel, "Agua", -22f, -14f, 0f, 4f, ZonaModificadorMovimiento.TIPOS.AGUA, new Color(0.29f, 0.5f, 0.65f, 0.35f), cuadrado);
             Zona(nivel, "Hielo", 12f, 16f, 0f, 0.5f, ZonaModificadorMovimiento.TIPOS.HIELO, new Color(0.9f, 0.95f, 1f, 0.5f), cuadrado);
 
             // Zona 4: foso sobre la zona mortal (coyote time en el borde, doble salto para cruzarlo).
-            Bloque(nivel, "SueloCentral", 22f, 40f, -1f, 0f, suelo, ColorSuelo, cuadrado, GameTags.Suelo);
+            Suelo(nivel, "SueloCentral", 22f, 40f, -1f, 0f, ColorSuelo);
 
             // Zona 5: escalones (el 2.º solo se alcanza desde el suelo con doble salto).
-            Bloque(nivel, "Escalon1", 26f, 28f, 1.5f, 2f, suelo, ColorSuelo, cuadrado, GameTags.Suelo);
-            Bloque(nivel, "Escalon2", 30f, 32f, 3.5f, 4f, suelo, ColorSuelo, cuadrado, GameTags.Suelo);
+            Suelo(nivel, "Escalon1", 26f, 28f, 1.5f, 2f, ColorSuelo);
+            Suelo(nivel, "Escalon2", 30f, 32f, 3.5f, 4f, ColorSuelo);
 
             // Zona 6: pinchos (DAMAGED, i-frames, escudo) y muñeco (ataque normal y cargado).
             CrearPinchos(nivel, 35f, 36.5f, cuadrado);
             CrearMuneco(nivel, new Vector2(38.5f, 0f), cuadrado);
 
             // Zona 7: pozo entre paredes (wall slide y wall jump) con salida por la cornisa.
-            Bloque(nivel, "SueloFinal", 40f, 52f, -1f, 0f, suelo, ColorSuelo, cuadrado, GameTags.Suelo);
+            Suelo(nivel, "SueloFinal", 40f, 52f, -1f, 0f, ColorSuelo);
             Bloque(nivel, "ParedIzquierda", 43f, 44f, 0f, 12f, pared, ColorPared, cuadrado);
             Bloque(nivel, "ParedDerecha", 47f, 48f, 0f, 9f, pared, ColorPared, cuadrado);
-            Bloque(nivel, "Cornisa", 48f, 52f, 8.5f, 9f, suelo, ColorSuelo, cuadrado, GameTags.Suelo);
+            Suelo(nivel, "Cornisa", 48f, 52f, 8.5f, 9f, ColorSuelo);
 
-            // Zona mortal bajo todo el nivel.
-            var zonaMortal = Bloque(nivel, "ZonaMortal", -30f, 80f, -12f, -10f, 0, Color.clear, null);
-            zonaMortal.GetComponent<BoxCollider2D>().isTrigger = true;
-            zonaMortal.AddComponent<DeadZone>();
+            ZonaMortal(nivel, -30f, 80f, -10f);
 
-            // Jugador.
             var aparicion = new GameObject("PuntoDeAparicion").transform;
             aparicion.position = new Vector3(0f, 0.05f, 0f);
 
-            var jugador = (GameObject)PrefabUtility.InstantiatePrefab(prefab, escena);
-            jugador.transform.position = aparicion.position;
-            Asignar(jugador.GetComponent<PlayerAbilities>(), "desbloqueadasAlInicio", p =>
-            {
-                // En la escena de prueba se desbloquean todas para poder probarlas.
-                var todas = (HABILIDADES[])System.Enum.GetValues(typeof(HABILIDADES));
-                p.arraySize = todas.Length;
-                for (var i = 0; i < todas.Length; i++)
-                {
-                    p.GetArrayElementAtIndex(i).enumValueIndex = (int)todas[i];
-                }
-            });
-
-            // Cámara.
-            var camara = Object.FindAnyObjectByType<Camera>();
-            if (camara == null)
-            {
-                camara = new GameObject("Main Camera") { tag = "MainCamera" }.AddComponent<Camera>();
-                camara.orthographic = true;
-            }
-
-            camara.backgroundColor = Hex("1A0800");
-            camara.transform.position = new Vector3(0f, 1.5f, -10f);
-            var seguimiento = camara.GetComponent<CameraMovement>();
-            if (seguimiento == null)
-            {
-                seguimiento = camara.gameObject.AddComponent<CameraMovement>();
-            }
-
-            Asignar(seguimiento, "objetivo", p => p.objectReferenceValue = jugador.transform);
-            Asignar(seguimiento, "minimo", p => p.vector2Value = new Vector2(-24f, -6f));
-            Asignar(seguimiento, "maximo", p => p.vector2Value = new Vector2(52f, 16f));
-
-            // Reaparición provisional (Fase 6: CheckpointManager).
-            var reaparicion = new GameObject("Reaparicion").AddComponent<ReaparicionSimple>();
-            Asignar(reaparicion, "jugador", p => p.objectReferenceValue = jugador.GetComponent<PlayerController>());
-            Asignar(reaparicion, "punto", p => p.objectReferenceValue = aparicion);
-            Asignar(reaparicion, "camara", p => p.objectReferenceValue = seguimiento);
+            // En la escena de prueba se desbloquean todas las habilidades para poder probarlas.
+            var jugador = InstanciarJugador(prefab, escena, aparicion.position, TodasLasHabilidades);
+            CamaraYReaparicion(jugador, aparicion, new Vector2(-24f, -6f), new Vector2(52f, 16f));
 
             // Panel de depuración con lo que hay que probar en cada zona.
             var depuracion = new GameObject("Depuracion").AddComponent<DepuracionJugador>();
@@ -407,32 +333,6 @@ namespace Fragmentum.EditorTools
 
         // --- Piezas de la escena ---
 
-        private static GameObject Bloque(Transform padre, string nombre, float xMin, float xMax, float yMin, float yMax,
-            int capa, Color color, Sprite sprite, string tag = null)
-        {
-            var objeto = new GameObject(nombre) { layer = capa };
-            if (!string.IsNullOrEmpty(tag))
-            {
-                objeto.tag = tag;
-            }
-
-            objeto.transform.SetParent(padre, false);
-            objeto.transform.position = new Vector3((xMin + xMax) * 0.5f, (yMin + yMax) * 0.5f, 0f);
-            objeto.transform.localScale = new Vector3(xMax - xMin, yMax - yMin, 1f);
-
-            if (sprite != null)
-            {
-                var renderer2d = objeto.AddComponent<SpriteRenderer>();
-                renderer2d.sprite = sprite;
-                renderer2d.color = color;
-            }
-
-            var caja = objeto.AddComponent<BoxCollider2D>();
-            caja.size = Vector2.one;
-            caja.offset = Vector2.zero;
-            return objeto;
-        }
-
         private static void Zona(Transform padre, string nombre, float xMin, float xMax, float yMin, float yMax,
             ZonaModificadorMovimiento.TIPOS tipo, Color color, Sprite sprite)
         {
@@ -487,72 +387,6 @@ namespace Fragmentum.EditorTools
             Asignar(objetivo, "sprite", p => p.objectReferenceValue = renderer2d);
         }
 
-        private static void CrearHud(Health vidaJugador)
-        {
-            var objetoCanvas = new GameObject("HUD");
-            var canvas = objetoCanvas.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            var escalador = objetoCanvas.AddComponent<CanvasScaler>();
-            escalador.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            escalador.referenceResolution = new Vector2(1920f, 1080f);
-
-            var spriteUi = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
-
-            var fondo = new GameObject("BarraVida", typeof(RectTransform)).AddComponent<Image>();
-            fondo.transform.SetParent(objetoCanvas.transform, false);
-            fondo.sprite = spriteUi;
-            fondo.type = Image.Type.Sliced;
-            fondo.color = new Color(0f, 0f, 0f, 0.6f);
-            var rectFondo = fondo.rectTransform;
-            rectFondo.anchorMin = rectFondo.anchorMax = rectFondo.pivot = new Vector2(0f, 1f);
-            rectFondo.anchoredPosition = new Vector2(20f, -20f);
-            rectFondo.sizeDelta = new Vector2(320f, 26f);
-
-            var relleno = new GameObject("Relleno", typeof(RectTransform)).AddComponent<Image>();
-            relleno.transform.SetParent(fondo.transform, false);
-            relleno.sprite = spriteUi;
-            relleno.type = Image.Type.Filled;
-            relleno.fillMethod = Image.FillMethod.Horizontal;
-            relleno.fillOrigin = (int)Image.OriginHorizontal.Left;
-            relleno.color = ColorSolapado;
-            var rectRelleno = relleno.rectTransform;
-            rectRelleno.anchorMin = Vector2.zero;
-            rectRelleno.anchorMax = Vector2.one;
-            rectRelleno.offsetMin = new Vector2(3f, 3f);
-            rectRelleno.offsetMax = new Vector2(-3f, -3f);
-
-            var barra = fondo.gameObject.AddComponent<LifeBar>();
-            Asignar(barra, "vida", p => p.objectReferenceValue = vidaJugador);
-            Asignar(barra, "relleno", p => p.objectReferenceValue = relleno);
-        }
-
-        // --- Utilidades ---
-
-        private static void AsegurarConfiguracion()
-        {
-            foreach (var capa in Capas.Propias)
-            {
-                if (LayerMask.NameToLayer(capa) < 0)
-                {
-                    Debug.Log("[Fragmentum] Faltan capas del proyecto; se ejecuta Configurar proyecto.");
-                    ConfiguradorProyecto.ConfigurarTodo();
-                    return;
-                }
-            }
-        }
-
-        private static int Capa(string nombre)
-        {
-            var indice = LayerMask.NameToLayer(nombre);
-            if (indice < 0)
-            {
-                Debug.LogWarning($"[Fragmentum] La capa '{nombre}' no existe; se usa Default. Ejecuta Fragmentum → Configurar proyecto.");
-                return 0;
-            }
-
-            return indice;
-        }
-
         private static PhysicsMaterial2D MaterialSinFriccion()
         {
             var material = AssetDatabase.LoadAssetAtPath<PhysicsMaterial2D>(RutaMaterialSinFriccion);
@@ -566,63 +400,5 @@ namespace Fragmentum.EditorTools
             AssetDatabase.CreateAsset(material, RutaMaterialSinFriccion);
             return material;
         }
-
-        private static Sprite CargarSprite(string ruta)
-        {
-            foreach (var objeto in AssetDatabase.LoadAllAssetsAtPath(ruta))
-            {
-                if (objeto is Sprite sprite)
-                {
-                    return sprite;
-                }
-            }
-
-            Debug.LogWarning($"[Fragmentum] No se encontró el sprite base {ruta}; se usará un placeholder en tiempo de ejecución.");
-            return null;
-        }
-
-        private static void AsegurarCarpeta(string ruta)
-        {
-            if (AssetDatabase.IsValidFolder(ruta))
-            {
-                return;
-            }
-
-            var partes = ruta.Split('/');
-            var actual = partes[0];
-            for (var i = 1; i < partes.Length; i++)
-            {
-                var siguiente = $"{actual}/{partes[i]}";
-                if (!AssetDatabase.IsValidFolder(siguiente))
-                {
-                    AssetDatabase.CreateFolder(actual, partes[i]);
-                }
-
-                actual = siguiente;
-            }
-        }
-
-        /// <summary>Asigna un campo serializado (también privado) y avisa si no existe.</summary>
-        private static void Asignar(Object objeto, string campo, System.Action<SerializedProperty> asignar)
-        {
-            if (objeto == null)
-            {
-                return;
-            }
-
-            var serializado = new SerializedObject(objeto);
-            var propiedad = serializado.FindProperty(campo);
-            if (propiedad == null)
-            {
-                Debug.LogWarning($"[Fragmentum] {objeto.GetType().Name} no tiene el campo serializado '{campo}'.");
-                return;
-            }
-
-            asignar(propiedad);
-            serializado.ApplyModifiedPropertiesWithoutUndo();
-        }
-
-        private static Color Hex(string rgb) =>
-            ColorUtility.TryParseHtmlString("#" + rgb, out var color) ? color : Color.magenta;
     }
 }

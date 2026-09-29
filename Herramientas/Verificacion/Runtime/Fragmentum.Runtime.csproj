@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Comun.props" />
+  <PropertyGroup>
+    <AssemblyName>Fragmentum.Runtime</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Proyecto)\Assets\Scripts\**\*.cs" Exclude="$(Proyecto)\Assets\Scripts\Editor\**\*.cs" />
+  </ItemGroup>
+</Project>
