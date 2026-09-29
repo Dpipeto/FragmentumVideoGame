@@ -1,9 +1,11 @@
 using System;
+using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Core.FSM;
 using Fragmentum.Core.Input;
 using Fragmentum.Player.States;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Fragmentum.Player
 {
@@ -309,8 +311,33 @@ namespace Fragmentum.Player
         }
 
         /// <summary>
-        /// Coloca al jugador y, si estaba muerto, lo devuelve a la vida. Lo usarán el
-        /// CheckpointManager (Fase 6) y, mientras tanto, <c>ReaparicionSimple</c>.
+        /// El jugador de una escena concreta (objeto con el tag Player), o null. Busca solo en
+        /// esa escena: durante una carga asíncrona conviven la escena que entra y la que sale.
+        /// </summary>
+        public static PlayerController BuscarEnEscena(Scene escena)
+        {
+            if (!escena.IsValid() || !escena.isLoaded)
+            {
+                return null;
+            }
+
+            foreach (var raiz in escena.GetRootGameObjects())
+            {
+                foreach (var jugador in raiz.GetComponentsInChildren<PlayerController>(true))
+                {
+                    if (jugador.CompareTag(GameTags.Player))
+                    {
+                        return jugador;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Coloca al jugador y, si estaba muerto, lo devuelve a la vida. Lo usa el LevelManager
+        /// al reaparecer en el checkpoint.
         /// </summary>
         public void Revivir(Vector2 posicion)
         {

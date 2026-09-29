@@ -66,7 +66,10 @@ namespace Fragmentum.Core.Juego
             Dueno.CargaTerminada ? Dueno.DestinoDeCarga : (ESTADOS_JUEGO?)null;
     }
 
-    /// <summary>PLAYING: al volver de un Game Over avisa de que hay que reaparecer en el checkpoint.</summary>
+    /// <summary>
+    /// PLAYING: al volver de un Game Over pide reaparecer en el checkpoint. Cuando el jugador
+    /// muere, pasa al Game Over tras una breve espera para que se vea la caída.
+    /// </summary>
     public sealed class EstadoJugando : EstadoJuego
     {
         public EstadoJugando(GameStateMachine dueno, MaquinaEstados<ESTADOS_JUEGO> maquina)
@@ -80,13 +83,17 @@ namespace Fragmentum.Core.Juego
             if (Maquina.EstadoAnterior == ESTADOS_JUEGO.GAME_OVER)
             {
                 EventosJuego.SolicitarReintento();
+                Dueno.AsegurarJugadorVivo();
             }
         }
+
+        public override ESTADOS_JUEGO? EvaluarTransiciones() =>
+            Dueno.GameOverPendiente ? ESTADOS_JUEGO.GAME_OVER : (ESTADOS_JUEGO?)null;
     }
 
     /// <summary>
-    /// GAME_OVER y LEVEL_COMPLETE: esperan a que su pantalla (Fase 6) decida. Si la pantalla
-    /// no existe todavía, avanzan solos tras una espera («construir para ausencia»): el
+    /// GAME_OVER y LEVEL_COMPLETE: esperan a que su pantalla del UIManager decida. Si la
+    /// pantalla no existe, avanzan solos tras una espera («construir para ausencia»): el
     /// Game Over reintenta y el fin de nivel continúa. El juego nunca se queda atascado.
     /// </summary>
     public sealed class EstadoEsperaPantalla : EstadoJuego
@@ -122,7 +129,7 @@ namespace Fragmentum.Core.Juego
             if (!_avisado)
             {
                 _avisado = true;
-                Debug.LogWarning($"[Juego] No hay pantalla para {Id} todavía (Fase 6): se pasa sola a {_siNoHayPantalla}.");
+                Debug.LogWarning($"[Juego] No hay pantalla para {Id} (falta el UIManager en los sistemas): se pasa sola a {_siNoHayPantalla}.");
             }
 
             return TiempoEnEstado >= Dueno.EsperaSinPantalla ? _siNoHayPantalla : (ESTADOS_JUEGO?)null;

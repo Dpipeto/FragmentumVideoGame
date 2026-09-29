@@ -45,11 +45,12 @@ namespace Fragmentum.Core.Input
 
         /// <summary>
         /// Bloqueo propio de esta fuente, o el global que fija la FSM del juego (pausa,
-        /// cinemáticas, cargas, Game Over).
+        /// cinemáticas, cargas, Game Over). También cuenta como bloqueado el fotograma en que se
+        /// sale de un menú, para que el clic de «Continuar» no sea además un ataque.
         /// </summary>
         public bool Bloqueado
         {
-            get => _bloqueado || EventosJuego.EntradaBloqueada;
+            get => _bloqueado || EventosJuego.EntradaIgnorada;
             set => _bloqueado = value;
         }
 

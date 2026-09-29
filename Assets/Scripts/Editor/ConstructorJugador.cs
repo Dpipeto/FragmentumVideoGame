@@ -27,7 +27,7 @@ namespace Fragmentum.EditorTools
         public const string RutaEscena = "Assets/Scenes/Pruebas/PruebaJugador.unity";
 
         private const string RutaMaterialSinFriccion = "Assets/Settings/Fisica/JugadorSinFriccion.physicsMaterial2D";
-        private const string RutaAccionesInput = "Assets/Settings/InputSystem_Actions.inputactions";
+        public const string RutaAccionesInput = "Assets/Settings/InputSystem_Actions.inputactions";
 
         // Paleta del Anexo A (Ira) para que la escena de prueba ya hable el idioma del Nivel 1.
         private static readonly Color ColorSuelo = Hex("5C4033");

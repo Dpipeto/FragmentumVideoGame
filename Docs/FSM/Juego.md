@@ -17,7 +17,7 @@ stateDiagram-v2
         PLAYING --> CUTSCENE : memoria, jefe o cierre del mundo
         CUTSCENE --> PLAYING : termina una cinemática de entrada o de memoria
         CUTSCENE --> LEVEL_COMPLETE : termina la cinemática de cierre
-        PLAYING --> GAME_OVER : el jugador muere en un nivel
+        PLAYING --> GAME_OVER : el jugador muere en un nivel (tras 1 s)
         GAME_OVER --> PLAYING : reintentar desde el checkpoint
         PLAYING --> LEVEL_COMPLETE : victoria sin cinemática de cierre
     }
@@ -52,7 +52,7 @@ stateDiagram-v2
 | PLAYING | CUTSCENE | memoria, jefe o cierre del mundo |
 | CUTSCENE | PLAYING | termina una cinemática de entrada o de memoria |
 | CUTSCENE | LEVEL_COMPLETE | termina la cinemática de cierre |
-| PLAYING | GAME_OVER | el jugador muere en un nivel |
+| PLAYING | GAME_OVER | el jugador muere en un nivel (tras 1 s) |
 | GAME_OVER | PLAYING | reintentar desde el checkpoint |
 | GAME_OVER | LOADING | reiniciar el nivel o volver al menú |
 | PLAYING | LEVEL_COMPLETE | victoria sin cinemática de cierre |

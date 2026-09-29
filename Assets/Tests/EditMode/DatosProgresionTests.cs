@@ -1,10 +1,13 @@
+using System.Collections.Generic;
 using Fragmentum.Core;
 using Fragmentum.Data;
 using Fragmentum.EditorTools;
 using Fragmentum.Player;
+using Fragmentum.UI;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Fragmentum.Tests
 {
@@ -94,6 +97,71 @@ namespace Fragmentum.Tests
             Assert.IsNotNull(sistemas.GetComponent<SceneLoader>());
             Assert.IsNotNull(sistemas.GetComponent<EconomyManager>());
             Assert.AreSame(BaseDeDatos(), gestor.BaseDeDatos);
+        }
+
+        // --- Fase 6 ---
+
+        [Test]
+        public void LosSistemasPersistentes_TienenInterfaz_ConLaAccionDePausa()
+        {
+            var sistemas = Resources.Load<GameObject>(Bootstrap.RutaRecurso);
+            var interfaz = sistemas.GetComponent<UIManager>();
+            Assert.IsNotNull(interfaz, "Sin UIManager no hay pausa, Game Over ni fin de nivel.");
+
+            var acciones = new SerializedObject(interfaz).FindProperty("acciones").objectReferenceValue as InputActionAsset;
+            Assert.IsNotNull(acciones, "El UIManager lee la pausa del asset de input.");
+            var pausa = acciones.FindAction("Game/Pause");
+            Assert.IsNotNull(pausa, "Falta la acción Game/Pause.");
+            CollectionAssert.Contains(RutasDe(pausa), "<Keyboard>/escape");
+            CollectionAssert.Contains(RutasDe(pausa), "<Gamepad>/start");
+        }
+
+        [Test]
+        public void ElNivel1_PreveElCheckpointDelAnexoEnX40()
+        {
+            CollectionAssert.AreEqual(new[] { 40f }, BaseDeDatos().niveles[0].puntosDeControl);
+        }
+
+        [Test]
+        public void CadaMundo_TieneElAcentoYLaCitaDeLaMaqueta()
+        {
+            var bd = BaseDeDatos();
+            foreach (var nivel in bd.niveles)
+            {
+                Assert.Greater(nivel.acento.a, 0f, $"{nivel.name} sin acento.");
+                Assert.IsFalse(string.IsNullOrEmpty(nivel.cita), $"{nivel.name} sin cita.");
+            }
+
+            Assert.AreEqual("FF6B35", ColorUtility.ToHtmlStringRGB(bd.niveles[0].acento));
+            StringAssert.Contains("rabia", bd.niveles[0].cita);
+            StringAssert.Contains("integrar", bd.niveles[5].cita);
+        }
+
+        [Test]
+        public void LaEtiqueta_NumeraLosMundosEnRomanos()
+        {
+            var bd = BaseDeDatos();
+            Assert.AreEqual("I · FORTALEZA VOLCÁNICA", bd.niveles[0].Etiqueta);
+            Assert.AreEqual("VI · EL ESPEJO DEL ORIGEN", bd.niveles[5].Etiqueta);
+        }
+
+        [Test]
+        public void ElColorOscuro_EsElMasOscuroDeLaPaleta()
+        {
+            var nivel = BaseDeDatos().niveles[0];
+            Assert.AreEqual("1A0800", ColorUtility.ToHtmlStringRGB(nivel.ColorOscuro), "Ira: #1A0800 es el más oscuro del Anexo A.");
+            Assert.AreEqual(new Vector2(0f, 80f), nivel.Extension, "Las secciones del Nivel 1 cubren de 0 a 80 u.");
+        }
+
+        private static List<string> RutasDe(InputAction accion)
+        {
+            var rutas = new List<string>();
+            foreach (var enlace in accion.bindings)
+            {
+                rutas.Add(enlace.path);
+            }
+
+            return rutas;
         }
     }
 }

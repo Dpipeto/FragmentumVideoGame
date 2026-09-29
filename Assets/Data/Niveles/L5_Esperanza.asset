@@ -41,3 +41,6 @@ MonoBehaviour:
     desdeX: 0
     hastaX: 50
     contenido: "Plataformeo puro en 4 secciones, una por habilidad previa. 3 Guardianes del Jard\xEDn."
+  puntosDeControl: []
+  acento: {r: 1, g: 0.89411765, b: 0.627451, a: 1}
+  cita: "respira. el camino contin\xFAa"

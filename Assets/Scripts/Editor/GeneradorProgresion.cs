@@ -185,6 +185,16 @@ namespace Fragmentum.EditorTools
                     Seccion("Arena final", 10, 40, "30 × 18 u con plataformas simétricas que se transforman entre fases."))),
             };
 
+            // Interfaz de cada mundo según la maqueta de los menús (Referencias/Menus) y
+            // checkpoints previstos por el Anexo A. Son campos de la Fase 6: en los assets que ya
+            // existían se completan sin pisar lo que se haya editado a mano.
+            Completar(niveles[0], "FF6B35", "la rabia consume al que la niega", 40f);
+            Completar(niveles[1], "00D4FF", "el dolor también es parte del yo");
+            Completar(niveles[2], "7FE0B0", "lo que ocultas en la sombra crece");
+            Completar(niveles[3], "C9A567", "el peso del ayer no define el mañana");
+            Completar(niveles[4], "FFE4A0", "respira. el camino continúa");
+            Completar(niveles[5], "B06EFF", "no destruir. integrar.");
+
             var bd = Asset<LevelDatabase>("Niveles/LevelDatabase", sobrescribir, b =>
             {
                 b.escenaMenu = Escena(RutaEscenaMenu);
@@ -279,6 +289,38 @@ namespace Fragmentum.EditorTools
             n.habilidadOtorgada = habilidad;
             n.reglas = reglas;
             n.secciones = new List<SeccionNivel>(secciones);
+
+            // Los rellena Completar con los valores de diseño.
+            n.acento = default;
+            n.cita = null;
+            n.puntosDeControl = new List<float>();
+        }
+
+        private static void Completar(LevelData n, string acento, string cita, params float[] puntosDeControl)
+        {
+            var cambio = false;
+            if (n.acento.a <= 0f)
+            {
+                n.acento = Hex(acento);
+                cambio = true;
+            }
+
+            if (string.IsNullOrEmpty(n.cita))
+            {
+                n.cita = cita;
+                cambio = true;
+            }
+
+            if ((n.puntosDeControl == null || n.puntosDeControl.Count == 0) && puntosDeControl.Length > 0)
+            {
+                n.puntosDeControl = new List<float>(puntosDeControl);
+                cambio = true;
+            }
+
+            if (cambio)
+            {
+                EditorUtility.SetDirty(n);
+            }
         }
 
         private static ReferenciaEscena Escena(string ruta)
@@ -344,6 +386,8 @@ namespace Fragmentum.EditorTools
                 Asignar(gestor, "baseDeDatos", p => p.objectReferenceValue = bd);
                 raiz.AddComponent<SceneLoader>();
                 raiz.AddComponent<GameStateMachine>();
+                var interfaz = raiz.AddComponent<UIManager>();
+                Asignar(interfaz, "acciones", p => p.objectReferenceValue = AssetDatabase.LoadMainAssetAtPath(ConstructorJugador.RutaAccionesInput));
                 raiz.AddComponent<AtajosDepuracion>();
                 return PrefabUtility.SaveAsPrefabAsset(raiz, RutaSistemas);
             }

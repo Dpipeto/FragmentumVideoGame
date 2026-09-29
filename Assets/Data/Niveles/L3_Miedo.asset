@@ -49,3 +49,6 @@ MonoBehaviour:
     desdeX: 50
     hastaX: 70
     contenido: Oscuridad total; solo la luz del jugador.
+  puntosDeControl: []
+  acento: {r: 0.49803922, g: 0.8784314, b: 0.6901961, a: 1}
+  cita: lo que ocultas en la sombra crece

@@ -6,8 +6,12 @@ namespace Fragmentum.EditorTools
 {
     /// <summary>
     /// Regenera todo lo que las herramientas del proyecto generan: configuración, prefabs,
-    /// datos, escenas de prueba y diagramas. Sirve desde el menú y en modo batch:
+    /// datos, escenas y diagramas. Sirve desde el menú y en modo batch:
     /// <c>Unity.exe -batchmode -projectPath … -executeMethod Fragmentum.EditorTools.ConstruccionBatch.Todo -quit</c>
+    ///
+    /// <see cref="Todo"/> no vuelve a crear las escenas de prueba que ya existen: al regenerarlas,
+    /// Unity les da identificadores internos nuevos y git las veía cambiadas por completo sin
+    /// que cambiara nada. <see cref="TodoForzado"/> (y el menú) sí las regeneran.
     /// </summary>
     public static class ConstruccionBatch
     {
@@ -16,17 +20,37 @@ namespace Fragmentum.EditorTools
         {
             if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
             {
-                Todo();
+                Construir(true);
             }
         }
 
-        public static void Todo()
+        /// <summary>Regenera todo salvo las escenas de prueba existentes (las crea si faltan).</summary>
+        public static void Todo() => Construir(false);
+
+        /// <summary>Regenera todo, también las escenas de prueba existentes.</summary>
+        public static void TodoForzado() => Construir(true);
+
+        private static void Construir(bool regenerarEscenasDePrueba)
         {
             ConfiguradorProyecto.ConfigurarTodo();
 
             var ok = GeneradorProgresion.Construir();
-            ok &= ConstructorJugador.CrearEscenaPrueba(false);
-            ok &= GeneradorEnemigos.CrearEscenaPrueba(false);
+
+            // Los prefabs se regeneran siempre: Unity conserva sus identificadores.
+            ok &= ConstructorJugador.CrearPrefab() != null;
+            ok &= GeneradorEnemigos.CrearPrefabs() != null;
+
+            if (regenerarEscenasDePrueba || !Existe(ConstructorJugador.RutaEscena))
+            {
+                ok &= ConstructorJugador.CrearEscenaPrueba(false);
+            }
+
+            if (regenerarEscenasDePrueba || !Existe(GeneradorEnemigos.RutaEscena))
+            {
+                ok &= GeneradorEnemigos.CrearEscenaPrueba(false);
+            }
+
+            ok &= PreparadorNivel.PrepararTodas();
             ExportadorDiagramasFSM.Exportar();
             AssetDatabase.SaveAssets();
 
@@ -39,5 +63,7 @@ namespace Fragmentum.EditorTools
                 }
             }
         }
+
+        private static bool Existe(string rutaEscena) => AssetDatabase.LoadAssetAtPath<SceneAsset>(rutaEscena) != null;
     }
 }

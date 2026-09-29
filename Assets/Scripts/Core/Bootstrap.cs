@@ -4,8 +4,8 @@ using UnityEngine.SceneManagement;
 namespace Fragmentum.Core
 {
     /// <summary>
-    /// Crea los sistemas persistentes (GameManager, FSM global, cargador de escenas, economía)
-    /// antes de que se cargue la primera escena, sea cual sea: el menú en una build, o
+    /// Crea los sistemas persistentes (GameManager, FSM global, cargador de escenas, economía e
+    /// interfaz) antes de que se cargue la primera escena, sea cual sea: el menú en una build, o
     /// cualquier nivel al darle a Play en el Editor. Así ninguna escena necesita llevar su
     /// propio GameManager (en la v1 cada escena tenía uno, que se destruía al salir).
     ///
@@ -52,6 +52,7 @@ namespace Fragmentum.Core
                 sistemas.AddComponent<GameManager>();
                 sistemas.AddComponent<SceneLoader>();
                 sistemas.AddComponent<GameStateMachine>();
+                sistemas.AddComponent<UI.UIManager>();
             }
 
             sistemas.name = RutaRecurso;

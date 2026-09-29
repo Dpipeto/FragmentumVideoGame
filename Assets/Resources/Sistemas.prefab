@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 9152017182611595826}
   - component: {fileID: 5962274029118171596}
   - component: {fileID: 4267072053821513290}
+  - component: {fileID: 6441665569661500136}
   - component: {fileID: 8006525277215968823}
   m_Layer: 0
   m_Name: Sistemas
@@ -88,7 +89,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Core.GameStateMachine
   esperaSinPantalla: 1.5
+  esperaGameOver: 1
   currentState: 0
+--- !u!114 &6441665569661500136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091112487755545173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da337534bd438054c88aff69ad4989d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.UI.UIManager
+  acciones: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  mapaJuego: Game
+  accionPausa: Pause
+  ordenLienzo: 100
 --- !u!114 &8006525277215968823
 MonoBehaviour:
   m_ObjectHideFlags: 0

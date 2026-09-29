@@ -16,7 +16,7 @@ namespace Fragmentum.Core
     ///   persistía nada. Ahora vive en los sistemas que crea <see cref="Bootstrap"/>.
     /// - Mezclaba UI de Game Over, monedas y navegación. Ahora solo lleva la progresión; las
     ///   monedas están en <see cref="EconomyManager"/>, la navegación en
-    ///   <see cref="GameStateMachine"/> y la pantalla de Game Over será de la UI (Fase 6).
+    ///   <see cref="GameStateMachine"/> y la pantalla de Game Over en la UI (<c>UIManager</c>).
     /// - El progreso se guarda en JSON (<see cref="SaveSystem"/>): al completar un nivel, al
     ///   activar un checkpoint, al volver al menú y al cerrar el juego.
     /// </summary>
@@ -28,6 +28,7 @@ namespace Fragmentum.Core
         [SerializeField] private LevelDatabase baseDeDatos;
 
         private PlayerController _jugadorEnganchado;
+        private Vector2 _inicioJugador;
         private bool _escenaInicialProcesada;
 
         public static GameManager Instancia { get; private set; }
@@ -51,6 +52,9 @@ namespace Fragmentum.Core
         public event Action<LevelData> OnNivelCompletado;
         public event Action<FragmentoData> OnFragmentoObtenido;
         public event Action OnProgresoCambiado;
+
+        /// <summary>Cambió el jugador de la escena (null si la escena no tiene). Lo escucha el HUD.</summary>
+        public event Action<PlayerController> OnJugadorRegistrado;
 
         private void Awake()
         {
@@ -169,12 +173,28 @@ namespace Fragmentum.Core
             OnProgresoCambiado?.Invoke();
         }
 
-        /// <summary>Guarda el checkpoint activado (lo llamará el CheckpointManager, Fase 6).</summary>
+        /// <summary>Guarda el checkpoint activado. Lo llama el CheckpointManager.</summary>
         public void RegistrarCheckpoint(string checkpointId)
         {
             Datos.checkpoint = new DatosCheckpoint { nivelId = NivelActual != null ? NivelActual.id : 0, checkpointId = checkpointId };
             Guardar();
         }
+
+        /// <summary>Olvida el checkpoint guardado: «Reiniciar nivel» vuelve al principio.</summary>
+        public void BorrarCheckpoint()
+        {
+            if (Datos.checkpoint.Vacio)
+            {
+                return;
+            }
+
+            Datos.checkpoint = new DatosCheckpoint();
+            Guardar();
+        }
+
+        /// <summary>El checkpoint guardado si pertenece a ese nivel; si no, null.</summary>
+        public DatosCheckpoint CheckpointDe(LevelData nivel) =>
+            nivel != null && !Datos.checkpoint.Vacio && Datos.checkpoint.nivelId == nivel.id ? Datos.checkpoint : null;
 
         /// <summary>Habilidades guardadas, ya convertidas a su enum (las desconocidas se ignoran).</summary>
         public List<HABILIDADES> HabilidadesGuardadas()
@@ -195,24 +215,40 @@ namespace Fragmentum.Core
 
         /// <summary>
         /// Engancha al jugador de la escena: le aplica el progreso y las reglas del nivel y
-        /// convierte su muerte en un evento global. Se llama sola al cargar cada escena; el
-        /// LevelManager (Fase 6) la llamará tras hacer aparecer al jugador.
+        /// convierte su muerte en un evento global. Se llama sola al cargar cada escena (el
+        /// LevelManager hace aparecer al jugador antes, en su Awake).
         /// </summary>
         public void RegistrarJugador(PlayerController jugador)
         {
             SoltarJugador();
             _jugadorEnganchado = jugador;
-            if (jugador == null)
+            if (jugador != null)
+            {
+                _inicioJugador = jugador.transform.position;
+                if (jugador.Vida != null)
+                {
+                    jugador.Vida.OnMuerte += AlMorirJugador;
+                }
+
+                AplicarProgresoAlJugador();
+            }
+
+            OnJugadorRegistrado?.Invoke(jugador);
+        }
+
+        /// <summary>
+        /// Red de seguridad del reintento: si tras pedirlo el jugador sigue muerto (la escena no
+        /// tiene LevelManager), se le revive donde apareció. Nunca se queda el juego atascado.
+        /// </summary>
+        public void RevivirJugadorSiSigueMuerto()
+        {
+            if (_jugadorEnganchado == null || _jugadorEnganchado.EstaVivo)
             {
                 return;
             }
 
-            if (jugador.Vida != null)
-            {
-                jugador.Vida.OnMuerte += AlMorirJugador;
-            }
-
-            AplicarProgresoAlJugador();
+            Debug.LogWarning("[GameManager] Nadie hizo reaparecer al jugador (¿falta el LevelManager en la escena?): se le revive donde empezó.", _jugadorEnganchado);
+            _jugadorEnganchado.Revivir(_inicioJugador);
         }
 
         private void AlCargarEscena(Scene escena, LoadSceneMode modo)
@@ -225,14 +261,14 @@ namespace Fragmentum.Core
             _escenaInicialProcesada = true;
             NivelActual = baseDeDatos != null ? baseDeDatos.PorEscena(escena.name) : null;
 
-            var objeto = GameObject.FindGameObjectWithTag(GameTags.Player);
-            RegistrarJugador(objeto != null ? objeto.GetComponent<PlayerController>() : null);
+            // Solo en la escena que entra: en una carga asíncrona aún puede quedar la anterior.
+            RegistrarJugador(PlayerController.BuscarEnEscena(escena));
 
             if (NivelActual != null)
             {
                 if (_jugadorEnganchado == null)
                 {
-                    Debug.LogWarning($"[GameManager] El nivel '{NivelActual.Titulo}' no tiene jugador en la escena. Arrastra Prefabs/Player.prefab (en la Fase 6 lo hará el LevelManager).");
+                    Debug.LogWarning($"[GameManager] El nivel '{NivelActual.Titulo}' no tiene jugador. Prepara la escena con Fragmentum → Niveles → Preparar la escena de nivel abierta (añade el LevelManager, que lo hace aparecer).");
                 }
 
                 OnNivelIniciado?.Invoke(NivelActual);

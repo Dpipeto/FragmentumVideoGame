@@ -49,3 +49,7 @@ MonoBehaviour:
     desdeX: 55
     hastaX: 80
     contenido: "Sala cerrada de 60 \xD7 15 u, plataformas a 3 alturas y lava en el suelo."
+  puntosDeControl:
+  - 40
+  acento: {r: 1, g: 0.41960785, b: 0.20784314, a: 1}
+  cita: la rabia consume al que la niega

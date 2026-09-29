@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.5 — Fase 5, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.6 — Fase 6, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,10 +14,19 @@ Ordenado por urgencia.
 | N3 | **Recorta las poses de Kael** de `Referencias/Arte/posiblesanimaciiones kael.jpeg`. | El jugador ya tiene todos sus estados; hoy se ve como una cápsula clara. | Un PNG por pose con fondo transparente, a 32 px por unidad (el cuerpo mide 0,8 × 1,8 u, es decir, unos 26 × 58 px). Detalle en el apartado B3. |
 | N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
 | N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos` y `fase-5-progresion` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion` y `fase-6-flujo-nivel` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
 | N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
 | N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael: PNG con fondo transparente, a 32 px por unidad, pivote en los pies. Detalle en el apartado B4. |
-| N9 | **Prueba el flujo completo desde `Assets/Scenes/Menu_Inicial.unity`.** | Menú, selector, guardado, pausa y fin de nivel ya funcionan juntos (Fase 5). | Sigue la lista «Qué probar a mano» de la Fase 5 en `CHANGELOG.md`. En el Nivel 1, F9 completa el nivel y Esc pausa. |
+| N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`.** | Menú, selector, guardado, checkpoints, pausa, Game Over y fin de nivel ya funcionan juntos (Fases 5 y 6). | Sigue las listas «Qué probar a mano» de las Fases 5 y 6 en `CHANGELOG.md`. Dime qué pantalla no se entiende o qué se siente mal. |
+| N10 | **Pinta el layout del Nivel 1** (~80 u, Anexo A) cuando quieras. | Hoy se juega sobre un recorrido provisional de bloques. | Pasos en «Pasos manuales en el Editor» de la Fase 6: preparar el tilemap como suelo, borrar «Provisional» y ajustar la altura de la bandera y la salida. No bloquea: la Fase 9 lo necesita, la 7 y la 8 no. |
+
+## Revisión 0.6: qué cambió respecto de la v0.5
+
+- **El Nivel 1 se juega de principio a fin** (Fase 6). Tiene jugador, checkpoint en x = 40, salida al final y un recorrido provisional con dos enemigos de la Ira, que se borra al pintar el nivel.
+- **Hay pausa (Esc o Start), Game Over y fin de nivel**, con la estética de la maqueta `Referencias/Menus`. La viñeta y el icono de pausa se generan por código: ya no hacen falta como assets (B9).
+- **Nuevo N10:** pintar el layout del Nivel 1. N9 pasa a ser «juega el Nivel 1 de principio a fin».
+- **Checkpoint y salida** tienen un aspecto provisional: una bandera que se tiñe y un portal translúcido (B10).
+- **La música** de cada nivel se asigna en su `LevelData`. Hoy ninguno tiene, así que suenan en silencio (B8).
 
 ## Revisión 0.5: qué cambió respecto de la v0.4
 
@@ -236,7 +245,7 @@ escena, en ese orden. Un nivel sin escena aparece «en construcción» en el sel
 |---|---|---|---|---|
 | `Menu_Inicial` | ✔ generada | ✔ (0) | Fondo y logo (hoy, texto sobre color liso) | P3 |
 | `Niveles` (selector) | ✔ generada | ✔ (1) | Íconos por mundo (B9) | P3 |
-| `Nivel1` (Ira) | ✔, casi vacía: 2 tiles pintados, sin suelo que colisione, sin jugador | ✔ (2) | Pintar el layout de ~80 u del Anexo A. El jugador, el checkpoint y la salida los colocan las Fases 6 y 9. | P1 |
+| `Nivel1` (Ira) | ✔ Preparada (Fase 6): `LevelManager`, checkpoint en x = 40, salida en x = 78, zona mortal y recorrido provisional con un Soldado de lava y el Golem de Ceniza. Solo tiene 2 tiles pintados. | ✔ (2) | Pintar el layout de ~80 u del Anexo A (N10) y, en la Fase 9, sus mecánicas: plataformas inestables, lava y torreta. | P1 |
 | Nivel 2 (Tristeza) | ✗ | ✗ | Escena esqueleto (Fase 10) | P2 |
 | Nivel 3 (Miedo) | ✗ | ✗ | idem | P2 |
 | Nivel 4 (Culpa) | ✗ | ✗ | idem | P2 |
@@ -244,8 +253,8 @@ escena, en ese orden. Un nivel sin escena aparece «en construcción» en el sel
 | Nivel final | ✗ | ✗ | idem | P2 |
 
 Para añadir la escena de un nivel: arrástrala al campo `escena` de su asset en
-`Assets/Data/Niveles` y pulsa «Configurar Build Settings desde esta base de datos» en el inspector
-de la `LevelDatabase`.
+`Assets/Data/Niveles`, pulsa «Configurar Build Settings desde esta base de datos» en el inspector
+de la `LevelDatabase` y ejecuta *Fragmentum → Niveles → Preparar la escena de nivel abierta*.
 
 ### B7. Tilesets y fondos por nivel — `LevelData.paleta` / escenas
 
@@ -260,10 +269,14 @@ de la `LevelDatabase`.
 
 ### B8. Audio — `LevelData.musica`, `AudioManager` *(propuesto)*
 
+**Estado en la v2 (Fase 6).** El `LevelManager` toca en bucle el clip del campo `musica` del
+`LevelData`. Si el campo está vacío, avisa por consola y el nivel suena en silencio. Hoy no hay
+ningún clip importado en la v2.
+
 | Asset | Existe | Prioridad |
 |---|---|---|
-| Música del menú | ✔ `Music/MainMenu.mp3` (asignada en `Menu_Inicial`) | — |
-| Música del Nivel 1 | ✔ `Music/level1.mp3` (asignada en `Level1`). **Verificar** si cumple el Anexo A (industrial, ~160 BPM). | — |
+| Música del menú | En la v1: `Music/MainMenu.mp3`. Falta importarla en la v2 y darle un `AudioSource` al menú. | P3 |
+| Música del Nivel 1 | En la v1: `Music/level1.mp3`. Para usarla, impórtala y arrástrala al campo `musica` de `Assets/Data/Niveles/L1_Ira`. **Verificar** si cumple el Anexo A (industrial, ~160 BPM). | P1 |
 | Música de los niveles 2, 3, 4 y 5 | ✗ | P2 |
 | Música del final en 3 fases | ✗ | P2 |
 | Temas de jefe (Centinela, Doncella, Espectro, Juez) | ✗ | Centinela P1, resto P2 |
@@ -275,9 +288,10 @@ de la `LevelDatabase`.
 
 | Asset | Sistema | Existe | Prioridad |
 |---|---|---|---|
-| Viñeta en gradiente radial (pausa y Game Over) | `UIManager` | Maqueta en `Referencias/Menus/` | P3 |
-| Ícono de pausa | `UIManager` | ✗ | P3 |
-| Materiales de glow para TMP | `UIManager` | ✗ | P3 |
+| Viñeta en gradiente radial (pausa y Game Over) | `UIManager` | ✔ Se genera por código (`FabricaUI.Vineta`) | — |
+| Ícono de pausa | `MenuPausa` | ✔ Dos barras generadas por código | — |
+| Brillo (glow) de la opción seleccionada, como en la maqueta | `UIManager` | ✗ Hoy la opción seleccionada toma el color de acento, sin halo. El halo necesita TextMeshPro (fila de abajo). | P3 |
+| Escena animada de fondo por mundo (los SVG de la maqueta) | `MenuPausa` | ✗ Detrás del velo se ve el propio nivel congelado, que cumple la misma función. | P3 |
 | Íconos por mundo para el selector (×6) + candado | `SelectorNivel` → `LevelData.icono` | ✗ | P2 |
 | Íconos de los 5 fragmentos de identidad | Pantalla «yo reconstruido» | ✗ | P2 |
 | Arte de la pantalla «yo reconstruido» | idem | ✗ | P2 |
@@ -295,7 +309,8 @@ de la `LevelDatabase`.
 | Plataforma que se desmorona | `PlatformCrumble` | Candidato: `Pixel Adventure 1/Traps/Falling Platforms` | P1 |
 | Plataforma de combustión (estado caliente) | `HotPlatform` | Candidato: `FireSet` + tinte | P1 |
 | Lava (animada) | `Lava` | ✔ `Top Down Lava…/Burning Lava`, `Tiles/Lava.prefab`, `lava2.prefab` | P1 |
-| Checkpoint | `CheckpointManager` | ✔ `Pixel Adventure 1/Items/Checkpoints` (bandera) y `tileset/Puerta/respawn point_*` | P1 |
+| Checkpoint | `Checkpoint` (Fase 6) | Provisional: un mástil y un paño que se tiñe con el acento del mundo al activarse. Candidatos de la v1: `Pixel Adventure 1/Items/Checkpoints` (bandera animada) y `tileset/Puerta/respawn point_*`. El sprite va en `Nivel/Checkpoints/L1_CP1/Pano` (campo `indicador` del `Checkpoint`). | P1 |
+| Salida del nivel | `SalidaNivel` (Fase 6) | Provisional: un portal translúcido del color de acento. Falta decidir su aspecto; en los niveles con jefe (Fase 7) puede bastar la puerta de la arena. | P2 |
 | VFX del ataque cargado | modificador de `ATTACK` | ✗ | P1 |
 | Estela del dash | `DASH` | ✗ | P3 |
 | Material semitransparente de la sombra de eco | `EchoRecorder` | ✗ (sirve un `SpriteRenderer` con alfa) | P2 |
@@ -324,6 +339,7 @@ de la `LevelDatabase`.
 
 ## Historial
 
+- **0.6 (2026-09-29)** — Fase 6 (flujo de nivel). Nuevo N10 (pintar el Nivel 1), N9 ampliado, y B6, B8, B9 y B10 al día con el checkpoint, la salida, la música por `LevelData` y la UI de la maqueta.
 - **0.5 (2026-09-29)** — Fase 5 (progresión). N2 resuelta, nuevo N9, apartado B6 reescrito para la v2 y nota sobre TextMeshPro en B9.
 - **0.4 (2026-09-28)** — Fase 4 (enemigos). Apartado B4 reescrito para la v2; nuevos N7 (probar `PruebaEnemigos`) y N8 (arte de enemigos).
 - **0.3 (2026-09-28)** — Fase 3 (jugador). Nueva sección «Lo que necesito de ti», apartado B3 reescrito para la v2 y corrección de la convención de escala y de la tabla de decisiones, que se habían quedado desfasadas.

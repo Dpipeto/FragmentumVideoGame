@@ -38,9 +38,15 @@ namespace Fragmentum.UI
             }
         }
 
+        /// <summary>
+        /// Si está activa, busca sola al jugador cuando no se le asigna la vida. El HUD de los
+        /// niveles la desactiva: se la pasa con <see cref="Vincular"/> cuando aparece el jugador.
+        /// </summary>
+        public bool BuscarJugador { get; set; } = true;
+
         private void OnEnable()
         {
-            if (vida == null)
+            if (vida == null && BuscarJugador)
             {
                 var jugador = GameObject.FindGameObjectWithTag(GameTags.Player);
                 vida = jugador != null ? jugador.GetComponent<Health>() : null;
@@ -48,7 +54,41 @@ namespace Fragmentum.UI
 
             if (vida == null)
             {
-                Debug.LogWarning("[LifeBar] No hay vida asignada ni jugador con el tag Player. La barra no se actualizará.", this);
+                if (BuscarJugador)
+                {
+                    Debug.LogWarning("[LifeBar] No hay vida asignada ni jugador con el tag Player. La barra no se actualizará.", this);
+                }
+
+                return;
+            }
+
+            Suscribir();
+
+            // Al reactivarse (el HUD se oculta en los menús) se repinta con la vida de ahora.
+            vida.NotificarVida();
+        }
+
+        private void OnDisable() => Desuscribir();
+
+        /// <summary>Asigna la imagen de relleno a una barra creada por código (HUD de los niveles).</summary>
+        public void FijarRelleno(Image imagen) => relleno = imagen;
+
+        /// <summary>Muestra otra vida (por ejemplo, la del jugador que acaba de aparecer).</summary>
+        public void Vincular(Health nueva)
+        {
+            Desuscribir();
+            vida = nueva;
+            if (vida != null && isActiveAndEnabled)
+            {
+                Suscribir();
+                vida.NotificarVida();
+            }
+        }
+
+        private void Suscribir()
+        {
+            if (_suscrito)
+            {
                 return;
             }
 
@@ -56,7 +96,7 @@ namespace Fragmentum.UI
             _suscrito = true;
         }
 
-        private void OnDisable()
+        private void Desuscribir()
         {
             if (_suscrito && vida != null)
             {

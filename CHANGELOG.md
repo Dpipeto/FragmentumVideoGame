@@ -9,6 +9,197 @@
 
 ---
 
+## Fase 6 — Flujo de nivel (2026-09-29)
+
+Rama `fase-6-flujo-nivel`, que sale de `fase-5-progresion`. Cierra la tarea D con el
+`LevelManager` (D5) y los checkpoints (D8). Criterio de aceptación: el Nivel 1 se juega de
+principio a fin con checkpoints.
+
+### 1. Morir obligaba a repetir el nivel entero
+
+- **Problema.** En la v1, la única salida del Game Over era la tecla R, que recargaba la escena
+  desde el principio. En un juego de plataformas con daño por contacto, cada error costaba el
+  nivel completo.
+- **Causa.** No existía ningún punto de control ni nada que supiera dónde reaparecer.
+- **Solución.**
+  - **`Checkpoint`**: al tocarlo, pasa a ser el activo, se guarda en la partida y el HUD avisa
+    («Punto de control»). Tiene un id estable, que es lo que se guarda.
+  - **`CheckpointManager`**: encuentra solo los checkpoints de su escena, lleva el activo y
+    decide el punto de reaparición. Si el checkpoint guardado ya no existe, avisa y empieza
+    desde el inicio.
+  - **Reintentar** devuelve al jugador vivo al último checkpoint sin recargar la escena.
+  - **Continuar** otro día también empieza en el checkpoint guardado.
+  - **Reiniciar nivel** olvida el checkpoint y empieza desde el principio.
+  - Lo verifican `CheckpointManagerTests`, `TocarElCheckpoint_LoActivaYGuardaLaPartida`,
+    `Morir_MuestraElGameOver_YReintentarVuelveAlCheckpoint`,
+    `Continuar_EmpiezaEnElCheckpointGuardado` y
+    `ReiniciarNivel_OlvidaElCheckpoint_YEmpiezaDesdeElInicio`.
+
+### 2. Cada escena de nivel se montaba a mano
+
+- **Problema.** En la v1, cada nivel llevaba su propio jugador, su cámara con el jugador
+  asignado a mano y su música. Un nivel nuevo exigía repetir todo eso, y cualquier olvido lo
+  rompía.
+- **Causa.** No había ningún componente que aplicara a la escena los datos del nivel.
+- **Solución.** **`LevelManager`**, uno por escena de nivel (patrón Type Object: la escena lee su
+  `LevelData`):
+  - Usa el jugador que haya en la escena o instancia el prefab. Si hay un checkpoint guardado de
+    ese nivel, lo coloca ahí.
+  - La cámara sigue al jugador, con límites calculados desde las secciones del Anexo A, y su
+    fondo toma el color más oscuro de la paleta.
+  - Toca la música del `LevelData`. Si no hay, avisa por consola y el nivel suena en silencio.
+  - Fuera de los niveles del juego (escenas de prueba) no hay Game Over, así que hace reaparecer
+    al jugador tras una espera. Sustituye a la `ReaparicionSimple` provisional de la Fase 3.
+  - Lo verifica `EntrarEnElNivel_ApareceUnSoloJugadorEnElInicio_ConHudYCamara`.
+
+### 3. La pausa y el Game Over rompían el tiempo del juego
+
+- **Problema.** En la v1:
+  - Volver al menú desde la pausa lo dejaba congelado: `Pause` cargaba el menú sin restaurar
+    `Time.timeScale`.
+  - El Game Over no detenía el juego: los enemigos seguían moviéndose detrás del panel.
+  - Se manejaba con las teclas R y M, leídas en el `Update` del `GameManager`.
+  - Esc seguía pausando y reanudando durante el Game Over.
+- **Causa.** Cada pantalla escribía el tiempo y cargaba escenas por su cuenta, y la UI del Game
+  Over vivía dentro del `GameManager`.
+- **Solución.** **`UIManager`**, persistente como el resto de los sistemas, muestra la pantalla
+  que corresponde a cada estado de la FSM global: HUD al jugar, `MenuPausa` en PAUSED,
+  `PantallaGameOver` en GAME_OVER y `PantallaFinNivel` en LEVEL_COMPLETE.
+  - Las pantallas no tocan el tiempo ni cargan escenas: cada opción es una petición a la FSM
+    global, que ya era la única dueña de las dos cosas (Fase 5).
+  - La pausa es la acción `Game/Pause` del asset de input (Esc o Start). Solo actúa jugando o en
+    pausa.
+  - Se navegan con ratón, teclado o mando: al abrirse, queda seleccionada la primera opción.
+  - Siguen la maqueta `Referencias/Menus/fragmentum_pause_worlds.jsx`: velo oscuro con el tono del
+    mundo, viñeta, esquinas y separador del color de acento, el mundo en números romanos
+    («I · FORTALEZA VOLCÁNICA»), su jefe y su frase. La viñeta y el icono de pausa se generan por
+    código, sin necesidad de assets.
+  - El Game Over dice dónde se reaparecerá: en el último checkpoint o al principio.
+  - Lo verifican `Pausa_MuestraElMenu_YContinuarReanuda` y la espera de 2 s sin que el Game Over ni
+    el fin de nivel avancen solos.
+
+### 4. No había forma de terminar un nivel
+
+- **Problema.** En la v1 ningún nivel tenía final: no existía victoria, ni fin de nivel, ni paso
+  al siguiente mundo.
+- **Causa.** No había condición de victoria ni pantalla que la mostrara.
+- **Solución.**
+  - **`SalidaNivel`**: al cruzarla, el `LevelManager` declara la victoria. En la Fase 7 también la
+    declarará la derrota del jefe.
+  - La FSM global otorga el fragmento y la habilidad (Fase 5).
+  - **`PantallaFinNivel`** muestra el fragmento integrado y la habilidad nueva. «Continuar» lleva
+    al siguiente mundo, o al selector si ese mundo aún está en construcción.
+  - Lo verifica `CruzarLaSalida_CompletaElNivel_YContinuarLlevaAlSelector`.
+
+### 5. El Nivel 1 no se podía jugar
+
+- **Problema.** La escena `Nivel1` tenía 2 tiles pintados, ningún suelo que colisionara y ningún
+  jugador.
+- **Causa.** El pintado del layout es trabajo de la Fase 9 (y tuyo en el Editor).
+- **Solución.** **`PreparadorNivel`** (*Fragmentum → Niveles → Preparar la escena de nivel
+  abierta*) añade a una escena de nivel lo que le falte y nunca toca lo que ya hay:
+  - el `LevelManager` y el punto de inicio;
+  - los checkpoints (en el Nivel 1, el de x = 40 del Anexo A);
+  - la salida al final de la última sección;
+  - la zona mortal;
+  - el seguimiento de la cámara.
+
+  Si la escena no tiene suelo que colisione, añade además un **recorrido provisional**: suelo con
+  un foso tras cada cambio de sección, una plataforma por sección, paredes en los extremos y un
+  enemigo del mundo por sección. En el Nivel 1 son un Soldado de lava y, tras el checkpoint, el
+  Golem de Ceniza. Todo eso va dentro del objeto «Provisional (bórralo al pintar el nivel)».
+
+  La herramienta es idempotente: ejecutarla otra vez no cambia nada, y la escena solo se guarda
+  si cambió. *Regenerar todo* prepara todas las escenas de nivel de la `LevelDatabase`. Lo
+  verifica `EscenasNivelTests`.
+
+### Decisiones que ajustan el plan de la Fase 1
+
+1. **Las pantallas y el HUD se construyen por código** dentro del `UIManager` (con `FabricaUI`),
+   en lugar de un prefab de UI por escena. No hay referencias de Inspector que puedan quedar
+   rotas, y el estilo se cambia en un solo sitio. El HUD es persistente y solo se muestra en los
+   niveles del juego; las escenas de prueba conservan el suyo.
+2. **PLAYING → GAME_OVER llega 1 s después de la muerte**, para que se vea caer al jugador. La
+   espera vive en el estado PLAYING y el diagrama la recoge.
+3. **Reintentar no recarga la escena:** el jugador vuelve al checkpoint y los enemigos siguen como
+   estaban. Reiniciar sí recarga, y además olvida el checkpoint. Entrar en un nivel desde
+   «Continuar» o desde el selector empieza en el checkpoint guardado de ese nivel.
+4. **Nuevo mapa de input `Game`** con la acción `Pause` (Esc o Start), separado de `Player`. Así
+   la pausa funciona aunque el input del jugador esté bloqueado o su mapa desactivado.
+5. **`LevelData` añade** `puntosDeControl` (guía del Anexo A para preparar la escena), `acento` y
+   `cita` (la maqueta de los menús). Se completan también en los assets que ya existían, sin
+   pisar lo editado a mano.
+6. **Se elimina `ReaparicionSimple`.** Las escenas de prueba usan el `LevelManager`, sin Game
+   Over.
+
+### Además
+
+- **El clic que pulsa «Continuar» ya no ataca.** El clic izquierdo y Enter son también el ataque,
+  así que el input de juego ignora el fotograma en que se sale de un menú
+  (`EventosJuego.EntradaIgnorada`).
+- **EventSystem:** el `UIManager` trae uno propio y solo lo activa si la escena no tiene otro. Los
+  niveles no necesitan el suyo y el menú no tiene dos.
+- **El jugador se busca en la escena que entra** (`PlayerController.BuscarEnEscena`), no con un
+  `FindGameObjectWithTag` global. Durante una carga asíncrona conviven la escena que entra y la
+  que sale.
+- **Red de seguridad del reintento:** si tras reintentar el jugador sigue muerto (una escena sin
+  `LevelManager`), el `GameManager` lo revive donde apareció y avisa por consola.
+- **`AtajosDepuracion`** pierde Esc, que ahora es la pausa real; conserva F9 (completar nivel) y
+  F10 (menú).
+- **Regenerar todo en batch ya no reescribe las escenas de prueba que existen.** Al regenerarlas,
+  Unity cambiaba todos sus identificadores internos y git las mostraba cambiadas por completo
+  (unas 5000 líneas) sin que cambiara nada. `verificar.ps1 -Unity -Forzar` y el menú del Editor
+  sí las regeneran.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **134 de 134 correctas** (21 nuevas: checkpoints, datos de la interfaz, la
+  escena del Nivel 1 y la herramienta que la prepara).
+- Pruebas PlayMode: **47 de 47 correctas** (8 nuevas de flujo de nivel sobre la escena real del
+  Nivel 1; las de progresión se adaptaron a que el Nivel 1 ya trae jugador y pantallas).
+- Las pruebas encontraron dos fallos de la propia herramienta antes del commit:
+  - **Enemigos genéricos en lugar de los de la Ira.** Al preparar varias escenas seguidas, abrir
+    cada una en modo `Single` descarga los assets sin uso. La referencia a la emoción del nivel,
+    cargada antes, pasaba a valer `null`. Ahora el `LevelData` se vuelve a cargar después de abrir
+    su escena.
+  - **Dos enemigos con la misma ruta.** La raíz de todas las variantes de enemigo se llama
+    «Enemigo». Ahora cada uno toma el nombre de su prefab y tiene su propia ruta.
+
+### Pasos manuales en el Editor
+
+Ninguno obligatorio. La escena `Nivel1` ya está preparada y el `UIManager` está en
+`Resources/Sistemas.prefab`.
+
+- **Cuando pintes el Nivel 1** (Fase 9):
+  1. Selecciona el Tilemap y ejecuta *Fragmentum → Jugador → Preparar tilemap seleccionado como
+     suelo*.
+  2. Borra el objeto «Provisional (bórralo al pintar el nivel)».
+  3. Si el suelo no queda a la altura y = 0, sube o baja `Nivel/Inicio`, la bandera de
+     `Nivel/Checkpoints` y `Nivel/Salida`.
+- **Para añadir un checkpoint:** duplica `Nivel/Checkpoints/L1_CP1`, muévelo y cámbiale el `Id`
+  (por ejemplo, `L1_CP2`). Dos checkpoints con el mismo id generan un aviso en la consola.
+- **Para poner música a un nivel:** arrastra el clip al campo `musica` de su asset en
+  `Assets/Data/Niveles`.
+
+### Qué probar a mano (desde `Menu_Inicial`, «Nueva partida»)
+
+- El jugador aparece a la izquierda. Arriba a la izquierda está la vida con «I · FORTALEZA
+  VOLCÁNICA», y arriba a la derecha, las monedas.
+- **Esc** abre la pausa con el acento naranja de la Ira y «la rabia consume al que la niega».
+  ↑↓ y Enter funcionan, y Esc reanuda. Al reanudar con un clic, el jugador no lanza un ataque.
+- Cae en el foso de x ≈ 28: tras un segundo aparece «HAS CAÍDO». «Reintentar» te devuelve al
+  inicio.
+- Toca la bandera de x = 40: se tiñe y aparece «Punto de control». Si mueres ahora, reapareces
+  en la bandera, junto al Golem de Ceniza.
+- Pausa, «Menú principal» y luego «Continuar»: empiezas en la bandera.
+- Pausa y «Reiniciar»: vuelves al principio y la bandera está apagada.
+- Cruza el portal del final (x = 78): «MUNDO SUPERADO», el Fragmento de la Ira y el Ataque
+  Cargado. «Continuar» lleva al selector, porque el mundo 2 está en construcción.
+
+---
+
 ## Fase 5 — Progresión, guardado y FSM global (2026-09-28)
 
 Rama `fase-5-progresion`, que sale de `fase-4-enemigos`. Cubre la tarea D (salvo el

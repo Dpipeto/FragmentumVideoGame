@@ -5,11 +5,13 @@ using UnityEngine.InputSystem;
 namespace Fragmentum.Core
 {
     /// <summary>
-    /// Atajos para probar el flujo de juego antes de que existan la salida de nivel (Fase 6)
-    /// y los jefes (Fase 7). Solo funcionan en el Editor y en builds de desarrollo.
-    /// - Esc: pausa y reanuda.
+    /// Atajos para probar el flujo de juego antes de que existan los jefes (Fase 7). Solo
+    /// funcionan en el Editor y en builds de desarrollo.
     /// - F9: completa el nivel actual (otorga su fragmento y su habilidad).
     /// - F10: vuelve al menú.
+    ///
+    /// La pausa (Esc o Start) ya no es un atajo: la lleva el <c>UIManager</c> con la acción
+    /// <c>Game/Pause</c> del asset de input.
     ///
     /// Se comprueba <see cref="Debug.isDebugBuild"/> en lugar de la directiva
     /// <c>DEVELOPMENT_BUILD</c>, que Unity 6000.6 marca como obsoleta (aviso UAC0009).
@@ -31,12 +33,6 @@ namespace Fragmentum.Core
             if (teclado == null || juego == null)
             {
                 return;
-            }
-
-            if (teclado.escapeKey.wasPressedThisFrame &&
-                (juego.EstadoActual == ESTADOS_JUEGO.PLAYING || juego.EstadoActual == ESTADOS_JUEGO.PAUSED))
-            {
-                juego.AlternarPausa();
             }
 
             if (teclado.f9Key.wasPressedThisFrame && juego.EstadoActual == ESTADOS_JUEGO.PLAYING)

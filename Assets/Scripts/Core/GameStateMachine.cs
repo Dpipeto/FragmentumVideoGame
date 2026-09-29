@@ -16,8 +16,8 @@ namespace Fragmentum.Core
     /// llaman a la API de esta clase, y cada llamada pasa por el <c>TransitionTo</c> del núcleo
     /// y su tabla, igual que en el jugador y los enemigos.
     ///
-    /// Los estados avisan de sus cambios con <see cref="OnStateChanged"/>; la UI (Fase 6)
-    /// decidirá con ese evento qué lienzo mostrar.
+    /// Los estados avisan de sus cambios con <see cref="OnStateChanged"/>; con ese evento el
+    /// <c>UIManager</c> decide qué pantalla mostrar (HUD, pausa, Game Over o fin de nivel).
     /// </summary>
     [DeclaraFSM("Juego")]
     [DisallowMultipleComponent]
@@ -26,8 +26,11 @@ namespace Fragmentum.Core
     {
         public const string GrupoEnNivel = "EN_NIVEL";
 
-        [Tooltip("Sin pantalla de Game Over o de fin de nivel (llegan en la Fase 6), segundos antes de continuar solos.")]
+        [Tooltip("Sin pantalla de Game Over o de fin de nivel (falta el UIManager), segundos antes de continuar solos.")]
         [SerializeField] private float esperaSinPantalla = 1.5f;
+
+        [Tooltip("Segundos entre la muerte del jugador y el Game Over, para que se vea caer.")]
+        [SerializeField] private float esperaGameOver = 1f;
 
         [Header("Depuración")]
         [SerializeField] private ESTADOS_JUEGO currentState;
@@ -36,13 +39,14 @@ namespace Fragmentum.Core
         private TablaTransiciones<ESTADOS_JUEGO> _tabla;
         private SceneLoader _cargador;
         private string _escenaDestino;
+        private float _muerteEn = float.NaN;
 
         public static GameStateMachine Instancia { get; private set; }
 
-        /// <summary>Lo activará la pantalla de Game Over al existir (Fase 6).</summary>
+        /// <summary>Lo activa el UIManager cuando crea la pantalla de Game Over.</summary>
         public static bool HayPantallaGameOver { get; set; }
 
-        /// <summary>Lo activará la pantalla de fin de nivel al existir (Fase 6).</summary>
+        /// <summary>Lo activa el UIManager cuando crea la pantalla de fin de nivel.</summary>
         public static bool HayPantallaFinNivel { get; set; }
 
         public event Action<ESTADOS_JUEGO, ESTADOS_JUEGO> OnStateChanged;
@@ -57,6 +61,9 @@ namespace Fragmentum.Core
 
         /// <summary>Nivel que se está cargando o que se continuará tras LEVEL_COMPLETE.</summary>
         public LevelData NivelDestino { get; private set; }
+
+        /// <summary>El jugador murió en un nivel y ya pasó la espera: toca el Game Over.</summary>
+        internal bool GameOverPendiente => !float.IsNaN(_muerteEn) && Time.unscaledTime - _muerteEn >= esperaGameOver;
 
         private static LevelDatabase BaseDeDatos => GameManager.Instancia != null ? GameManager.Instancia.BaseDeDatos : null;
 
@@ -92,7 +99,7 @@ namespace Fragmentum.Core
                 .Permitir(PLAYING, CUTSCENE, "memoria, jefe o cierre del mundo")
                 .Permitir(CUTSCENE, PLAYING, "termina una cinemática de entrada o de memoria")
                 .Permitir(CUTSCENE, LEVEL_COMPLETE, "termina la cinemática de cierre")
-                .Permitir(PLAYING, GAME_OVER, "el jugador muere en un nivel")
+                .Permitir(PLAYING, GAME_OVER, "el jugador muere en un nivel (tras 1 s)")
                 .Permitir(GAME_OVER, PLAYING, "reintentar desde el checkpoint")
                 .Permitir(GAME_OVER, LOADING, "reiniciar el nivel o volver al menú")
                 .Permitir(PLAYING, LEVEL_COMPLETE, "victoria sin cinemática de cierre")
@@ -140,6 +147,11 @@ namespace Fragmentum.Core
             _maquina.OnStateChanged += (anterior, nuevo) =>
             {
                 currentState = nuevo;
+                if (nuevo == ESTADOS_JUEGO.GAME_OVER || nuevo == ESTADOS_JUEGO.LOADING)
+                {
+                    _muerteEn = float.NaN;
+                }
+
                 OnStateChanged?.Invoke(anterior, nuevo);
             };
         }
@@ -222,12 +234,27 @@ namespace Fragmentum.Core
             return nivel != null ? JugarNivel(nivel) : IrAlSelector();
         }
 
-        /// <summary>Reinicia el nivel actual desde el principio (pausa o Game Over).</summary>
+        /// <summary>
+        /// Reinicia el nivel actual desde el principio (pausa o Game Over): olvida el checkpoint
+        /// y vuelve a cargar la escena.
+        /// </summary>
         public bool ReiniciarNivel()
         {
-            var nivel = GameManager.Instancia != null ? GameManager.Instancia.NivelActual : null;
-            return CargarEscena(SceneManager.GetActiveScene().name, ESTADOS_JUEGO.PLAYING, nivel);
+            var gestor = GameManager.Instancia;
+            var nivel = gestor != null ? gestor.NivelActual : null;
+            var cargando = CargarEscena(SceneManager.GetActiveScene().name, ESTADOS_JUEGO.PLAYING, nivel);
+
+            // La escena se carga en diferido: el LevelManager nuevo ya no encontrará el checkpoint.
+            if (cargando && gestor != null)
+            {
+                gestor.BorrarCheckpoint();
+            }
+
+            return cargando;
         }
+
+        /// <summary>¿Se puede reiniciar el nivel actual? (La escena tiene que estar en Build Settings.)</summary>
+        public bool PuedeReiniciar() => Puede(ESTADOS_JUEGO.LOADING) && SceneLoader.PuedeCargar(SceneManager.GetActiveScene().name);
 
         public bool Pausar() => Transitar(ESTADOS_JUEGO.PAUSED);
 
@@ -368,13 +395,23 @@ namespace Fragmentum.Core
             return _maquina.TransitionTo(destino);
         }
 
+        /// <summary>Tras el reintento: si nadie hizo reaparecer al jugador, lo revive el GameManager.</summary>
+        internal void AsegurarJugadorVivo()
+        {
+            if (GameManager.Instancia != null)
+            {
+                GameManager.Instancia.RevivirJugadorSiSigueMuerto();
+            }
+        }
+
         private void AlMorirJugador()
         {
             // Solo los niveles del juego tienen Game Over; en las escenas de prueba el jugador
-            // reaparece con su propio mecanismo.
+            // reaparece con su propio mecanismo (LevelManager). El Game Over llega tras una
+            // espera, desde el estado PLAYING (ver EstadoJugando).
             if (EstadoActual == ESTADOS_JUEGO.PLAYING && GameManager.Instancia != null && GameManager.Instancia.NivelActual != null)
             {
-                _maquina.TransitionTo(ESTADOS_JUEGO.GAME_OVER);
+                _muerteEn = Time.unscaledTime;
             }
         }
 

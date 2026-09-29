@@ -22,15 +22,29 @@ namespace Fragmentum.Core
         /// <summary>Cambió el bloqueo global del input de juego: (bloqueado).</summary>
         public static event Action<bool> EntradaBloqueadaCambiada;
 
+        /// <summary>Se activó un checkpoint del nivel: (id). Lo escucha el HUD para avisar.</summary>
+        public static event Action<string> CheckpointActivado;
+
         /// <summary>
         /// ¿Está bloqueado el input de juego? Lo fija la FSM global (pausa, cinemáticas, cargas,
         /// Game Over) y lo respeta <c>FuenteInputJugador</c>.
         /// </summary>
         public static bool EntradaBloqueada { get; private set; }
 
+        /// <summary>
+        /// Fotograma en que se desbloqueó el input. En ese fotograma se ignora: el clic o el Enter
+        /// que pulsan «Continuar» en un menú no deben convertirse además en un ataque.
+        /// </summary>
+        public static int FotogramaDesbloqueo { get; private set; } = -1;
+
+        /// <summary>¿Bloqueado, o recién desbloqueado en este mismo fotograma?</summary>
+        public static bool EntradaIgnorada => EntradaBloqueada || Time.frameCount <= FotogramaDesbloqueo;
+
         public static void NotificarMuerteJugador() => JugadorMurio?.Invoke();
 
         public static void SolicitarReintento() => ReintentoSolicitado?.Invoke();
+
+        public static void NotificarCheckpoint(string id) => CheckpointActivado?.Invoke(id);
 
         public static void FijarEntradaBloqueada(bool bloqueada)
         {
@@ -40,6 +54,11 @@ namespace Fragmentum.Core
             }
 
             EntradaBloqueada = bloqueada;
+            if (!bloqueada)
+            {
+                FotogramaDesbloqueo = Time.frameCount;
+            }
+
             EntradaBloqueadaCambiada?.Invoke(bloqueada);
         }
 
@@ -50,7 +69,9 @@ namespace Fragmentum.Core
             JugadorMurio = null;
             ReintentoSolicitado = null;
             EntradaBloqueadaCambiada = null;
+            CheckpointActivado = null;
             EntradaBloqueada = false;
+            FotogramaDesbloqueo = -1;
         }
     }
 }

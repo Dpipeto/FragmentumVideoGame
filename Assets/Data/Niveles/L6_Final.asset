@@ -45,3 +45,6 @@ MonoBehaviour:
     desdeX: 10
     hastaX: 40
     contenido: "30 \xD7 18 u con plataformas sim\xE9tricas que se transforman entre fases."
+  puntosDeControl: []
+  acento: {r: 0.6901961, g: 0.43137255, b: 1, a: 1}
+  cita: no destruir. integrar.

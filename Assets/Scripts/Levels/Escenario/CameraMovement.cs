@@ -66,6 +66,12 @@ namespace Fragmentum.Levels.Escenario
             _velocidad = Vector3.zero;
         }
 
+        /// <summary>Cambia el objetivo (el LevelManager lo usa con el jugador que hace aparecer).</summary>
+        public void FijarObjetivo(Transform nuevo)
+        {
+            objetivo = nuevo;
+        }
+
         public void FijarLimites(Vector2 nuevoMinimo, Vector2 nuevoMaximo)
         {
             minimo = nuevoMinimo;

@@ -4,6 +4,7 @@
     "references": [
         "Fragmentum.Runtime",
         "Fragmentum.Editor",
+        "Unity.InputSystem",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

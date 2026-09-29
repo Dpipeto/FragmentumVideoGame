@@ -208,7 +208,10 @@ namespace Fragmentum.EditorTools
 
         public static HABILIDADES[] TodasLasHabilidades => (HABILIDADES[])System.Enum.GetValues(typeof(HABILIDADES));
 
-        /// <summary>Cámara con seguimiento y límites, y reaparición provisional del jugador.</summary>
+        /// <summary>
+        /// Cámara con seguimiento y límites, y un LevelManager que hace reaparecer al jugador en
+        /// el punto de aparición (en las escenas de prueba no hay Game Over).
+        /// </summary>
         public static void CamaraYReaparicion(GameObject jugador, Transform aparicion, Vector2 minimo, Vector2 maximo)
         {
             var camara = Object.FindAnyObjectByType<Camera>();
@@ -230,10 +233,11 @@ namespace Fragmentum.EditorTools
             Asignar(seguimiento, "minimo", p => p.vector2Value = minimo);
             Asignar(seguimiento, "maximo", p => p.vector2Value = maximo);
 
-            var reaparicion = new GameObject("Reaparicion").AddComponent<ReaparicionSimple>();
-            Asignar(reaparicion, "jugador", p => p.objectReferenceValue = jugador.GetComponent<PlayerController>());
-            Asignar(reaparicion, "punto", p => p.objectReferenceValue = aparicion);
-            Asignar(reaparicion, "camara", p => p.objectReferenceValue = seguimiento);
+            // Sin nivel de la LevelDatabase: no toca los límites ni el fondo de la cámara.
+            var gestor = new GameObject("Nivel (LevelManager)").AddComponent<LevelManager>();
+            Asignar(gestor, "puntoInicio", p => p.objectReferenceValue = aparicion);
+            Asignar(gestor, "limitesDesdeSecciones", p => p.boolValue = false);
+            Asignar(gestor, "fondoDesdePaleta", p => p.boolValue = false);
         }
 
         /// <summary>HUD mínimo: barra de vida del jugador escuchando sus eventos.</summary>

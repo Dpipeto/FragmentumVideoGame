@@ -53,7 +53,18 @@ con Gemini, y dejar `Tesis` congelado como **v1** de referencia para la comparac
 | Escenas de prueba | No son niveles: el `GameManager` no les impone progreso ni reglas, y la muerte en ellas no lleva al Game Over. |
 | Guardado (§6.2) | Se añade el campo `migradoDePlayerPrefs`, para no importar dos veces las monedas de la v1. |
 
-Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** (de la 3 a la 5, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 6 en adelante por hacer.
+### Ajustes tras la Fase 6 (2026-09-29)
+
+| Qué cambia | Detalle |
+|---|---|
+| FSM global (§3.6) | PLAYING → GAME_OVER llega 1 s después de la muerte, para que se vea la caída. «Reintentar» (GAME_OVER → PLAYING) devuelve al jugador al checkpoint sin recargar la escena. «Reiniciar» recarga el nivel y olvida el checkpoint. |
+| UI (§4, §5) | Las pantallas (`MenuPausa`, `PantallaGameOver`, `PantallaFinNivel`) y el HUD se construyen por código dentro del `UIManager` persistente, con una base común `PantallaSuperpuesta` (patrón Template Method). No hay prefabs de UI por escena, y `PantallaCarga` no hace falta: el fundido del `SceneLoader` cumple su función. |
+| Input | Nuevo mapa `Game` con la acción `Pause` (Esc o Start), independiente del mapa `Player`. |
+| Datos (§6.1) | `LevelData` añade `puntosDeControl`, `acento` y `cita`. |
+| Escenas | Nueva herramienta *Fragmentum → Niveles → Preparar la escena de nivel*: añade a una escena de nivel lo que le falte (LevelManager, checkpoints, salida, zona mortal y, si no hay suelo, un recorrido provisional). Sustituye al «migrador de escenas» de §8.3 para las escenas de la v2. |
+| Checkpoints | Al entrar en un nivel desde «Continuar» o desde el selector se empieza en su checkpoint guardado. |
+
+Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** · **6 hecha** (de la 3 a la 6, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 7 en adelante por hacer.
 
 ---
 

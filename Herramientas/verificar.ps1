@@ -7,7 +7,8 @@
     que trae Unity, contra las DLL de Unity. Tarda segundos.
 
     Paso 2 (con -Unity): abre Unity en modo batch para
-      a) regenerar todo lo que generan las herramientas (Fragmentum → Regenerar todo),
+      a) regenerar lo que generan las herramientas y preparar las escenas de nivel. Las escenas de
+         prueba que ya existen no se reescriben; con -Forzar, sí (Fragmentum → Regenerar todo),
       b) ejecutar las pruebas EditMode y
       c) ejecutar las pruebas PlayMode.
     El proyecto debe estar CERRADO en el editor: Unity no abre dos veces el mismo proyecto.
@@ -15,9 +16,11 @@
 .EXAMPLE
     .\Herramientas\verificar.ps1
     .\Herramientas\verificar.ps1 -Unity
+    .\Herramientas\verificar.ps1 -Unity -Forzar
 #>
 param(
     [switch]$Unity,
+    [switch]$Forzar,
     [string]$UnityExe = "C:\Program Files\Unity\Hub\Editor\6000.6.3f1\Editor\Unity.exe"
 )
 
@@ -56,7 +59,8 @@ function Invoke-UnityBatch([string[]]$argumentos, [string]$nombre) {
 }
 
 Write-Host "== 2a. Regenerar todo en Unity" -ForegroundColor Cyan
-$codigo = Invoke-UnityBatch @('-executeMethod', 'Fragmentum.EditorTools.ConstruccionBatch.Todo', '-quit') "regenerar"
+$metodo = if ($Forzar) { 'Fragmentum.EditorTools.ConstruccionBatch.TodoForzado' } else { 'Fragmentum.EditorTools.ConstruccionBatch.Todo' }
+$codigo = Invoke-UnityBatch @('-executeMethod', $metodo, '-quit') "regenerar"
 if ($codigo -ne 0) { Write-Host "La regeneración falló (código $codigo). Mira Salida\regenerar.log." -ForegroundColor Red; exit 1 }
 
 $fallos = 0
