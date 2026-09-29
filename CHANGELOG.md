@@ -9,6 +9,136 @@
 
 ---
 
+## Fase 9 — Nivel 1 de referencia (2026-09-29)
+
+Rama `fase-9-nivel1`, que sale de `fase-8-narrativa`. Cubre la tarea H: las mecánicas del
+mundo de la Ira del Anexo A, como prefabs listos para arrastrar al pintar el nivel, y ya
+colocadas en el recorrido provisional del Nivel 1.
+
+Lo demás que pide la tarea venía de fases anteriores:
+- de la Fase 6, el checkpoint en x = 40, los enemigos y las guías de las secciones (Gizmos del
+  `LevelManager`);
+- de la Fase 7, la arena cerrada.
+
+Pintar el layout de ~80 u sigue siendo trabajo tuyo en el Editor (PENDIENTES N10).
+
+### 1. El mundo de la Ira no tenía mecánicas propias
+
+- **Problema.** En la v1, la lava del Nivel 1 era solo un tile decorativo que no mataba.
+  Tampoco había plataformas que se desmoronaran ni torretas. El nivel se jugaba igual que
+  cualquier otro.
+- **Causa.** Las mecánicas del Anexo A (`PlatformCrumble`, `HotPlatform`, `Lava` y la torreta)
+  nunca se programaron.
+- **Solución.** Cuatro componentes en `Levels/Mecanicas`, cada uno con su prefab provisional:
+  rectángulos de color hasta que haya arte (PENDIENTES B10).
+  - **`PlataformaInestable`.**
+    - Con el jugador encima tiembla 0,6 s, cae y vuelve a los 3 s.
+    - No vuelve mientras el jugador esté justo donde reaparecería.
+    - Detecta al jugador con una consulta fina sobre su superficie, no con contactos, así que
+      funciona igual si llega saltando o caminando.
+  - **`PlataformaCaliente`.**
+    - Se puede pisar, pero se va poniendo al rojo y a los 2 s quema.
+    - Sigue quemando mientras el jugador no se baje; al bajarse, se enfría.
+    - Es la mecánica de la emoción del mundo: la Ira no deja quedarse quieto.
+  - **`Lava`.** Muerte instantánea para el jugador y para los enemigos. Usa el mismo
+    `Golpe.Letal` que la zona de caída: atraviesa los i-frames y el escudo.
+  - **`TorretaFuego`.**
+    - Es fija e indestructible.
+    - Cuando el jugador está a menos de 10 u, avisa con un destello y dispara una bola de fuego
+      horizontal cada 2,2 s.
+    - Se esquiva saltando.
+- Lo verifican las pruebas de `MecanicasPlayModeTests`, con los prefabs reales, el jugador real
+  y física real.
+
+### 2. Un proyectil reutilizable
+
+- **`Proyectil`** (en `Core/Combate`) vuela en línea recta y hace daño con un `Hitbox`, así que
+  respeta las capas, los i-frames y los escudos.
+  - Desaparece al golpear, al tocar el suelo o una pared, o al acabar su alcance.
+  - También lo usarán las olas de la Doncella y los Artilleros (Fase 10).
+- **Problema encontrado:** la bola atravesaba las paredes.
+  - **Causa:** la matriz de colisión del Anexo A no deja que las armas enemigas choquen con el
+    suelo ni con las paredes. Por eso un trigger en la capa `EnemyWeapon` nunca detecta una
+    pared.
+  - **Solución:** en cada paso de física, el proyectil comprueba con `OverlapCircle` si está
+    tocando suelo o pared, en lugar de esperar un contacto. La matriz no cambia.
+
+### 3. El Nivel 1 ya tiene sus mecánicas
+
+La herramienta *Preparar la escena de nivel* tiene un paso nuevo:
+- Solo actúa sobre el recorrido provisional, y solo si todavía no hay mecánicas.
+- En un nivel pintado a mano, las mecánicas se colocan arrastrando los prefabs.
+
+Siguiendo el Anexo A, coloca esto:
+
+| Tramo | Qué coloca | Dónde |
+|---|---|---|
+| Final de la sección 1 | Torreta de fuego | x = 24 |
+| Primer foso (27–30 u) | Plataforma inestable, para cruzarlo | x = 28,5 |
+| Sección 2, antes del checkpoint | Dos plataformas de combustión | x = 33,5 y 37 |
+| Final de la sección 2 | Río de lava de 3 u, que hay que saltar | x = 50–53 |
+| Segundo foso (57–60 u), antes de la arena | Lava en el fondo | x = 58,5 |
+
+- La arena del jefe queda sin lava en el suelo hasta que se equilibre el combate (N9).
+- Lo verifican `ElNivel1_TieneLasMecanicasDeLaIra` y `LosPrefabsDeMecanicas_Existen`.
+- `PrepararOtraVez_NoCambiaNada` sigue comprobando que la herramienta es idempotente.
+
+### Decisiones que ajustan el plan de la Fase 1
+
+1. **Nombres en español,** como el resto del código: `PlataformaInestable` y
+   `PlataformaCaliente` son los `PlatformCrumble` y `HotPlatform` del plan.
+2. **La torreta no es un enemigo** con `EnemyData` y FSM, sino una mecánica del escenario: no
+   se mueve, no se puede destruir y no persigue. Así no carga con estados que no usa.
+3. **Las mecánicas son prefabs, no tiles.** Tienen el pivote en su cara superior (la torreta,
+   en su base), para que al arrastrarlas queden a la altura del suelo.
+
+### Además
+
+- **Nuevo menú *Fragmentum → Niveles → Crear prefabs de mecánicas (Ira)*,** incluido en
+  *Regenerar todo*.
+- **`PreparadorNivel.PosicionesFosos` ahora es pública.** La usan los enemigos (para que su
+  patrulla no cruce un foso) y las mecánicas.
+- **Ajuste en una prueba de flujo:** para matar al jugador, ahora lo lleva a x = 55 en lugar
+  de x = 52, porque en 52 está el río de lava.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **181 de 181 correctas** (2 nuevas: las mecánicas del Nivel 1 y sus prefabs).
+- Pruebas PlayMode: **76 de 76 correctas** (7 nuevas en `MecanicasPlayModeTests`):
+  - la plataforma inestable aguanta, cae y vuelve;
+  - la de combustión no quema antes de 2 s, quema después y se enfría;
+  - la lava mata al jugador aunque tenga i-frames, y también a un enemigo;
+  - la torreta no dispara fuera de su alcance, avisa antes del primer disparo y su bola hiere
+    y desaparece;
+  - el proyectil se frena en una pared y desaparece al acabar su alcance.
+
+### Pasos manuales en el Editor
+
+Ninguno obligatorio: el Nivel 1 ya tiene las mecánicas sobre el recorrido provisional.
+
+- **Al pintar el layout (N10):**
+  - Borra «Provisional»: sus mecánicas se van con él.
+  - Arrastra a su sitio los prefabs de `Assets/Prefabs/Mecanicas`. Van a la altura del
+    suelo, porque el pivote está en su cara superior.
+- **Para ajustar una mecánica:** los tiempos, el daño y el alcance están en el componente de
+  cada prefab, por ejemplo el aguante de la plataforma inestable o el intervalo de la torreta.
+  Si seleccionas la torreta, su alcance se ve como un círculo.
+
+### Qué probar a mano (desde `Menu_Inicial`, «Nueva partida»)
+
+- **Sección 1:** al acercarte, la torreta avisa con un destello y dispara. Salta la bola.
+- **Primer foso:** si te quedas encima de la plataforma, tiembla y cae. Al rato vuelve.
+- **Antes del checkpoint:** si te quedas quieto sobre una plataforma de combustión, se pone al
+  rojo y quema a los 2 s.
+- **Río de lava:** hay que saltarlo. Caer en él o en el segundo foso mata al instante, aunque
+  acabes de recibir un golpe.
+- **Golem de Ceniza:** si te persigue hasta el río, puede morir en la lava. Dime si te parece
+  una estrategia válida o si el Golem debe detenerse ante la lava.
+
+---
+
 ## Fase 8 — Narrativa (2026-09-29)
 
 Rama `fase-8-narrativa`, que sale de `fase-7-jefes`. Cubre la tarea G: la cinemática inicial

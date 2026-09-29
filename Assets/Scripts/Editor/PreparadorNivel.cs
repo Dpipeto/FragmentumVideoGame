@@ -5,6 +5,7 @@ using Fragmentum.Data;
 using Fragmentum.Enemies;
 using Fragmentum.Levels;
 using Fragmentum.Levels.Escenario;
+using Fragmentum.Levels.Mecanicas;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -200,7 +201,80 @@ namespace Fragmentum.EditorTools
                 cambios = true;
             }
 
+            // 7. Mecánicas del mundo (Fase 9), solo sobre el recorrido provisional: en un nivel
+            //    pintado a mano se colocan arrastrando los prefabs de Assets/Prefabs/Mecanicas.
+            var provisional = RaizProvisional(escena);
+            if (provisional != null && TieneMecanicasDeMundo(nivel) && Buscar<TorretaFuego>(escena) == null &&
+                Buscar<PlataformaInestable>(escena) == null && Buscar<PlataformaCaliente>(escena) == null)
+            {
+                cambios |= CrearMecanicasIra(escena, provisional, nivel);
+            }
+
             return cambios;
+        }
+
+        private static bool TieneMecanicasDeMundo(LevelData nivel) =>
+            nivel.emocion != null && nivel.emocion.id == EMOCIONES.IRA && nivel.secciones != null && nivel.secciones.Count >= 2;
+
+        /// <summary>
+        /// Mecánicas del mundo de la Ira sobre el recorrido provisional, según el Anexo A:
+        /// - sección 1: plataforma inestable en el primer foso y la torreta de fuego al final;
+        /// - sección 2: plataformas de combustión antes del checkpoint y un río de lava antes del
+        ///   final, y lava en el fondo del segundo foso.
+        /// La arena queda sin lava en el suelo hasta que se equilibre el combate (PENDIENTES).
+        /// </summary>
+        private static bool CrearMecanicasIra(Scene escena, Transform provisional, LevelData nivel)
+        {
+            var mecanicas = Hijo(provisional, "Mecanicas");
+            var s1 = nivel.secciones[0];
+            var s2 = nivel.secciones[1];
+            var fosos = PosicionesFosos(nivel);
+            var creadas = 0;
+
+            if (fosos.Count > 0)
+            {
+                creadas += Colocar(escena, mecanicas, GeneradorMecanicas.PlataformaInestable, (fosos[0].x + fosos[0].y) * 0.5f, AlturaSuelo);
+            }
+
+            creadas += Colocar(escena, mecanicas, GeneradorMecanicas.TorretaFuego, s1.hastaX - 1f, AlturaSuelo);
+            creadas += Colocar(escena, mecanicas, GeneradorMecanicas.PlataformaCaliente, s2.desdeX + 8.5f, AlturaSuelo + 0.3f);
+            creadas += Colocar(escena, mecanicas, GeneradorMecanicas.PlataformaCaliente, s2.desdeX + 12f, AlturaSuelo + 0.3f);
+            creadas += Colocar(escena, mecanicas, GeneradorMecanicas.Lava, s2.hastaX - 3.5f, AlturaSuelo + 0.05f);
+
+            if (fosos.Count > 1)
+            {
+                creadas += Colocar(escena, mecanicas, GeneradorMecanicas.Lava, (fosos[1].x + fosos[1].y) * 0.5f, AlturaSuelo - 1f);
+            }
+
+            return creadas > 0;
+        }
+
+        private static int Colocar(Scene escena, Transform padre, string prefab, float x, float y)
+        {
+            var origen = GeneradorMecanicas.Cargar(prefab);
+            if (origen == null)
+            {
+                Debug.LogWarning($"[Fragmentum] Falta el prefab {prefab}: ejecuta Fragmentum → Niveles → Crear prefabs de mecánicas.");
+                return 0;
+            }
+
+            var instancia = (GameObject)PrefabUtility.InstantiatePrefab(origen, escena);
+            instancia.transform.SetParent(padre, true);
+            instancia.transform.position = new Vector3(x, y, 0f);
+            return 1;
+        }
+
+        private static Transform RaizProvisional(Scene escena)
+        {
+            foreach (var objeto in escena.GetRootGameObjects())
+            {
+                if (objeto.name == NombreProvisional)
+                {
+                    return objeto.transform;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -318,6 +392,29 @@ namespace Fragmentum.EditorTools
         }
 
         /// <summary>
+        /// Fosos del recorrido provisional: 3 u justo después de cada cambio de sección, salvo
+        /// cerca de un checkpoint. (desde, hasta) en x.
+        /// </summary>
+        public static List<Vector2> PosicionesFosos(LevelData nivel)
+        {
+            var checkpoints = PosicionesCheckpoint(nivel);
+            var fosos = new List<Vector2>();
+            if (nivel.secciones != null)
+            {
+                for (var i = 1; i < nivel.secciones.Count; i++)
+                {
+                    var desde = nivel.secciones[i].desdeX + 2f;
+                    if (!checkpoints.Exists(x => x > desde - 3f && x < desde + 6f))
+                    {
+                        fosos.Add(new Vector2(desde, desde + 3f));
+                    }
+                }
+            }
+
+            return fosos;
+        }
+
+        /// <summary>
         /// Recorrido provisional sobre el tramo del nivel: suelo con un foso tras cada cambio de
         /// sección, una plataforma por sección, paredes en los extremos y un enemigo del mundo
         /// por sección (salvo la última, que es la arena del jefe).
@@ -332,20 +429,7 @@ namespace Fragmentum.EditorTools
             var colorPared = FabricaColor(colorSuelo, 0.6f);
             var cuadrado = SpriteCuadrado;
             var checkpoints = PosicionesCheckpoint(nivel);
-
-            // Fosos de 3 u justo después de cada cambio de sección, lejos de los checkpoints.
-            var fosos = new List<Vector2>();
-            if (nivel.secciones != null)
-            {
-                for (var i = 1; i < nivel.secciones.Count; i++)
-                {
-                    var desde = nivel.secciones[i].desdeX + 2f;
-                    if (!checkpoints.Exists(x => x > desde - 3f && x < desde + 6f))
-                    {
-                        fosos.Add(new Vector2(desde, desde + 3f));
-                    }
-                }
-            }
+            var fosos = PosicionesFosos(nivel);
 
             var inicioTramo = tramo.x - 6f;
             var n = 0;

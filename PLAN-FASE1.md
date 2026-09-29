@@ -84,7 +84,16 @@ con Gemini, y dejar `Tesis` congelado como **v1** de referencia para la comparac
 | Registro emocional (§6.2) | Primer paso de la pantalla de fin de nivel, siempre omitible. Su configuración es un ScriptableObject (`ConfiguracionRegistro`); el código de participante se pide ahí la primera vez. |
 | Datos (§6.1) | `LevelData` añade `cinematicaEntrada`, `cinematicaCierre` y `dialogos`. Los placeholders de narrativa se generan en `Assets/Data/Narrativa`. |
 
-Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** · **6 hecha** · **7 hecha** · **8 hecha** (de la 3 a la 8, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 9 en adelante por hacer.
+### Ajustes tras la Fase 9 (2026-09-29)
+
+| Qué cambia | Detalle |
+|---|---|
+| Mecánicas (§7, `Levels/Mecanicas`) | `PlatformCrumble` y `HotPlatform` se llaman `PlataformaInestable` y `PlataformaCaliente`. Detectan al jugador con una consulta sobre su superficie, no con colisiones. `Lava` envía `Golpe.Letal`, como la zona de caída. |
+| Torreta | Es una mecánica del escenario (`TorretaFuego`), no un enemigo con `EnemyData` y FSM: no se mueve, no se destruye y no persigue. |
+| Proyectil | `Proyectil` vive en `Core/Combate` y daña con un `Hitbox`. Detecta el suelo y las paredes con una consulta (`OverlapCircle`), porque la matriz de colisión separa las armas enemigas del escenario. Lo reutilizará la Fase 10. |
+| Escenas | *Preparar la escena de nivel* coloca las mecánicas de la Ira solo sobre el recorrido provisional. En un nivel pintado a mano, se arrastran los prefabs de `Assets/Prefabs/Mecanicas` (pivote en la cara superior). |
+
+Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** · **6 hecha** · **7 hecha** · **8 hecha** · **9 hecha** (de la 3 a la 9, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 10 en adelante por hacer.
 
 ---
 

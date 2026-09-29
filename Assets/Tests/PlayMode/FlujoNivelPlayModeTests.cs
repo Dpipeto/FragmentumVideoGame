@@ -64,7 +64,7 @@ namespace Fragmentum.Tests.PlayMode
         {
             yield return EntrarEnNivel1();
             yield return LlevarJugadorA(PrimerCheckpoint.PuntoReaparicion);
-            yield return LlevarJugadorA(new Vector2(52f, 0.05f));
+            yield return LlevarJugadorA(new Vector2(55f, 0.05f));
 
             Jugador.Vida.Matar();
             yield return EsperarEstado(ESTADOS_JUEGO.GAME_OVER, 3f);

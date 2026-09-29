@@ -7,6 +7,7 @@ using Fragmentum.EditorTools;
 using Fragmentum.Enemies;
 using Fragmentum.Levels;
 using Fragmentum.Levels.Escenario;
+using Fragmentum.Levels.Mecanicas;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -121,6 +122,37 @@ namespace Fragmentum.Tests
             Assert.IsNotNull(puerta);
             Assert.IsFalse(puerta.activeSelf, "La puerta está abierta hasta que empieza el combate.");
             Assert.Less(puerta.transform.position.x, arena.transform.position.x, "La puerta queda detrás del jugador al entrar.");
+        }
+
+        [Test]
+        public void ElNivel1_TieneLasMecanicasDeLaIra()
+        {
+            // Anexo A: plataformas inestables y torreta en la sección 1; plataformas de combustión y lava en la 2.
+            var inestables = Todos<PlataformaInestable>(_nivel1);
+            Assert.AreEqual(1, inestables.Count);
+            Assert.AreEqual(28.5f, inestables[0].transform.position.x, 0.01f, "En el primer foso.");
+
+            var torretas = Todos<TorretaFuego>(_nivel1);
+            Assert.AreEqual(1, torretas.Count);
+            Assert.That(torretas[0].transform.position.x, Is.InRange(0f, 25f), "La torreta es de la sección 1.");
+
+            var calientes = Todos<PlataformaCaliente>(_nivel1);
+            Assert.AreEqual(2, calientes.Count);
+            Assert.IsTrue(calientes.All(c => c.transform.position.x > 25f && c.transform.position.x < 40f), "Antes del checkpoint.");
+
+            var lavas = Todos<Lava>(_nivel1);
+            Assert.AreEqual(2, lavas.Count, "Un río de lava en la sección 2 y lava en el fondo del segundo foso.");
+            Assert.IsTrue(lavas.All(l => l.GetComponent<Collider2D>().isTrigger));
+            Assert.IsTrue(lavas.All(l => l.CompareTag(GameTags.Lava)));
+        }
+
+        [Test]
+        public void LosPrefabsDeMecanicas_Existen()
+        {
+            foreach (var nombre in new[] { GeneradorMecanicas.PlataformaInestable, GeneradorMecanicas.PlataformaCaliente, GeneradorMecanicas.Lava, GeneradorMecanicas.TorretaFuego })
+            {
+                Assert.IsNotNull(GeneradorMecanicas.Cargar(nombre), $"Falta el prefab {nombre}.");
+            }
         }
 
         [Test]

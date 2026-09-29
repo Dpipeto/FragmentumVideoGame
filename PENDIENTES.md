@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.8 — Fase 8, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.9 — Fase 9, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,13 +14,22 @@ Ordenado por urgencia.
 | N3 | **Recorta las poses de Kael** de `Referencias/Arte/posiblesanimaciiones kael.jpeg`. | El jugador ya tiene todos sus estados; hoy se ve como una cápsula clara. | Un PNG por pose con fondo transparente, a 32 px por unidad (el cuerpo mide 0,8 × 1,8 u, es decir, unos 26 × 58 px). Detalle en el apartado B3. |
 | N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
 | N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel`, `fase-7-jefes` y `fase-8-narrativa` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel`, `fase-7-jefes`, `fase-8-narrativa` y `fase-9-nivel1` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
 | N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
 | N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael: PNG con fondo transparente, a 32 px por unidad, pivote en los pies. Detalle en el apartado B4. |
-| N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`**, jefe incluido. | Menú, selector, guardado, checkpoints, pausa, Game Over, la Centinela Ardiente y el fin de nivel ya funcionan juntos (Fases 5 a 7). | Sigue las listas «Qué probar a mano» de las Fases 5, 6 y 7 en `CHANGELOG.md`. Dime qué pantalla no se entiende, qué se siente mal o si la Centinela es demasiado fácil o difícil (sus valores están en `Assets/Data/Jefes`). |
-| N10 | **Pinta el layout del Nivel 1** (~80 u, Anexo A) cuando quieras. | Hoy se juega sobre un recorrido provisional de bloques. | Pasos en «Pasos manuales en el Editor» de la Fase 6: preparar el tilemap como suelo, borrar «Provisional» y ajustar la altura de la bandera y la salida. No bloquea: la Fase 9 lo necesita, la 7 y la 8 no. |
+| N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`**, jefe incluido. | Menú, selector, guardado, checkpoints, pausa, Game Over, la Centinela Ardiente, la narrativa, el fin de nivel y las mecánicas de la Ira ya funcionan juntos (Fases 5 a 9). | Sigue las listas «Qué probar a mano» de las Fases 5 a 9 en `CHANGELOG.md`. Dime qué pantalla no se entiende y qué se siente mal. También si la Centinela es demasiado fácil o difícil (sus valores están en `Assets/Data/Jefes`) y si el Golem de Ceniza debe poder morir en la lava. |
+| N10 | **Pinta el layout del Nivel 1** (~80 u, Anexo A) cuando quieras. | Hoy se juega sobre un recorrido provisional de bloques. | Sigue los «Pasos manuales en el Editor» de las Fases 6 y 9: prepara el tilemap como suelo, borra «Provisional» (se lleva sus mecánicas), ajusta la altura de la bandera y de la salida, y arrastra las mecánicas desde `Assets/Prefabs/Mecanicas`. No bloquea: el nivel ya se juega entero sobre el recorrido provisional. |
 | N11 | **Escribe el guion**: la cinemática inicial, los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | El sistema de cinemáticas y diálogos ya funciona con textos marcados como «pendiente de guion» (Fase 8). | Edita los assets `Cinematica_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2). Prioridad: la inicial y el mundo de la Ira. Si prefieres pasarme el texto, lo vuelco yo. |
 | N12 | **Revisa la pregunta del registro emocional.** | Hoy pregunta «¿Con qué intensidad sentiste {emoción} en este mundo?», de 1 (Nada) a 5 (Muchísimo). Debe encajar con el instrumento de la tesis (TMMS-24 y SCCS). | Cámbiala en `Assets/Data/Narrativa/RegistroEmocional.asset`, o dime cuál quieres. También puedes pedir que no se pida código de participante. |
+
+## Revisión 0.9: qué cambió respecto de la v0.8
+
+- **El mundo de la Ira tiene sus mecánicas** (Fase 9): plataforma inestable, plataformas de combustión, lava y torreta de fuego.
+  - Son prefabs provisionales en `Assets/Prefabs/Mecanicas`.
+  - Ya están colocadas en el recorrido provisional del Nivel 1.
+- **N9** incluye probar las mecánicas y una pregunta: ¿el Golem de Ceniza debe poder morir en la lava?
+- **N10** explica cómo recolocar las mecánicas al pintar el nivel.
+- B4, B6 y B10 están al día.
 
 ## Revisión 0.8: qué cambió respecto de la v0.7
 
@@ -240,7 +249,7 @@ mundo.
 | — | Genérico | ✔ `Generico` / `Enemigo.prefab` | Cápsula gris | — | — |
 | Ira | Soldado de lava | ✔ `SoldadoLava` / `Enemigo_SoldadoLava` | Cápsula naranja | — | P1 |
 | Ira | Golem de Ceniza (mini-jefe, vida 10) | ✔ `GolemCeniza` / `Enemigo_GolemCeniza` (más grande) | Cápsula ceniza | — | P1 |
-| Ira | Torreta de fuego fija | ✗ | ✗ | Componente `Proyectil` (Fase 9) | P1 |
+| Ira | Torreta de fuego fija | ✔ Es una mecánica, no un enemigo: `TorretaFuego` / `Mecanicas/TorretaFuego.prefab` (Fase 9) | Bloque oscuro con boca naranja; la bola de fuego es un cuadrado naranja | Sprite de la torreta y de la bola (B10) | P1 |
 | Tristeza | Lamento | ✔ `Lamento` / `Enemigo_Lamento` | Cápsula azul | Ralentizar al jugador al tocarlo (Anexo: «reducen velocidad al contacto»), Fase 10 | P2 |
 | Tristeza | Esculturas Vivientes, Medusas de Hielo | ✗ | ✗ | Movimiento sinusoidal de las medusas (Fase 10) | P2 |
 | Miedo | Espectro | ✔ `Espectro` / `Enemigo_Espectro` (detección en oscuridad) | Cápsula oscura translúcida | Que sea invisible salvo al atacar (Fase 10) | P2 |
@@ -282,7 +291,7 @@ escena, en ese orden. Un nivel sin escena aparece «en construcción» en el sel
 |---|---|---|---|---|
 | `Menu_Inicial` | ✔ generada | ✔ (0) | Fondo y logo (hoy, texto sobre color liso) | P3 |
 | `Niveles` (selector) | ✔ generada | ✔ (1) | Íconos por mundo (B9) | P3 |
-| `Nivel1` (Ira) | ✔ Preparada (Fase 6): `LevelManager`, checkpoint en x = 40, salida en x = 78, zona mortal y recorrido provisional con un Soldado de lava y el Golem de Ceniza. Solo tiene 2 tiles pintados. | ✔ (2) | Pintar el layout de ~80 u del Anexo A (N10) y, en la Fase 9, sus mecánicas: plataformas inestables, lava y torreta. | P1 |
+| `Nivel1` (Ira) | ✔ Preparada (Fase 6): `LevelManager`, checkpoint en x = 40, salida en x = 78, zona mortal y recorrido provisional con un Soldado de lava y el Golem de Ceniza. Fase 9: plataforma inestable, dos plataformas de combustión, lava y torreta sobre el recorrido provisional. Solo tiene 2 tiles pintados. | ✔ (2) | Pintar el layout de ~80 u del Anexo A (N10) y recolocar en él las mecánicas. | P1 |
 | Nivel 2 (Tristeza) | ✗ | ✗ | Escena esqueleto (Fase 10) | P2 |
 | Nivel 3 (Miedo) | ✗ | ✗ | idem | P2 |
 | Nivel 4 (Culpa) | ✗ | ✗ | idem | P2 |
@@ -343,9 +352,10 @@ ningún clip importado en la v2.
 
 | Asset | Componente *(propuesto)* | Existe / candidato | Prioridad |
 |---|---|---|---|
-| Plataforma que se desmorona | `PlatformCrumble` | Candidato: `Pixel Adventure 1/Traps/Falling Platforms` | P1 |
-| Plataforma de combustión (estado caliente) | `HotPlatform` | Candidato: `FireSet` + tinte | P1 |
-| Lava (animada) | `Lava` | ✔ `Top Down Lava…/Burning Lava`, `Tiles/Lava.prefab`, `lava2.prefab` | P1 |
+| Plataforma que se desmorona | `PlataformaInestable` (Fase 9) | Provisional: rectángulo marrón que tiembla y desaparece. Candidato: `Pixel Adventure 1/Traps/Falling Platforms`. El sprite va en el hijo `Visual` de `Mecanicas/PlataformaInestable.prefab`. | P1 |
+| Plataforma de combustión (estado caliente) | `PlataformaCaliente` (Fase 9) | Provisional: rectángulo que se tiñe de rojo con el calor. Candidato: `FireSet` + tinte. El tinte funciona igual con un sprite (campos `colorFrio` y `colorAlRojo`). | P1 |
+| Lava (animada) | `Lava` (Fase 9) | Provisional: rectángulo cuyo color late. Candidatos de la v1: `Top Down Lava…/Burning Lava`, `Tiles/Lava.prefab`, `lava2.prefab`. Si se pinta con tiles, el prefab sigue haciendo falta como zona mortal (se le puede quitar el `Visual`). | P1 |
+| Torreta de fuego y su bola | `TorretaFuego` + `Proyectil` (Fase 9) | Provisional: bloque oscuro con boca naranja y un cuadrado naranja como bola. El destello de aviso tiñe el `Visual`. | P1 |
 | Checkpoint | `Checkpoint` (Fase 6) | Provisional: un mástil y un paño que se tiñe con el acento del mundo al activarse. Candidatos de la v1: `Pixel Adventure 1/Items/Checkpoints` (bandera animada) y `tileset/Puerta/respawn point_*`. El sprite va en `Nivel/Checkpoints/L1_CP1/Pano` (campo `indicador` del `Checkpoint`). | P1 |
 | Salida del nivel | `SalidaNivel` (Fase 6) | Provisional: un portal translúcido del color de acento. Falta decidir su aspecto; en los niveles con jefe (Fase 7) puede bastar la puerta de la arena. | P2 |
 | VFX del ataque cargado | modificador de `ATTACK` | ✗ | P1 |
@@ -376,6 +386,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.9 (2026-09-29)** — Fase 9 (Nivel 1 de referencia). Mecánicas de la Ira en B4, B6 y B10; N9 y N10 ampliados.
 - **0.8 (2026-09-29)** — Fase 8 (narrativa). Nuevos N11 y N12; B1 y B2 reescritos para la v2; B9 con la UI del registro y de «yo reconstruido».
 - **0.7 (2026-09-29)** — Fase 7 (jefes). Apartado B5 reescrito para la v2, N9 con el jefe, nota de la música del jefe en B8.
 - **0.6 (2026-09-29)** — Fase 6 (flujo de nivel). Nuevo N10 (pintar el Nivel 1), N9 ampliado, y B6, B8, B9 y B10 al día con el checkpoint, la salida, la música por `LevelData` y la UI de la maqueta.

@@ -40,6 +40,7 @@ namespace Fragmentum.EditorTools
             ok &= ConstructorJugador.CrearPrefab() != null;
             ok &= GeneradorEnemigos.CrearPrefabs() != null;
             ok &= GeneradorJefes.Construir();
+            ok &= GeneradorMecanicas.CrearPrefabs();
 
             if (regenerarEscenasDePrueba || !Existe(ConstructorJugador.RutaEscena))
             {
