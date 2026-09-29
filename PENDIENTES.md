@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.4 — Fase 4, 2026-09-28.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.5 — Fase 5, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -11,13 +11,22 @@ Ordenado por urgencia.
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
 | N1 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaJugador.unity`** y dime cómo se siente el control. | Los valores de salto, carrera y dash están calculados, no probados por una persona. | Play, recorre el circuito (el panel F1 dice qué probar en cada zona). Si algo se siente mal, dime qué («salta poco», «patina») o cambia `PlayerController → Parametros` en el prefab. |
-| N2 | **Decide qué hacer con la v1 (`Tesis`) actualizada a Unity 6000.6.3f1.** | Al abrirla en este PC, Unity reimportó 33 archivos de ajustes y `.meta` (ningún script). La v1 se suponía congelada en 6000.2.14f1. | **Recomendado:** guardar esa actualización en un commit aparte de `Tesis`, porque en este PC solo está instalado 6000.6.3. La alternativa es descartarla con git e instalar 6000.2.14 para abrir la v1. Dime cuál prefieres y lo hago. |
 | N3 | **Recorta las poses de Kael** de `Referencias/Arte/posiblesanimaciiones kael.jpeg`. | El jugador ya tiene todos sus estados; hoy se ve como una cápsula clara. | Un PNG por pose con fondo transparente, a 32 px por unidad (el cuerpo mide 0,8 × 1,8 u, es decir, unos 26 × 58 px). Detalle en el apartado B3. |
 | N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
 | N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador` y `fase-4-enemigos` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1 y N7, dime «fusiona» y lo hago. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos` y `fase-5-progresion` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
 | N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
 | N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael: PNG con fondo transparente, a 32 px por unidad, pivote en los pies. Detalle en el apartado B4. |
+| N9 | **Prueba el flujo completo desde `Assets/Scenes/Menu_Inicial.unity`.** | Menú, selector, guardado, pausa y fin de nivel ya funcionan juntos (Fase 5). | Sigue la lista «Qué probar a mano» de la Fase 5 en `CHANGELOG.md`. En el Nivel 1, F9 completa el nivel y Esc pausa. |
+
+## Revisión 0.5: qué cambió respecto de la v0.4
+
+- **Hay progresión** (Fase 5): menú principal con «Continuar», selector con los 6 mundos, guardado en JSON y FSM global del juego. Los datos del Anexo A están en `Assets/Data` (emociones, habilidades, fragmentos, jefes y niveles).
+- **N2 resuelta:** la v1 (`Tesis`) quedó actualizada a 6000.6.3f1 en su propio commit (`ea50657`), como recomendaba.
+- **Gracias por la primera prueba en el Editor.** De ella salieron dos correcciones: un doble clic en el selector ya no pide dos cargas, y abrir `Menu_Inicial` ya no la marca como modificada.
+- **Nuevo N9:** probar el flujo completo desde el menú.
+- **Apartado B6 reescrito para la v2**: seguía describiendo las escenas de la v1.
+- **La UI usa el `Text` integrado de Unity** porque los recursos esenciales de TextMeshPro no están importados. Queda anotado en B9.
 
 ## Revisión 0.4: qué cambió respecto de la v0.3
 
@@ -219,16 +228,24 @@ evento `OnStateChanged` de cada enemigo ya permite dispararlos sin tocar la IA.
 
 ### B6. Escenas — `LevelDatabase` / Build Settings
 
-| Escena | Existe | En Build Settings | Prioridad |
-|---|---|---|---|
-| `Menu_Inicial` | ✔ | ✔ (0) | — |
-| `Niveles` (selector) | ✔ | ✔ (1) | — |
-| `Level1` (Ira) | ✔, pero mide **~37 u** (el tilemap `ground` tiene 229 celdas de 0,16 u). El Anexo pide ~80 u. Sin checkpoint ni arena cerrada. | ✔ (2) | P1 (rediseño del layout) |
-| `Level2` (Tristeza) | ✗ | ✗ | P2 |
-| `Level3` (Miedo) | ✗ | ✗ | P2 |
-| `Level4` (Culpa) | ✗ | ✗ | P2 |
-| `Level5` (Esperanza) | ✗ | ✗ | P2 |
-| `LevelFinal` | ✗ | ✗ | P2 |
+**Estado en la v2 (Fase 5).** Build Settings se generan desde la `LevelDatabase`
+(*Fragmentum → Progresión → Configurar Build Settings*): menú, selector y los niveles que tienen
+escena, en ese orden. Un nivel sin escena aparece «en construcción» en el selector; nunca da error.
+
+| Escena | Existe | En Build Settings | Falta | Prioridad |
+|---|---|---|---|---|
+| `Menu_Inicial` | ✔ generada | ✔ (0) | Fondo y logo (hoy, texto sobre color liso) | P3 |
+| `Niveles` (selector) | ✔ generada | ✔ (1) | Íconos por mundo (B9) | P3 |
+| `Nivel1` (Ira) | ✔, casi vacía: 2 tiles pintados, sin suelo que colisione, sin jugador | ✔ (2) | Pintar el layout de ~80 u del Anexo A. El jugador, el checkpoint y la salida los colocan las Fases 6 y 9. | P1 |
+| Nivel 2 (Tristeza) | ✗ | ✗ | Escena esqueleto (Fase 10) | P2 |
+| Nivel 3 (Miedo) | ✗ | ✗ | idem | P2 |
+| Nivel 4 (Culpa) | ✗ | ✗ | idem | P2 |
+| Nivel 5 (Esperanza) | ✗ | ✗ | idem | P2 |
+| Nivel final | ✗ | ✗ | idem | P2 |
+
+Para añadir la escena de un nivel: arrástrala al campo `escena` de su asset en
+`Assets/Data/Niveles` y pulsa «Configurar Build Settings desde esta base de datos» en el inspector
+de la `LevelDatabase`.
 
 ### B7. Tilesets y fondos por nivel — `LevelData.paleta` / escenas
 
@@ -268,7 +285,8 @@ evento `OnStateChanged` de cada enemigo ya permite dispararlos sin tocar la IA.
 | Pantalla de carga / fade | `SceneLoader` | ✗ (negro sólido basta) | P3 |
 | Panel de opciones | `MainMenu` | ✗ **No existe**: el botón «Configuration» no hace nada | P3 |
 | Corazones y monedas | HUD | ✔ `Elementos/Corazones.png`, `coins.png`, `Animaciones/hearths.anim`, `Coin.anim` | — |
-| Logo | Menú | ✔ `Images/tituloxd.png` | — |
+| Logo | Menú | ✔ `Images/tituloxd.png` en la v1; falta importarlo en la v2 (hoy el título es texto) | P3 |
+| Recursos esenciales de TextMeshPro | Toda la UI | ✗ No importados: la UI usa el `Text` integrado de Unity a través de `FabricaUI`. Se importan con *Window → TextMeshPro → Import TMP Essential Resources*; después se cambia `FabricaUI` y nada más. | P3 |
 
 ### B10. VFX y objetos de mecánica
 
@@ -306,6 +324,7 @@ evento `OnStateChanged` de cada enemigo ya permite dispararlos sin tocar la IA.
 
 ## Historial
 
+- **0.5 (2026-09-29)** — Fase 5 (progresión). N2 resuelta, nuevo N9, apartado B6 reescrito para la v2 y nota sobre TextMeshPro en B9.
 - **0.4 (2026-09-28)** — Fase 4 (enemigos). Apartado B4 reescrito para la v2; nuevos N7 (probar `PruebaEnemigos`) y N8 (arte de enemigos).
 - **0.3 (2026-09-28)** — Fase 3 (jugador). Nueva sección «Lo que necesito de ti», apartado B3 reescrito para la v2 y corrección de la convención de escala y de la tabla de decisiones, que se habían quedado desfasadas.
 - **0.2 (2026-09-19)** — Traslado a `Tesis2.0`, decisiones resueltas, inventario del arte de Gemini.

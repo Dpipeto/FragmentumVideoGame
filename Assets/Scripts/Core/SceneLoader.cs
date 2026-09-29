@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -63,6 +64,13 @@ namespace Fragmentum.Core
         private IEnumerator CargarRutina(string nombre, Action alTerminar)
         {
             Cargando = true;
+
+            // Sin selección, un segundo Enter del teclado o del mando no repite la acción.
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+
             yield return Fundir(1f);
 
             var operacion = SceneManager.LoadSceneAsync(nombre, LoadSceneMode.Single);
@@ -100,7 +108,9 @@ namespace Fragmentum.Core
             _fundido.alpha = objetivo;
         }
 
-        // El fundido es un lienzo propio, por encima de todo, que vive con los sistemas.
+        // El fundido es un lienzo propio, por encima de todo, que vive con los sistemas. Tiene
+        // su GraphicRaycaster para que, mientras dura la carga, se trague los clics: sin él,
+        // blocksRaycasts no hacía nada y un doble clic en el selector pedía dos cargas.
         private void CrearFundido()
         {
             var objeto = new GameObject("Fundido", typeof(RectTransform));
@@ -109,6 +119,7 @@ namespace Fragmentum.Core
             var lienzo = objeto.AddComponent<Canvas>();
             lienzo.renderMode = RenderMode.ScreenSpaceOverlay;
             lienzo.sortingOrder = 1000;
+            objeto.AddComponent<GraphicRaycaster>();
 
             var imagen = new GameObject("Negro", typeof(RectTransform)).AddComponent<Image>();
             imagen.transform.SetParent(objeto.transform, false);

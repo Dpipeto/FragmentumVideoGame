@@ -4,7 +4,202 @@
 > capítulo de desarrollo de la tesis. Una entrada por fase.
 >
 > - **v1**: proyecto original `Tesis` (Unity 6000.2.14f1), congelado tras la auditoría de la Fase 0.
-> - **v2**: este proyecto `Tesis2.0` (Unity 6000.6.0f1), donde se construye la versión refactorizada.
+>   Desde la Fase 5 está actualizado a 6000.6.3f1 para poder abrirlo en el PC nuevo; su código no cambia.
+> - **v2**: este proyecto `Tesis2.0` (Unity 6000.6.3f1 desde la Fase 3), donde se construye la versión refactorizada.
+
+---
+
+## Fase 5 — Progresión, guardado y FSM global (2026-09-28)
+
+Rama `fase-5-progresion`, que sale de `fase-4-enemigos`. Cubre la tarea D (salvo el
+`LevelManager` y el `CheckpointManager`, que son de la Fase 6) y la tarea E. D es, junto con A,
+una de las dos tareas de prioridad máxima.
+
+### 1. El GameManager no persistía nada
+
+- **Problema.** El `GameManager` de la v1 se destruía en cada cambio de escena, así que no
+  conservaba nada entre niveles. Además mezclaba la UI de Game Over, las monedas y la navegación.
+- **Causa.** No tenía `DontDestroyOnLoad`: cada escena llevaba su propia copia. Era una clase con
+  tres responsabilidades sin relación.
+- **Solución.**
+  - `GameManager` es un Singleton persistente, el único del proyecto, y solo lleva la progresión.
+  - `Bootstrap` crea los sistemas persistentes antes de cargar la primera escena, sea cual sea.
+    Salen de `Resources/Sistemas.prefab`: `GameManager`, `GameStateMachine`, `SceneLoader` y
+    `EconomyManager`. Ninguna escena necesita su propio `GameManager`, y darle a Play en cualquier
+    escena funciona.
+  - Las monedas pasan a `EconomyManager`, la navegación a `GameStateMachine` y la pantalla de
+    Game Over a la UI (Fase 6).
+
+### 2. Las monedas no se guardaban nunca
+
+- **Problema.** Las monedas volvían a 0 cada vez que se abría el juego.
+- **Causa.** `CargarMonedas()` leía los `PlayerPrefs`, pero ningún método los escribía. El
+  progreso estaba repartido en claves sueltas.
+- **Solución.** `SaveSystem` (patrón Facade) guarda la partida en
+  `persistentDataPath/fragmentum_guardado.json`. Incluye el nivel máximo alcanzado, los niveles
+  completados, los fragmentos, las habilidades, las monedas, el checkpoint, las cinemáticas vistas
+  y las memorias.
+  - **Escritura atómica:** escribe primero en un temporal y después lo reemplaza, dejando el
+    archivo anterior como `.bak`. Si el archivo está dañado, recupera la copia; si tampoco sirve,
+    empieza una partida nueva y avisa. Nunca lanza una excepción al jugador.
+  - **Cuándo se guarda:** al completar un nivel, al activar un checkpoint, al volver al menú y al
+    cerrar el juego.
+  - **Migración:** si no hay JSON pero sí la clave `Monedas` de la v1, se importan esas monedas.
+    La clave antigua no se borra.
+  - Los fragmentos y las habilidades se guardan por nombre (`IRA`, `ATAQUE_CARGADO`), así que
+    reordenar los enum no corrompe las partidas.
+  - Lo verifican `SaveSystemTests` y `Monedas_SeGuardanAlVolverAlMenu`.
+
+### 3. El selector cargaba escenas que no existían
+
+- **Problema.** El selector generaba 10 botones que cargaban «Level1»…«Level10», y hacer clic
+  daba error porque esas escenas no existían. Además:
+  - Se podía entrar al nivel final desde el principio.
+  - Los botones decían «Level 3».
+  - No limpiaba los botones anteriores al regenerarse.
+- **Causa.** Los nombres de escena se formaban concatenando texto y no existía ningún modelo de
+  datos del nivel.
+- **Solución.**
+  - **`LevelData`** (patrón Type Object): un asset por nivel con escena, mundo, emoción, paleta,
+    jefe, fragmento, habilidad, reglas y secciones.
+  - **`LevelDatabase`**: la lista ordenada de niveles y las escenas de menú y selector. Es la única
+    fuente de verdad.
+  - **`ReferenciaEscena`**: la escena se elige arrastrando el asset y se guarda su ruta.
+    `EnBuild` dice si de verdad se puede cargar.
+  - **El selector** crea un botón por nivel de la base de datos, con el texto «3. Miedo — Bosque
+    Tenebroso» y el color de la emoción. Los niveles no desbloqueados aparecen bloqueados; los
+    que no tienen escena, «en construcción»; y los superados, con su fragmento integrado.
+  - **`SceneLoader`** comprueba que la escena esté en Build Settings antes de cargarla. Si no lo
+    está, avisa y no carga nada.
+  - **Build Settings** se generan desde la base de datos, y su inspector avisa si alguna escena
+    no está incluida.
+  - Lo verifican `Flujo_MenuSelectorNivelCompletado_DesbloqueaYGuarda`,
+    `NivelSinEscenaOBloqueado_NoSeCargaNiRompeNada` y `LevelDatabaseTests`.
+
+### 4. El menú no tenía «Continuar» y «Salir» no hacía nada en el Editor
+
+- **Problema.** El menú principal tenía los nombres de escena escritos en el código («Niveles»,
+  «Level1»). No existía la opción de continuar la partida, y «Salir» no funcionaba en el Editor.
+- **Causa.** El menú cargaba escenas por su cuenta, y `Application.Quit()` no tiene efecto en el
+  Editor.
+- **Solución.** `MainMenu` pide cada acción a la FSM global:
+  - **Continuar** lleva al nivel desbloqueado más avanzado que tenga escena, y solo está activo si
+    hay progreso.
+  - **Nueva partida** empieza desde cero; la partida anterior queda en la copia `.bak`.
+  - **Salir** guarda y también funciona en el Editor.
+  - Ya no queda ningún nombre de escena en el código.
+
+### 5. `Time.timeScale` se escribía desde cinco sitios
+
+- **Problema.** La pausa, el Game Over y los cambios de escena se pisaban: cualquiera de ellos
+  podía dejar el juego congelado o en marcha cuando no tocaba.
+- **Causa.** La v1 no tenía un estado global del juego y escribía `Time.timeScale` en cinco
+  scripts distintos.
+- **Solución.** **`GameStateMachine`**, una FSM de 9 estados sobre el mismo núcleo que el jugador
+  y los enemigos: BOOT, MAIN_MENU, LEVEL_SELECT, LOADING, PLAYING, PAUSED, CUTSCENE, GAME_OVER y
+  LEVEL_COMPLETE. Los estados de dentro de un nivel forman el grupo EN_NIVEL.
+  - Es la única que escribe `Time.timeScale` y la única que bloquea el input de juego
+    (`EventosJuego.EntradaBloqueada`, que respeta `FuenteInputJugador`). Los efectos de cada
+    estado están en una sola tabla.
+  - Es la única que pide cargar escenas. El menú, el selector y los niveles llaman a su API.
+  - Cuenta el tiempo sin escala, así que sus esperas funcionan con el juego en pausa.
+  - La muerte del jugador en un nivel lleva al Game Over mediante el evento global
+    `EventosJuego.JugadorMurio`, sin que la FSM conozca al jugador.
+  - El diagrama `Docs/FSM/Juego.md` se genera desde su tabla.
+  - Lo verifican `TablaJuegoTests` y `Pausa_CongelaElTiempoYBloqueaElInput`.
+
+### 6. El diseño de los niveles solo existía en el documento
+
+- **Problema.** Emociones, mundos, jefes, fragmentos y habilidades del Anexo A no estaban en el
+  proyecto: cada escena tendría que haberlos repetido a mano.
+- **Causa.** No había dónde guardar esos datos.
+- **Solución.**
+  - *Fragmentum → Progresión* genera desde el Anexo A las 6 emociones, las 4 habilidades, los
+    5 fragmentos, los 5 jefes y los 6 niveles. Cada nivel lleva su paleta, sus reglas (sigilo,
+    oscuridad, agacharse) y sus secciones.
+  - Los nombres canónicos siguen el GDD: Centinela Ardiente, Juez Silente y Esperanza.
+  - Al entrar en un nivel, el `GameManager` aplica al jugador las habilidades guardadas y las
+    reglas del nivel.
+  - Lo verifican `DatosProgresionTests` y `EnUnNivel_SeAplicanLasHabilidadesGuardadasYLasReglas`.
+
+### Decisiones que ajustan el plan de la Fase 1
+
+1. **«Seleccionar nivel» y «Volver» pasan por LOADING.** El menú y el selector son escenas
+   distintas, así que no existen las transiciones directas MAIN_MENU → LEVEL_SELECT y
+   LEVEL_SELECT → MAIN_MENU del plan (§3.6).
+2. **Nueva transición BOOT → LEVEL_SELECT**, para darle a Play con el selector abierto. BOOT →
+   PLAYING cubre también las escenas de prueba.
+3. **GAME_OVER y LEVEL_COMPLETE avanzan solos** tras 1,5 s mientras no existan sus pantallas
+   (Fase 6): el Game Over reintenta y el fin de nivel continúa. El juego nunca se queda atascado.
+4. **La UI usa el `Text` integrado de Unity, no TextMeshPro**, porque los recursos esenciales de
+   TMP no están importados (PENDIENTES B9). `FabricaUI` concentra el estilo, así que el cambio
+   posterior se hará en un solo sitio.
+5. **Las escenas de prueba no son niveles.** El `GameManager` no les impone progreso ni reglas, y
+   la muerte del jugador en ellas no lleva al Game Over.
+
+### Además
+
+- **`AtajosDepuracion`** (solo en el Editor y en builds de desarrollo): Esc pausa, F9 completa el
+  nivel y F10 vuelve al menú. Sirven para probar el flujo hasta que existan la salida de nivel y
+  los jefes.
+- **`Moneda`** suma en `EconomyManager` y **`ContadorMonedas`** escucha su evento.
+- **Nuevo menú *Fragmentum → Progresión*:** generar y restablecer los datos, crear las escenas de
+  menú y selector, configurar Build Settings y validar la base de datos. *Regenerar todo* incluye
+  la progresión.
+- **Pruebas sin tocar la partida real:** en el ejecutor de pruebas, `Bootstrap` no crea los
+  sistemas. Las pruebas montan los suyos y guardan en una carpeta temporal.
+- **La v1 (`Tesis`) se actualizó a 6000.6.3f1** en un commit aparte. Son los cambios que hizo el
+  propio editor al abrirla en el PC nuevo, sin ningún script.
+
+### Correcciones tras la prueba en el Editor (2026-09-29)
+
+- **Un doble clic en el selector pedía una segunda carga**, y la consola decía «No se puede
+  cambiar de escena desde LOADING».
+  - *Causa:* el fundido activaba `blocksRaycasts`, pero su lienzo no tenía `GraphicRaycaster`, así
+    que no interceptaba ningún clic.
+  - *Solución:* el lienzo del fundido tiene su `GraphicRaycaster`, y al empezar la carga se quita
+    la selección de teclado. Lo verifica `DuranteLaCarga_ElFundidoSeTragaLosClics`.
+- **Abrir `Menu_Inicial` en el Editor la marcaba como modificada.**
+  - *Causa:* en modo batch no se calculan los layouts de uGUI. Además, al cargar la escena Unity
+    sube el tamaño máximo de cada texto hasta su tamaño de fuente.
+  - *Solución:* el generador calcula los layouts antes de guardar y `FabricaUI` fija el tamaño
+    máximo. Las escenas de menú y selector se regeneraron conservando su GUID.
+- **Aviso UAC0009:** Unity 6000.6 marca como obsoleta la directiva `DEVELOPMENT_BUILD`.
+  `AtajosDepuracion` comprueba ahora `Debug.isDebugBuild`.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **113 de 113 correctas** (34 nuevas: guardado, base de datos, tabla del juego
+  y datos del Anexo A).
+- Pruebas PlayMode: **39 de 39 correctas** (8 nuevas de progresión, con las escenas reales de menú,
+  selector y Nivel 1).
+
+### Pasos manuales en el Editor
+
+Ninguno obligatorio. Ya están generados:
+- los datos (`Assets/Data/Emociones`, `Habilidades`, `Fragmentos`, `Jefes` y `Niveles`);
+- las escenas `Menu_Inicial` y `Niveles`;
+- `Assets/Resources/Sistemas.prefab`;
+- Build Settings: `Menu_Inicial`, `Niveles` y `Nivel1`.
+
+Notas:
+- **Para jugar desde el principio,** abre `Menu_Inicial` y dale a Play. También se puede dar a
+  Play en cualquier otra escena: los sistemas se crean solos.
+- **`Nivel1` todavía no tiene jugador.** Lo colocará el `LevelManager` de la Fase 6.
+- **Para borrar la partida,** elimina
+  `%USERPROFILE%\AppData\LocalLow\DefaultCompany\Tesis2.0\fragmentum_guardado.json` o usa
+  «Nueva partida».
+
+### Qué probar a mano (desde `Menu_Inicial`)
+
+- En una partida nueva, «Continuar» está desactivado y «Nueva partida» lleva al Nivel 1.
+- El selector muestra los 6 mundos con su emoción. Solo el primero está disponible.
+- En el Nivel 1, Esc pausa (el tiempo se detiene) y F9 completa el nivel. De vuelta en el
+  selector, el Nivel 1 dice «Fragmento integrado» y el 2, «En construcción».
+- Cierra y vuelve a abrir el juego: el progreso sigue ahí y «Continuar» está activo.
+- Un doble clic rápido sobre un mundo solo lo carga una vez.
 
 ---
 

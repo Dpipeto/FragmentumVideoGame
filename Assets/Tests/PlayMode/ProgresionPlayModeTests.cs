@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using Fragmentum.Core;
 using Fragmentum.Core.Juego;
@@ -9,6 +10,7 @@ using Fragmentum.Player;
 using Fragmentum.UI;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -125,6 +127,23 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsFalse(selector.Botones[1].interactable, "Desbloqueado pero sin escena: no se puede pulsar.");
             StringAssert.Contains("En construcción", Etiqueta(selector.Botones[1]));
             StringAssert.Contains("Fragmento integrado", Etiqueta(selector.Botones[0]));
+        }
+
+        [UnityTest]
+        public IEnumerator DuranteLaCarga_ElFundidoSeTragaLosClics()
+        {
+            // En la prueba manual, un doble clic en el selector pedía una segunda carga.
+            Assert.IsTrue(Juego.IrAlSelector());
+            yield return null;
+            yield return null;
+
+            var datos = new PointerEventData(EventSystem.current) { position = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f) };
+            var impactos = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(datos, impactos);
+
+            Assert.IsNotEmpty(impactos, "En el centro del menú hay un botón.");
+            Assert.AreEqual("Negro", impactos[0].gameObject.name, "Mientras carga, el primer objeto bajo el puntero es el fundido, no un botón.");
+            yield return EsperarEstado(ESTADOS_JUEGO.LEVEL_SELECT, 5f);
         }
 
         [UnityTest]

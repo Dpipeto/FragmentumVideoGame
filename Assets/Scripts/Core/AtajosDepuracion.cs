@@ -10,10 +10,20 @@ namespace Fragmentum.Core
     /// - Esc: pausa y reanuda.
     /// - F9: completa el nivel actual (otorga su fragmento y su habilidad).
     /// - F10: vuelve al menú.
+    ///
+    /// Se comprueba <see cref="Debug.isDebugBuild"/> en lugar de la directiva
+    /// <c>DEVELOPMENT_BUILD</c>, que Unity 6000.6 marca como obsoleta (aviso UAC0009).
     /// </summary>
     public class AtajosDepuracion : MonoBehaviour
     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private void Awake()
+        {
+            if (!Debug.isDebugBuild)
+            {
+                enabled = false;
+            }
+        }
+
         private void Update()
         {
             var teclado = Keyboard.current;
@@ -39,6 +49,5 @@ namespace Fragmentum.Core
                 juego.IrAlMenu();
             }
         }
-#endif
     }
 }

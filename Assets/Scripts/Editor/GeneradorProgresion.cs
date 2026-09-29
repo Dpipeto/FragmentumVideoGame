@@ -56,6 +56,17 @@ namespace Fragmentum.EditorTools
             }
         }
 
+        /// <summary>
+        /// Regenera sin preguntar las escenas de menú y selector (conservan su GUID). Para el
+        /// modo batch: <c>-executeMethod Fragmentum.EditorTools.GeneradorProgresion.RegenerarEscenasNavegacion</c>.
+        /// </summary>
+        public static void RegenerarEscenasNavegacion()
+        {
+            CrearEscenaMenu(false);
+            CrearEscenaSelector(false);
+            ConfigurarBuildSettings(GenerarDatos(false));
+        }
+
         [MenuItem("Fragmentum/Progresión/Configurar Build Settings desde la LevelDatabase", priority = 123)]
         public static void MenuBuildSettings() => ConfigurarBuildSettings(AssetDatabase.LoadAssetAtPath<LevelDatabase>(RutaBaseDeDatos));
 
@@ -437,9 +448,28 @@ namespace Fragmentum.EditorTools
 
         private static void Guardar(UnityEngine.SceneManagement.Scene escena, string ruta)
         {
+            CalcularLayout(escena);
             EditorSceneManager.MarkSceneDirty(escena);
             EditorSceneManager.SaveScene(escena, ruta);
             Debug.Log($"[Fragmentum] Escena creada: {ruta}.");
+        }
+
+        /// <summary>
+        /// Calcula los layouts de uGUI antes de guardar. En modo batch no hay repintado y los
+        /// hijos de las columnas se guardaban con valores por defecto; al abrir la escena en el
+        /// Editor, el layout los recalculaba y la escena aparecía modificada sin haberla tocado.
+        /// </summary>
+        public static void CalcularLayout(UnityEngine.SceneManagement.Scene escena)
+        {
+            // Sobre cada grupo y no sobre el lienzo: el recálculo se salta los subárboles cuya
+            // raíz no controla ningún layout, y el lienzo no lo hace.
+            foreach (var raiz in escena.GetRootGameObjects())
+            {
+                foreach (var grupo in raiz.GetComponentsInChildren<LayoutGroup>(true))
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)grupo.transform);
+                }
+            }
         }
     }
 }

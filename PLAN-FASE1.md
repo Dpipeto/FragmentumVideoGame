@@ -43,7 +43,17 @@ con Gemini, y dejar `Tesis` congelado como **v1** de referencia para la comparac
 | Datos | `EnemyData` añade `danioContacto`, `alturaAtaque`, `factorHisteresis`, ventana de golpe y `tinte` provisional. |
 | Verificación (§8.5) | El proyecto de verificación vive ahora en el repositorio: `Herramientas/verificar.ps1` compila sin abrir Unity y, con `-Unity`, regenera todo y ejecuta las pruebas EditMode y PlayMode. |
 
-Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** (las dos últimas pendientes de tu prueba en el Editor, ver `PENDIENTES.md` N1 y N7) · 5 en adelante por hacer.
+### Ajustes tras la Fase 5 (2026-09-29)
+
+| Qué cambia | Detalle |
+|---|---|
+| FSM global (§3.6) | Menú y selector son escenas distintas: «Seleccionar nivel» y «Volver» pasan por LOADING, así que no existen MAIN_MENU → LEVEL_SELECT ni LEVEL_SELECT → MAIN_MENU directas. Nueva BOOT → LEVEL_SELECT (Play con el selector abierto). Los estados de dentro de un nivel forman el grupo EN_NIVEL. El diagrama real está en `Docs/FSM/Juego.md`. |
+| FSM global (§3.6) | GAME_OVER y LEVEL_COMPLETE avanzan solos tras 1,5 s mientras no exista su pantalla. La Fase 6 las añade y desactiva ese avance. |
+| UI | Se usa el `Text` integrado de Unity en lugar de TextMeshPro, cuyos recursos esenciales no están importados. Todo el estilo pasa por `FabricaUI`. |
+| Escenas de prueba | No son niveles: el `GameManager` no les impone progreso ni reglas, y la muerte en ellas no lleva al Game Over. |
+| Guardado (§6.2) | Se añade el campo `migradoDePlayerPrefs`, para no importar dos veces las monedas de la v1. |
+
+Estado de las fases: **2 hecha** · **3 hecha** · **4 hecha** · **5 hecha** (de la 3 a la 5, pendientes de tu prueba en el Editor: `PENDIENTES.md` N1, N7 y N9) · 6 en adelante por hacer.
 
 ---
 

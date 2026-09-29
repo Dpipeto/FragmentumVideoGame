@@ -32,6 +32,9 @@ namespace Fragmentum.UI
             texto.font = Fuente;
             texto.text = contenido;
             texto.fontSize = tamano;
+            // Unity sube el tamaño máximo hasta el de la fuente al cargar la escena; si no se
+            // fija aquí, abrir en el Editor una escena generada la marca como modificada.
+            texto.resizeTextMaxSize = Mathf.Max(texto.resizeTextMaxSize, tamano);
             texto.color = color;
             texto.alignment = alineacion;
             texto.horizontalOverflow = HorizontalWrapMode.Wrap;
