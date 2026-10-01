@@ -1,50 +1,96 @@
+using System;
 using System.Collections.Generic;
+using System.Text;
 using Fragmentum.Core;
 using Fragmentum.Narrative;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.UI;
 
 namespace Fragmentum.UI
 {
     /// <summary>
-    /// Reproductor de cinemáticas (<c>CutscenePlayer</c> del plan): muestra las diapositivas de
-    /// un <see cref="CutsceneData"/> a pantalla completa mientras la FSM global está en CUTSCENE.
+    /// Reproductor de cinemáticas (<c>CutscenePlayer</c> del plan): muestra un
+    /// <see cref="CutsceneData"/> a pantalla completa mientras la FSM global está en CUTSCENE.
     ///
-    /// - Cada diapositiva dura lo que diga su dato; un clic, Enter o Espacio pasan a la
-    ///   siguiente, y Esc o Start saltan la cinemática entera si es saltable.
+    /// - Qué se ve en cada instante lo decide <see cref="LineaTiempoCinematica"/>; esta pantalla
+    ///   solo lo aplica. Las imágenes y los textos entran y salen con <c>CanvasGroup.alpha</c>:
+    ///   fundido cruzado entre imágenes y fundido en cada texto, nunca un corte duro.
+    /// - Las imágenes conservan su proporción sobre fondo negro, y los textos se colocan por
+    ///   tercios de la <b>imagen</b>, no de la pantalla: en 16:10 un título «arriba» sigue cayendo
+    ///   sobre la imagen y no sobre la franja negra.
+    /// - Pasados los primeros segundos (<see cref="CutsceneData.bloqueoSalto"/>), cualquier tecla,
+    ///   botón o clic la salta entera. Un aviso discreto lo dice.
     /// - <b>Funciona sin arte:</b> una diapositiva sin imagen se ve en negro con su texto, y sin
-    ///   texto dice qué falta. La cinemática inicial ya se puede ver, cronometrar y saltar
-    ///   (criterio de aceptación de la Fase 8).
+    ///   texto dice qué falta (criterio de aceptación de la Fase 8).
     /// - Cuenta el tiempo sin escala, porque la cinemática para el juego.
     /// - Al terminar se lo dice a la FSM global, que decide a dónde se va.
     /// </summary>
     public class PantallaCinematica : MonoBehaviour
     {
-        private const float DuracionSinDiapositivas = 3f;
+        private const int TamanoTexto = 40;
+        private const int TamanoTitulo = 76;
+        private static readonly Color ColorTexto = new Color(0.94f, 0.93f, 0.85f, 1f);
 
         private static readonly HashSet<string> AvisadasSinArte = new HashSet<string>();
 
-        private Image _imagen;
-        private Text _texto;
-        private Text _progreso;
-        private Text _ayuda;
-        private Button _siguiente;
+        private sealed class Ranura
+        {
+            public Text Texto;
+            public CanvasGroup Grupo;
+        }
+
+        private AspectRatioFitter _marco;
+        private Image _abajo;
+        private Image _encima;
+        private CanvasGroup _grupoAbajo;
+        private CanvasGroup _grupoEncima;
+        private readonly Dictionary<POSICIONES_CARTEL, Ranura> _ranuras = new Dictionary<POSICIONES_CARTEL, Ranura>();
+        private Text _aviso;
+        private CanvasGroup _grupoAviso;
         private AudioSource _audio;
+        private AudioSource _musica;
         private bool _construida;
-        private float _finDiapositiva;
+        private float _inicio;
+        private int _indiceAudio = -1;
+        private int _frameSaltoPedido = -1;
+        private IDisposable _escuchaBotones;
 
         public CutsceneData Actual { get; private set; }
 
-        public int Indice { get; private set; }
+        public LineaTiempoCinematica Linea { get; private set; }
 
         public bool Reproduciendo { get; private set; }
 
-        public string TextoActual => _texto != null ? _texto.text : string.Empty;
+        /// <summary>Segundos desde que empezó la cinemática en curso.</summary>
+        public float Tiempo => Reproduciendo ? Time.unscaledTime - _inicio : 0f;
+
+        /// <summary>Diapositiva en curso.</summary>
+        public int Indice => Linea != null ? Mathf.Max(0, Linea.IndiceEn(Tiempo)) : 0;
+
+        /// <summary>Los textos que se ven ahora, uno por línea.</summary>
+        public string TextoActual
+        {
+            get
+            {
+                var texto = new StringBuilder();
+                foreach (var ranura in _ranuras.Values)
+                {
+                    if (ranura.Grupo.alpha > 0f && !string.IsNullOrEmpty(ranura.Texto.text))
+                    {
+                        texto.AppendLine(ranura.Texto.text);
+                    }
+                }
+
+                return texto.ToString().TrimEnd();
+            }
+        }
+
+        /// <summary>Opacidad actual del aviso «pulsa cualquier tecla».</summary>
+        public float AlfaAviso => _grupoAviso != null ? _grupoAviso.alpha : 0f;
 
         public bool Visible => _construida && gameObject.activeSelf;
-
-        private int Total => Actual != null && Actual.diapositivas.Count > 0 ? Actual.diapositivas.Count : 1;
 
         public void Construir()
         {
@@ -60,83 +106,100 @@ namespace Fragmentum.UI
 
             FabricaUI.Panel(raiz, "Fondo", Color.black);
 
-            _imagen = FabricaUI.Objeto("Imagen", raiz).gameObject.AddComponent<Image>();
-            _imagen.preserveAspect = true;
-            _imagen.raycastTarget = false;
-            FabricaUI.Estirar(_imagen.rectTransform);
+            // El marco tiene la proporción de la imagen y cabe en la pantalla: las franjas negras
+            // quedan fuera de él, y los textos se colocan dentro.
+            var marco = FabricaUI.Objeto("Marco", raiz);
+            FabricaUI.Estirar(marco);
+            _marco = marco.gameObject.AddComponent<AspectRatioFitter>();
+            _marco.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            _marco.aspectRatio = 16f / 9f;
 
-            // Toda la pantalla es el botón «siguiente»: clic, Enter o Espacio.
-            _siguiente = FabricaUI.Objeto("Siguiente", raiz).gameObject.AddComponent<Button>();
-            var zona = _siguiente.gameObject.AddComponent<Image>();
-            zona.color = new Color(0f, 0f, 0f, 0f);
-            FabricaUI.Estirar((RectTransform)_siguiente.transform);
-            _siguiente.transition = Selectable.Transition.None;
-            _siguiente.onClick.AddListener(Siguiente);
+            (_abajo, _grupoAbajo) = CapaDeImagen(marco, "ImagenAbajo");
+            (_encima, _grupoEncima) = CapaDeImagen(marco, "ImagenEncima");
 
-            var banda = FabricaUI.Panel(raiz, "Banda", new Color(0f, 0f, 0f, 0.55f), false);
-            FabricaUI.Colocar(banda.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 150f), new Vector2(1920f, 220f));
+            _ranuras[POSICIONES_CARTEL.ARRIBA] = CrearRanura(marco, "TextoArriba", 5f / 6f);
+            _ranuras[POSICIONES_CARTEL.CENTRO] = CrearRanura(marco, "TextoCentro", 0.5f);
+            _ranuras[POSICIONES_CARTEL.ABAJO] = CrearRanura(marco, "TextoAbajo", 1f / 6f);
 
-            _texto = FabricaUI.Texto(raiz, "Texto", string.Empty, 34, new Color(0.94f, 0.93f, 0.85f, 1f));
-            FabricaUI.Colocar(_texto.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 160f), new Vector2(1400f, 180f));
-            _texto.raycastTarget = false;
-
-            _progreso = FabricaUI.Texto(raiz, "Progreso", string.Empty, 20, new Color(1f, 1f, 1f, 0.45f), TextAnchor.UpperRight);
-            FabricaUI.Colocar(_progreso.rectTransform, new Vector2(1f, 1f), new Vector2(-40f, -32f), new Vector2(300f, 30f), new Vector2(1f, 1f));
-            _progreso.raycastTarget = false;
-
-            _ayuda = FabricaUI.Texto(raiz, "Ayuda", string.Empty, 18, new Color(1f, 1f, 1f, 0.4f));
-            FabricaUI.Colocar(_ayuda.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 28f), new Vector2(1200f, 30f));
-            _ayuda.raycastTarget = false;
+            _aviso = FabricaUI.Texto(raiz, "Aviso", string.Empty, 22, Color.white, TextAnchor.LowerRight);
+            FabricaUI.Colocar(_aviso.rectTransform, new Vector2(1f, 0f), new Vector2(-48f, 36f), new Vector2(900f, 40f), new Vector2(1f, 0f));
+            _aviso.raycastTarget = false;
+            _grupoAviso = Grupo(_aviso.gameObject);
 
             _audio = gameObject.AddComponent<AudioSource>();
             _audio.playOnAwake = false;
             _audio.ignoreListenerPause = true;
+
+            _musica = gameObject.AddComponent<AudioSource>();
+            _musica.playOnAwake = false;
+            _musica.ignoreListenerPause = true;
         }
 
-        /// <summary>Empieza a reproducir. Sin datos, termina en el acto.</summary>
+        /// <summary>Empieza a reproducir. Sin datos o sin diapositivas, termina en el acto.</summary>
         public void Reproducir(CutsceneData cinematica)
         {
             Construir();
             Actual = cinematica;
-            if (cinematica == null)
+            if (cinematica == null || cinematica.diapositivas.Count == 0)
             {
-                Debug.LogWarning("[Cinemática] La FSM pidió una cinemática sin datos: se continúa sin ella.");
+                Debug.LogWarning(cinematica == null
+                    ? "[Cinemática] La FSM pidió una cinemática sin datos: se continúa sin ella."
+                    : $"[Cinemática] '{cinematica.Id}' no tiene diapositivas: se continúa sin ella.");
                 Terminar();
                 return;
             }
 
             if (cinematica.FaltaArte && AvisadasSinArte.Add(cinematica.Id))
             {
-                Debug.LogWarning($"[Cinemática] '{cinematica.Id}' no tiene imágenes (PENDIENTES B1): se muestra en negro con su texto.");
+                Debug.LogWarning($"[Cinemática] '{cinematica.Id}' tiene diapositivas sin imagen (PENDIENTES B1): se ven en negro con su texto.");
             }
 
+            Linea = new LineaTiempoCinematica(cinematica);
+            _inicio = Time.unscaledTime;
+            _indiceAudio = -1;
+            _frameSaltoPedido = -1;
             Reproduciendo = true;
             gameObject.SetActive(true);
-            _ayuda.text = cinematica.saltable ? "CLIC O ENTER  siguiente   ·   ESC  saltar" : "CLIC O ENTER  siguiente";
-            Mostrar(0);
+            _aviso.text = cinematica.avisoSaltar;
+
+            _musica.Stop();
+            if (cinematica.musica != null)
+            {
+                _musica.clip = cinematica.musica;
+                _musica.Play();
+            }
+
+            // Cualquier tecla, botón del mando o clic.
+            _escuchaBotones?.Dispose();
+            _escuchaBotones = InputSystem.onAnyButtonPress.Call(_ => PedirSalto());
+
+            Aplicar(0f);
         }
 
-        /// <summary>Pasa a la diapositiva siguiente, o termina si era la última.</summary>
-        public void Siguiente()
+        /// <summary>
+        /// Cualquier tecla: salta la cinemática si ya pasó el bloqueo inicial. Se aplica en el
+        /// frame siguiente, para que la misma pulsación no llegue también al juego (Esc pausaría
+        /// nada más volver). Devuelve si se aceptó.
+        /// </summary>
+        public bool PedirSalto()
         {
-            if (!Reproduciendo)
+            if (!Reproduciendo || !Linea.PuedeSaltar(Tiempo))
             {
-                return;
+                return false;
             }
 
-            if (Indice + 1 >= Total)
+            if (_frameSaltoPedido < 0)
             {
-                Terminar();
-                return;
+                _frameSaltoPedido = Time.frameCount;
             }
 
-            Mostrar(Indice + 1);
+            return true;
         }
 
-        /// <summary>Esc o Start: salta la cinemática entera si es saltable.</summary>
+        /// <summary>Esc o Start (desde el UIManager): salta en el acto si ya pasó el bloqueo inicial.</summary>
         public void Saltar()
         {
-            if (Reproduciendo && Actual != null && Actual.saltable)
+            if (Reproduciendo && Linea.PuedeSaltar(Tiempo))
             {
                 Terminar();
             }
@@ -146,9 +209,12 @@ namespace Fragmentum.UI
         public void Ocultar()
         {
             Reproduciendo = false;
+            DejarDeEscuchar();
+
             if (_audio != null)
             {
                 _audio.Stop();
+                _musica.Stop();
             }
 
             if (_construida)
@@ -159,34 +225,89 @@ namespace Fragmentum.UI
 
         private void Update()
         {
-            if (Reproduciendo && Time.unscaledTime >= _finDiapositiva)
+            if (!Reproduciendo)
             {
-                Siguiente();
+                return;
             }
+
+            var t = Tiempo;
+            if (Linea.Terminada(t) || (_frameSaltoPedido >= 0 && Time.frameCount > _frameSaltoPedido))
+            {
+                Terminar();
+                return;
+            }
+
+            Aplicar(t);
         }
 
-        private void Mostrar(int indice)
+        private void OnDisable() => DejarDeEscuchar();
+
+        private void Aplicar(float t)
         {
-            Indice = indice;
-            var diapositiva = Actual.diapositivas.Count > indice ? Actual.diapositivas[indice] : null;
+            var (abajo, encima) = Linea.ImagenesEn(t);
+            Pintar(_abajo, _grupoAbajo, abajo);
+            Pintar(_encima, _grupoEncima, encima);
 
-            _imagen.sprite = diapositiva != null ? diapositiva.imagen : null;
-            _imagen.enabled = _imagen.sprite != null;
-            _texto.text = Actual.TextoDe(indice);
-            _progreso.text = $"{indice + 1} / {Total}";
-            _finDiapositiva = Time.unscaledTime + (diapositiva != null ? diapositiva.duracion : DuracionSinDiapositivas);
+            foreach (var ranura in _ranuras.Values)
+            {
+                ranura.Grupo.alpha = 0f;
+            }
 
+            // Si dos textos comparten tercio a la vez, se ve el más opaco.
+            foreach (var visible in Linea.TextosEn(t))
+            {
+                var ranura = _ranuras[visible.Cartel.posicion];
+                if (visible.Alfa <= ranura.Grupo.alpha)
+                {
+                    continue;
+                }
+
+                ranura.Texto.text = visible.Cartel.texto;
+                ranura.Texto.fontSize = visible.Cartel.titulo ? TamanoTitulo : TamanoTexto;
+                ranura.Grupo.alpha = visible.Alfa;
+            }
+
+            _grupoAviso.alpha = Linea.AlfaAviso(t);
+            SonarAudioDe(Linea.IndiceEn(t));
+        }
+
+        private void Pintar(Image imagen, CanvasGroup grupo, LineaTiempoCinematica.Capa capa)
+        {
+            var sprite = capa.Indice >= 0 ? Actual.diapositivas[capa.Indice]?.imagen : null;
+            if (imagen.sprite != sprite)
+            {
+                imagen.sprite = sprite;
+                if (sprite != null)
+                {
+                    _marco.aspectRatio = sprite.rect.width / sprite.rect.height;
+                }
+            }
+
+            imagen.enabled = sprite != null;
+            grupo.alpha = sprite != null ? capa.Alfa : 0f;
+        }
+
+        private void SonarAudioDe(int indice)
+        {
+            if (indice == _indiceAudio)
+            {
+                return;
+            }
+
+            _indiceAudio = indice;
             _audio.Stop();
+            var diapositiva = indice >= 0 ? Actual.diapositivas[indice] : null;
             if (diapositiva != null && diapositiva.audio != null)
             {
                 _audio.clip = diapositiva.audio;
                 _audio.Play();
             }
+        }
 
-            if (EventSystem.current != null)
-            {
-                EventSystem.current.SetSelectedGameObject(_siguiente.gameObject);
-            }
+        private void DejarDeEscuchar()
+        {
+            _escuchaBotones?.Dispose();
+            _escuchaBotones = null;
         }
 
         private void Terminar()
@@ -197,6 +318,45 @@ namespace Fragmentum.UI
             {
                 juego.TerminarCinematica();
             }
+        }
+
+        // --- Construcción ---
+
+        private static (Image, CanvasGroup) CapaDeImagen(Transform marco, string nombre)
+        {
+            var imagen = FabricaUI.Objeto(nombre, marco).gameObject.AddComponent<Image>();
+            imagen.preserveAspect = true;
+            imagen.raycastTarget = false;
+            imagen.enabled = false;
+            FabricaUI.Estirar(imagen.rectTransform);
+            return (imagen, Grupo(imagen.gameObject));
+        }
+
+        private static Ranura CrearRanura(Transform marco, string nombre, float alturaRelativa)
+        {
+            var texto = FabricaUI.Texto(marco, nombre, string.Empty, TamanoTexto, ColorTexto);
+            texto.raycastTarget = false;
+            var rect = texto.rectTransform;
+            rect.anchorMin = new Vector2(0.08f, alturaRelativa);
+            rect.anchorMax = new Vector2(0.92f, alturaRelativa);
+            rect.sizeDelta = new Vector2(0f, 260f);
+            rect.anchoredPosition = Vector2.zero;
+
+            // Sombra para que se lea sobre cualquier imagen.
+            var sombra = texto.gameObject.AddComponent<Shadow>();
+            sombra.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            sombra.effectDistance = new Vector2(3f, -3f);
+
+            return new Ranura { Texto = texto, Grupo = Grupo(texto.gameObject) };
+        }
+
+        private static CanvasGroup Grupo(GameObject objeto)
+        {
+            var grupo = objeto.AddComponent<CanvasGroup>();
+            grupo.alpha = 0f;
+            grupo.blocksRaycasts = false;
+            grupo.interactable = false;
+            return grupo;
         }
     }
 }

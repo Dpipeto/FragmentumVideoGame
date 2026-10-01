@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.10 — Arte de Kael, 2026-09-30.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.11 — Cinemática inicial y escenario pintado, 2026-09-30.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,14 +14,24 @@ Ordenado por urgencia.
 | N3 | **Dibuja los clips de Kael que faltan:** dash, wall slide, agacharse, daño y muerte (y, para la Fase 10, nado). | Quieto, correr, salto y ataque ya están en el juego. Los demás estados usan el clip más parecido; por ejemplo, el dash muestra un fotograma de carrera fijo. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a escala 1× y sin ping-pong** a `Assets/Sprites/Kael`. Si prefieres pasarme los PNG, los monto yo. Detalle en B3. |
 | N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
 | N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel`, `fase-7-jefes`, `fase-8-narrativa`, `fase-9-nivel1` y `arte-kael` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel`, `fase-7-jefes`, `fase-8-narrativa`, `fase-9-nivel1`, `arte-kael` y `cinematica-y-mapa` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
 | N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
 | N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael (B3): tiras de fotogramas con fondo transparente, exportadas a escala 1× y a la misma densidad de píxel que Kael. Detalle en el apartado B4. |
 | N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`**, jefe incluido. | Menú, selector, guardado, checkpoints, pausa, Game Over, la Centinela Ardiente, la narrativa, el fin de nivel y las mecánicas de la Ira ya funcionan juntos (Fases 5 a 9). | Sigue las listas «Qué probar a mano» de las Fases 5 a 9 en `CHANGELOG.md`. Dime qué pantalla no se entiende y qué se siente mal. También si la Centinela es demasiado fácil o difícil (sus valores están en `Assets/Data/Jefes`) y si el Golem de Ceniza debe poder morir en la lava. |
-| N10 | **Pinta el layout del Nivel 1** (~80 u, Anexo A) cuando quieras. | Hoy se juega sobre un recorrido provisional de bloques. | Sigue los «Pasos manuales en el Editor» de las Fases 6 y 9: prepara el tilemap como suelo, borra «Provisional» (se lleva sus mecánicas), ajusta la altura de la bandera y de la salida, y arrastra las mecánicas desde `Assets/Prefabs/Mecanicas`. No bloquea: el nivel ya se juega entero sobre el recorrido provisional. |
-| N11 | **Escribe el guion**: la cinemática inicial, los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | El sistema de cinemáticas y diálogos ya funciona con textos marcados como «pendiente de guion» (Fase 8). | Edita los assets `Cinematica_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2). Prioridad: la inicial y el mundo de la Ira. Si prefieres pasarme el texto, lo vuelco yo. |
+| N10 | **Pinta el layout definitivo del Nivel 1** (~80 u, Anexo A) cuando quieras. | El recorrido provisional ya se ve con el tileset volcánico (ladrillo, vigas y decoración), pero su forma sigue siendo la provisional: suelo plano con dos fosos y una plataforma por sección. | Sigue los «Pasos manuales en el Editor» de las Fases 6 y 9: borra «Escenario (tiles)» y «Provisional» (se lleva sus mecánicas), pinta y prepara el tilemap como suelo, ajusta la altura de la bandera y de la salida, y arrastra las mecánicas desde `Assets/Prefabs/Mecanicas`. No bloquea. |
+| N11 | **Escribe el guion** de los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | La cinemática inicial ya tiene guion e imágenes. Los cierres y los diálogos siguen con textos marcados como «pendiente de guion» (Fase 8). | Edita los assets `Cinematica_Cierre_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2). Cada diapositiva admite varios textos con sus tiempos, como la inicial. Prioridad: el mundo de la Ira. Si prefieres pasarme el texto y las imágenes, lo vuelco yo. |
 | N12 | **Revisa la pregunta del registro emocional.** | Hoy pregunta «¿Con qué intensidad sentiste {emoción} en este mundo?», de 1 (Nada) a 5 (Muchísimo). Debe encajar con el instrumento de la tesis (TMMS-24 y SCCS). | Cámbiala en `Assets/Data/Narrativa/RegistroEmocional.asset`, o dime cuál quieres. También puedes pedir que no se pida código de participante. |
 | N13 | **¿Subo la hitbox de la espada al arco del dibujo?** | El tajo del ataque nuevo se dibuja hasta ~2,8 u de alto, pero la hitbox cubre de 0,25 a 1,55 u. Se golpea lo que está a la altura del pecho, no lo que el arco parece tocar. | Dime «súbela» y la ajusto al arco: alcanzaría a enemigos más altos y a los que estén justo encima. Si prefieres el alcance actual, no hay que hacer nada. |
+
+## Revisión 0.11: qué cambió respecto de la v0.10
+
+- **La cinemática inicial está completa** (rama `cinematica-y-mapa`): 12 planos con fundidos
+  cruzados, los textos del guion con sus tiempos y salto con cualquier tecla pasados 2 s. Las de
+  cierre usan el mismo sistema: basta con rellenar su asset.
+- **El escenario se ve con el tileset volcánico** en el Nivel 1 y en las escenas de prueba. Solo
+  cambia el dibujo: las colisiones son las de siempre.
+- **N10** pasa a ser el layout definitivo, y **N11** ya no incluye la cinemática inicial.
+- B1 y B7 están al día.
 
 ## Revisión 0.10: qué cambió respecto de la v0.9
 
@@ -171,7 +181,7 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 
 | Cinemática (asset) | Dónde suena | Falta | Prioridad |
 |---|---|---|---|
-| `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | Guion completo e imágenes 16:9 | P1 |
+| `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | ✔ 12 planos y guion (80 s). Falta, opcional, la música o el sonido (campo `musica` del asset, o `audio` de cada plano) | P2 |
 | `Cinematica_Cierre_Ira` | Al superar el mundo de la Ira | Guion e imágenes | P1 |
 | `Cinematica_Cierre_Tristeza`, `_Miedo`, `_Culpa` | Al superar cada mundo | Guion e imágenes | P2 |
 | `Cinematica_Cierre_Jardin` (~30 s: Kael ve al Soldado) | Al superar el Jardín | Guion e imágenes (la idea, del Anexo A, ya está) | P2 |
@@ -317,7 +327,7 @@ de la `LevelDatabase` y ejecuta *Fragmentum → Niveles → Preparar la escena d
 
 | Nivel | Disponible | Falta |
 |---|---|---|
-| 1 Ira | ✔ Tiles de lava (`Tiles/LavaTile set`, el que pinta `Level1`; `Tiles/freelavatileset-Sheet`), `Starter Tiles Platformer/FireSet` | ✗ **Parallax volcánico de 3 capas** (humo, montañas, cielo rojo). Hoy `Level1` usa el parallax *demon woods* (bosque), que encaja con Miedo. ✗ Sprite de plataforma de basalto inestable (candidato: `Pixel Adventure 1/Traps/Falling Platforms`). |
+| 1 Ira | ✔ **Tileset volcánico de la v2** (`Assets/TileMap/tileset_32.png`): ya viste el Nivel 1 y las escenas de prueba con `PintorEscenario` (ladrillo, vigas, estatua, braseros, cadenas y escombros). Su versión grande con fondo negro está en `Tesis/TileMap Nivel 1`. En la v1: tiles de lava (`Tiles/LavaTile set`, `Tiles/freelavatileset-Sheet`) y `Starter Tiles Platformer/FireSet` | ✗ **Parallax volcánico de 3 capas** (humo, montañas, cielo rojo). Hoy `Level1` usa el parallax *demon woods* (bosque), que encaja con Miedo. ✗ Sprite de plataforma de basalto inestable (candidato: `Pixel Adventure 1/Traps/Falling Platforms`). |
 | 2 Tristeza | ✔ `Starter Tiles Platformer/IceSet`, `tileset/Tilemaps/rock_ice*.aseprite`, `Pixel Adventure 1/Traps/Sand Mud Ice` | ✗ Ciudad sumergida, corriente y superficie helada (parallax). ✗ Burbuja de oxígeno (UI). |
 | 3 Miedo | ✔ Parallax `TileMap/Forest` (*demon woods*, 4 capas), tileset de pantano `TileMap/ParallaxVideo`, antorcha animada (`Top Down Lava…/Torch ( No Light )`, 7 frames), URP 2D con `Light2D` ya activo | ✗ Raíces y ramas. ✗ Partícula de «ruido» del sigilo. |
 | 4 Culpa | ~ `Starter Tiles Platformer/DarkCastle` | ✗ Tierra quemada, escombros, tanques volcados. ✗ **Barril explosivo** (`Explodable`). ✗ Objetos de memoria. ✗ Marcas proyectadas en el suelo. |
@@ -397,6 +407,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.11 (2026-09-30)** — Cinemática inicial y escenario pintado. N10 y N11 reescritos; B1 y B7 al día.
 - **0.10 (2026-09-30)** — Arte de Kael. N3 reescrito (clips que faltan), nuevo N13 (hitbox de la espada), B3 al día y convención de escala de personajes a 64 PPU.
 - **0.9 (2026-09-29)** — Fase 9 (Nivel 1 de referencia). Mecánicas de la Ira en B4, B6 y B10; N9 y N10 ampliados.
 - **0.8 (2026-09-29)** — Fase 8 (narrativa). Nuevos N11 y N12; B1 y B2 reescritos para la v2; B9 con la UI del registro y de «yo reconstruido».

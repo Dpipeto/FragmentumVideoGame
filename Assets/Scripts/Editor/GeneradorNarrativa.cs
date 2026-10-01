@@ -16,7 +16,8 @@ namespace Fragmentum.EditorTools
     /// (PENDIENTES B1 y B2). Cada línea dice que está pendiente y nombra la emoción del mundo,
     /// para que el sistema se vea funcionar sin inventar la historia. Solo se usan textos del
     /// Anexo A donde el Anexo los da (el cierre del Jardín, la entrada al final y la pregunta de
-    /// los créditos).
+    /// los créditos). La excepción es la cinemática inicial, que ya tiene guion e imágenes
+    /// (<see cref="ConstructorCinematicaInicial"/>).
     ///
     /// Solo crea lo que falta y solo enlaza los campos vacíos: lo que se escriba a mano no se pisa.
     /// </summary>
@@ -55,10 +56,8 @@ namespace Fragmentum.EditorTools
 
             ConfiguracionDelRegistro();
 
-            var inicial = Cinematica("Cinematica_Inicial", "Inicial", sobrescribir, true,
-                "[CINEMÁTICA INICIAL · pendiente de guion e imágenes (PENDIENTES B1)]",
-                "[CINEMÁTICA INICIAL · pendiente de guion]",
-                "[CINEMÁTICA INICIAL · pendiente de guion] Al terminar empieza el mundo de la Ira.");
+            // La inicial ya tiene guion e imágenes: se crea (o restablece) con ellos.
+            var inicial = Crear<CutsceneData>("Cinematica_Inicial", sobrescribir, ConstructorCinematicaInicial.Rellenar);
 
             foreach (var nivel in bd.niveles)
             {

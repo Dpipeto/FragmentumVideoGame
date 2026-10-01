@@ -9,6 +9,158 @@
 
 ---
 
+## Cinemática inicial y escenario pintado (2026-09-30)
+
+Rama `cinematica-y-mapa`, que sale de `arte-kael`. Llegaron las 12 imágenes de la cinemática
+inicial con su guion, y el tileset volcánico ya recortado en `Assets/TileMap` se usa por fin
+para pintar el escenario.
+
+### 1. La cinemática inicial: 12 planos, 80 s
+
+- **Problema.** El encargo pedía:
+  - fundidos cruzados de 0,6 s entre planos, nunca un corte duro;
+  - textos con sus propios tiempos y posición, con fundidos de 0,4 s;
+  - saltar con cualquier tecla pasados 2 s, con un aviso discreto;
+  - que se pudiera reutilizar para los cierres de cada mundo.
+
+  El sistema de la Fase 8 cortaba en seco entre diapositivas, tenía un solo texto fijo abajo
+  y se saltaba con Esc desde el primer instante.
+- **Causa.** La Fase 8 se hizo sin arte ni guion: bastaba con que la cinemática se viera,
+  se cronometrara y se pudiera saltar.
+- **Solución.** Se amplió el mismo sistema en lugar de crear uno nuevo, como proponía el
+  encargo con `CinematicSequence` y `CinematicController`. Esos dos nombres corresponden a
+  `CutsceneData` y `PantallaCinematica`, que ya existían, se reproducían desde la FSM global y
+  guardaban en la partida que la cinemática ya se había visto.
+  - **`CutsceneData`:**
+    - cada diapositiva puede tener **varios carteles**, con su inicio, duración, tercio (arriba,
+      centro o abajo) y estilo de título;
+    - el campo `texto` de siempre funciona como cartel por defecto: abajo, entra a los 0,8 s y se
+      va 0,8 s antes del final;
+    - los tiempos (fundidos, margen y bloqueo del salto), el aviso y una música opcional para
+      toda la cinemática se editan en el asset.
+    - **Una cinemática nueva se crea con *Create → Fragmentum → Cinemática*, sin escribir código.**
+  - **`LineaTiempoCinematica`** (nueva) dice qué se ve en cada instante. Es lógica pura, así
+    que las pruebas recorren los 80 s sin esperarlos. Reglas:
+    - los fundidos van **dentro** de cada plano, así que la cinemática dura exactamente la suma
+      de sus planos;
+    - la primera imagen sale de negro y la última vuelve a negro;
+    - en el fundido cruzado, la imagen que entra aparece **encima** de la que sale, que sigue
+      opaca debajo, de modo que el cruce no se oscurece a la mitad.
+  - **`PantallaCinematica`:**
+    - todo entra y sale con `CanvasGroup.alpha`;
+    - las imágenes conservan su proporción (1376×768, 1,79:1) sobre fondo negro;
+    - **los textos se colocan por tercios de la imagen, no de la pantalla**: en 16:10, el título
+      de arriba sigue cayendo sobre la mitad vacía de la imagen y no sobre la franja negra.
+  - **Saltar:**
+    - pasados 2 s, cualquier tecla, botón del mando o clic la salta (`InputSystem.onAnyButtonPress`);
+    - antes de los 2 s no se puede saltar, ni siquiera con Esc: así no se salta con la tecla que
+      inició la partida;
+    - el aviso «Pulsa cualquier tecla para saltar» aparece a los 2 s con opacidad baja y se va a
+      los 5 s.
+  - **`ConstructorCinematicaInicial`** (menú *Fragmentum → Narrativa → Importar la cinemática
+    inicial*) prepara las imágenes como pixel art y escribe el guion en `Cinematica_Inicial`:
+    - las imágenes, en `Assets/Sprites/Cinematicas/Inicial/Plano_01.png` a `Plano_12.png`, se
+      importan con filtro *Point*, sin compresión y sin mipmaps;
+    - el guion incluye los dos textos temporizados del plano 4 y el título del plano 11 arriba.
+- **Problema encontrado:** con «cualquier tecla», pulsar Esc para saltar la cinemática habría
+  pausado el juego nada más volver.
+  - **Causa:** la misma pulsación llegaba primero a la cinemática y después al `UIManager`, que
+    ya veía el juego en marcha.
+  - **Solución:** la cinemática aplica el salto en el frame siguiente a la pulsación. Lo
+    comprueba una prueba PlayMode.
+
+### 2. El escenario pintado con el tileset
+
+- **Problema.** El Nivel 1 y las escenas de prueba se veían como rectángulos de color.
+- **Causa.** El tileset volcánico estaba recortado desde la Fase 2 (`Assets/TileMap`, 283 tiles de
+  32 px), pero nadie había pintado con él. `Nivel1` solo tenía un Tilemap con 2 tiles, que se borró
+  a mano antes de este cambio.
+- **Solución.** **`PintorEscenario`** viste los bloques de colisión con el tileset:
+  - **Solo cambia el dibujo.** Las colisiones siguen siendo las de los bloques: el recorrido,
+    las mecánicas y todas las pruebas quedan igual. Se apaga el rectángulo de color de cada bloque
+    y se pinta encima un Tilemap sin colisión propia.
+  - **La masa sólida** (suelos, techos y paredes) usa la pieza de ladrillo de 3×3, la única que
+    encaja sin costuras en las dos direcciones. Las demás se probaron y dejaban juntas visibles.
+    - Los suelos a ras de 0 siguen 7 filas hacia abajo como cimiento: los fosos se ven como
+      huecos entre acantilados.
+  - **Las plataformas finas** (0,5 u) usan la viga de hierro, con sus dos extremos.
+  - **Los bloques fuera de la rejilla** (el techo bajo, a 1,2 u) van en un Tilemap desplazado,
+    para que el dibujo coincida con su colisión.
+  - **En el mundo de la Ira, decoración detrás del jugador:** la estatua del caballero, braseros,
+    escombros y cadenas.
+    - Nunca tapa un objeto del juego (mecánicas, checkpoints, enemigos, salida, arena).
+    - No se coloca debajo de una plataforma ni contra una pared.
+  - **Dónde se pinta:**
+    - `Nivel1`, `PruebaJugador` y `PruebaEnemigos` ya están pintadas;
+    - la herramienta *Preparar la escena de nivel* pinta sola el recorrido provisional de los
+      niveles de la Ira, y las escenas de prueba se pintan al regenerarse;
+    - menú para repintar la escena abierta: *Fragmentum → Niveles → Pintar el escenario*.
+
+### Decisiones que ajustan el plan de la Fase 1
+
+1. **No se crean `CinematicSequence` ni `CinematicController`, ni una escena «Intro».** La
+   cinemática inicial ya se reproducía al entrar al Nivel 1, en el flujo de la FSM global. Una
+   escena aparte habría duplicado el sistema y la marca de «ya vista».
+2. **La marca de «ya vista» sigue en la partida, no en PlayerPrefs.** PlayerPrefs es del PC: si
+   los participantes del piloto comparten ordenador, solo el primero vería la cinemática.
+3. **Se sigue usando el `Text` integrado de Unity, no TextMeshPro.** Los recursos de TMP no están
+   importados y toda la UI usa `FabricaUI` (PENDIENTES B9). Si se adopta TMP, se cambia para toda
+   la UI a la vez.
+4. **Ya no se pasa de diapositiva con un clic:** cualquier tecla salta la cinemática entera, como
+   pedía el encargo.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **204 de 204 correctas** (14 nuevas):
+  - `CinematicaInicialTests` (10):
+    - 12 planos con sus imágenes y 80 s exactos;
+    - imágenes importadas como pixel art;
+    - **ningún corte duro en los 80 s**, comprobado cada 1/120 s;
+    - sale de negro, cruza los planos y vuelve a negro;
+    - los textos entran a los 0,8 s y salen 0,8 s antes;
+    - los dos textos del plano 4 y el título arriba en el 11;
+    - no se puede saltar antes de 2 s;
+    - el aviso aparece a los 2 s y se va a los 5 s.
+  - `PintorEscenarioTests` (4):
+    - cada bloque queda cubierto por tiles alineados con su colisión, también el desplazado;
+    - la colisión no cambia;
+    - pintar dos veces deja lo mismo;
+    - las tres escenas reales están pintadas y el Nivel 1 tiene decoración.
+- Pruebas PlayMode: **81 de 81 correctas**. Las de narrativa se adaptaron al bloqueo de 2 s:
+  - la cinemática inicial no se salta antes de 2 s, ni con Esc ni con otra tecla;
+  - el aviso aparece;
+  - el salto se aplica en el frame siguiente;
+  - un texto entra con fundido.
+
+### Pasos manuales en el Editor
+
+Ninguno.
+
+- **Para cambiar un texto o una duración de la cinemática inicial:** edita
+  `Assets/Data/Narrativa/Cinematica_Inicial` en el Inspector. Volver a ejecutar *Importar la
+  cinemática inicial* restablece el guion de este cambio.
+- **Para hacer una cinemática de cierre:** en su asset `Cinematica_Cierre_*`, arrastra cada
+  imagen a `imagen`, escribe el `texto` y, si hace falta, añade `carteles` con sus tiempos.
+  Importa las imágenes con filtro *Point* y sin compresión, como las de `Assets/Sprites/Cinematicas/Inicial`.
+- **Para pintar el nivel a mano más adelante (N10):** borra «Escenario (tiles)» y «Provisional»
+  y sigue los pasos de la Fase 9.
+
+### Qué probar a mano (desde `Menu_Inicial`, «Nueva partida»)
+
+- La cinemática dura 1 min 20 s si no se salta. Las imágenes se funden entre sí, sin cortes,
+  y los textos aparecen y desaparecen suavemente. El título del plano 11 sale arriba y más
+  grande.
+- Pulsar una tecla durante los 2 primeros segundos no hace nada. Después, el aviso aparece
+  abajo a la derecha, y cualquier tecla, botón o clic lleva al Nivel 1 sin pausar el juego.
+- En una partida nueva vuelve a verse; en una partida ya empezada, no.
+- En el Nivel 1: el suelo de ladrillo volcánico, los fosos como huecos entre acantilados, las
+  vigas de las plataformas, la estatua del caballero, los braseros y los escombros. Las
+  mecánicas, la lava y la puerta de la arena siguen con su dibujo provisional (PENDIENTES B10).
+
+---
+
 ## Arte de Kael (2026-09-30)
 
 Rama `arte-kael`, que sale de `fase-9-nivel1`. No es una fase del plan: llegaron las primeras

@@ -446,6 +446,9 @@ namespace Fragmentum.EditorTools
 
             CrearHud(jugador.GetComponent<PlayerHealth>());
 
+            // Los bloques se ven con el tileset; sus colisiones no cambian.
+            PintorEscenario.Pintar(escena, nivel, false);
+
             EditorSceneManager.MarkSceneDirty(escena);
             var ok = EditorSceneManager.SaveScene(escena, RutaEscena);
             if (ok)

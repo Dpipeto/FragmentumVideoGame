@@ -210,6 +210,14 @@ namespace Fragmentum.EditorTools
                 cambios |= CrearMecanicasIra(escena, provisional, nivel);
             }
 
+            // 8. El recorrido provisional del mundo de la Ira, vestido con su tileset volcánico.
+            //    Solo cambia el dibujo: las colisiones siguen siendo las de los bloques.
+            if (provisional != null && nivel.emocion != null && nivel.emocion.id == EMOCIONES.IRA &&
+                !PintorEscenario.EstaPintada(escena))
+            {
+                cambios |= PintorEscenario.Pintar(escena, provisional, true) > 0;
+            }
+
             return cambios;
         }
 

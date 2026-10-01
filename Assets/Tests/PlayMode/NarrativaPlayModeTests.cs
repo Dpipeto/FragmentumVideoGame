@@ -28,7 +28,7 @@ namespace Fragmentum.Tests.PlayMode
         // --- Cinemáticas ---
 
         [UnityTest]
-        public IEnumerator LaCinematicaInicial_SeVeAntesDelNivel1_SinImagenes()
+        public IEnumerator LaCinematicaInicial_SeVeAntesDelNivel1_YSoloSeSaltaPasados2Segundos()
         {
             Assert.IsTrue(Juego.JugarNivel(Nivel1));
             yield return EsperarEstado(ESTADOS_JUEGO.CUTSCENE, 5f);
@@ -36,17 +36,50 @@ namespace Fragmentum.Tests.PlayMode
             var cinematica = Interfaz.Cinematica;
             Assert.IsTrue(cinematica.Visible);
             Assert.AreEqual("Inicial", cinematica.Actual.Id);
-            StringAssert.Contains("CINEMÁTICA INICIAL", cinematica.TextoActual, "Sin imágenes se ve el texto: el sistema funciona igual.");
+            Assert.AreEqual(12, cinematica.Linea.Diapositivas);
             Assert.AreEqual(0f, Time.timeScale, "La cinemática detiene el juego.");
 
-            cinematica.Siguiente();
-            Assert.AreEqual(1, cinematica.Indice, "Un clic o Enter pasa a la diapositiva siguiente.");
+            // Los primeros 2 s, ninguna tecla la salta: ni Esc ni cualquier otra.
+            Assert.IsFalse(cinematica.PedirSalto(), "Cualquier tecla, antes de 2 s: no salta.");
+            Interfaz.AlternarPausa();
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Esc, antes de 2 s: no salta.");
+            Assert.AreEqual(0f, cinematica.AlfaAviso, "El aviso aún no se ve.");
 
-            Interfaz.AlternarPausa(); // Esc: saltar
+            yield return EsperarHasta(() => cinematica.Tiempo >= 2.6f, 5f, "pasar el bloqueo de 2 s");
+            Assert.Greater(cinematica.AlfaAviso, 0f, "A los 2 s aparece el aviso para saltar.");
+
+            Assert.IsTrue(cinematica.PedirSalto(), "Pasados 2 s, cualquier tecla la salta.");
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Se aplica en el frame siguiente: la tecla no llega al juego.");
+            yield return null;
+            yield return null;
+
             Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual);
             Assert.IsFalse(cinematica.Visible);
             CollectionAssert.Contains(Gestor.Datos.cinematicasVistas, "Inicial");
             CollectionAssert.Contains(new SaveSystem(CarpetaGuardado).Cargar().cinematicasVistas, "Inicial", "Queda guardado que ya se vio.");
+        }
+
+        [UnityTest]
+        public IEnumerator UnTexto_EntraConFundido_YLaCinematicaTerminaSola()
+        {
+            Gestor.Datos.cinematicasVistas.Add("Inicial");
+            yield return EntrarEnNivel1();
+
+            // Una cinemática corta con las mismas reglas, para no esperar los 80 s de la inicial.
+            var corta = ScriptableObject.CreateInstance<CutsceneData>();
+            corta.id = "Corta";
+            corta.diapositivas.Add(new Diapositiva { texto = "Hubo una guerra.", duracion = 3f });
+
+            Assert.IsTrue(Juego.IniciarCinematica(corta));
+            var cinematica = Interfaz.Cinematica;
+            Assert.AreEqual(string.Empty, cinematica.TextoActual, "Al empezar, el texto todavía no ha entrado.");
+
+            yield return EsperarHasta(() => cinematica.Tiempo >= 1.5f, 3f, "el centro de la diapositiva");
+            Assert.AreEqual("Hubo una guerra.", cinematica.TextoActual);
+
+            yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 4f);
+            Assert.IsFalse(cinematica.Visible);
+            Object.Destroy(corta);
         }
 
         [UnityTest]
@@ -101,7 +134,8 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsTrue(Juego.CompletarNivel());
             Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Primero el cierre del mundo.");
             Assert.AreEqual("Cierre_Ira", Juego.CinematicaActual.Id);
-            Interfaz.AlternarPausa(); // saltar
+            yield return EsperarReal(2.1f); // pasado el bloqueo inicial
+            Interfaz.AlternarPausa(); // Esc: saltar
             Assert.AreEqual(ESTADOS_JUEGO.LEVEL_COMPLETE, Juego.EstadoActual);
 
             var fin = Interfaz.PantallaFinNivel;
@@ -143,10 +177,10 @@ namespace Fragmentum.Tests.PlayMode
         {
             Assert.IsTrue(Juego.JugarNivel(Nivel1));
             yield return EsperarEstado(ESTADOS_JUEGO.CUTSCENE, 5f);
-            yield return EsperarReal(0.3f);
+            yield return EsperarReal(2.1f); // pasado el bloqueo inicial
             Assert.AreEqual(string.Empty, Interfaz.Hud.LineaActual, "Durante la cinemática, los diálogos esperan.");
 
-            Interfaz.AlternarPausa(); // saltar la cinemática
+            Interfaz.AlternarPausa(); // Esc: saltar la cinemática
             yield return EsperarHasta(() => Interfaz.Hud.LineaActual.Length > 0, 2f, "la línea de apertura");
 
             StringAssert.Contains("Apertura", Interfaz.Hud.LineaActual);
