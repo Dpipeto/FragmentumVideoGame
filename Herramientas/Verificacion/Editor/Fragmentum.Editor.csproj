@@ -5,6 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(Proyecto)\Assets\Scripts\Editor\**\*.cs" />
+    <!-- Recorte de hojas de sprites (ConstructorArteKael): paquete 2D Sprite. -->
+    <Reference Include="$(Proyecto)\Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll" Private="false" />
     <ProjectReference Include="..\Runtime\Fragmentum.Runtime.csproj" />
   </ItemGroup>
 </Project>

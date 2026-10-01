@@ -36,7 +36,9 @@ namespace Fragmentum.EditorTools
 
             var ok = GeneradorProgresion.Construir();
 
-            // Los prefabs se regeneran siempre: Unity conserva sus identificadores.
+            // Los prefabs se regeneran siempre: Unity conserva sus identificadores. El arte de
+            // Kael va antes que el prefab del jugador, que lo usa.
+            ok &= ConstructorArteKael.Construir();
             ok &= ConstructorJugador.CrearPrefab() != null;
             ok &= GeneradorEnemigos.CrearPrefabs() != null;
             ok &= GeneradorJefes.Construir();

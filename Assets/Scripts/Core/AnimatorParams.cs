@@ -10,7 +10,9 @@ namespace Fragmentum.Core
     /// "Walk") no llena la consola de avisos por frame: se avisa una sola vez y el juego sigue.
     ///
     /// Se conservan los nombres que ya usaba el prototipo: MovEn, Attack, Damage, Death,
-    /// Movement y Walk. Los nuevos se añadirán cuando existan los clips.
+    /// Movement y Walk. En Kael, el clip lo elige <c>PlayerAnimacion</c> según el estado de la
+    /// FSM; de estos parámetros, Movement marca el ritmo de las piernas al correr y
+    /// VelocidadAtaque estira el clip de ataque a la duración del golpe.
     /// </summary>
     public static class AnimatorParams
     {
@@ -35,9 +37,8 @@ namespace Fragmentum.Core
         public static readonly Parametro Movement = new Parametro("Movement");
         public static readonly Parametro Walk = new Parametro("Walk");
 
-        // Parámetros nuevos, para cuando existan los clips de salto y caída.
-        public static readonly Parametro EnSuelo = new Parametro("EnSuelo");
-        public static readonly Parametro VelocidadY = new Parametro("VelocidadY");
+        // Multiplicador de velocidad del estado Ataque: 1 / duración del golpe en segundos.
+        public static readonly Parametro VelocidadAtaque = new Parametro("VelocidadAtaque");
 
         /// <summary>¿El Animator tiene este parámetro? Avisa una sola vez por parámetro ausente.</summary>
         public static bool Existe(Animator animator, in Parametro parametro)

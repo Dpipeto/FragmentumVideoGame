@@ -65,6 +65,7 @@ namespace Fragmentum.Player
         [SerializeField] private bool registrarTransiciones;
 
         private MaquinaEstados<ESTADOS_JUGADOR> _maquina;
+        private PlayerAttackState _ataque;
         private IFuenteInput _input;
         private int _danioBaseEspada = 1;
         private float _finCoyote = float.NegativeInfinity;
@@ -91,6 +92,10 @@ namespace Fragmentum.Player
         public PlayerAbilities Habilidades => habilidades;
 
         public bool EstaVivo => vida != null && vida.EstaVivo;
+
+        /// <summary>Duración del ataque en curso (el cargado dura más). Fuera de ATTACK, la del normal.</summary>
+        public float DuracionAtaqueEnCurso =>
+            _ataque != null && EstadoActual == ESTADOS_JUGADOR.ATTACK ? _ataque.Duracion : parametros.duracionAtaque;
 
         /// <summary>Hacia dónde mira: 1 derecha, -1 izquierda.</summary>
         public int Mirando { get; private set; } = 1;
@@ -219,7 +224,8 @@ namespace Fragmentum.Player
             _maquina.Registrar(new PlayerWallSlideState(this, _maquina));
             _maquina.Registrar(new PlayerWallJumpState(this, _maquina));
             _maquina.Registrar(new PlayerDashState(this, _maquina));
-            _maquina.Registrar(new PlayerAttackState(this, _maquina));
+            _ataque = new PlayerAttackState(this, _maquina);
+            _maquina.Registrar(_ataque);
             _maquina.Registrar(new PlayerDamagedState(this, _maquina));
             _maquina.Registrar(new PlayerDeadState(this, _maquina));
             _maquina.OnStateChanged += AlCambiarEstado;

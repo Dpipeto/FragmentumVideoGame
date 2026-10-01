@@ -96,6 +96,9 @@ namespace Fragmentum.Player.States
         /// <summary>¿Salió cargado el ataque en curso? (para VFX y depuración)</summary>
         public bool Cargado => _cargado;
 
+        /// <summary>Duración del ataque en curso: la del cargado si salió cargado.</summary>
+        public float Duracion => _duracion;
+
         private void FijarHitbox(bool activa)
         {
             var espada = Dueno.Espada;

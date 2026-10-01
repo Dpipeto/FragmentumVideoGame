@@ -129,6 +129,7 @@ namespace Fragmentum.EditorTools
                 var controlador = raiz.AddComponent<PlayerController>();
                 raiz.AddComponent<PlayerModoMovimiento>();
                 var visual = raiz.AddComponent<PlayerVisual>();
+                var animacion = raiz.AddComponent<PlayerAnimacion>();
 
                 // Pivote: lo que se voltea al girar (sprite y espada).
                 var pivote = new GameObject("Pivote").transform;
@@ -137,18 +138,32 @@ namespace Fragmentum.EditorTools
                 var objetoSprite = new GameObject("Sprite");
                 objetoSprite.layer = raiz.layer;
                 objetoSprite.transform.SetParent(pivote, false);
-                objetoSprite.transform.localPosition = new Vector3(0f, 0.9f, 0f);
 
                 var sprite = objetoSprite.AddComponent<SpriteRenderer>();
-                sprite.sprite = SpriteCapsula;
-                sprite.color = ColorJugador;
                 sprite.sortingOrder = 10;
-                if (sprite.sprite != null)
+                var animator = objetoSprite.AddComponent<Animator>();
+
+                // Con el arte de Kael, los sprites ya traen el pivote en los pies: sin desplazar ni escalar.
+                var animacionesKael = ConstructorArteKael.Controlador;
+                var quieto = ConstructorArteKael.Fotogramas(ConstructorArteKael.HojaIdle);
+                if (animacionesKael != null && quieto.Length > 0)
                 {
-                    objetoSprite.transform.localScale = new Vector3(0.8f, 0.9f, 1f); // la cápsula mide 1 × 2 u
+                    sprite.sprite = quieto[0];
+                    animator.runtimeAnimatorController = animacionesKael;
+                }
+                else
+                {
+                    Debug.LogWarning("[Fragmentum] El arte de Kael no está importado: el jugador será una cápsula. " +
+                                     "Usa Fragmentum → Jugador → Importar arte de Kael.");
+                    objetoSprite.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+                    sprite.sprite = SpriteCapsula;
+                    sprite.color = ColorJugador;
+                    if (sprite.sprite != null)
+                    {
+                        objetoSprite.transform.localScale = new Vector3(0.8f, 0.9f, 1f); // la cápsula mide 1 × 2 u
+                    }
                 }
 
-                var animator = objetoSprite.AddComponent<Animator>();
                 var provisional = objetoSprite.AddComponent<SpriteProvisional>();
                 Asignar(provisional, "assetPendiente", p => p.stringValue = "Sprites y animaciones de Kael (PENDIENTES B3)");
                 Asignar(provisional, "color", p => p.colorValue = ColorJugador);
@@ -174,6 +189,8 @@ namespace Fragmentum.EditorTools
                 Asignar(controlador, "fuenteInput", p => p.objectReferenceValue = input);
                 Asignar(visual, "pivote", p => p.objectReferenceValue = pivote);
                 Asignar(visual, "sprite", p => p.objectReferenceValue = sprite);
+                Asignar(animacion, "jugador", p => p.objectReferenceValue = controlador);
+                Asignar(animacion, "animator", p => p.objectReferenceValue = animator);
 
                 var prefab = PrefabUtility.SaveAsPrefabAsset(raiz, RutaPrefab, out var guardado);
                 if (!guardado)

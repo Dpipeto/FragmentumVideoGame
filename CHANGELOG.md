@@ -9,6 +9,138 @@
 
 ---
 
+## Arte de Kael (2026-09-30)
+
+Rama `arte-kael`, que sale de `fase-9-nivel1`. No es una fase del plan: llegaron las primeras
+animaciones de Kael, dibujadas en Pixelorama (quieto, correr, salto y ataque), y el jugador deja
+de ser una cápsula.
+
+### 1. Kael era una cápsula
+
+- **Problema.** Desde la Fase 3, el jugador era un rectángulo claro (PENDIENTES B3).
+- **Causa.** No había arte de Kael listo para importar. Las hojas que llegaron, además, venían
+  escaladas: la de correr y la del salto a 5×, la de quieto y la del ataque a 10×. La del
+  ataque medía 13 300 px de ancho: Unity la habría reducido a su máximo de 8192 px con filtro y
+  el pixel art se habría emborronado. La del salto venía exportada en ping-pong (9 fotogramas de
+  ida y 7 de vuelta).
+- **Solución.**
+  - **`Herramientas/reducir_hoja.py`** detecta la escala de cada hoja y la reduce sin pérdida a
+    1× (un píxel de cada bloque idéntico de N×N). Con `--conservar 9` quita la vuelta del
+    ping-pong. Las hojas quedan en `Assets/Sprites/Kael`.
+  - **`ConstructorArteKael`** (menú *Fragmentum → Jugador → Importar arte de Kael*, incluido en
+    *Regenerar todo*) hace el resto:
+    - recorta cada hoja en fotogramas con el pivote en la planta de los pies y en el centro del
+      torso, para que cambiar de clip no desplace a Kael;
+    - crea 6 clips en `Assets/Animaciones/Kael`: Idle, Correr, Salto, Caida, CaidaBucle y Ataque;
+    - arma `Kael.controller`.
+    - Es idempotente: reutiliza los identificadores de sprites y estados, así que volver a
+      ejecutarlo sin cambios no modifica ningún archivo (comprobado).
+  - **El prefab** usa el primer fotograma de Idle sin desplazar ni escalar el sprite. Si el arte
+    falta, vuelve a la cápsula y avisa («construir para ausencia»).
+
+### 2. Dos máquinas de estados que se contradecían
+
+- **Problema.** En la v1, el Animator tenía sus propias transiciones, gobernadas por booleanos
+  sueltos que el código escribía cada frame. Si el código y el Animator no coincidían, Kael
+  hacía una cosa y mostraba otra.
+- **Causa.** El estado del personaje vivía en dos sitios: en las banderas de `PlayerMovement` y
+  en el grafo del Animator.
+- **Solución.** La FSM del código es la única que decide.
+  - El nuevo componente **`PlayerAnimacion`** escucha `OnStateChanged` (patrón Observer) y, al
+    entrar en cada estado, reproduce el clip que dice su tabla.
+  - El Animator no tiene transiciones propias: solo guarda los clips. La única excepción es
+    Caida → CaidaBucle al terminar el clip, que es parte de la animación y no una decisión.
+  - La tabla se edita en el Inspector. Los estados sin arte propio usan el clip más parecido:
+
+| Estado de la FSM | Clip | Nota |
+|---|---|---|
+| IDLE | Idle | 2 fotogramas, respiración de 1 s |
+| RUN | Correr | Las piernas siguen la velocidad real (ver 3) |
+| JUMP, DOUBLE_JUMP, WALL_JUMP | Salto | Vuelve al primer fotograma aunque ya sonara |
+| FALL | Caida → CaidaBucle | El pelo sube al empezar a caer y luego ondea |
+| ATTACK | Ataque | Se estira a la duración del golpe (ver 3) |
+| WALL_SLIDE | Caida | Provisional: falta su clip |
+| DASH | Correr | Provisional: falta su clip. Se ve un fotograma de carrera fijo |
+| CROUCH | Idle | Provisional: falta su clip |
+| DEAD | Idle | Provisional: falta su clip |
+| DAMAGED | (sigue el clip anterior) | El parpadeo ya marca el golpe |
+
+### 3. Que la animación encaje con el movimiento
+
+- **Escala.** Kael mide unos 113 px de arte. A 64 px por unidad son 1,77 u, la altura de su
+  collider (1,8 u). Los tiles siguen a 32 PPU: Kael tiene el doble de detalle que el escenario,
+  como en el arte original.
+- **Correr.** El parámetro `Movement` (velocidad horizontal en u/s, que ya escribía la FSM)
+  multiplica la velocidad del clip. Una zancada completa recorre 3 u: a 6 u/s la vuelta dura
+  0,5 s, y bajo el agua o sobre hielo las piernas van al ritmo real del cuerpo, sin patinar.
+- **Ataque.** El clip dura 1 s y `PlayerAnimacion` lo acelera con el parámetro nuevo
+  `VelocidadAtaque` = 1 / duración del golpe. Así ocupa exactamente el ataque normal (0,35 s) y
+  el cargado (0,5 s) se ve más lento sin un clip propio. La preparación es rápida para que el
+  tajo (fotogramas 4 y 5) se vea mientras la hitbox está abierta.
+- **Problema encontrado:** el clip de ataque duraba 1,017 s en lugar de 1 s.
+  - **Causa:** Unity alarga los clips de sprites un fotograma (1/60 s) después de la última clave.
+  - **Solución:** la clave de cierre se coloca ese fotograma antes. Lo comprueba una prueba
+    para todos los clips.
+
+### Decisiones que ajustan el plan de la Fase 1
+
+1. **Kael va a 64 PPU, no a 32** como decía la convención de PENDIENTES. A 32 PPU mediría 3,5 u,
+   el doble de su collider, y habría que reducir el arte a la mitad.
+2. **Se quitan `EnSuelo` y `VelocidadY` de `AnimatorParams`.** Estaban reservados para que el
+   Animator eligiera entre salto y caída; ahora lo decide la FSM. Se conservan `Movement`,
+   `Attack`, `Damage` y `Death` en el controlador, aunque solo `Movement` mueve el clip, para
+   que el código no avise de que faltan.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **190 de 190 correctas** (9 nuevas en `ArteKaelTests`):
+  - cada hoja está recortada en sus fotogramas, a 64 PPU y con filtro *Point*;
+  - Kael mide lo mismo que su collider en las 4 hojas (falla si una se exporta a 5×);
+  - el pivote de cada hoja está en la fila de los pies;
+  - cada estado de la FSM tiene un clip que existe en el controlador;
+  - los clips tienen sus fotogramas, su bucle y su duración exacta;
+  - el controlador tiene los parámetros que escribe el código y solo la transición de la caída;
+  - el tajo del ataque se ve con la hitbox abierta;
+  - el prefab usa el arte sin `localScale`.
+- Pruebas PlayMode: **80 de 80 correctas** (4 nuevas en `AnimacionJugadorPlayModeTests`):
+  - correr, saltar, caer y aterrizar cambian de clip, y los pies del sprite pisan donde pisa el
+    cuerpo;
+  - el doble salto vuelve al primer fotograma del salto;
+  - el ataque se estira a la duración del golpe, normal y cargado;
+  - el dash usa el clip de correr sin reiniciarlo.
+
+### Pasos manuales en el Editor
+
+Ninguno: el prefab ya tiene el arte, y las escenas lo usan porque instancian el prefab.
+
+- **Para añadir una animación** (por ejemplo, el dash):
+  1. En Pixelorama, exporta la tira horizontal **a escala 1× y sin ping-pong** a
+     `Assets/Sprites/Kael/Kael_Dash.png`. Si ya la exportaste escalada:
+     `python Herramientas/reducir_hoja.py entrada.png FOTOGRAMAS Assets/Sprites/Kael/Kael_Dash.png`.
+  2. Añade la hoja y su clip a las tablas de `ConstructorArteKael`. El pivote se mide en píxeles
+     desde la esquina inferior izquierda del fotograma: la x en el torso y la y en los pies.
+  3. Ejecuta *Fragmentum → Jugador → Importar arte de Kael y regenerar el prefab*.
+  4. En la tabla de `PlayerAnimacion` (o en `TablaPorDefecto`), apunta el estado DASH al clip
+     nuevo. Las pruebas dicen si algo no cuadra.
+- **Si cambias el lienzo de una hoja en Pixelorama,** ajusta su pivote en `ConstructorArteKael`.
+  La prueba del pivote avisa si los pies ya no están en la fila indicada.
+
+### Qué probar a mano (`Assets/Scenes/Pruebas/PruebaJugador.unity`)
+
+- Quieto, Kael respira. Al correr, el pelo ondea y las piernas no patinan; en el agua van más
+  despacio.
+- El salto sube con las piernas recogidas, el pelo se levanta al empezar a caer y vuelve a Idle
+  al aterrizar. El doble salto repite el impulso.
+- El ataque (clic) es rápido y el tajo coincide con el golpe al muñeco. El cargado (mantener y
+  soltar) se ve más lento y rojizo.
+- Al girar, el sprite se voltea sin desplazarse.
+- **El tajo se dibuja más alto (hasta ~2,8 u) que la hitbox de la espada (0,25 a 1,55 u).**
+  Dime si debo subir la hitbox al arco del dibujo: así alcanzaría a enemigos más altos.
+
+---
+
 ## Fase 9 — Nivel 1 de referencia (2026-09-29)
 
 Rama `fase-9-nivel1`, que sale de `fase-8-narrativa`. Cubre la tarea H: las mecánicas del

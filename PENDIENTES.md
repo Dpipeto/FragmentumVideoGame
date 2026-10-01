@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.9 — Fase 9, 2026-09-29.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.10 — Arte de Kael, 2026-09-30.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -11,16 +11,26 @@ Ordenado por urgencia.
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
 | N1 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaJugador.unity`** y dime cómo se siente el control. | Los valores de salto, carrera y dash están calculados, no probados por una persona. | Play, recorre el circuito (el panel F1 dice qué probar en cada zona). Si algo se siente mal, dime qué («salta poco», «patina») o cambia `PlayerController → Parametros` en el prefab. |
-| N3 | **Recorta las poses de Kael** de `Referencias/Arte/posiblesanimaciiones kael.jpeg`. | El jugador ya tiene todos sus estados; hoy se ve como una cápsula clara. | Un PNG por pose con fondo transparente, a 32 px por unidad (el cuerpo mide 0,8 × 1,8 u, es decir, unos 26 × 58 px). Detalle en el apartado B3. |
+| N3 | **Dibuja los clips de Kael que faltan:** dash, wall slide, agacharse, daño y muerte (y, para la Fase 10, nado). | Quieto, correr, salto y ataque ya están en el juego. Los demás estados usan el clip más parecido; por ejemplo, el dash muestra un fotograma de carrera fijo. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a escala 1× y sin ping-pong** a `Assets/Sprites/Kael`. Si prefieres pasarme los PNG, los monto yo. Detalle en B3. |
 | N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
 | N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel`, `fase-7-jefes`, `fase-8-narrativa` y `fase-9-nivel1` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
+| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel`, `fase-7-jefes`, `fase-8-narrativa`, `fase-9-nivel1` y `arte-kael` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
 | N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
-| N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael: PNG con fondo transparente, a 32 px por unidad, pivote en los pies. Detalle en el apartado B4. |
+| N8 | **Recorta los enemigos** de `Referencias/Arte/EnemigosNiveles.jpeg` y `AnimacionesGeneralesEnemigos.jpeg`. | Hoy son cápsulas tintadas con el color de su mundo. | Igual que Kael (B3): tiras de fotogramas con fondo transparente, exportadas a escala 1× y a la misma densidad de píxel que Kael. Detalle en el apartado B4. |
 | N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`**, jefe incluido. | Menú, selector, guardado, checkpoints, pausa, Game Over, la Centinela Ardiente, la narrativa, el fin de nivel y las mecánicas de la Ira ya funcionan juntos (Fases 5 a 9). | Sigue las listas «Qué probar a mano» de las Fases 5 a 9 en `CHANGELOG.md`. Dime qué pantalla no se entiende y qué se siente mal. También si la Centinela es demasiado fácil o difícil (sus valores están en `Assets/Data/Jefes`) y si el Golem de Ceniza debe poder morir en la lava. |
 | N10 | **Pinta el layout del Nivel 1** (~80 u, Anexo A) cuando quieras. | Hoy se juega sobre un recorrido provisional de bloques. | Sigue los «Pasos manuales en el Editor» de las Fases 6 y 9: prepara el tilemap como suelo, borra «Provisional» (se lleva sus mecánicas), ajusta la altura de la bandera y de la salida, y arrastra las mecánicas desde `Assets/Prefabs/Mecanicas`. No bloquea: el nivel ya se juega entero sobre el recorrido provisional. |
 | N11 | **Escribe el guion**: la cinemática inicial, los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | El sistema de cinemáticas y diálogos ya funciona con textos marcados como «pendiente de guion» (Fase 8). | Edita los assets `Cinematica_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2). Prioridad: la inicial y el mundo de la Ira. Si prefieres pasarme el texto, lo vuelco yo. |
 | N12 | **Revisa la pregunta del registro emocional.** | Hoy pregunta «¿Con qué intensidad sentiste {emoción} en este mundo?», de 1 (Nada) a 5 (Muchísimo). Debe encajar con el instrumento de la tesis (TMMS-24 y SCCS). | Cámbiala en `Assets/Data/Narrativa/RegistroEmocional.asset`, o dime cuál quieres. También puedes pedir que no se pida código de participante. |
+| N13 | **¿Subo la hitbox de la espada al arco del dibujo?** | El tajo del ataque nuevo se dibuja hasta ~2,8 u de alto, pero la hitbox cubre de 0,25 a 1,55 u. Se golpea lo que está a la altura del pecho, no lo que el arco parece tocar. | Dime «súbela» y la ajusto al arco: alcanzaría a enemigos más altos y a los que estén justo encima. Si prefieres el alcance actual, no hay que hacer nada. |
+
+## Revisión 0.10: qué cambió respecto de la v0.9
+
+- **Kael ya tiene arte** (rama `arte-kael`): quieto, correr, salto con caída y ataque, a partir de
+  las hojas de Pixelorama. Al probar N1 ya se ve animado.
+- **N3** pasa a ser «dibuja los clips que faltan» (dash, wall slide, agacharse, daño y muerte).
+- **Nuevo N13:** ¿la hitbox de la espada debe cubrir el arco del dibujo?
+- **Convención de escala:** Kael va a 64 px por unidad, no a 32 (ver «Convención de formato»).
+- B3 está al día.
 
 ## Revisión 0.9: qué cambió respecto de la v0.8
 
@@ -124,7 +134,7 @@ los efectos de sonido, los iconos de la UI y el concepto del jugador con sus hab
 
 **Convención de formato** (fijada en la v2)
 - Tiles: 32 px a 32 PPU, así que 1 tile = 1 unidad (`Grid.cellSize = 1`). Filtro *Point*, sin compresión.
-- Sprites de personaje: también a 32 PPU, con el pivote en los pies (*Bottom Center*). El jugador mide 0,8 × 1,8 u; su sprite puede sobresalir del collider, pero no debe depender de `localScale` (en la v1 dependía de 0,215 y eso rompía el wall jump).
+- Sprites de personaje: **a 64 PPU** (desde la v0.10; antes decía 32). Kael mide unos 113 px de arte, que a 64 PPU son 1,77 u, la altura de su collider (1,8 u); tiene el doble de detalle que el escenario. Tiras horizontales exportadas a escala 1×, con el pivote en los pies. El sprite puede sobresalir del collider, pero no debe depender de `localScale` (en la v1 dependía de 0,215 y eso rompía el wall jump).
 - Imágenes de cinemática: PNG 16:9, 1920×1080, o 480×270 escalado ×4 con filtro *Point* si se quiere pixel art.
 - Música: OGG, 44,1 kHz, estéreo, con loop limpio. SFX: WAV mono, 44,1 kHz, menos de 2 s.
 
@@ -187,40 +197,41 @@ nivel).
 
 ### B3. Jugador — Kael
 
-**Estado en la v2 (Fase 3).** El jugador está completo en lógica: prefab `Assets/Prefabs/Player.prefab`
-con FSM de 12 estados, región de sigilo, vida con escudo y habilidades. **Visualmente** es una
-cápsula clara (el sprite `Capsule` del paquete 2D), porque todavía no hay arte de Kael importado.
+**Estado en la v2 (arte de Kael, 2026-09-30).** El jugador está completo en lógica (prefab
+`Assets/Prefabs/Player.prefab`, FSM de 12 estados) y **ya tiene arte**: quieto, correr, salto con
+caída y ataque, dibujados en Pixelorama. El detalle está en el CHANGELOG, entrada «Arte de Kael».
 
-- **Dónde va el arte:** en el hijo `Pivote/Sprite` del prefab. Ese objeto tiene un `SpriteRenderer`,
-  un `Animator` **sin controlador** y un `SpriteProvisional` que dibuja el placeholder si el sprite
-  falta.
-- **Qué hay que hacer:** crear `Animaciones/Kael.controller` y asignarlo a ese `Animator`. Los
-  parámetros que el código ya escribe son estos; si el controlador no los tiene, el código avisa
-  una vez y sigue.
-  - `Movement` (float): velocidad horizontal en u/s. Es 0 en IDLE; por encima de 0,1 hay que pasar a
-    correr.
-  - `Attack` (bool): mientras dura ATTACK.
-  - `Damage` (bool): mientras dura DAMAGED.
-  - `Death` (bool): en DEAD.
-- **Parámetros futuros:** `EnSuelo` (bool) y `VelocidadY` (float) ya están declarados en
-  `AnimatorParams`. Se empezarán a escribir cuando existan los clips de salto y caída.
-- **Arte fuente:** las 8 poses de `Referencias/Arte/posiblesanimaciiones kael.jpeg` (hay que
-  recortarlas; ver «Arte nuevo generado con Gemini»). Las hojas de la v1 (`camin-ando.png`,
-  `Elsaltodel.png`, `finalsignodepregunta.png`) están a 500 PPU y habría que reimportarlas a 32.
+- **Dónde está el arte:**
+  - las hojas, en `Assets/Sprites/Kael`, a escala 1× y 64 PPU;
+  - los clips y `Kael.controller`, en `Assets/Animaciones/Kael`, generados por
+    *Fragmentum → Jugador → Importar arte de Kael y regenerar el prefab*.
+- **Quién elige el clip:** `PlayerAnimacion`, con una tabla estado de la FSM → clip que se edita
+  en el Inspector. El Animator no tiene transiciones propias.
+- **Parámetros que escribe el código:**
+  - `Movement` (float, u/s) acelera el clip de correr;
+  - `VelocidadAtaque` (float) estira el de ataque a la duración del golpe;
+  - `Attack`, `Damage` y `Death` (bool) se conservan del prototipo, pero ningún clip depende de
+    ellos.
+- **Cómo añadir un clip:** en el CHANGELOG, «Arte de Kael» → *Pasos manuales en el Editor*.
+  Resumen: exporta la tira a 1× y sin ping-pong a `Assets/Sprites/Kael`, añádela a las tablas de
+  `ConstructorArteKael` y apunta el estado en `PlayerAnimacion`.
+- **Arte fuente:** los `.pxo` y las exportaciones a 5× y 10× están en `Tesis/Imagenes Kael` (los
+  `.pxo` no se versionan). Si cambias el lienzo de una hoja, ajusta su pivote en
+  `ConstructorArteKael`; la prueba del pivote avisa si no cuadra.
 
-| Clip de Kael | Estado de la FSM | Prioridad | Placeholder actual |
+| Clip de Kael | Estado de la FSM | Prioridad | Estado actual |
 |---|---|---|---|
-| Idle | `IDLE` | P1 | Cápsula quieta |
-| Correr | `RUN` | P1 | Cápsula |
-| Salto / caída / doble salto | `JUMP`, `FALL`, `DOUBLE_JUMP` | P1 | Cápsula |
-| Ataque básico | `ATTACK` | P1 | Cápsula (la hitbox se ve en la vista Scene) |
-| Daño | `DAMAGED` | P1 | Parpadeo (no necesita arte) |
-| Muerte | `DEAD` | P1 | Cápsula quieta |
-| Dash | `DASH` | P2 | Cápsula |
-| Wall slide / wall jump | `WALL_SLIDE`, `WALL_JUMP` | P2 | Cápsula |
-| Agacharse | `CROUCH` | P2 | Cápsula (el collider sí se encoge) |
-| Carga y ataque cargado (Ira) | modificador de `ATTACK` | P1 | Tinte rojizo con la carga completa |
-| Nado (Tristeza) | modificador de movimiento `BajoElAgua` | P2 | Cápsula |
+| Idle | `IDLE` | P1 | ✔ 2 fotogramas |
+| Correr | `RUN` | P1 | ✔ 8 fotogramas, al ritmo de la velocidad real |
+| Salto / caída / doble salto | `JUMP`, `FALL`, `DOUBLE_JUMP` | P1 | ✔ 9 fotogramas: 6 de subida y 3 de caída (2 en bucle) |
+| Ataque básico | `ATTACK` | P1 | ✔ 7 fotogramas, estirados a la duración del golpe. Ver N13 sobre la hitbox |
+| Carga y ataque cargado (Ira) | modificador de `ATTACK` | P1 | ✔ El mismo clip, más lento, con el tinte rojizo de la carga |
+| Daño | `DAMAGED` | P1 | Sigue el clip anterior y parpadea. Falta un fotograma de golpe |
+| Muerte | `DEAD` | P1 | Usa Idle. Falta su clip |
+| Dash | `DASH` | P2 | Usa Correr, que se queda fijo en un fotograma. Falta su clip |
+| Wall slide / wall jump | `WALL_SLIDE`, `WALL_JUMP` | P2 | Usan Caida y Salto. Falta el de wall slide (pegado a la pared) |
+| Agacharse | `CROUCH` | P2 | Usa Idle, así que el sprite no se encoge con el collider. Falta su clip |
+| Nado (Tristeza) | modificador de movimiento `BajoElAgua` | P2 | Usa Correr, más lento en el agua |
 | Invisibilidad parcial (Miedo) | habilidad | — | Opacidad al 40 % (no necesita arte) |
 | Defensa reforzada (Culpa) | escudo de `PlayerHealth` | P2 | Sin efecto visual: falta un VFX de escudo |
 
@@ -386,6 +397,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.10 (2026-09-30)** — Arte de Kael. N3 reescrito (clips que faltan), nuevo N13 (hitbox de la espada), B3 al día y convención de escala de personajes a 64 PPU.
 - **0.9 (2026-09-29)** — Fase 9 (Nivel 1 de referencia). Mecánicas de la Ira en B4, B6 y B10; N9 y N10 ampliados.
 - **0.8 (2026-09-29)** — Fase 8 (narrativa). Nuevos N11 y N12; B1 y B2 reescritos para la v2; B9 con la UI del registro y de «yo reconstruido».
 - **0.7 (2026-09-29)** — Fase 7 (jefes). Apartado B5 reescrito para la v2, N9 con el jefe, nota de la música del jefe en B8.
