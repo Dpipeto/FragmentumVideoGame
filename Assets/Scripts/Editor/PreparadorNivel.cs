@@ -23,7 +23,8 @@ namespace Fragmentum.EditorTools
     /// - la zona mortal bajo el nivel y el seguimiento de la cámara;
     /// - si la escena todavía no tiene suelo que colisione, un <b>suelo provisional</b> con fosos
     ///   y algunos enemigos del mundo, dentro de un objeto que se borra al pintar el nivel;
-    /// - si el nivel tiene jefe, la <b>arena</b> (Fase 7): entrada, puerta y el prefab del jefe.
+    /// - si el nivel tiene jefe, la <b>arena</b> (Fase 7): entrada, puerta y el prefab del jefe;
+    /// - en el mundo de la Ira, el <b>fondo con parallax</b> con sus hitos repartidos.
     ///
     /// Es idempotente: ejecutarla otra vez sobre una escena preparada no cambia nada, y la
     /// escena solo se guarda si cambió.
@@ -216,6 +217,13 @@ namespace Fragmentum.EditorTools
                 !PintorEscenario.EstaPintada(escena))
             {
                 cambios |= PintorEscenario.Pintar(escena, provisional, true) > 0;
+            }
+
+            // 9. El fondo con parallax del mundo, con los hitos repartidos según la longitud del
+            //    nivel. Por ahora solo existe el de la Ira.
+            if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.IRA && Buscar<ParallaxMovement>(escena) == null)
+            {
+                cambios |= ConstructorFondoMundo1.Colocar(escena, nivel);
             }
 
             return cambios;

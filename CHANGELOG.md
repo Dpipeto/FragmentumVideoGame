@@ -9,6 +9,202 @@
 
 ---
 
+## Fondo con parallax del Mundo 1 (2026-10-01)
+
+Rama `fondo-mundo1`, que sale de `cinematica-y-mapa`. Llegaron las seis capas del fondo de la
+Fortaleza Volcánica (`Tesis/Imagestesis2/Mapas/limpias`), con un encargo de montaje: seis
+profundidades, `ParallaxMovement` del prototipo para las capas que se repiten y un
+`ParallaxProps` nuevo para los hitos sueltos. Antes de montar nada se revisó el plan, y salieron
+varios problemas.
+
+### 1. El parallax del prototipo no se movía con URP
+
+- **Problema.** `ParallaxMovement` desplaza el offset de la textura de cada capa, pero en la v2
+  las capas no se habrían movido.
+- **Causa.** La v2 usa URP con el 2D Renderer. Sus shaders de sprites (`Sprite-Lit-Default`,
+  `Sprite-Unlit-Default`, `Mesh2D`) dibujan la textura con su UV tal cual: ignoran el tiling y el
+  offset. Además, el script escribía `_MainTex`, que en URP se llama `_BaseMap`. Y ni siquiera
+  estaba en la v2: solo existía en el prototipo.
+- **Solución.** `ParallaxMovement` se trae a la v2 (`Levels/Escenario`) y se corrige:
+  - las capas repetibles usan un material **URP/Unlit transparente**, que sí aplica el offset;
+  - el desplazamiento se escribe con un `MaterialPropertyBlock` en la textura principal del
+    shader, sea cual sea su nombre (`_BaseMap` o `_MainTex`). Avisa si el shader es de sprites;
+  - ya no fija el objeto en (cámara − 1, y, 9.92): ese −1 dejaba un hueco en el borde derecho y el
+    9.92 movía todas las capas en Z.
+
+### 2. Las velocidades no seguían la profundidad
+
+- **Problema.** Con las capas a la altura de la pantalla y `parallaxSpeed = 0,05`, las
+  velocidades reales habrían sido 0,35 (fondo lejano), 0,42 (muro) y 1,39 (primer plano), en
+  lugar de 0,2, 0,6 y 0,8. La catarata (0,6, con `ParallaxProps`) habría resbalado sobre el muro y
+  el primer plano habría corrido más que el suelo.
+- **Causa.** El script sumaba el mismo desplazamiento de UV a todas las capas, pero las texturas
+  miden distinto: 1376 px el cielo y 2752 el fondo lejano. Un mismo desplazamiento en UV es el
+  doble de distancia en pantalla en la textura el doble de ancha.
+- **Solución.** **`CalculoParallax`** reúne las cuentas que usan las dos técnicas:
+  - la velocidad sale de la Z como en el prototipo: `1 - (z - zCámara) / distancia de la capa más lejana`;
+  - el desplazamiento de textura se divide por el ancho de la textura en el mundo, así que la
+    velocidad de la tabla es literal: 0,2 = 0,2 u en pantalla por cada unidad de cámara;
+  - `ParallaxProps` lleva su velocidad escrita, y una prueba comprueba que es la que daría su Z.
+  - `parallaxSpeed` desaparece: era el factor que lo descuadraba.
+
+### 3. El fondo mide una pantalla y la cámara sube y baja
+
+- **Problema.** Cada imagen mide justo una pantalla de alto (768 px), pero la cámara sigue al
+  jugador también en vertical. Al saltar habría asomado el borde.
+- **Solución.**
+  - Las capas siguen a la cámara en vertical: las repetibles enteras, y los props con
+    `seguirCamaraEnY` (su Y local es su altura en pantalla).
+  - Las capas repetibles se ajustan cada fotograma al tamaño de la vista. Los props se escalan
+    igual (`altoReferencia`). Así el fondo encaja con cualquier cámara: el Nivel 1 usa tamaño
+    ortográfico 4,85 y la plantilla de escenas, 5.
+  - Los dos scripts se ejecutan después de `CameraMovement` (`DefaultExecutionOrder(100)`). Si
+    fuera antes, irían un fotograma por detrás y asomaría el borde.
+
+### 4. El muro tapaba medio montaje y los hitos no cabían
+
+- **Problema.**
+  - El muro es opaco en un 92 % (del todo por debajo del 29 % superior). Como capa continua en
+    todo el nivel, habría tapado el cielo, las montañas y la fortaleza.
+  - La fortaleza mide 17,4 u, más que la pantalla. A velocidad 0,4 tarda 87 u de cámara en
+    cruzarla, y la cámara del Nivel 1 solo recorre 75: tres fortalezas se habrían visto a la vez.
+  - `ParallaxProps` anclaba los props a la posición de la cámara en su `Start`. Al continuar desde
+    un checkpoint guardado, la cámara arranca en otro sitio y los hitos habrían salido en otro
+    lugar. Además, `LevelManager.Start` coloca la cámara antes o después según el orden de
+    ejecución.
+- **Solución** (decisiones del autor: muro en tramos y una fortaleza):
+  - **el muro va en tramos**: un sprite en modo *Tiled* del ancho justo para tapar la pantalla
+    mientras la cámara recorre el tramo. En el Nivel 1 tapa la arena del jefe, el interior de la
+    fortaleza;
+  - **cada hito se ancla en su X**: se ve centrado cuando la cámara pasa por donde está colocado,
+    empiece donde empiece la partida. Así se coloca en el editor donde se quiere ver;
+  - **`RepartoHitos`** guarda dónde va cada hito como fracción del nivel y los coloca según la
+    longitud de cada nivel. Avisa si dos hitos de la misma capa se ven a la vez. En el Nivel 1:
+    - la fortaleza se ve centrada en x = 24;
+    - una catarata se ve centrada en x = 12 y la otra en x = 68, sobre el muro. Nunca coinciden;
+    - el muro tapa la pantalla de x = 60 al final.
+
+### 5. La importación habría estropeado el pixel art
+
+- **Problema.** Los ajustes del encargo (Point, sin compresión, sin mipmaps) no bastaban.
+- **Causa.** En el tipo *Default*, «Non-Power of 2» viene en «To Nearest»: Unity habría reescalado
+  las texturas de 2752×768 a 2048×1024. Además, el tamaño máximo por defecto (2048) las habría
+  reducido.
+- **Solución.**
+  - **`ImportadorFondos`** (un `AssetPostprocessor`) fija en todo `Assets/Sprites/Fondos` el
+    filtro Point, sin compresión, sin mipmaps, sin reescalar y con tamaño máximo 4096.
+  - Las capas repetibles se repiten en horizontal (Repeat) y no en vertical (Clamp): con Repeat y
+    filtro Point podría asomar una línea de la fila contraria arriba o abajo.
+  - Los props son sprites Single y Full Rect (el modo Tiled lo exige), a 79,2 px por unidad, la
+    misma escala que las repetibles.
+
+### El montaje
+
+`ConstructorFondoMundo1` (menú *Fragmentum → Escenario → Importar el fondo del Mundo 1*, y dentro
+de *Regenerar todo*) importa las imágenes, crea los materiales y arma
+`Assets/Prefabs/Fondos/FondoMundo1.prefab`:
+
+| Capa | Z | Imagen | Técnica | Velocidad | Orden |
+|---|---|---|---|---|---|
+| Cielo | 40 | `Skie.png` | Quad + `ParallaxMovement` | 0,0 | −60 |
+| Fondo lejano | 30 | `Fondo lejano tileable.png` | Quad + `ParallaxMovement` | 0,2 | −50 |
+| Fortaleza | 20 | `Plano medio.png` | Sprite + `ParallaxProps` (1) | 0,4 | −40 |
+| Muro | 10 | `Muro tileable.png` | Sprite Tiled + `ParallaxProps` (tramos) | 0,6 | −30 |
+| Catarata | 10 | `Prop catarata.png` | Sprite + `ParallaxProps` (2) | 0,6 | −29 |
+| Primer plano | 0 | `Primer plano tileable.png` | Quad + `ParallaxMovement` | 0,8 | −10 |
+
+- **El orden de dibujo** va de lejos a cerca y siempre por debajo del juego (el escenario pintado
+  usa −2 en adelante). El muro y la catarata comparten Z, pero no orden: la catarata va delante.
+- **Todo el fondo es unlit:** las capas repetibles con URP/Unlit y los props con
+  `Sprite-Unlit-Default`. Ni la luz del jugador ni la de la lava lo iluminan.
+- **`PreparadorNivel`** pone el fondo en las escenas de nivel del mundo de la Ira y reparte sus
+  hitos (paso 9). El Nivel 1 ya lo tiene.
+
+### Decisiones que ajustan el encargo
+
+1. **El muro no es una capa repetible sino tramos**, con `ParallaxProps` como la catarata. Así
+   los dos van a la misma velocidad por construcción.
+2. **Una fortaleza y dos cataratas en el Nivel 1**, no tres y dos: el nivel es corto para su
+   tamaño. En niveles más largos se añaden posiciones en `RepartoHitos`.
+3. **El arte va en `Assets/Sprites/Fondos/Mundo1Ira`**, junto al resto de sprites, y los scripts en
+   `Assets/Scripts/Levels/Escenario`, junto a `CameraMovement`, con el namespace del proyecto.
+4. **Las imágenes conservan su nombre original**, para poder volver a copiarlas desde
+   `Imagestesis2/Mapas/limpias` si cambian.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **218 de 218 correctas** (14 nuevas en `FondoParallaxTests`):
+  - las cuentas: la tabla de velocidades sale de la Z; dos texturas de distinto ancho se mueven
+    igual en pantalla; con velocidad 1 la textura queda fija en el mundo; un tramo del ancho
+    calculado tapa la pantalla; un hito se ve centrado al pasar la cámara por su ancla;
+  - la importación: pixel art sin reescalar, repetibles con Repeat/Clamp, sprites a 79,2 px por
+    unidad, y las texturas que se repiten encajan borde con borde;
+  - el prefab: seis capas con su técnica y su material, velocidades coherentes con la Z y orden
+    de dibujo de lejos a cerca, por debajo del juego;
+  - el reparto: el Nivel 1 tiene una fortaleza y dos cataratas que no se ven a la vez, y el muro
+    tapa la arena; en un nivel de 300 u se copian hitos, se ensancha el tramo y se avisa si dos
+    fortalezas se ven a la vez.
+- Pruebas PlayMode: **86 de 86 correctas** (5 nuevas en `ParallaxPlayModeTests`, con una cámara
+  que se mueve):
+  - cada una de las seis capas se desplaza en pantalla a su velocidad;
+  - siguen a la cámara en vertical y tapan la vista;
+  - el muro y su catarata van juntos;
+  - los hitos salen en su sitio aunque la cámara empiece en el checkpoint;
+  - con otro tamaño de cámara, todo se ajusta a la vista.
+- Capturas del Nivel 1 renderizadas en modo batch con la cámara en ocho posiciones: pixel art
+  nítido, las capas con alfa dejan ver las de atrás y no hay costuras en el muro.
+
+### Pasos manuales en el Editor
+
+Ninguno: el Nivel 1 ya tiene el fondo.
+
+- **Para ponerlo en otro nivel de la Ira:** *Fragmentum → Niveles → Preparar la escena de nivel
+  abierta* lo coloca y reparte los hitos. También se puede arrastrar
+  `Assets/Prefabs/Fondos/FondoMundo1.prefab` a la escena y usar *Fragmentum → Niveles → Repartir
+  los hitos del fondo en la escena abierta*.
+- **Para mover los hitos:** en el objeto `FondoMundo1` de la escena, componente `RepartoHitos`,
+  cambia las fracciones (0 = inicio del nivel, 1 = final) y vuelve a repartir. La consola avisa si
+  dos hitos de la misma capa se ven a la vez.
+- **Para cambiar un ajuste de importación** de las imágenes, cámbialo en
+  `ConstructorFondoMundo1.AjustarImportador`: `ImportadorFondos` lo restablece en cada
+  importación.
+
+### Cómo ajustar la velocidad
+
+El fondo solo se mueve al darle a Play. La velocidad es lo que una capa se corre en pantalla por
+cada unidad que avanza la cámara: 0 = parece no moverse, 1 = va pegada al suelo.
+
+- **Una capa repetible va demasiado rápida:** aléjala en Z (sube su Z en el prefab). Con el cielo
+  en z = 40, la velocidad es `1 - (z + 10) / 50`: z = 35 → 0,1; z = 30 → 0,2; z = 25 → 0,3;
+  z = 5 → 0,7; z = 0 → 0,8. **Demasiado lenta:** acércala (baja su Z). No muevas el cielo: es la
+  referencia de todas.
+- **Una capa de props va demasiado rápida o lenta:** cambia `velocidad` en su `ParallaxProps` y
+  pon su Z a juego, para que la tabla siga siendo cierta. El muro y las cataratas deben llevar la
+  misma, o la catarata resbala sobre el muro.
+- **Todo el fondo se siente demasiado rápido:** baja todas las velocidades a la vez. Por
+  ejemplo: primer plano a z = 10 (0,6), fondo lejano a z = 32,5 (0,15), fortaleza a 0,3 y muro y
+  cataratas a 0,45 en sus `ParallaxProps`, con su Z a juego (25 y 17,5).
+- **Tras cambiar la velocidad de un hito, vuelve a repartir:** cuanto más lento va, más recorrido
+  tarda en cruzar la pantalla y más fácil es que dos se vean a la vez.
+
+### Qué probar a mano (desde `Menu_Inicial`, «Nueva partida»)
+
+- Al correr hacia la derecha, las seis capas se mueven a velocidades distintas: el cielo casi
+  quieto, las montañas despacio, la fortaleza algo más rápido, las rocas del primer plano casi
+  con el suelo.
+- La fortaleza se ve centrada hacia el final de la sección 1. La primera catarata aparece al
+  principio; la segunda, sobre el muro.
+- El muro entra poco a poco durante la sección 2 y tapa la pantalla en la arena del jefe.
+- Al saltar, no asoma ningún borde arriba ni abajo.
+- Al morir y reaparecer en el checkpoint, la fortaleza sigue en el mismo sitio del paisaje.
+- El pixel art se ve nítido. Al desplazarse puede notarse un leve parpadeo de los píxeles: a
+  1080p cada píxel del fondo ocupa 1,4 píxeles de pantalla.
+- Los extremos del tramo de muro son un corte recto (PENDIENTES N14).
+
+---
+
 ## Cinemática inicial y escenario pintado (2026-09-30)
 
 Rama `cinematica-y-mapa`, que sale de `arte-kael`. Llegaron las 12 imágenes de la cinemática
