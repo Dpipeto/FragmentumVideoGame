@@ -24,7 +24,7 @@ namespace Fragmentum.Tests.PlayMode
             ("CapasRepetibles/FondoLejano", 0.2f),
             ("Fortaleza/Fortaleza_1", 0.4f),
             ("Muro/Muro_1", 0.6f),
-            ("Cataratas/Catarata_2", 0.6f),
+            ("Cataratas/Catarata_1", 0.6f),
             ("CapasRepetibles/PrimerPlano", 0.8f),
         };
 
@@ -127,7 +127,7 @@ namespace Fragmentum.Tests.PlayMode
         {
             yield return Montar(50f, 1.5f);
             var muro = Capa("Muro/Muro_1");
-            var catarata = Capa("Cataratas/Catarata_2");
+            var catarata = Capa("Cataratas/Catarata_1");
             var separacion = catarata.position.x - muro.position.x;
 
             for (var x = 52f; x <= 76f; x += 4f)

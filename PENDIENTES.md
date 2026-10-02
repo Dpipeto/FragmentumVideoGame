@@ -27,7 +27,7 @@ Ordenado por urgencia.
 ## Revisión 0.12: qué cambió respecto de la v0.11
 
 - **El Nivel 1 tiene fondo con parallax** (rama `fondo-mundo1`): cielo, montañas, la fortaleza,
-  el muro, dos cataratas de lava y el primer plano de rocas, cada capa a su velocidad.
+  el muro, una catarata de lava sobre él y el primer plano de rocas, cada capa a su velocidad.
   - El muro va en tramos: en el Nivel 1 tapa la arena del jefe.
   - Hay una fortaleza (no tres): el nivel es corto para su tamaño.
   - El prefab `Assets/Prefabs/Fondos/FondoMundo1.prefab` sirve para cualquier nivel de la Ira, y

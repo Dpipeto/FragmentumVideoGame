@@ -205,7 +205,7 @@ namespace Fragmentum.Tests
                 Assert.AreEqual(capa.Z, quad.transform.localPosition.z, 1e-4f, capa.Nombre);
             }
 
-            foreach (var (grupo, capa, hitos) in new[] { ("Fortaleza", Fortaleza, 1), ("Muro", Muro, 1), ("Cataratas", Catarata, 2) })
+            foreach (var (grupo, capa, hitos) in new[] { ("Fortaleza", Fortaleza, 1), ("Muro", Muro, 1), ("Cataratas", Catarata, 1) })
             {
                 var props = prefab.transform.Find(grupo).GetComponent<ParallaxProps>();
                 Assert.IsNotNull(props, grupo);
@@ -271,7 +271,7 @@ namespace Fragmentum.Tests
         // --- Reparto ---
 
         [Test]
-        public void ElNivel1_TieneElFondo_ConUnaFortalezaYDosCataratasQueNoSeVenALaVez()
+        public void ElNivel1_TieneElFondo_ConUnaFortaleza_YUnaCatarataSobreElMuro()
         {
             var bd = AssetDatabase.LoadAssetAtPath<LevelDatabase>(GeneradorProgresion.RutaBaseDeDatos);
             var datos = bd.niveles[0];
@@ -285,12 +285,19 @@ namespace Fragmentum.Tests
 
                 Assert.IsEmpty(reparto.Solapes(datos.Extension, AltoReferencia));
                 Assert.AreEqual(1, Activas(reparto.transform.Find("Fortaleza")).Count, "Una sola fortaleza.");
-                Assert.AreEqual(2, Activas(reparto.transform.Find("Cataratas")).Count);
 
-                // El muro tapa la pantalla mientras la cámara recorre la arena del jefe.
                 var muro = reparto.transform.Find("Muro").GetComponent<ParallaxProps>();
                 var tramo = Activas(muro.transform).Single().GetComponent<SpriteRenderer>();
                 var ancho = tramo.size.x;
+
+                // La catarata necesita una pared de la que caer: la única va sobre el muro.
+                var cataratas = reparto.transform.Find("Cataratas").GetComponent<ParallaxProps>();
+                var catarata = Activas(cataratas.transform).Single().GetComponent<SpriteRenderer>();
+                Assert.AreEqual(muro.velocidad, cataratas.velocidad, 1e-5f, "Van juntos.");
+                var separacion = cataratas.velocidad * (catarata.transform.position.x - tramo.transform.position.x);
+                Assert.LessOrEqual(Mathf.Abs(separacion) + catarata.sprite.bounds.size.x / 2f, ancho / 2f, "La catarata cae dentro del tramo de muro.");
+
+                // El muro tapa la pantalla mientras la cámara recorre la arena del jefe.
                 var limiteCamara = datos.Extension.y + 6f - AnchoVista / 2f;
                 for (var camara = 60f; camara <= limiteCamara; camara += 0.5f)
                 {

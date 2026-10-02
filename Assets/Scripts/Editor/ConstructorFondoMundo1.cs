@@ -130,10 +130,11 @@ namespace Fragmentum.EditorTools
         public static readonly CapaFondo[] CapasFondo = { Cielo, FondoLejano, Fortaleza, Muro, Catarata, PrimerPlano };
 
         // Reparto por defecto, en fracciones del nivel (ver RepartoHitos). En el Nivel 1 (0 a 80 u):
-        // la fortaleza se ve centrada al final de la sección 1, una catarata al principio y otra
-        // sobre el muro, que tapa la arena del jefe (el interior de la fortaleza).
+        // la fortaleza se ve centrada al final de la sección 1 y la catarata cae sobre el muro, que
+        // tapa la arena del jefe (el interior de la fortaleza). La catarata necesita una pared de la
+        // que caer: en campo abierto no encajaba con nada y se quitó.
         public static readonly float[] PosicionesFortaleza = { 0.3f };
-        public static readonly float[] PosicionesCataratas = { 0.15f, 0.85f };
+        public static readonly float[] PosicionesCataratas = { 0.85f };
         public static readonly Vector2[] TramosMuro = { new Vector2(0.75f, 1f) };
 
         // --- Menú y modo batch ---

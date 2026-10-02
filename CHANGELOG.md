@@ -81,7 +81,7 @@ varios problemas.
   - **`RepartoHitos`** guarda dónde va cada hito como fracción del nivel y los coloca según la
     longitud de cada nivel. Avisa si dos hitos de la misma capa se ven a la vez. En el Nivel 1:
     - la fortaleza se ve centrada en x = 24;
-    - una catarata se ve centrada en x = 12 y la otra en x = 68, sobre el muro. Nunca coinciden;
+    - la catarata se ve centrada en x = 68 y cae sobre el muro;
     - el muro tapa la pantalla de x = 60 al final.
 
 ### 5. La importación habría estropeado el pixel art
@@ -110,7 +110,7 @@ de *Regenerar todo*) importa las imágenes, crea los materiales y arma
 | Fondo lejano | 30 | `Fondo lejano tileable.png` | Quad + `ParallaxMovement` | 0,2 | −50 |
 | Fortaleza | 20 | `Plano medio.png` | Sprite + `ParallaxProps` (1) | 0,4 | −40 |
 | Muro | 10 | `Muro tileable.png` | Sprite Tiled + `ParallaxProps` (tramos) | 0,6 | −30 |
-| Catarata | 10 | `Prop catarata.png` | Sprite + `ParallaxProps` (2) | 0,6 | −29 |
+| Catarata | 10 | `Prop catarata.png` | Sprite + `ParallaxProps` (1) | 0,6 | −29 |
 | Primer plano | 0 | `Primer plano tileable.png` | Quad + `ParallaxMovement` | 0,8 | −10 |
 
 - **El orden de dibujo** va de lejos a cerca y siempre por debajo del juego (el escenario pintado
@@ -124,8 +124,10 @@ de *Regenerar todo*) importa las imágenes, crea los materiales y arma
 
 1. **El muro no es una capa repetible sino tramos**, con `ParallaxProps` como la catarata. Así
    los dos van a la misma velocidad por construcción.
-2. **Una fortaleza y dos cataratas en el Nivel 1**, no tres y dos: el nivel es corto para su
-   tamaño. En niveles más largos se añaden posiciones en `RepartoHitos`.
+2. **Una fortaleza y una catarata en el Nivel 1**, no tres y dos. La fortaleza no cabe más
+   veces: el nivel es corto para su tamaño. La catarata necesita una pared de la que caer: la
+   primera, en campo abierto (x = 12), no encajaba con nada y se quitó tras verla en el Editor.
+   Queda la que cae sobre el muro. En niveles más largos se añaden posiciones en `RepartoHitos`.
 3. **El arte va en `Assets/Sprites/Fondos/Mundo1Ira`**, junto al resto de sprites, y los scripts en
    `Assets/Scripts/Levels/Escenario`, junto a `CameraMovement`, con el namespace del proyecto.
 4. **Las imágenes conservan su nombre original**, para poder volver a copiarlas desde
@@ -143,8 +145,8 @@ de *Regenerar todo*) importa las imágenes, crea los materiales y arma
     unidad, y las texturas que se repiten encajan borde con borde;
   - el prefab: seis capas con su técnica y su material, velocidades coherentes con la Z y orden
     de dibujo de lejos a cerca, por debajo del juego;
-  - el reparto: el Nivel 1 tiene una fortaleza y dos cataratas que no se ven a la vez, y el muro
-    tapa la arena; en un nivel de 300 u se copian hitos, se ensancha el tramo y se avisa si dos
+  - el reparto: el Nivel 1 tiene una fortaleza y una catarata que cae dentro del tramo de muro,
+    y el muro tapa la arena; en un nivel de 300 u se copian hitos, se ensancha el tramo y se avisa si dos
     fortalezas se ven a la vez.
 - Pruebas PlayMode: **86 de 86 correctas** (5 nuevas en `ParallaxPlayModeTests`, con una cámara
   que se mueve):
@@ -194,8 +196,8 @@ cada unidad que avanza la cámara: 0 = parece no moverse, 1 = va pegada al suelo
 - Al correr hacia la derecha, las seis capas se mueven a velocidades distintas: el cielo casi
   quieto, las montañas despacio, la fortaleza algo más rápido, las rocas del primer plano casi
   con el suelo.
-- La fortaleza se ve centrada hacia el final de la sección 1. La primera catarata aparece al
-  principio; la segunda, sobre el muro.
+- La fortaleza se ve centrada hacia el final de la sección 1. La catarata aparece sobre el
+  muro, en la arena.
 - El muro entra poco a poco durante la sección 2 y tapa la pantalla en la arena del jefe.
 - Al saltar, no asoma ningún borde arriba ni abajo.
 - Al morir y reaparecer en el checkpoint, la fortaleza sigue en el mismo sitio del paisaje.
