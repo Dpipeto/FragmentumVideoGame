@@ -110,6 +110,25 @@ namespace Fragmentum.EditorTools
                 d.tinte = Hex("CC4400");
             });
 
+            // El primer enemigo con arte. Persigue más despacio que el Soldado de lava para que sus
+            // piernas no patinen (el ciclo de correr dibujado avanza ~1,3 u/s); la Ira está en el
+            // golpe: anticipación larga y visible y un impacto casi instantáneo.
+            Datos("EcoIra", sobrescribir, d =>
+            {
+                d.nombreCanonico = "Eco de la Ira";
+                d.descripcion = "Ira (Mundo 1): patrulla con pausas; al ver al jugador lo persigue, carga el golpe a la vista " +
+                                "(a1, 0,35 s) y lo suelta de golpe (a2 y a3). Tocarlo no hace daño: solo el golpe.";
+                d.vidaMaxima = 3; d.danio = 1; d.danioContacto = 0;
+                d.velocidadPatrulla = 1.3f; d.velocidadPersecucion = 2.6f; d.esperaEnWaypoint = 1.6f;
+                d.deteccion = vision; d.detectionRadius = 7f;
+                d.attackRadius = 1.3f; d.attackCooldown = 0.7f;
+                // Con arte, la ventana del golpe la marcan los eventos del clip. Estos tiempos (los
+                // del clip a ritmo 1) solo se usan si el prefab se queda sin animación.
+                d.duracionAtaque = 0.73f; d.inicioVentanaGolpe = 0.35f; d.finVentanaGolpe = 0.48f;
+                d.damagedDuration = 0.25f; d.resistenciaRetroceso = 0f;
+                d.tinte = Color.white;
+            });
+
             Datos("GolemCeniza", sobrescribir, d =>
             {
                 d.nombreCanonico = "Golem de Ceniza";
@@ -233,9 +252,20 @@ namespace Fragmentum.EditorTools
             return base_;
         }
 
-        public static GameObject CargarPrefab(string variante) =>
-            AssetDatabase.LoadAssetAtPath<GameObject>(
-                string.IsNullOrEmpty(variante) || variante == "Generico" ? RutaPrefabBase : $"{CarpetaPrefabs}/Enemigo_{variante}.prefab");
+        /// <summary>
+        /// Prefab de una variante. Los enemigos con arte tienen prefab propio con su nombre
+        /// (<c>EcoIra.prefab</c>); los demás son variantes del base (<c>Enemigo_*.prefab</c>).
+        /// </summary>
+        public static GameObject CargarPrefab(string variante)
+        {
+            if (string.IsNullOrEmpty(variante) || variante == "Generico")
+            {
+                return AssetDatabase.LoadAssetAtPath<GameObject>(RutaPrefabBase);
+            }
+
+            return AssetDatabase.LoadAssetAtPath<GameObject>($"{CarpetaPrefabs}/{variante}.prefab") ??
+                   AssetDatabase.LoadAssetAtPath<GameObject>($"{CarpetaPrefabs}/Enemigo_{variante}.prefab");
+        }
 
         private static GameObject CrearPrefabBase()
         {
@@ -399,8 +429,8 @@ namespace Fragmentum.EditorTools
             var rutas = new GameObject("Rutas").transform;
             var colorSuelo = Hex("5C4033");
 
-            Suelo(nivel, "Suelo", -10f, 122f, -1f, 0f, colorSuelo);
-            ZonaMortal(nivel, -20f, 140f, -10f);
+            Suelo(nivel, "Suelo", -10f, 138f, -1f, 0f, colorSuelo);
+            ZonaMortal(nivel, -20f, 150f, -10f);
 
             // Una zona cada 16 u, con patrulla entre ±4 u de su centro.
             Zona(escena, nivel, rutas, "Generico", 14f);
@@ -422,13 +452,16 @@ namespace Fragmentum.EditorTools
             quieto.name = "Generico_SinRuta";
             quieto.transform.position = new Vector3(110f, 3.05f, 0f);
 
+            // El Eco de la Ira, con su arte y sus animaciones, al final de la pista.
+            Zona(escena, nivel, rutas, ConstructorEcoIra.NombreDatos, 128f);
+
             var aparicion = new GameObject("PuntoDeAparicion").transform;
             aparicion.position = new Vector3(0f, 0.05f, 0f);
 
             var jugador = InstanciarJugador(jugadorPrefab, escena, aparicion.position, TodasLasHabilidades);
             // En esta escena correr hace ruido, para que el Centinela Ciego pueda oír.
             Asignar(jugador.GetComponent<PlayerModoMovimiento>(), "emitirRuido", p => p.boolValue = true);
-            CamaraYReaparicion(jugador, aparicion, new Vector2(-10f, -6f), new Vector2(122f, 16f));
+            CamaraYReaparicion(jugador, aparicion, new Vector2(-10f, -6f), new Vector2(138f, 16f));
 
             var depuracion = new GameObject("Depuracion");
             depuracion.AddComponent<DepuracionEnemigos>();
@@ -442,6 +475,7 @@ namespace Fragmentum.EditorTools
                 "x = 78 Espectro: en el círculo de luz (x = 71) no se acerca\n" +
                 "x = 94 Centinela Ciego: te oye si corres; con mando, camina despacio\n" +
                 "x = 110 enemigo sin ruta en una plataforma: no se tira por el borde\n" +
+                "x = 128 Eco de la Ira (con arte): patrulla con pausas en Idle; el golpe solo hace daño en a2 y a3\n" +
                 "Acércate por la izquierda y por la derecha: debe atacar por ambos lados.");
 
             CrearHud(jugador.GetComponent<PlayerHealth>());
@@ -461,7 +495,14 @@ namespace Fragmentum.EditorTools
 
         private static void Zona(UnityEngine.SceneManagement.Scene escena, Transform nivel, Transform rutas, string variante, float centro)
         {
-            var enemigo = (GameObject)PrefabUtility.InstantiatePrefab(CargarPrefab(variante), escena);
+            var prefab = CargarPrefab(variante);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"[Fragmentum] Falta el prefab de {variante}: su zona de la escena de prueba queda vacía.");
+                return;
+            }
+
+            var enemigo = (GameObject)PrefabUtility.InstantiatePrefab(prefab, escena);
             enemigo.transform.position = new Vector3(centro, 0.05f, 0f);
 
             var a = new GameObject($"{variante}_A").transform;

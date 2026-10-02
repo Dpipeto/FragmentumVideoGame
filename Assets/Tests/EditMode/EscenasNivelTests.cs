@@ -85,9 +85,10 @@ namespace Fragmentum.Tests
         public void ElSueloProvisional_TieneEnemigosDelMundoDeLaIra()
         {
             var enemigos = Todos<EnemyController>(_nivel1);
-            Assert.AreEqual(2, enemigos.Count, "Un Soldado de lava en la sección 1 y el Golem de Ceniza tras el checkpoint.");
-            Assert.IsTrue(enemigos.Any(e => e.transform.position.x < 25f && e.name.Contains("SoldadoLava")),
-                "El Soldado de lava patrulla la sección 1.");
+            Assert.AreEqual(2, enemigos.Count, "Un Eco de la Ira en la sección 1 y el Golem de Ceniza tras el checkpoint.");
+            Assert.IsTrue(enemigos.Any(e => e.transform.position.x < 25f && e.name.Contains(ConstructorEcoIra.NombreDatos) &&
+                                            PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(e.gameObject) == ConstructorEcoIra.RutaPrefab),
+                "El Eco de la Ira (con arte) patrulla la sección 1, donde estaba el Soldado de lava provisional.");
             Assert.IsTrue(enemigos.Any(e => e.transform.position.x > 40f && e.name.Contains("GolemCeniza")),
                 "Anexo A: el checkpoint de x = 40 va antes del Golem.");
 

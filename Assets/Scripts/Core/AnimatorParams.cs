@@ -40,6 +40,9 @@ namespace Fragmentum.Core
         // Multiplicador de velocidad del estado Ataque: 1 / duración del golpe en segundos.
         public static readonly Parametro VelocidadAtaque = new Parametro("VelocidadAtaque");
 
+        // Multiplicador del estado Run de los Ecos: velocidad real / la del ciclo dibujado.
+        public static readonly Parametro VelocidadCorrer = new Parametro("VelocidadCorrer");
+
         /// <summary>¿El Animator tiene este parámetro? Avisa una sola vez por parámetro ausente.</summary>
         public static bool Existe(Animator animator, in Parametro parametro)
         {

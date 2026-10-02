@@ -26,6 +26,9 @@ namespace Fragmentum.Enemies
     ///   i-frames que interrumpe el ataque y un DEAD real que apaga colisiones y lo destruye.
     /// - La vida es entera y los parámetros viven en <see cref="EnemyData"/>.
     /// - El Animator se fija en el OnEnter de cada estado, no con cuatro SetBool por frame.
+    /// - Con arte (el Eco de la Ira), los fotogramas del clip marcan la ventana del golpe y el
+    ///   final de la muerte a través de <see cref="EnemigoAnimacion"/>; sin arte, todo va por
+    ///   tiempo con los valores de <see cref="EnemyData"/>.
     /// </summary>
     [DeclaraFSM("Enemigo")]
     [DisallowMultipleComponent]
@@ -60,11 +63,18 @@ namespace Fragmentum.Enemies
         [Tooltip("Hitbox del cuerpo (capa EnemyWeapon): daño por contacto.")]
         [SerializeField] private Hitbox contacto;
 
+        [Tooltip("Animación con eventos (Ecos). Vacío = se busca en los hijos; si no hay, el golpe y la muerte van por tiempo.")]
+        [SerializeField] private EnemigoAnimacion animacion;
+
         [Header("Depuración")]
         [SerializeField] private ESTADOS_ENEMIGO currentState;
         [SerializeField] private bool registrarTransiciones;
 
+        // Margen sobre la duración del clip de ataque antes de darlo por terminado sin su evento.
+        private const float MargenFinAtaque = 0.25f;
+
         private MaquinaEstados<ESTADOS_ENEMIGO> _maquina;
+        private EnemyAttackState _ataque;
         private Rigidbody2D _cuerpo;
         private Collider2D _colisionador;
         private Health _vida;
@@ -116,6 +126,15 @@ namespace Fragmentum.Enemies
         internal Animator Animador => animator;
 
         internal Hitbox Arma => arma;
+
+        /// <summary>
+        /// Hay animación con eventos: los fotogramas del clip abren y cierran el arma, el ataque
+        /// acaba con el clip y la muerte la remata <see cref="EnemigoAnimacion"/>.
+        /// </summary>
+        internal bool AnimadoPorEventos => animacion != null && animacion.Lista;
+
+        /// <summary>Lo más que dura ATTACK: el clip a su ritmo (con margen) o, sin animación, EnemyData.</summary>
+        internal float DuracionAtaque => AnimadoPorEventos ? animacion.DuracionAtaque + MargenFinAtaque : datos.duracionAtaque;
 
         internal float Ahora => Time.time;
 
@@ -203,6 +222,7 @@ namespace Fragmentum.Enemies
             _vida = GetComponent<Health>();
             if (animator == null) animator = GetComponentInChildren<Animator>();
             if (sprite == null) sprite = GetComponentInChildren<SpriteRenderer>();
+            if (animacion == null) animacion = GetComponentInChildren<EnemigoAnimacion>();
             if (pivote == null && sprite != null) pivote = sprite.transform.parent != transform ? sprite.transform.parent : sprite.transform;
 
             _cuerpo.freezeRotation = true;
@@ -216,7 +236,8 @@ namespace Fragmentum.Enemies
             _maquina.Registrar(new EnemyIdleState(this, _maquina));
             _maquina.Registrar(new EnemyPatrolState(this, _maquina));
             _maquina.Registrar(new EnemyChaseState(this, _maquina));
-            _maquina.Registrar(new EnemyAttackState(this, _maquina));
+            _ataque = new EnemyAttackState(this, _maquina);
+            _maquina.Registrar(_ataque);
             _maquina.Registrar(new EnemyDamagedState(this, _maquina));
             _maquina.Registrar(new EnemyDeadState(this, _maquina));
             _maquina.OnStateChanged += AlCambiarEstado;
@@ -292,6 +313,24 @@ namespace Fragmentum.Enemies
 
         /// <summary>Receptor del evento de animación de la v1 (EnemyHurt.anim): fin del daño.</summary>
         public void DesactiveDamage() => FinDanioPorAnimacion = true;
+
+        /// <summary>Evento de animación (primer instante de a2): el arma empieza a hacer daño.</summary>
+        public void AbrirGolpe()
+        {
+            if (EstadoActual == ESTADOS_ENEMIGO.ATTACK)
+            {
+                _ataque.AbrirGolpe();
+            }
+        }
+
+        /// <summary>Evento de animación (primer instante de a4): el arma deja de hacer daño.</summary>
+        public void CerrarGolpe()
+        {
+            if (EstadoActual == ESTADOS_ENEMIGO.ATTACK)
+            {
+                _ataque.CerrarGolpe();
+            }
+        }
 
         // --- Consultas y acciones para los estados ---
 
@@ -399,17 +438,34 @@ namespace Fragmentum.Enemies
         /// Muerte real: apaga todas las colisiones y hitbox, detiene la física y programa la
         /// destrucción. En el prototipo <c>death</c> solo congelaba al enemigo, que seguía
         /// bloqueando el paso y podía hacer daño.
+        ///
+        /// Con animación, el arma y el contacto se apagan ya (un enemigo moribundo no hace daño),
+        /// pero el cuerpo sigue hasta que acaba el clip de muerte: entonces
+        /// <see cref="EnemigoAnimacion"/> apaga el collider, suelta las partículas, funde el sprite
+        /// y lo destruye.
         /// </summary>
         internal void Morir()
         {
             FijarArma(false);
+            _cuerpo.linearVelocity = Vector2.zero;
+            _cuerpo.bodyType = RigidbodyType2D.Kinematic;
+
+            if (AnimadoPorEventos)
+            {
+                if (contacto != null)
+                {
+                    contacto.gameObject.SetActive(false);
+                }
+
+                animacion.Morir();
+                return;
+            }
+
             foreach (var c in GetComponentsInChildren<Collider2D>())
             {
                 c.enabled = false;
             }
 
-            _cuerpo.linearVelocity = Vector2.zero;
-            _cuerpo.bodyType = RigidbodyType2D.Kinematic;
             Destroy(gameObject, Mathf.Max(0f, datos.deathDelay));
         }
 

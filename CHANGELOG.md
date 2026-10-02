@@ -9,6 +9,258 @@
 
 ---
 
+## Eco de la Ira: el primer enemigo con arte (2026-10-02)
+
+Rama `enemigo-eco-ira`, que sale de `fondo-mundo1`. Llegaron los 12 fotogramas del enemigo del
+Mundo 1 (`Tesis/Enemigo/limpios`), con un encargo: importarlos sin tocar su lienzo, crear
+`EcoIra.controller` con tiempos deliberadamente desiguales, conectar el Animator al
+`EnemyController` sin reescribirlo, y añadir una ventana de daño por eventos de animación, un
+multiplicador de ritmo, la muerte con partículas y un squash en el ataque. Antes de montar nada
+se revisó el plan, y salieron varios problemas.
+
+### 1. Los eventos de animación no habrían llegado al EnemyController
+
+- **Problema.** Los eventos de un clip solo llaman a métodos de los scripts del objeto que tiene el
+  Animator. Los receptores del prototipo (`CancelAttack`, `DesactiveDamage`) están en el
+  `EnemyController`, en la raíz, y el Animator va en el hijo `Pivote/Sprite`.
+- **Solución.** **`EnemigoAnimacion`** (`Scripts/Enemies`), en el mismo objeto que el Animator,
+  recibe los eventos y se los pasa al `EnemyController`. También lleva lo que es solo de la
+  presentación: `velocidadAnimacion`, el destello del golpe y el final de la muerte. La FSM sigue
+  siendo la que decide; el componente solo le avisa de lo que pasa en el clip.
+
+### 2. La ventana del golpe iba por tiempo y habría cortado el ataque
+
+- **Problema.** `EnemyAttackState` abría y cerraba el arma con un temporizador en `Update`, con
+  los tiempos de `EnemyData`: el Soldado de lava ataca 0,4 s y el clip del Eco dura 0,73 s. La FSM
+  habría dado por terminado el ataque a mitad del clip, y la ventana no habría coincidido con a2
+  y a3.
+- **Solución** (diff revisado por el autor antes de aplicarlo):
+  - con animación, el arma la abren y la cierran los eventos `AbrirGolpe` (primer instante de a2)
+    y `CerrarGolpe` (primer instante de a4), y el ataque termina con `FinAtaque`, al acabar el
+    clip. Fuera de ATTACK los eventos no hacen nada;
+  - el límite de ATTACK pasa a ser la duración del clip a su ritmo, con 0,25 s de margen por si
+    el evento final no llegara;
+  - se conserva la garantía de la Fase 4: el arma pasa al menos un paso de física abierta. Si un
+    tirón de fotogramas junta a2, a3 y a4, el cierre espera a ese paso;
+  - sin animación (los enemigos que aún son cápsulas), todo sigue igual que antes.
+
+### 3. Un «tinte blanco» en el SpriteRenderer no se ve
+
+- **Problema.** El encargo pedía el daño como tinte blanco del SpriteRenderer durante 0,1 s.
+- **Causa.** El color del SpriteRenderer multiplica la textura. El Eco ya va con tinte blanco (el
+  arte final no lleva tinte), así que ponerlo en blanco no cambia nada.
+- **Solución.** Un shader propio, **`Fragmentum/SiluetaSprite`** (`Assets/Shaders`), pinta el
+  sprite de un color liso conservando solo su alfa, sin luces. Al recibir un golpe,
+  `EnemigoAnimacion` le pone al sprite el material `Destello` durante 0,1 s y luego le devuelve
+  el suyo. Sigue sin haber arte de daño.
+
+### 4. Al Animator le faltaban transiciones que la FSM necesita
+
+- **Problema.** Con solo las transiciones del encargo, el Eco:
+  - no volvería a Idle al perder al jugador;
+  - terminaría la animación del golpe aunque un golpe de Kael interrumpiera el ataque, es decir,
+    golpearía sin hacer daño;
+  - con «Cualquiera → Death» reiniciaría el clip de muerte en cada fotograma, porque Death sigue
+    activo, y la muerte no acabaría nunca.
+
+  Las pruebas encontraron dos casos más:
+  - al entrar en ATTACK la FSM apaga `MovEn`, y un «Run → Idle si no se mueve» se adelantaba a
+    «Run → Attack»;
+  - la FSM encadena transiciones en un mismo fotograma. Con el jugador ya a tiro pasa de IDLE a
+    ATTACK (por CHASE) sin que el Animator llegue a ver `MovEn` encendido, y el Eco atacaba
+    quieto en Idle.
+- **Solución.** `EcoIra.controller` usa los parámetros que la FSM ya escribía (`MovEn`, `Attack`,
+  `Damage`, `Death`) y añade a las del encargo:
+  - **Idle → Attack** si el ataque empieza en el mismo fotograma en que lo detecta;
+  - **Run → Idle** cuando pierde al jugador, salvo aturdido (`Damage`, así los ojos no se apagan
+    al recibir un golpe) o atacando (`Attack`). En Idle y en Run, atacar se comprueba primero;
+  - **Attack → Run sin esperar** cuando un golpe interrumpe el ataque;
+  - *Can Transition To Self* desactivado en «Cualquiera → Death».
+
+  Todas van sin Exit Time salvo Attack → Run al terminar el golpe, y sin mezcla (duración 0).
+
+### 5. Las piernas habrían patinado
+
+- **Problema.** El ciclo r1–r4 a 0,12 s es un solo paso de unas 0,62 u: avanza 1,3 u/s. El
+  Soldado de lava patrulla a 2,5 u/s y persigue a 5. A esa velocidad los pies se habrían
+  deslizado, y durante el cooldown, quieto a tiro del jugador, el Eco habría corrido en el sitio.
+- **Solución** (decisión del autor: el ritmo según la velocidad, como Kael):
+  - el estado Run se acelera con el parámetro `VelocidadCorrer`, que es la velocidad real del
+    cuerpo entre la del ciclo dibujado. Quieto se congela, sin correr en el sitio, y aturdido no
+    corre;
+  - `velocidadAnimacion` acelera todo el Animator, pero se descuenta en Run: las piernas siguen al
+    cuerpo con cualquier ritmo;
+  - `EcoIra.asset` patrulla a 1,3 u/s (justo los 0,12 s del encargo) y persigue a 2,6 u/s (el
+    ciclo al doble). A 5 u/s cada fotograma duraría 0,03 s y se vería frenético.
+
+### 6. El daño por contacto contradecía el criterio del golpe
+
+- **Problema.** Fuera de a2 y a3 el jugador debe poder pasarle por encima sin daño, pero todos los
+  enemigos de la Fase 4 dañan al tocarlos (`danioContacto = 1`).
+- **Solución.** El Eco tiene sus propios datos, **`EcoIra.asset`**, con `danioContacto = 0`. El
+  resto sale del Soldado de lava (vida 3, daño 1, visión de 7 u, cooldown 0,7 s). Para que se vean
+  sus pausas en Idle, espera 1,6 s en cada punto de patrulla, dos ciclos de I1 a I2.
+
+### 7. La muerte no esperaba al clip
+
+- **Problema.** `Morir()` apagaba los colliders y destruía al enemigo pasado `deathDelay`, con un
+  tiempo fijo y sin saber nada del clip. Unas partículas hijas del enemigo habrían desaparecido
+  con él a medio vuelo.
+- **Solución.** Con animación, `Morir()` apaga ya el arma y el contacto (un enemigo moribundo no
+  hace daño) y deja el resto a `EnemigoAnimacion`. Al acabar el clip (`FinMuerte`):
+  - apaga el collider del cuerpo;
+  - suelta las partículas desde la **cavidad del pecho**, a (0,04; 0,28) u de los pies, tal como
+    está dibujada en d3, el fotograma que se ve al acabar. Las partículas se separan del enemigo
+    para que destruirlo no las corte, y se borran solas;
+  - funde el sprite en 0,4 s y destruye al enemigo.
+
+  Si el evento no llegara, se remata igual 1 s después de lo previsto.
+
+### El montaje
+
+`ConstructorEcoIra` (menú *Fragmentum → Enemigos → Importar el arte del Eco de la Ira*, y dentro de
+*Regenerar todo*) importa los fotogramas, crea los clips y el controlador y arma
+`Assets/Prefabs/Enemigos/EcoIra.prefab`.
+
+- **Arte:** `Assets/Sprites/Enemigos/EcoIra/` (los 12 PNG con su nombre original; D1 no se usa).
+  `ImportadorEnemigos` fija sus ajustes en cada importación:
+  - Sprite Single, Point, sin compresión, sin mipmaps, alfa como transparencia y Full Rect;
+  - el lienzo entero, de 1229×905;
+  - el pivote común (0,345; 0,014), que es el ancla de los pies en el píxel (424, 892).
+- **Escala: 708 px por unidad.** Kael mide 113 px de arte a 64 px por unidad, es decir 1,77 u.
+  El Eco corriendo mide 750 px, el 60 % de Kael (1,06 u). El arte es pixel art ampliado: cada
+  píxel del dibujo son unos 10 px de la textura, y a 708 PPU mide 0,014 u, casi lo mismo que un
+  píxel de Kael (0,016 u). Los dos se ven de la misma resolución.
+- **Clips** (`Assets/Animaciones/Enemigos/EcoIra/`):
+
+  | Estado | Fotogramas | Por fotograma | Bucle | Eventos |
+  |---|---|---|---|---|
+  | Idle | I1, I2 | 0,40 s | sí | — |
+  | Run | r1–r4 | 0,12 s (a ritmo 1) | sí | — |
+  | Attack | a1 · a2 · a3 · a4 | 0,35 · 0,08 · 0,05 · 0,25 s | no | `AbrirGolpe` 0,35 · `CerrarGolpe` 0,48 · `FinAtaque` 0,73 |
+  | Death | d2, d3 | 0,15 s | no | `FinMuerte` 0,30 |
+
+- **Squash:** el clip de ataque anima la escala X del sprite en escalones: 1 en a1, 1,15 en a2, 1
+  en a3, 0,9 en a4 y 1 al acabar.
+  - Va en el clip y no en eventos: así cambia con el fotograma exacto, escala con
+    `velocidadAnimacion` y vuelve a 1 si el ataque se interrumpe.
+  - Va en `Sprite` y no en `Pivote`, porque el `EnemyController` reescribe la escala del
+    `Pivote` para voltear.
+  - El arma no se estira.
+- **Prefab `EcoIra`:**
+  - la raíz, en la capa Enemy: Rigidbody2D, cápsula del cuerpo (0,42 × 1 u), Health y
+    `EnemyController` con `EcoIra.asset`;
+  - `Pivote`, lo que se voltea al girar:
+    - `Sprite`, con el SpriteRenderer, el Animator (siempre animado, también fuera de cámara,
+      para que lleguen los eventos) y `EnemigoAnimacion`;
+    - `Arma`, en la capa EnemyWeapon: un trigger de 0,25 a 1,25 u, porque el puño de a2,
+      estirado, llega a 1,29 u;
+    - `Pecho`, con las partículas: 28 cuadrados de 2 a 3 píxeles del dibujo, brasa y ceniza con
+      los colores del arte, en abanico hacia arriba;
+  - `Contacto`, apagado porque el Eco no daña por contacto.
+- **Escenas:**
+  - en el Nivel 1, el Eco sustituye al Soldado de lava provisional, en su misma posición y con
+    su ruta (*Fragmentum → Enemigos → Sustituir los Soldados de lava de la escena abierta*);
+  - `PreparadorNivel` ya pone el Eco en los recorridos provisionales de la Ira;
+  - `PruebaEnemigos` tiene una zona nueva en x = 128.
+
+### Decisiones que ajustan el encargo
+
+1. **Carpetas de la convención del proyecto** (decisión del autor): `Assets/Sprites/Enemigos/EcoIra`
+   y `Assets/Animaciones/Enemigos/EcoIra`, como Kael y los fondos, en lugar de `Assets/Art`.
+2. **Patrulla con Run y pausas en Idle** (decisión del autor). Al patrullar el Eco lleva los ojos
+   encendidos; en las pausas, apagados.
+3. **El ritmo de Run sigue a la velocidad real** (decisión del autor), y por eso el Eco persigue a
+   2,6 u/s y no a 5. Se cambia en `EcoIra.asset` y las piernas se ajustan solas.
+4. **Tres transiciones más y Death sin volver a sí misma** (problema 4).
+5. **El arma y el contacto se apagan al morir, no al acabar el clip.** El cuerpo sí espera al
+   clip, como pedía el encargo.
+6. **En a3 el squash vuelve a 1**: el encargo solo fija a2 y a4.
+7. **`EnemyDeadState` no cambia**: todo cabe en `EnemyController.Morir()`.
+
+### Verificación
+
+- Compilación con `dotnet build`: 0 errores, 0 avisos.
+- Compilación real en Unity 6000.6.3f1 en modo batch: 0 errores, 0 avisos.
+- Pruebas EditMode: **228 de 228 correctas** (10 nuevas en `EcoIraTests`):
+  - los doce fotogramas son pixel art con el lienzo entero, a 708 PPU y con el mismo pivote, y la
+    planta de los pies de cada PNG cae en la fila del pivote;
+  - corriendo, el Eco mide el 60 % de Kael;
+  - los clips tienen los tiempos del diseño, sin fotogramas de relleno, y la anticipación dura
+    más de 2,5 veces el golpe;
+  - los eventos van al principio de a2 y de a4 y al final del ataque y de la muerte;
+  - el squash de a2 y a4;
+  - el controlador: estados, transiciones y Exit Time;
+  - el prefab completo, y el arma cubre el brazo de a2 y a3.
+- Pruebas PlayMode: **94 de 94 correctas** (8 nuevas en `EcoIraPlayModeTests`, con el jugador real):
+  - el arma solo está abierta mientras se ven a2 y a3, el daño llega en esos fotogramas, a1 dura
+    0,35 s y el golpe 0,13 s;
+  - a `velocidadAnimacion` 0,5 todo dura el doble y la ventana sigue en a2 y a3;
+  - un golpe en a1 cancela el ataque sin que el arma llegue a abrirse;
+  - pasando por Idle, Run, Attack y Death, la base del sprite no se mueve ni 0,005 u;
+  - corriendo, el ritmo de las piernas es el de la velocidad real; parado en el borde, el clip
+    se congela;
+  - patrulla con Run y se para en Idle en cada punto;
+  - el destello dura 0,1 s;
+  - la muerte espera al clip (0,3 s), apaga el cuerpo, suelta las partículas desde el pecho, se
+    funde y desaparece a los 0,7 s.
+- Regenerar el Eco dos veces deja sus archivos idénticos.
+- Render en modo batch a 1080p y 720p:
+  - los doce fotogramas apoyan los pies en la misma línea;
+  - corriendo, el Eco mide 118 px de pantalla frente a los 196 de Kael, el 60 %;
+  - el pixel art se ve nítido, sin suavizado;
+  - la silueta blanca, el volteo y las partículas desde el pecho salen como se espera.
+- Desplazando la cámara 1/3 y 2/3 de píxel, cambia de columna el 17–30 % de los píxeles del Eco,
+  frente al 4–8 % de Kael. No se emborrona, pero al moverse su textura «repta» un poco más que la
+  de Kael (ver «Notas sobre el arte»).
+
+### Pasos manuales en el Editor
+
+Ninguno: el prefab, el Nivel 1 y `PruebaEnemigos` ya tienen el Eco.
+
+- **Otro Eco con los mismos clips:** duplica `EcoIra.prefab`, cambia sus datos en su
+  `EnemyController` (un `EnemyData` propio) y su `velocidadAnimacion` en `EnemigoAnimacion`. Si
+  cambia el dibujo, usa un *Animator Override Controller* sobre `EcoIra.controller`: los eventos
+  van en los clips y `EnemigoAnimacion` lee sus duraciones de ellos.
+- **Para cambiar un ajuste de importación,** cámbialo en `ConstructorEcoIra.AjustarImportador`:
+  `ImportadorEnemigos` lo restablece en cada importación.
+
+### Qué revisar en el Editor
+
+Abre `Assets/Scenes/Pruebas/PruebaEnemigos.unity`, dale a Play y camina hasta x = 128 (F2 muestra
+el estado del enemigo).
+
+- **No salta:** al pasar de Idle a Run, de Run a Attack y al morir, los pies no se separan del
+  suelo. En la escena, con `EcoIra` seleccionado, `Pivote/Sprite` está siempre en (0, 0).
+- **Anticipación y golpe:** a1 se ve venir (0,35 s, con las grietas de lava encendidas) y a2–a3
+  son un latigazo. Con el Gizmo del collider visible, `Pivote/Arma` solo se enciende en a2 y a3.
+- **Daño:** si te quedas pegado al Eco sin que ataque, no te hace daño. Solo duele si te toca el
+  golpe.
+- **Destello:** al golpearlo, el Eco se vuelve una silueta blanca un instante.
+- **Muerte:** cae (d2 → d3), salen brasas y ceniza del pecho, se funde y desaparece.
+- **Piernas:** al perseguirte no patina, y quieto a tu lado durante el cooldown no corre en el
+  sitio. Al patrullar se para en cada punto con los ojos apagados.
+- **Nitidez:** en la vista Game a 1920×1080, los bordes se ven duros, sin suavizado.
+- **Ritmo:** en `Pivote/Sprite → EnemigoAnimacion`, `velocidadAnimacion` cambia en Play el ritmo
+  de idle, ataque y muerte. A 2, la anticipación dura 0,175 s: menos que el tiempo de reacción
+  habitual.
+- **Consola:** sin errores ni avisos del Eco.
+
+### Notas sobre el arte (no se ha tocado)
+
+- **La línea de suelo parpadea.** r1–r4 y a1 llevan una línea negra bajo los pies; idle, a2–a4 y
+  la muerte no. Esa «sombra» aparece y desaparece al cambiar de estado.
+- **La textura «repta» al moverse.** El arte viene de JPG ampliados: cada píxel del dibujo son ~10
+  px de la textura, con ruido de un píxel dentro. Con Point y sin mipmaps, al moverse se nota
+  algo más que en Kael. Si molesta, la solución es reducir el arte a 1× (un píxel de textura por
+  píxel del dibujo), conservando la alineación. El encargo pedía no redimensionar, así que queda
+  como opción.
+- **Memoria:** sin compresión, los 12 fotogramas ocupan ~53 MB de textura. Los demás Ecos los
+  comparten.
+- **D1** está en `limpios/` a otra escala y no se usa.
+
+---
+
 ## Fondo con parallax del Mundo 1 (2026-10-01)
 
 Rama `fondo-mundo1`, que sale de `cinematica-y-mapa`. Llegaron las seis capas del fondo de la

@@ -532,13 +532,14 @@ namespace Fragmentum.EditorTools
             }
         }
 
-        // Enemigos de cada mundo según el Anexo A (los que ya existen desde la Fase 4).
+        // Enemigos de cada mundo según el Anexo A (los que ya existen desde la Fase 4). En la Ira,
+        // el Eco con arte ocupa el sitio del Soldado de lava.
         private static string[] VariantesDe(LevelData nivel)
         {
             switch (nivel.emocion != null ? nivel.emocion.id : EMOCIONES.INTEGRACION)
             {
                 case EMOCIONES.IRA:
-                    return new[] { "SoldadoLava", "GolemCeniza" };
+                    return new[] { ConstructorEcoIra.NombreDatos, "GolemCeniza" };
                 case EMOCIONES.TRISTEZA:
                     return new[] { "Lamento" };
                 case EMOCIONES.MIEDO:

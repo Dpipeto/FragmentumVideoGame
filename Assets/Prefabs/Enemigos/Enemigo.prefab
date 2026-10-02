@@ -484,5 +484,6 @@ MonoBehaviour:
   sprite: {fileID: 7357180718059526174}
   arma: {fileID: 4992869791940261711}
   contacto: {fileID: 5400673593464718520}
+  animacion: {fileID: 0}
   currentState: 0
   registrarTransiciones: 0
