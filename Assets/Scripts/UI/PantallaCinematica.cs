@@ -24,6 +24,9 @@ namespace Fragmentum.UI
     ///   botón o clic la salta entera. Un aviso discreto lo dice.
     /// - <b>Funciona sin arte:</b> una diapositiva sin imagen se ve en negro con su texto, y sin
     ///   texto dice qué falta (criterio de aceptación de la Fase 8).
+    /// - <b>Sobre el juego</b> (<see cref="CutsceneData.sobreElJuego"/>): en vez de negro, un velo
+    ///   y dos franjas de cine sobre la escena congelada. Es la presentación del jefe: se ve la
+    ///   arena con el jefe mientras habla.
     /// - Cuenta el tiempo sin escala, porque la cinemática para el juego.
     /// - Al terminar se lo dice a la FSM global, que decide a dónde se va.
     /// </summary>
@@ -31,6 +34,9 @@ namespace Fragmentum.UI
     {
         private const int TamanoTexto = 40;
         private const int TamanoTitulo = 76;
+
+        // Alto de cada franja de cine, en fracción de la pantalla, cuando va sobre el juego.
+        private const float AltoFranja = 0.11f;
         private static readonly Color ColorTexto = new Color(0.94f, 0.93f, 0.85f, 1f);
 
         private static readonly HashSet<string> AvisadasSinArte = new HashSet<string>();
@@ -42,6 +48,9 @@ namespace Fragmentum.UI
         }
 
         private AspectRatioFitter _marco;
+        private Image _fondo;
+        private Image _franjaArriba;
+        private Image _franjaAbajo;
         private Image _abajo;
         private Image _encima;
         private CanvasGroup _grupoAbajo;
@@ -92,6 +101,9 @@ namespace Fragmentum.UI
 
         public bool Visible => _construida && gameObject.activeSelf;
 
+        /// <summary>¿Se ve la escena detrás? (Cinemática sobre el juego.)</summary>
+        public bool SobreElJuego => Visible && _fondo != null && _fondo.color.a < 1f;
+
         public void Construir()
         {
             if (_construida)
@@ -104,7 +116,9 @@ namespace Fragmentum.UI
             var raiz = (RectTransform)transform;
             FabricaUI.Estirar(raiz);
 
-            FabricaUI.Panel(raiz, "Fondo", Color.black);
+            _fondo = FabricaUI.Panel(raiz, "Fondo", Color.black);
+            _franjaArriba = Franja(raiz, "FranjaArriba", 1f);
+            _franjaAbajo = Franja(raiz, "FranjaAbajo", 0f);
 
             // El marco tiene la proporción de la imagen y cabe en la pantalla: las franjas negras
             // quedan fuera de él, y los textos se colocan dentro.
@@ -151,8 +165,14 @@ namespace Fragmentum.UI
 
             if (cinematica.FaltaArte && AvisadasSinArte.Add(cinematica.Id))
             {
-                Debug.LogWarning($"[Cinemática] '{cinematica.Id}' tiene diapositivas sin imagen (PENDIENTES B1): se ven en negro con su texto.");
+                Debug.LogWarning(cinematica.sobreElJuego
+                    ? $"[Cinemática] '{cinematica.Id}' tiene diapositivas sin imagen (PENDIENTES B1): se ven sobre la escena con su texto."
+                    : $"[Cinemática] '{cinematica.Id}' tiene diapositivas sin imagen (PENDIENTES B1): se ven en negro con su texto.");
             }
+
+            _fondo.color = new Color(0f, 0f, 0f, cinematica.sobreElJuego ? cinematica.opacidadVelo : 1f);
+            _franjaArriba.enabled = cinematica.sobreElJuego;
+            _franjaAbajo.enabled = cinematica.sobreElJuego;
 
             Linea = new LineaTiempoCinematica(cinematica);
             _inicio = Time.unscaledTime;
@@ -321,6 +341,19 @@ namespace Fragmentum.UI
         }
 
         // --- Construcción ---
+
+        // Franja negra de cine pegada al borde de arriba (borde = 1) o de abajo (borde = 0).
+        private static Image Franja(RectTransform raiz, string nombre, float borde)
+        {
+            var franja = FabricaUI.Panel(raiz, nombre, Color.black, false);
+            var rect = franja.rectTransform;
+            rect.anchorMin = new Vector2(0f, borde > 0.5f ? 1f - AltoFranja : 0f);
+            rect.anchorMax = new Vector2(1f, borde > 0.5f ? 1f : AltoFranja);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            franja.enabled = false;
+            return franja;
+        }
 
         private static (Image, CanvasGroup) CapaDeImagen(Transform marco, string nombre)
         {

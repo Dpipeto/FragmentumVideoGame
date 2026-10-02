@@ -385,3 +385,4 @@ MonoBehaviour:
   contacto: {fileID: 2102609817447056952}
   currentState: 0
   registrarTransiciones: 0
+  enrojecimientoFase3: 0.45

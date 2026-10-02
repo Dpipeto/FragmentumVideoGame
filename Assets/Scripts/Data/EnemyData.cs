@@ -44,6 +44,9 @@ namespace Fragmentum.Data
         [Tooltip("No avanza si delante hay un borde o una pared (no se tira a la lava).")]
         public bool evitarBordes = true;
 
+        [Tooltip("La lava no le hace daño y la cruza andando (Golem de Ceniza). Caer al vacío sí lo mata.")]
+        public bool inmuneALava;
+
         [Header("Detección")]
         [Tooltip("Estrategia de detección. Vacío = por distancia.")]
         public DeteccionData deteccion;

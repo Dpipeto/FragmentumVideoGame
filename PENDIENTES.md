@@ -1,29 +1,67 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.13 — Eco de la Ira con arte, 2026-10-02.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.14 — Ajustes tras la primera prueba del Nivel 1, 2026-10-02.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
 
-Nada de esto bloquea el trabajo: sigo con las fases siguientes y lo que falte usa placeholders.
-Ordenado por urgencia.
+Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urgencia. Lo marcado
+**en curso** ya lo estás haciendo: no hace falta que me contestes.
 
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
-| N1 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaJugador.unity`** y dime cómo se siente el control. | Los valores de salto, carrera y dash están calculados, no probados por una persona. | Play, recorre el circuito (el panel F1 dice qué probar en cada zona). Si algo se siente mal, dime qué («salta poco», «patina») o cambia `PlayerController → Parametros` en el prefab. |
-| N3 | **Dibuja los clips de Kael que faltan:** dash, wall slide, agacharse, daño y muerte (y, para la Fase 10, nado). | Quieto, correr, salto y ataque ya están en el juego. Los demás estados usan el clip más parecido; por ejemplo, el dash muestra un fotograma de carrera fijo. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a escala 1× y sin ping-pong** a `Assets/Sprites/Kael`. Si prefieres pasarme los PNG, los monto yo. Detalle en B3. |
-| N4 | **Decide si la tecla E de interactuar debe ser «pulsar» o «mantener».** | La acción `Interact` del asset trae la interacción *Hold* de fábrica: hay que mantener E unos 0,4 s. | Recomiendo «pulsar» para antorchas y memorias. Lo cambio yo cuando lo decidas (afecta a la Fase 10). |
-| N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. El mando sí permite caminar. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
-| N6 | **Da el visto bueno para fusionar a `main`** las ramas `fase-2-cimientos`, `fase-3-jugador`, `fase-4-enemigos`, `fase-5-progresion`, `fase-6-flujo-nivel`, `fase-7-jefes`, `fase-8-narrativa`, `fase-9-nivel1`, `arte-kael`, `cinematica-y-mapa`, `fondo-mundo1` y `enemigo-eco-ira` (cada una sale de la anterior). | El plan dice que cada fase se fusiona cuando la pruebas tú en Unity. | Cuando termines N1, N7 y N9, dime «fusiona» y lo hago. |
-| N7 | **Prueba la escena `Assets/Scenes/Pruebas/PruebaEnemigos.unity`.** | Las 6 variantes de enemigo tienen valores de diseño, no probados por una persona. | Recorre la pista (F2 muestra el estado de cada enemigo). Si una variante no «se siente» como su emoción, dime cuál y por qué, o ajusta su asset en `Assets/Data/Enemigos`. |
-| N8 | **Pásame el arte de los demás enemigos** (los otros Ecos, el Golem de Ceniza y los de cada mundo). | El Eco de la Ira ya tiene arte y animaciones; el resto siguen siendo cápsulas tintadas con el color de su mundo. | Como el Eco: fotogramas PNG con alfa en un lienzo común, alineados en los pies. Si un Eco reutiliza los clips del de la Ira con otro ritmo, basta con decirme cuál y su `velocidadAnimacion`. Detalle en el apartado B4. |
-| N9 | **Juega el Nivel 1 de principio a fin desde `Assets/Scenes/Menu_Inicial.unity`**, jefe incluido. | Menú, selector, guardado, checkpoints, pausa, Game Over, la Centinela Ardiente, la narrativa, el fin de nivel y las mecánicas de la Ira ya funcionan juntos (Fases 5 a 9). | Sigue las listas «Qué probar a mano» de las Fases 5 a 9 en `CHANGELOG.md`. Dime qué pantalla no se entiende y qué se siente mal. También si la Centinela es demasiado fácil o difícil (sus valores están en `Assets/Data/Jefes`) y si el Golem de Ceniza debe poder morir en la lava. |
-| N10 | **Pinta el layout definitivo del Nivel 1** (~80 u, Anexo A) cuando quieras. | El recorrido provisional ya se ve con el tileset volcánico (ladrillo, vigas y decoración), pero su forma sigue siendo la provisional: suelo plano con dos fosos y una plataforma por sección. | Sigue los «Pasos manuales en el Editor» de las Fases 6 y 9: borra «Escenario (tiles)» y «Provisional» (se lleva sus mecánicas), pinta y prepara el tilemap como suelo, ajusta la altura de la bandera y de la salida, y arrastra las mecánicas desde `Assets/Prefabs/Mecanicas`. No bloquea. |
-| N11 | **Escribe el guion** de los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | La cinemática inicial ya tiene guion e imágenes. Los cierres y los diálogos siguen con textos marcados como «pendiente de guion» (Fase 8). | Edita los assets `Cinematica_Cierre_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2). Cada diapositiva admite varios textos con sus tiempos, como la inicial. Prioridad: el mundo de la Ira. Si prefieres pasarme el texto y las imágenes, lo vuelco yo. |
-| N12 | **Revisa la pregunta del registro emocional.** | Hoy pregunta «¿Con qué intensidad sentiste {emoción} en este mundo?», de 1 (Nada) a 5 (Muchísimo). Debe encajar con el instrumento de la tesis (TMMS-24 y SCCS). | Cámbiala en `Assets/Data/Narrativa/RegistroEmocional.asset`, o dime cuál quieres. También puedes pedir que no se pida código de participante. |
-| N14 | **Mira el fondo del Nivel 1 en movimiento** y dime si la velocidad se siente bien. Si quieres, dibuja los **remates del muro**. | Las seis capas ya se mueven con su parallax, pero las velocidades vienen de la tabla del encargo, no de verlas en pantalla. Los extremos de cada tramo de muro son un corte recto a través de los ladrillos. | Play en el Nivel 1 y recórrelo. Para ajustar, sigue «Cómo ajustar la velocidad» en la entrada del fondo en `CHANGELOG.md`. Para los remates: dos PNG de 768 px de alto (inicio y final del muro, con alfa en el lado que da al paisaje), en `Assets/Sprites/Fondos/Mundo1Ira`, y los coloco en cada extremo del tramo. Detalle en B7. |
-| N15 | **Pelea con el Eco de la Ira** en `PruebaEnemigos` (x = 128) y en el Nivel 1, y dime cómo se siente. | Sus tiempos son los del encargo, pero su velocidad la fijé yo: para que las piernas no patinen persigue a 2,6 u/s, la mitad que el Soldado de lava al que sustituye, y patrulla a 1,3 u/s. | Sigue «Qué revisar en el Editor» en la entrada del Eco en `CHANGELOG.md`. Si lo quieres más rápido, sube `velocidadPersecucion` en `Assets/Data/Enemigos/EcoIra.asset`: las piernas se ajustan solas. Dime también si te molesta que su textura «repte» un poco al moverse o que la línea de suelo de r1–r4 y a1 aparezca y desaparezca: lo primero se arregla reduciendo el arte a 1×, lo segundo en el dibujo. |
-| N13 | **¿Subo la hitbox de la espada al arco del dibujo?** | El tajo del ataque nuevo se dibuja hasta ~2,8 u de alto, pero la hitbox cubre de 0,25 a 1,55 u. Se golpea lo que está a la altura del pecho, no lo que el arco parece tocar. | Dime «súbela» y la ajusto al arco: alcanzaría a enemigos más altos y a los que estén justo encima. Si prefieres el alcance actual, no hay que hacer nada. |
+| N16 | **Pelea otra vez con la Centinela Ardiente** en el Nivel 1 y dime si ya se siente la ira. | La hice más difícil: combos de martillazos, salto aplastante, ondas dobles y una tercera fase de «ira desatada» al 25 % (ver la Revisión 0.14). Ahora hay que ver si me pasé. | Juega desde `Menu_Inicial`. Si es demasiado, dime en qué ataque mueres. Las fases están en `Assets/Data/Jefes/CentinelaArdiente.asset` y los ataques (avisos, golpes, daño) en `Assets/Data/Jefes/Patrones`. |
+| N17 | **Mira la presentación del jefe** al entrar en la arena y **escribe su diálogo**. | Ya funciona: se cierra la puerta, la cámara va hacia la Centinela y aparecen su nombre y una línea sobre la arena oscurecida. Dura 7,5 s y se salta con cualquier tecla pasado 1 s. El texto es provisional. | Escribe el texto en `Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset`: cada diapositiva tiene texto, carteles con tiempos y, si se dibuja, imagen. Puedes añadir diapositivas. Si prefieres pasarme el texto, lo vuelco yo. Detalle en B1. |
+| N15 | **Prueba el golpe del Eco de la Ira**, ahora más rápido. | El ataque va a 1,6×: a1 dura 0,22 s, el golpe 0,08 s y el ataque entero 0,46 s. Descansa 0,45 s entre golpes, antes 0,7. | Pelea con él en el Nivel 1 (x ≈ 12). Si sigue lento, sube `velocidadAtaque` en `EcoIra.prefab → Pivote/Sprite → EnemigoAnimacion` o baja `attackCooldown` en `Assets/Data/Enemigos/EcoIra.asset`. |
+| N18 | **¿Querías el Eco más grande?** En el Nivel 1, el Eco de x = 12,5 tiene escala 1,8 × 1,5. | Lo cambiaste en la escena y lo dejé tal cual. Con una escala distinta en X y en Y, los píxeles del dibujo quedan un 20 % más anchos que altos. Además, ese Eco mide el 90 % de Kael y los demás el 60 %. | Si lo quieres más grande en todo el juego, dime cuánto (por ejemplo, «al 80 % de Kael») y lo cambio en la importación, con la misma escala en X y en Y. Si fue una prueba, vuelve a poner la escala a 1 en la escena. |
+| N7 | **Dibuja el Golem de Ceniza** (ficha en B4). | Me pediste cómo es para diseñarlo. Hoy es una cápsula marrón. | La ficha de B4 tiene su tamaño, su carácter, cada animación con sus tiempos y el alcance del golpe. Formato, igual que el Eco. |
+| N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después dash, wall slide y agacharse (y, para la Fase 10, nado). | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
+| N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Solo el Eco de la Ira tiene arte. | Ver «Arte que más necesito», justo debajo. |
+| N11 | *En curso.* **Guion:** el diálogo de la presentación de cada jefe (N17), los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | Siguen con textos marcados como «pendiente de guion». | Edita los assets `Cinematica_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2), o pásame el texto. Prioridad: el mundo de la Ira. |
+| N10 | *Para más adelante.* **Pinta el layout definitivo del Nivel 1** (~80 u, Anexo A). | El recorrido sigue siendo el provisional: suelo plano con dos fosos y una plataforma por sección. | Sigue los «Pasos manuales en el Editor» de las Fases 6 y 9 en `CHANGELOG.md`. No bloquea. |
+| N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
+
+### Arte que más necesito, por urgencia
+
+1. **Centinela Ardiente**, el jefe del Nivel 1. Es lo más visible que sigue siendo una cápsula, y
+   ahora tiene más ataques que leer: el jugador tiene que distinguir el martillazo, el golpe al
+   suelo, el salto y el rugido por la pose. La ficha está en B5.
+2. **Kael: daño y muerte** (N3). Se ven en cada partida.
+3. **Golem de Ceniza**, el mini-jefe (N7). La ficha está en B4.
+4. **Lava animada, torreta de fuego con su bola, plataforma inestable y plataforma de
+   combustión.** Se ven por todo el nivel (B10). Pueden ser tiles o tiras cortas en bucle.
+5. **Imágenes para la presentación de la Centinela y para el cierre de la Ira.** Son opcionales:
+   la presentación ya se ve bien sobre la arena sin imágenes (B1).
+
+### Resuelto en la v0.14
+
+- **N1** (control): está bien, no se toca.
+- **N4:** E se **pulsa**, no se mantiene. Ya está cambiado en el Input.
+- **N6:** `main` está al día hasta `enemigo-eco-ira`. Las ramas se conservan y no se ha subido
+  nada. La rama nueva `ajustes-nivel1` queda para fusionar cuando la pruebes. Antes falta repetir
+  las pruebas PlayMode: abriste Unity mientras corrían. Dime cuando lo cierres y las repito, o
+  ejecútalas tú en *Window → General → Test Runner → PlayMode*.
+- **N9:** el Golem de Ceniza ya no muere en la lava (la cruza andando) y la Centinela es más
+  difícil (sigue en N16).
+- **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
+- **N13:** la hitbox de la espada se queda como está.
+- **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.14: qué cambió respecto de la v0.13
+
+- **Rama `ajustes-nivel1`**, con lo que salió de tu prueba:
+  - el golpe del Eco es más rápido;
+  - el Golem es inmune a la lava;
+  - la Centinela tiene combos, salto, ondas dobles y una tercera fase;
+  - al entrar en la arena hay una presentación del jefe con su diálogo;
+  - E se pulsa y el registro no pide código.
+
+  El detalle está en `CHANGELOG.md`, entrada «Ajustes tras la primera prueba del Nivel 1».
+- **Ramas fusionadas en `main`** hasta `enemigo-eco-ira`.
+- **Nuevos N16, N17 y N18.** N7 pasa a ser la ficha del Golem. N1, N4, N6, N9, N12, N13 y N14
+  están resueltos.
+- **Nueva lista «Arte que más necesito».** B1, B2, B4 y B5 están al día, con las fichas del Golem
+  y de la Centinela.
 
 ## Revisión 0.13: qué cambió respecto de la v0.12
 
@@ -206,6 +244,8 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 | Cinemática (asset) | Dónde suena | Falta | Prioridad |
 |---|---|---|---|
 | `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | ✔ 12 planos y guion (80 s). Falta, opcional, la música o el sonido (campo `musica` del asset, o `audio` de cada plano) | P2 |
+| `Cinematica_Jefe_Ira` (~7,5 s, sobre el juego) | Al entrar en la arena de la Centinela, antes del combate (una vez por carga del nivel) | Guion del diálogo (N17). Las imágenes son opcionales: sin ellas se ve la arena oscurecida con franjas de cine | P1 |
+| `Cinematica_Jefe_Tristeza`, `_Miedo`, `_Culpa` | Al entrar en la arena de cada jefe | Guion; imágenes opcionales | P2 |
 | `Cinematica_Cierre_Ira` | Al superar el mundo de la Ira | Guion e imágenes | P1 |
 | `Cinematica_Cierre_Tristeza`, `_Miedo`, `_Culpa` | Al superar cada mundo | Guion e imágenes | P2 |
 | `Cinematica_Cierre_Jardin` (~30 s: Kael ve al Soldado) | Al superar el Jardín | Guion e imágenes (la idea, del Anexo A, ya está) | P2 |
@@ -213,6 +253,11 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 | `Cinematica_Final` y créditos («¿Eres un error… o una nueva identidad?») | Al terminar el juego | Imágenes; texto del Anexo A ya incluido | P2 |
 | Memorias de los Niveles 4 y 5 (4 + 4, ~5 s) | Al activar cada memoria (`MemoryObject`, Fase 10) | Todo: se crearán con la mecánica | P2 |
 
+> **Presentación del jefe.** Lleva `sobreElJuego` marcado: detrás se ve la escena congelada, con
+> un velo (`opacidadVelo`) y franjas de cine. Para que la cámara encuadre al jefe y el combate
+> empiece al terminar, basta con que la cinemática esté en el campo `cinematicaJefe` del
+> `LevelData`. Su diálogo sustituye a las líneas «antes del jefe» del HUD.
+>
 > La v2 no usa Timeline: las cinemáticas son diapositivas. Si alguna necesita animación, una
 > diapositiva puede apuntar más adelante a un clip de Timeline sin cambiar el resto del sistema.
 
@@ -225,8 +270,8 @@ nivel).
 
 | Asset | Dónde | Formato | Prioridad |
 |---|---|---|---|
-| Líneas de Kael y de los Arquitectos, **×6 mundos**. Pueden ser varias por momento: se muestran en orden. | `Dialogos_*` → `lineas` (hablante, texto, momento, duración) | Texto | Ira P1, resto P2 |
-| Pregunta y escala del registro emocional, ajustadas al instrumento de la tesis (N12) | `Assets/Data/Narrativa/RegistroEmocional.asset` | Texto | P1 |
+| Líneas de Kael y de los Arquitectos, **×6 mundos**. Pueden ser varias por momento: se muestran en orden. Las de «antes del jefe» solo se usan en un nivel sin presentación del jefe (B1). | `Dialogos_*` → `lineas` (hablante, texto, momento, duración) | Texto | Ira P1, resto P2 |
+| Pregunta y escala del registro emocional | `Assets/Data/Narrativa/RegistroEmocional.asset` | ✔ Revisadas (N12). Sin código de participante (`pedirParticipante` apagado) | — |
 | Retratos opcionales (Kael, los 5 Arquitectos y el Soldado) | Pendiente de campo (hoy solo se muestra el nombre) | PNG 256×256 | P3 |
 
 ### B3. Jugador — Kael
@@ -299,9 +344,9 @@ cápsulas tintadas con un color de la paleta de su mundo.
 | Mundo | Enemigo | Datos y prefab | Arte | Falta además | Prioridad |
 |---|---|---|---|---|---|
 | — | Genérico | ✔ `Generico` / `Enemigo.prefab` | Cápsula gris | — | — |
-| Ira | **Eco de la Ira** | ✔ `EcoIra` / `EcoIra.prefab`; en el Nivel 1 y en `PruebaEnemigos` | ✔ 12 fotogramas, 4 clips (Idle, Run, Attack, Death) | Audio; probarlo (N15) | P1 |
+| Ira | **Eco de la Ira** | ✔ `EcoIra` / `EcoIra.prefab`; en el Nivel 1 y en `PruebaEnemigos` | ✔ 12 fotogramas, 4 clips (Idle, Run, Attack, Death). El ataque va a 1,6× | Audio; probar el golpe nuevo (N15) | P1 |
 | Ira | Soldado de lava | ✔ `SoldadoLava` / `Enemigo_SoldadoLava`; el Eco ocupa su sitio en el Nivel 1 | Cápsula naranja | — | P2 |
-| Ira | Golem de Ceniza (mini-jefe, vida 10) | ✔ `GolemCeniza` / `Enemigo_GolemCeniza` (más grande) | Cápsula ceniza | — | P1 |
+| Ira | Golem de Ceniza (mini-jefe, vida 10) | ✔ `GolemCeniza` / `Enemigo_GolemCeniza` (más grande). Inmune a la lava | Cápsula ceniza | Arte: ficha abajo (N7) | P1 |
 | Ira | Torreta de fuego fija | ✔ Es una mecánica, no un enemigo: `TorretaFuego` / `Mecanicas/TorretaFuego.prefab` (Fase 9) | Bloque oscuro con boca naranja; la bola de fuego es un cuadrado naranja | Sprite de la torreta y de la bola (B10) | P1 |
 | Tristeza | Lamento | ✔ `Lamento` / `Enemigo_Lamento` | Cápsula azul | Ralentizar al jugador al tocarlo (Anexo: «reducen velocidad al contacto»), Fase 10 | P2 |
 | Tristeza | Esculturas Vivientes, Medusas de Hielo | ✗ | ✗ | Movimiento sinusoidal de las medusas (Fase 10) | P2 |
@@ -309,6 +354,44 @@ cápsulas tintadas con un color de la paleta de su mundo.
 | Miedo | Centinela Ciego | ✔ `CentinelaCiego` / `Enemigo_CentinelaCiego` (detección por ruido) | Cápsula violeta | Tecla de caminar con teclado (N5) | P2 |
 | Culpa | Penitentes, Artilleros (+ proyectil) | ✗ | ✗ | `Proyectil` y cobertura (Fase 10) | P2 |
 | Esperanza | Guardianes del Jardín (pacíficos) | ✗ | ✗ | `GardenGuardian` (Fase 10) | P2 |
+
+#### Ficha: Golem de Ceniza (para dibujarlo, N7)
+
+**Qué es.** El mini-jefe del mundo de la Ira (Anexo A: sección 2 del Nivel 1, vida 10). El Eco es
+la ira que estalla: anticipación corta y un latigazo. El Golem es la ira acumulada: lento, pesado,
+avisa mucho y pega fuerte. Está hecho de ceniza y magma, así que la lava no le hace nada y la
+cruza andando (N9). Apenas retrocede al recibir un golpe.
+
+**Tamaño.**
+
+- **En el juego:** 1,4 u de ancho y 2,4 u de alto. Es 1,35 veces Kael (1,77 u) y más del doble
+  que el Eco (1,06 u).
+- **Recomendado: a 1×, al detalle de Kael** (64 px por unidad): unos 150 px de alto por 90 de
+  ancho de dibujo, un píxel del PNG por píxel del dibujo. Así pesa poco y no «repta» al moverse,
+  que es lo que le pasa al Eco (`CHANGELOG.md`, «Notas sobre el arte» del Eco).
+- **Si lo dibujas ampliado, como el Eco:** que el lienzo no pase de 2048 px de lado. Yo ajusto la
+  importación para que mida 2,4 u.
+
+**Animaciones.** Las mismas que el Eco, así que lo monto igual: Idle, Andar, Ataque y Muerte.
+
+| Clip | Qué hace | Tiempo en el juego | Fotogramas sugeridos |
+|---|---|---|---|
+| Idle | Quieto, respira; las grietas de magma laten | Bucle | 2–4 |
+| Andar | Pasos pesados. Patrulla a 1 u/s y persigue a 2 u/s | Bucle; ajusto el ritmo a la velocidad real, como en el Eco | 4–6 |
+| Ataque | Levanta los puños (anticipación muy visible), descarga hacia delante y hacia el suelo, se recupera | 0,9 s: anticipación 0,5 s, golpe 0,2 s, recuperación 0,2 s. Descansa 2 s entre ataques | 4–5. El golpe en 1 o 2 fotogramas |
+| Muerte | Se desmorona en ceniza; las brasas se apagan | Hasta 2 s | 2–4 |
+| Daño | — | Por código: destello blanco de 0,1 s | Ninguno |
+
+**Alcance del golpe.** El arma cubre de 0,5 a 2,1 u por delante de su centro y de 0,2 a 2,2 u de
+altura. El golpe dibujado tiene que llegar hasta ahí: unos 130 px por delante del centro, al
+detalle de Kael. Si lo dibujas con otro alcance, ajusto la hitbox al dibujo.
+
+**Formato.** Igual que el Eco, salvo la escala (mejor a 1×):
+
+- PNG con alfa;
+- todos los fotogramas en un mismo lienzo y alineados en los pies (la misma fila de suelo);
+- mirando a la derecha y sin recortar;
+- con el nombre del clip y su número, por ejemplo `I1`, `w1`, `a1` o `d1`.
 
 **Audio de enemigos (todo falta, P2):** pasos, aviso de ataque, golpe, dolor y muerte, por tipo. El
 evento `OnStateChanged` de cada enemigo ya permite dispararlos sin tocar la IA.
@@ -331,11 +414,38 @@ rectángulos de color: avisan translúcidos y queman casi opacos.
 
 | Jefe | Estado | Falta | Prioridad |
 |---|---|---|---|
-| **Centinela Ardiente** (Ira) | ✔ Completo: martillazo, onda de suelo y erupciones; arena en el Nivel 1 | Sprites y animaciones: en la v1 existen `Characters/Bosses/Boss1/jefe1.1.png` y los clips `Idle`, `Walk` y `Attack`, que hay que reimportar a 32 PPU. Faltan martillazo, daño, rugido de fase 2 y muerte/explosión, y los VFX de la onda y de las erupciones. | P1 |
+| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, martillazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Sprites y animaciones (ficha abajo) y los VFX de la onda, las erupciones y la caída del salto. En la v1 existen `Characters/Bosses/Boss1/jefe1.1.png` y los clips `Idle`, `Walk` y `Attack`, que pueden servir de partida. | P1 |
 | **Doncella del Lamento** (Tristeza) | Esqueleto: datos, prefab y dos fases sin patrones | Patrones de olas, inundación y congelamiento (Fase 10); todas las animaciones. Concepto: `Jefe2 (2).png` en la v1. | P2 |
 | **Espectro del Pavor** (Miedo) | Esqueleto: casi invisible en combate | Patrón de ataque con destello y clones (Fase 10); animaciones; la partícula que distingue al real. Concepto: `Jefe3 (2).png` en la v1. | P2 |
 | **Juez Silente** (Culpa) | Esqueleto: inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()` | Proyectar las memorias y conectarlas (`MemoryObject`, Fase 10); todo el arte. | P2 |
 | **El Verdadero Soldado** (Final) | Esqueleto: tres fases; no cae sin `CompletarIntegracion()` | Combate espejo, secciones de cada mundo y el plataformeo final (Fase 10); todo el arte (el concepto **no está** en el proyecto). | P2 |
+
+#### Ficha: Centinela Ardiente (para dibujarla)
+
+**Qué es.** La Arquitecta de la Ira y el jefe del Nivel 1. Lleva un martillo. Se enfurece según
+pierde vida: más rápida, con menos pausas y, en la última fase, al rojo vivo (el rojo lo pongo yo
+por código).
+
+**Tamaño.** 2,2 u de ancho y 3,4 u de alto, casi el doble que Kael. Recomendado a 1×, al detalle
+de Kael: unos 220 px de alto. Si la dibujas ampliada, que el lienzo no pase de 2048 px de lado; yo
+ajusto la importación.
+
+**Animaciones.** Cada ataque tiene que reconocerse por la pose antes de que llegue: así el jugador
+aprende a esquivarlo.
+
+| Clip | Qué hace | Tiempo en el juego | Fotogramas sugeridos |
+|---|---|---|---|
+| Idle | Quieta, el martillo en la mano | Bucle | 2–4 |
+| Andar | Avanza hacia el jugador: 2,4 u/s, que llega a 3,8 en la última fase | Bucle; ajusto el ritmo a la velocidad | 4–6 |
+| Martillazo | Levanta el martillo y lo descarga delante | Anticipación: 0,55 s el primero y 0,3–0,35 s los encadenados. Golpe: 0,15 s | 3–4 |
+| Martillo clavado | El martillo queda hundido en el suelo y ella atrapada: es cuando se le pega | 1,2 s (0,9 s en furia) | 1–2, más 1–2 para sacarlo |
+| Golpe al suelo | Golpea el suelo y salen las ondas | Anticipación 0,5–0,6 s, golpe breve | 2–3 |
+| Salto | Se agacha, salta y cae con todo su peso | Agacharse 0,5 s, aire 0,8 s, caída breve | 4–5: agachada, subiendo, cayendo y aterrizaje |
+| Rugido | Al empezar las fases 2 y 3 | 0,9 s | 2–3 |
+| Muerte | Explosión o derrumbe | 2 s | 3–5 |
+| Daño | — | Por código: destello | Ninguno |
+
+**Formato.** El mismo que el Eco y el Golem.
 
 ### B6. Escenas — `LevelDatabase` / Build Settings
 
@@ -362,7 +472,7 @@ de la `LevelDatabase` y ejecuta *Fragmentum → Niveles → Preparar la escena d
 
 | Nivel | Disponible | Falta |
 |---|---|---|
-| 1 Ira | ✔ **Tileset volcánico de la v2** (`Assets/TileMap/tileset_32.png`): ya viste el Nivel 1 y las escenas de prueba con `PintorEscenario` (ladrillo, vigas, estatua, braseros, cadenas y escombros). Su versión grande con fondo negro está en `Tesis/TileMap Nivel 1`. En la v1: tiles de lava (`Tiles/LavaTile set`, `Tiles/freelavatileset-Sheet`) y `Starter Tiles Platformer/FireSet` | ✔ **Parallax volcánico de 6 capas** en `Assets/Sprites/Fondos/Mundo1Ira` (cielo, montañas, fortaleza, muro, catarata y primer plano), montado en `FondoMundo1.prefab`. ~ **Remates del muro** (N14): los extremos de cada tramo son un corte recto. ✗ Sprite de plataforma de basalto inestable (candidato: `Pixel Adventure 1/Traps/Falling Platforms`). |
+| 1 Ira | ✔ **Tileset volcánico de la v2** (`Assets/TileMap/tileset_32.png`): ya viste el Nivel 1 y las escenas de prueba con `PintorEscenario` (ladrillo, vigas, estatua, braseros, cadenas y escombros). Su versión grande con fondo negro está en `Tesis/TileMap Nivel 1`. En la v1: tiles de lava (`Tiles/LavaTile set`, `Tiles/freelavatileset-Sheet`) y `Starter Tiles Platformer/FireSet` | ✔ **Parallax volcánico de 6 capas** en `Assets/Sprites/Fondos/Mundo1Ira` (cielo, montañas, fortaleza, muro, catarata y primer plano), montado en `FondoMundo1.prefab`. ~ **Remates del muro** (opcional; el fondo está aprobado, N14): los extremos de cada tramo son un corte recto. ✗ Sprite de plataforma de basalto inestable (candidato: `Pixel Adventure 1/Traps/Falling Platforms`). |
 | 2 Tristeza | ✔ `Starter Tiles Platformer/IceSet`, `tileset/Tilemaps/rock_ice*.aseprite`, `Pixel Adventure 1/Traps/Sand Mud Ice` | ✗ Ciudad sumergida, corriente y superficie helada (parallax). ✗ Burbuja de oxígeno (UI). |
 | 3 Miedo | ✔ Parallax `TileMap/Forest` (*demon woods*, 4 capas), tileset de pantano `TileMap/ParallaxVideo`, antorcha animada (`Top Down Lava…/Torch ( No Light )`, 7 frames), URP 2D con `Light2D` ya activo | ✗ Raíces y ramas. ✗ Partícula de «ruido» del sigilo. |
 | 4 Culpa | ~ `Starter Tiles Platformer/DarkCastle` | ✗ Tierra quemada, escombros, tanques volcados. ✗ **Barril explosivo** (`Explodable`). ✗ Objetos de memoria. ✗ Marcas proyectadas en el suelo. |
@@ -442,6 +552,11 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.14 (2026-10-02)** — Respuestas a la primera prueba del Nivel 1, en la rama `ajustes-nivel1`.
+  - Resueltos N1, N4, N6, N9, N12, N13 y N14.
+  - Nuevos N16 (pelear con la Centinela), N17 (presentación del jefe) y N18 (escala del Eco).
+  - N7 pasa a ser la ficha del Golem.
+  - Nueva lista «Arte que más necesito», con las fichas del Golem (B4) y de la Centinela (B5).
 - **0.13 (2026-10-02)** — Eco de la Ira con arte. Nuevo N15 (pelear con el Eco), N8 reescrito, N6 con la rama `enemigo-eco-ira`, B4 y B5 al día.
 - **0.12 (2026-10-01)** — Fondo con parallax del Mundo 1. Nuevo N14 (velocidad del fondo y remates del muro), N6 con la rama `fondo-mundo1`, B7 al día.
 - **0.11 (2026-09-30)** — Cinemática inicial y escenario pintado. N10 y N11 reescritos; B1 y B7 al día.

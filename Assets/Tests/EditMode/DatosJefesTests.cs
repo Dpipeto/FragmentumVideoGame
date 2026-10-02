@@ -67,13 +67,14 @@ namespace Fragmentum.Tests
         // --- Datos del Anexo A ---
 
         [Test]
-        public void LaCentinelaArdiente_SigueElAnexo()
+        public void LaCentinelaArdiente_SigueElAnexo_YAnadeUnaTerceraFaseDeIra()
         {
             var centinela = Datos("CentinelaArdiente");
 
             Assert.AreEqual("Centinela Ardiente", centinela.nombreCanonico);
-            Assert.AreEqual(2, centinela.fases.Count);
+            Assert.AreEqual(3, centinela.fases.Count, "Las dos fases del Anexo y la ira desatada, añadida tras la primera prueba.");
             Assert.AreEqual(0.5f, centinela.fases[1].umbralVida, "La fase 2 empieza al 50 % de vida.");
+            Assert.AreEqual(0.25f, centinela.fases[2].umbralVida, 0.001f, "La ira desatada, al 25 %.");
             Assert.AreEqual(1.2f, centinela.duracionVulnerable, 0.001f, "El martillo queda clavado 1,2 s.");
 
             var fase1 = Tipos(centinela.fases[0]);
@@ -81,6 +82,37 @@ namespace Fragmentum.Tests
             CollectionAssert.Contains(fase1, typeof(PatronOndaSuelo));
             CollectionAssert.DoesNotContain(fase1, typeof(PatronPlataformasErupcion));
             CollectionAssert.Contains(Tipos(centinela.fases[1]), typeof(PatronPlataformasErupcion), "Las erupciones llegan en la fase 2.");
+            CollectionAssert.Contains(Tipos(centinela.fases[2]), typeof(PatronPlataformasErupcion));
+        }
+
+        [Test]
+        public void LaCentinelaArdiente_SeEnfureceFaseAFase_SinDejarDeSerLegible()
+        {
+            var fases = Datos("CentinelaArdiente").fases;
+            for (var i = 1; i < fases.Count; i++)
+            {
+                Assert.Greater(fases[i].multiplicadorVelocidad, fases[i - 1].multiplicadorVelocidad, $"La fase {i + 1} persigue más rápido.");
+                Assert.Less(fases[i].pausaEntrePatrones, fases[i - 1].pausaEntrePatrones, $"La fase {i + 1} descansa menos entre ataques.");
+            }
+
+            foreach (var fase in fases)
+            {
+                // Siempre hay por dónde ganarle: algún martillazo deja el martillo clavado.
+                Assert.IsTrue(fase.patrones.OfType<PatronMartillazo>().Any(m => m.abreVentana), $"{fase.nombre}: abre la ventana vulnerable.");
+                CollectionAssert.Contains(Tipos(fase), typeof(PatronSaltoAplastante), $"{fase.nombre}: salta sobre el jugador.");
+                foreach (var patron in fase.patrones)
+                {
+                    Assert.GreaterOrEqual(patron.aviso, 0.3f, $"{patron.nombre}: el aviso se tiene que poder ver.");
+                    if (patron is PatronMartillazo martillazo)
+                    {
+                        Assert.GreaterOrEqual(martillazo.avisoEncadenado, 0.3f, $"{patron.nombre}: también entre golpes.");
+                    }
+                }
+            }
+
+            var furia = fases[1].patrones.OfType<PatronMartillazo>().First();
+            Assert.GreaterOrEqual(furia.golpes, 3, "En la furia, combos de tres.");
+            Assert.Less(furia.duracionVentana, 1.2f, "Y la ventana dura menos.");
         }
 
         [Test]

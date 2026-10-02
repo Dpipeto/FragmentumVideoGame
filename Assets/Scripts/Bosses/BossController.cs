@@ -19,7 +19,8 @@ namespace Fragmentum.Bosses
     ///
     /// - <b>Template Method:</b> esta clase lleva el flujo (fases, ventana vulnerable, derrota,
     ///   reinicio) y cada jefe redefine solo sus pasos: <see cref="CondicionDerrota"/>,
-    ///   <see cref="AlActivarse"/>, <see cref="AlCambiarDeFase"/>, <see cref="AlSerDerrotado"/> y
+    ///   <see cref="AlActivarse"/>, <see cref="AlCambiarDeFase"/>,
+    ///   <see cref="EsperaAlEmpezarFase"/>, <see cref="AlSerDerrotado"/> y
     ///   <see cref="AlReiniciarse"/>.
     /// - <b>Strategy:</b> lo que hace cada fase es un dato: la lista de <see cref="PatronAtaque"/>
     ///   de su <see cref="FaseJefe"/>.
@@ -131,6 +132,20 @@ namespace Fragmentum.Bosses
 
         public int DireccionHaciaJugador => CentroJugador.x >= Centro.x ? 1 : -1;
 
+        /// <summary>Velocidad al perseguir en la fase actual: la de sus datos por el multiplicador de la fase.</summary>
+        public float VelocidadActual
+        {
+            get
+            {
+                var fase = datos != null ? datos.Fase(Mathf.Max(0, _faseNotificada)) : null;
+                var multiplicador = fase != null && fase.multiplicadorVelocidad > 0f ? fase.multiplicadorVelocidad : 1f;
+                return (datos != null ? datos.velocidad : 0f) * multiplicador;
+            }
+        }
+
+        /// <summary>¿Apoyado en el suelo? (Para los saltos.)</summary>
+        public bool EnSuelo => _cuerpo != null && _cuerpo.linearVelocity.y <= 0.05f && _cuerpo.IsTouchingLayers(Capas.MascaraSuelo);
+
         /// <summary>Distancia horizontal entre el centro del jefe y el del jugador.</summary>
         public float DistanciaAlJugador => Mathf.Abs(CentroJugador.x - Centro.x);
 
@@ -198,6 +213,12 @@ namespace Fragmentum.Bosses
         protected virtual void AlCambiarDeFase(int fase)
         {
         }
+
+        /// <summary>
+        /// Segundos de calma al empezar una fase (1, 2 o 3), antes de su primer ataque. Por
+        /// defecto, medio segundo como mucho; la Centinela los usa para rugir.
+        /// </summary>
+        protected virtual float EsperaAlEmpezarFase(int fase, FaseJefe datosFase) => Mathf.Min(0.5f, datosFase.pausaEntrePatrones);
 
         /// <summary>Derrotado: aquí va lo que el mundo hace al vencerlo (el Anexo A lo describe por jefe).</summary>
         protected virtual void AlSerDerrotado()
@@ -360,7 +381,7 @@ namespace Fragmentum.Bosses
                 return;
             }
 
-            Mover(DireccionHaciaJugador, datos.velocidad * factorVelocidad);
+            Mover(DireccionHaciaJugador, VelocidadActual * factorVelocidad);
         }
 
         public void Mover(int direccion, float velocidad)
@@ -392,6 +413,29 @@ namespace Fragmentum.Bosses
         }
 
         public void MirarAlJugador() => Mirar(DireccionHaciaJugador);
+
+        /// <summary>
+        /// Salta en parábola para caer en <paramref name="destinoX"/> al cabo de
+        /// <paramref name="tiempoVuelo"/> segundos, sin salir de la arena. Devuelve la x donde
+        /// caerá (el destino, recortado a la arena).
+        /// </summary>
+        public float Saltar(float destinoX, float tiempoVuelo)
+        {
+            var limites = Limites;
+            destinoX = Mathf.Clamp(destinoX, limites.x + MedioAncho, limites.y - MedioAncho);
+            if (_cuerpo == null || _cuerpo.bodyType != RigidbodyType2D.Dynamic || tiempoVuelo <= 0f)
+            {
+                return destinoX;
+            }
+
+            // Tiro parabólico: llega a la x y a la altura del suelo de destino justo en tiempoVuelo.
+            var gravedad = Physics2D.gravity.y * _cuerpo.gravityScale;
+            var subida = SueloEn(destinoX) - SueloY;
+            var velocidad = new Vector2((destinoX - Centro.x) / tiempoVuelo, subida / tiempoVuelo - 0.5f * gravedad * tiempoVuelo);
+            Mirar(velocidad.x > 0f ? 1 : velocidad.x < 0f ? -1 : 0);
+            _cuerpo.linearVelocity = velocidad;
+            return destinoX;
+        }
 
         public void Mirar(int direccion)
         {
@@ -440,14 +484,15 @@ namespace Fragmentum.Bosses
 
         internal void EntrarEnFase(int fase)
         {
-            if (fase != _faseNotificada)
+            var nueva = fase != _faseNotificada;
+            if (nueva)
             {
                 _faseNotificada = fase;
                 AlCambiarDeFase(fase + 1);
                 OnFaseCambiada?.Invoke(fase + 1);
             }
 
-            StartCoroutine(BuclePatrones(fase));
+            StartCoroutine(BuclePatrones(fase, nueva));
         }
 
         internal void EntrarEnVulnerable() => Detener();
@@ -490,7 +535,7 @@ namespace Fragmentum.Bosses
 
         // Repite los patrones de la fase. Guarda por dónde iba: al volver de la ventana
         // vulnerable sigue con el siguiente patrón, no vuelve a empezar la lista.
-        private IEnumerator BuclePatrones(int fase)
+        private IEnumerator BuclePatrones(int fase, bool nueva)
         {
             var datosFase = datos.Fase(fase);
             if (datosFase == null)
@@ -498,7 +543,7 @@ namespace Fragmentum.Bosses
                 yield break;
             }
 
-            yield return new WaitForSeconds(Mathf.Min(0.5f, datosFase.pausaEntrePatrones));
+            yield return new WaitForSeconds(nueva ? EsperaAlEmpezarFase(fase + 1, datosFase) : Mathf.Min(0.5f, datosFase.pausaEntrePatrones));
             while (true)
             {
                 var patrones = datosFase.patrones;

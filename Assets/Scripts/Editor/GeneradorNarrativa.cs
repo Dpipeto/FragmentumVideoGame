@@ -98,13 +98,15 @@ namespace Fragmentum.EditorTools
                 }
 
                 var dialogos = Dialogos(nivel, clave, sobrescribir);
+                // El jefe final ya se presenta en la cinemática de entrada del nivel.
+                var presentacion = nivel.jefe != null && nivel.emocion.id != EMOCIONES.INTEGRACION ? CinematicaJefe(nivel, clave, sobrescribir) : null;
 
                 if (nivel.id == bd.PrimerId)
                 {
                     entrada = inicial;
                 }
 
-                Enlazar(nivel, entrada, cierre, dialogos);
+                Enlazar(nivel, entrada, cierre, dialogos, presentacion);
             }
 
             AssetDatabase.SaveAssets();
@@ -124,6 +126,47 @@ namespace Fragmentum.EditorTools
                 {
                     c.diapositivas.Add(new Diapositiva { texto = texto, duracion = 4f });
                 }
+            });
+        }
+
+        /// <summary>
+        /// Presentación del jefe al entrar en su arena (~7 s), sobre la escena congelada: su
+        /// nombre como título y el diálogo antes del combate. Texto pendiente de guion; las
+        /// imágenes, si se dibujan, van en el campo «imagen» de cada diapositiva.
+        /// </summary>
+        private static CutsceneData CinematicaJefe(LevelData nivel, string clave, bool sobrescribir)
+        {
+            var jefe = nivel.jefe.nombreCanonico;
+            var emocion = nivel.emocion.nombreCanonico;
+            return Crear<CutsceneData>($"Cinematica_Jefe_{clave}", sobrescribir, c =>
+            {
+                c.id = $"Jefe_{clave}";
+                c.saltable = true;
+                c.soloPrimeraVez = false;
+                c.sobreElJuego = true;
+                c.opacidadVelo = 0.55f;
+                // Corta y dentro del juego: el bloqueo solo evita saltarla con la tecla con la que
+                // se iba corriendo (mantener una tecla no la salta; hay que volver a pulsar).
+                c.bloqueoSalto = 1f;
+                c.finAviso = 4f;
+                c.fundidoImagen = 0.4f;
+                c.diapositivas = new List<Diapositiva>
+                {
+                    new Diapositiva
+                    {
+                        duracion = 3f,
+                        carteles = new List<Cartel>
+                        {
+                            new Cartel { texto = jefe.ToUpperInvariant(), inicio = 0.2f, duracion = 2.8f, posicion = POSICIONES_CARTEL.CENTRO, titulo = true },
+                            new Cartel { texto = $"[Presentación · {emocion} · pendiente de guion]", inicio = 0.6f, duracion = 2.4f, posicion = POSICIONES_CARTEL.ABAJO },
+                        },
+                    },
+                    new Diapositiva
+                    {
+                        duracion = 4.5f,
+                        texto = $"{jefe}: [Antes del combate · {emocion} · pendiente de guion] {jefe} encarna {ConArticulo(nivel)}.",
+                    },
+                };
             });
         }
 
@@ -169,7 +212,7 @@ namespace Fragmentum.EditorTools
         // --- Utilidades ---
 
         // Enlaza en el LevelData solo los campos vacíos: lo que se haya asignado a mano se respeta.
-        private static void Enlazar(LevelData nivel, CutsceneData entrada, CutsceneData cierre, DialogueData dialogos)
+        private static void Enlazar(LevelData nivel, CutsceneData entrada, CutsceneData cierre, DialogueData dialogos, CutsceneData presentacion)
         {
             var cambio = false;
             if (nivel.cinematicaEntrada == null && entrada != null)
@@ -187,6 +230,12 @@ namespace Fragmentum.EditorTools
             if (nivel.dialogos == null && dialogos != null)
             {
                 nivel.dialogos = dialogos;
+                cambio = true;
+            }
+
+            if (nivel.cinematicaJefe == null && presentacion != null)
+            {
+                nivel.cinematicaJefe = presentacion;
                 cambio = true;
             }
 

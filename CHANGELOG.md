@@ -9,6 +9,185 @@
 
 ---
 
+## Ajustes tras la primera prueba del Nivel 1 (2026-10-02)
+
+Rama `ajustes-nivel1`, que sale de `enemigo-eco-ira`. El autor jugó el Nivel 1 y contestó a
+`PENDIENTES.md`:
+
+- el control, la hitbox de la espada y el fondo están bien;
+- la tecla E se pulsa, no se mantiene;
+- el registro emocional no debe pedir código de participante;
+- el golpe del Eco es demasiado lento;
+- el Golem de Ceniza no debe morir en la lava;
+- la Centinela se siente fácil: tiene que transmitir la ira;
+- al entrar en la arena tiene que haber una cinemática corta con el diálogo del jefe.
+
+Además dio el visto bueno para fusionar las ramas que había (N6).
+
+### 1. El golpe del Eco de la Ira era lento
+
+- **Problema.** En la prueba, el ataque del Eco se sentía demasiado lento.
+- **Causa.** El clip seguía los tiempos del encargo: 0,73 s en total, con 0,35 s de anticipación.
+  Después del golpe, el Eco descansaba 0,7 s más.
+- **Solución.** El estado Attack tiene ahora su propio multiplicador de velocidad.
+  - **Velocidad.** El parámetro `VelocidadAtaque` del controlador lo escribe
+    `EnemigoAnimacion.velocidadAtaque`, que en el prefab vale 1,6. Así a1 dura 0,22 s, a2 + a3
+    duran 0,08 s y el ataque entero 0,46 s.
+  - **Proporciones.** Siguen igual: la anticipación casi triplica el golpe.
+  - **Ventana de daño.** Los eventos se mueven con el clip, así que el daño sigue llegando solo en
+    a2 y a3.
+  - **Descanso.** Baja de 0,7 s a 0,45 s.
+  - **Tiempos del encargo.** No se tocan: la tabla de `ConstructorEcoIra` sigue igual. Para
+    volver a ellos basta con poner `velocidadAtaque` a 1.
+
+### 2. El Golem de Ceniza moría en la lava
+
+- **Problema.** La lava de la sección 2 está a ras de suelo, y el Golem persigue al jugador por el
+  suelo, así que la pisaba y moría. El autor decidió que no debe morir en ella (N9).
+- **Solución.**
+  - **El dato.** Nuevo `EnemyData.inmuneALava`, que solo tiene el Golem.
+  - **La regla.** `EnemyController` implementa la interfaz nueva `IInmuneALava`
+    (`Core/Combate`), y `Lava` no quema a quien la cumple. Así la lava no depende de los enemigos.
+  - **El vacío.** Caer al vacío sigue matándolo.
+
+### 3. La Centinela Ardiente se sentía fácil
+
+- **Problema.** El combate no transmitía la ira del mundo.
+- **Causa.**
+  - Un solo ataque cada vez, con pausas de 0,9 s.
+  - El martillazo, que es el que abre la ventana, era siempre el mismo.
+  - La fase 2 solo añadía erupciones.
+  - Con 24 de vida y una ventana de 1,2 s a doble daño, caía en unas cuatro ventanas.
+- **Solución.** Casi todo son datos. Solo hay un patrón nuevo, el salto, y tres campos nuevos.
+  - **Patrones ampliados:**
+    - `PatronMartillazo.golpes`: el martillazo es un combo y solo el último deja el martillo
+      clavado;
+    - `PatronOndaSuelo.repeticiones`: hay que saltar una onda detrás de otra.
+  - **Patrón nuevo, `PatronSaltoAplastante`:**
+    - salta hacia el jugador y marca en el suelo dónde caerá desde que despega;
+    - al aterrizar quema ese tramo (2 de daño) y suelta una onda a cada lado;
+    - el salto es un tiro parabólico (`BossController.Saltar`) que cae justo cuando la marca
+      empieza a quemar.
+  - **Tres fases.** Cada una persigue más rápido (nuevo `FaseJefe.multiplicadorVelocidad`) y
+    descansa menos:
+
+    | Fase | Desde | Velocidad | Pausa | Ataques, en orden |
+    |---|---|---|---|---|
+    | 1 | 100 % | ×1 (2,4 u/s) | 0,7 s | martillazo ×2, onda, salto, martillazo ×2, onda |
+    | 2 · Furia | 50 % | ×1,3 | 0,5 s | onda doble, martillazo ×3, erupción (4), salto, martillazo ×3, erupción |
+    | 3 · Ira desatada | 25 % | ×1,6 | 0,3 s | onda doble, ráfaga de erupciones (6), salto, martillazo ×3, salto, onda doble, martillazo ×3 |
+
+  - **El rugido.** Al empezar las fases 2 y 3 ruge 0,9 s, quieta y sin atacar: es la señal de que
+    el combate cambia. Lo hace el nuevo paso `EsperaAlEmpezarFase` del Template Method. En la
+    fase 3, además, se pone al rojo.
+  - **Vida y velocidad.** La vida sube de 24 a 30 y la velocidad de 2,2 a 2,4 u/s.
+  - **Ventana vulnerable.** En la fase 1 sigue durando 1,2 s, como pide el Anexo A. En las fases 2
+    y 3, el martillazo de furia la deja en 0,9 s.
+  - **Límites, para que siga siendo justo:**
+    - ningún aviso baja de 0,3 s;
+    - cada fase tiene un martillazo que abre la ventana, así que siempre hay por dónde ganarle.
+  - **Para la tesis.** La tercera fase no está en el Anexo A: hay que anotarla en el capítulo de
+    diseño.
+
+### 4. La presentación del jefe
+
+- **Problema.** El autor quería que, al entrar en la arena, una cinemática corta diera el diálogo
+  del jefe. La FSM global ya admitía PLAYING → CUTSCENE → PLAYING para «memoria, jefe o cierre»,
+  pero nada la pedía al llegar al jefe.
+- **Solución.**
+  - **Dónde va.** Nuevo campo `LevelData.cinematicaJefe`. El generador de narrativa crea
+    `Cinematica_Jefe_Ira`, `_Tristeza`, `_Miedo` y `_Culpa`, con el nombre del jefe como título y
+    una línea pendiente de guion. El final no tiene: ya se presenta en su cinemática de entrada.
+  - **El flujo.** `ArenaJefe.Entrar` cierra las puertas y pide la cinemática.
+    - **La cámara.** Se desliza hasta encuadrar a la Centinela (`CameraMovement.Presentar`). Usa
+      tiempo sin escala, porque la cinemática para el juego.
+    - **El combate.** Empieza al volver a PLAYING, tanto si la cinemática termina como si se salta.
+    - **Cuándo se ve.** Una vez por cada carga del nivel: al reintentar tras morir, el combate
+      empieza directamente.
+  - **Cómo se ve.** Nuevo `CutsceneData.sobreElJuego`: en vez de fondo negro, un velo al 55 % y
+    dos franjas de cine sobre la escena congelada. Así se ve la arena con el jefe mientras habla,
+    aunque todavía no haya imágenes. Si se dibujan, las imágenes la tapan como en cualquier otra
+    cinemática.
+  - **El diálogo.** El diálogo antes del jefe va en la cinemática. Las líneas «antes del jefe» del
+    HUD solo se usan en un nivel sin presentación, para no decir lo mismo dos veces.
+
+### 5. Decisiones del autor aplicadas
+
+- **Tecla E (N4):** la acción `Interact` ya no lleva la interacción *Hold* de fábrica, así que basta
+  con pulsar.
+- **Registro emocional (N12):** `pedirParticipante` está apagado. La pregunta se queda como estaba.
+- **Sin cambios:** la hitbox de la espada (N13), el control (N1) y el fondo (N14) se quedan como
+  están.
+- **Ramas (N6):** `main` avanzó hasta `enemigo-eco-ira` (70f32b1).
+  - No hizo falta un commit de fusión, porque cada rama sale de la anterior.
+  - Las ramas de cada fase se conservan.
+  - No se ha subido nada al remoto.
+- **Cambio del autor en el Nivel 1:** el primer Eco, en x = 12,5, tiene escala 1,8 × 1,5. Se
+  conserva tal cual; la pregunta va en PENDIENTES (N18).
+
+### Verificación
+
+- **Compilación** con `dotnet build`: 0 errores y 0 avisos.
+- **Compilación y regeneración** en Unity 6000.6.3f1 en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 234 de 234 correctas.** Hay 6 nuevas:
+  - la Centinela tiene tres fases;
+  - cada fase es más rápida y descansa menos;
+  - ningún aviso baja de 0,3 s;
+  - todas las fases abren la ventana y tienen salto;
+  - solo el Golem es inmune a la lava, y el Eco descansa menos;
+  - cada jefe, salvo el final, tiene su presentación sobre el juego, con su nombre y su diálogo;
+  - el registro no pide código;
+  - `Interact` no lleva *Hold*;
+  - el controlador del Eco tiene `VelocidadAtaque` en el estado Attack.
+- **Pruebas PlayMode: 98 de 100 correctas en la pasada completa.** Las nuevas que pasaron:
+  - el martillazo son dos golpes y la ventana solo se abre tras el segundo;
+  - el salto marca la caída bajo el jugador, no hace daño en el aire, cae donde marcó, suelta
+    las ondas y quema al jugador que no se apartó;
+  - la fase 3 llega al 25 % (1 → 2 → 3), ruge sin atacar, persigue más rápido y se pone al rojo;
+  - el Golem pisa la lava sin perder vida;
+  - el golpe del Eco dura la anticipación y la ventana del diseño divididas entre 1,6, con el
+    daño solo en a2 y a3;
+  - al entrar en la arena del Nivel 1:
+    - primero la presentación, con las puertas cerradas, el jefe quieto, la arena visible
+      detrás y la cámara en el jefe;
+    - al terminar, el combate y la cámara de vuelta;
+    - el diálogo va en la presentación y no se repite en el HUD;
+    - sin presentación, la línea va en el HUD.
+- **Los 2 fallos eran de las propias pruebas, no del juego:**
+  - `MorirEnLaArena_ReiniciaElCombate` no sabía de la presentación: esperaba el Game Over con el
+    juego todavía en la cinemática;
+  - la prueba nueva de «la presentación no se repite» volvía a meter al jugador en la arena sin
+    pasos de física entre medias, y Box2D no registraba la salida del trigger. La prueba antigua
+    ya documentaba ese caso.
+
+  Las dos quedan unidas en una sola, `MorirEnLaArena_ReiniciaElCombate_SinRepetirLaPresentacion`,
+  que salta la presentación y espera esos pasos.
+- **Falta repetir PlayMode con ese cambio.** El total pasa a 99 pruebas. No se pudo repetir porque
+  el autor abrió el proyecto en el Editor durante la verificación, y el modo batch no puede
+  abrirlo a la vez.
+
+### Qué probar a mano (desde `Menu_Inicial`, «Nueva partida»)
+
+- **Eco (x ≈ 12):** el golpe sale mucho antes. Sigue viéndose venir (a1 con las grietas
+  encendidas), pero ya no da tiempo a pasearse delante de él.
+- **Golem (sección 2):** si te persigue hasta la lava, la cruza sin morir.
+- **Arena:**
+  - al cruzar la entrada se cierra la puerta, la cámara va hacia la Centinela y aparece su nombre
+    sobre la arena oscurecida;
+  - pasado 1 s, cualquier tecla la salta;
+  - al terminar, empieza el combate;
+  - si mueres y vuelves, ya no sale.
+- **Centinela:**
+  - el martillazo son dos golpes y solo después se queda clavado;
+  - el salto marca en el suelo dónde caerá: apártate y salta la onda;
+  - al 50 % ruge y se acelera;
+  - al 25 % ruge otra vez, se pone al rojo y apenas descansa.
+  - Si se pasa de difícil, dime en qué ataque mueres.
+- **Tecla E:** una pulsación basta (se notará en la Fase 10, con antorchas y memorias).
+- **Fin del nivel:** el registro emocional ya no pide código de participante.
+
+---
+
 ## Eco de la Ira: el primer enemigo con arte (2026-10-02)
 
 Rama `enemigo-eco-ira`, que sale de `fondo-mundo1`. Llegaron los 12 fotogramas del enemigo del

@@ -63,12 +63,30 @@ namespace Fragmentum.EditorTools
         {
             AsegurarCarpeta(CarpetaPatrones);
 
+            // Centinela Ardiente. Tras la primera prueba se sentía fácil: ahora encadena golpes,
+            // salta sobre el jugador y tiene una tercera fase de ira desatada (CHANGELOG). Los
+            // avisos nunca bajan de 0,3 s: más rápida, pero siempre legible.
             var martillazo = Patron<PatronMartillazo>("Martillazo", sobrescribir, p =>
             {
                 p.nombre = "Martillazo";
-                p.descripcion = "Se acerca, avisa y golpea delante; el martillo queda clavado 1,2 s (ventana vulnerable).";
-                p.aviso = 0.6f;
+                p.descripcion = "Se acerca, avisa y golpea delante dos veces seguidas; tras el segundo el martillo queda clavado 1,2 s (ventana vulnerable).";
+                p.aviso = 0.55f;
                 p.danio = 1;
+                p.golpes = 2;
+                p.avisoEncadenado = 0.35f;
+                p.color = Hex("FF6B35");
+            });
+
+            var martillazoFuria = Patron<PatronMartillazo>("MartillazoFuria", sobrescribir, p =>
+            {
+                p.nombre = "Martillazo de furia";
+                p.descripcion = "Combo de tres martillazos, echándose encima del jugador entre uno y otro. La ventana dura menos (0,9 s).";
+                p.aviso = 0.45f;
+                p.danio = 1;
+                p.golpes = 3;
+                p.avisoEncadenado = 0.3f;
+                p.impulsoEncadenado = 1.8f;
+                p.duracionVentana = 0.9f;
                 p.color = Hex("FF6B35");
             });
 
@@ -76,8 +94,21 @@ namespace Fragmentum.EditorTools
             {
                 p.nombre = "Onda de suelo";
                 p.descripcion = "Golpe al suelo: una onda baja recorre el piso hacia los dos lados. Se esquiva saltando.";
-                p.aviso = 0.7f;
+                p.aviso = 0.6f;
                 p.danio = 1;
+                p.color = Hex("CC4400");
+            });
+
+            var ondaDoble = Patron<PatronOndaSuelo>("OndaDoble", sobrescribir, p =>
+            {
+                p.nombre = "Onda doble";
+                p.descripcion = "Dos golpes al suelo seguidos: hay que saltar una onda detrás de otra.";
+                p.aviso = 0.5f;
+                p.danio = 1;
+                p.repeticiones = 2;
+                p.intervalo = 0.55f;
+                p.velocidadOnda = 10f;
+                p.recuperacion = 0.5f;
                 p.color = Hex("CC4400");
             });
 
@@ -85,15 +116,42 @@ namespace Fragmentum.EditorTools
             {
                 p.nombre = "Plataformas en erupción";
                 p.descripcion = "Columnas de lava bajo el jugador y a su alrededor, anunciadas antes. Obligan a moverse.";
-                p.aviso = 0.8f;
+                p.aviso = 0.75f;
                 p.danio = 1;
+                p.erupciones = 4;
+                p.intervalo = 0.4f;
                 p.color = Hex("FF3D00");
+            });
+
+            var erupcionRafaga = Patron<PatronPlataformasErupcion>("ErupcionEnRafaga", sobrescribir, p =>
+            {
+                p.nombre = "Erupción en ráfaga";
+                p.descripcion = "Seis columnas de lava muy seguidas por toda la arena: no hay sitio en el que quedarse quieto.";
+                p.aviso = 0.6f;
+                p.danio = 1;
+                p.erupciones = 6;
+                p.intervalo = 0.28f;
+                p.dispersion = 4.5f;
+                p.duracion = 0.8f;
+                p.recuperacion = 0.5f;
+                p.color = Hex("FF3D00");
+            });
+
+            var salto = Patron<PatronSaltoAplastante>("SaltoAplastante", sobrescribir, p =>
+            {
+                p.nombre = "Salto aplastante";
+                p.descripcion = "Salta hacia el jugador; la caída se marca en el suelo y quema al aterrizar (2 de daño), con una onda a cada lado.";
+                p.aviso = 0.5f;
+                p.danio = 2;
+                p.tiempoVuelo = 0.8f;
+                p.danioOnda = 1;
+                p.color = Hex("E85D04");
             });
 
             Completar("CentinelaArdiente", sobrescribir, j =>
             {
-                j.vidaMaxima = 24;
-                j.velocidad = 2.2f;
+                j.vidaMaxima = 30;
+                j.velocidad = 2.4f;
                 j.danioContacto = 1;
                 j.duracionVulnerable = 1.2f;
                 j.multiplicadorVulnerable = 2f;
@@ -102,8 +160,9 @@ namespace Fragmentum.EditorTools
                 j.tamano = new Vector2(2.2f, 3.4f);
                 j.fases = new List<FaseJefe>
                 {
-                    Fase("Martillazo y onda de suelo", 1f, 0.9f, martillazo, onda),
-                    Fase("Plataformas en erupción (50 %)", 0.5f, 0.6f, martillazo, erupcion, onda, erupcion),
+                    Fase("Martillazo y onda de suelo", 1f, 0.7f, 1f, martillazo, onda, salto, martillazo, onda),
+                    Fase("Furia: plataformas en erupción (50 %)", 0.5f, 0.5f, 1.3f, ondaDoble, martillazoFuria, erupcion, salto, martillazoFuria, erupcion),
+                    Fase("Ira desatada (25 %)", 0.25f, 0.3f, 1.6f, ondaDoble, erupcionRafaga, salto, martillazoFuria, salto, ondaDoble, martillazoFuria),
                 };
             });
 
@@ -170,8 +229,17 @@ namespace Fragmentum.EditorTools
             j.fases = new List<FaseJefe>(fases);
         }
 
-        private static FaseJefe Fase(string nombre, float umbral, float pausa = 1f, params PatronAtaque[] patrones) =>
-            new FaseJefe { nombre = nombre, umbralVida = umbral, pausaEntrePatrones = pausa, patrones = new List<PatronAtaque>(patrones) };
+        private static FaseJefe Fase(string nombre, float umbral) => Fase(nombre, umbral, 1f, 1f);
+
+        private static FaseJefe Fase(string nombre, float umbral, float pausa, float multiplicadorVelocidad, params PatronAtaque[] patrones) =>
+            new FaseJefe
+            {
+                nombre = nombre,
+                umbralVida = umbral,
+                pausaEntrePatrones = pausa,
+                multiplicadorVelocidad = multiplicadorVelocidad,
+                patrones = new List<PatronAtaque>(patrones),
+            };
 
         public static JefeData CargarDatos(string asset) => AssetDatabase.LoadAssetAtPath<JefeData>($"{CarpetaDatos}/{asset}.asset");
 

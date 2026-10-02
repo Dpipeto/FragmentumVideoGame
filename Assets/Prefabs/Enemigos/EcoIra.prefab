@@ -2449,6 +2449,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Enemies.EnemigoAnimacion
   velocidadAnimacion: 1
+  velocidadAtaque: 1.6
   velocidadNaturalCarrera: 1.2916667
   materialDestello: {fileID: 2100000, guid: 20e4a05da50e7b3418038b6f39244735, type: 2}
   duracionDestello: 0.1

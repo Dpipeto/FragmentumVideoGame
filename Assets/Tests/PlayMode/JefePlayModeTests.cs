@@ -90,12 +90,84 @@ namespace Fragmentum.Tests.PlayMode
 
             // Durante la ventana baja de la mitad: al cerrarse, sale directamente a la fase 2.
             yield return new WaitForSeconds(0.2f);
-            jefe.Vida.RecibirGolpe(new Golpe(6, jefe.Centro));
+            jefe.Vida.RecibirGolpe(new Golpe(jefe.Vida.VidaMaxima / 4, jefe.Centro));
             yield return EsperarHasta(() => jefe.EstadoActual != ESTADOS_JEFE.VULNERABLE, 1f, "que se cierre la ventana");
             Assert.AreEqual(ESTADOS_JEFE.PHASE_2, jefe.EstadoActual);
         }
 
+        [UnityTest]
+        public IEnumerator LaIraDesatada_LlegaAlCuartoDeVida_YRugeAntesDeAtacar()
+        {
+            var jefe = CrearJefe("CentinelaArdiente");
+            yield return CrearJugadorEnSuelo(new Vector2(-10f, 0f));
+            var fases = new List<int>();
+            jefe.OnFaseCambiada += fases.Add;
+            jefe.Activar(Jugador.transform, LimitesArena);
+            var colorFase1 = jefe.GetComponentInChildren<SpriteRenderer>().color;
+
+            jefe.Vida.RecibirGolpe(new Golpe(Mathf.CeilToInt(jefe.Vida.VidaMaxima * 0.8f), jefe.Centro));
+            yield return EsperarHasta(() => jefe.EstadoActual == ESTADOS_JEFE.PHASE_3, 1f, "la fase 3");
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, fases, "Las fases llegan de una en una.");
+
+            // Ruge: quieta y sin atacar mientras dura el aviso.
+            yield return ComprobarQueNunca(() => jefe.PatronActual != null, 0.6f, "Durante el rugido no ataca.");
+            yield return EsperarHasta(() => jefe.PatronActual != null, 2f, "que empiece a atacar tras el rugido");
+
+            Assert.Greater(jefe.VelocidadActual, jefe.Datos.velocidad, "En la ira desatada persigue más rápido.");
+            Assert.AreNotEqual(colorFase1, jefe.GetComponentInChildren<SpriteRenderer>().color, "Y se pone al rojo.");
+        }
+
         // --- Patrones ---
+
+        [UnityTest]
+        public IEnumerator Martillazo_EsUnComboDeDos_YSoloElUltimoDejaElMartilloClavado()
+        {
+            var jefe = CrearJefe("CentinelaArdiente");
+            SoloPatron(jefe, "Martillazo");
+            yield return CrearJugadorEnSuelo(new Vector2(-2.8f, 0f));
+            var golpes = new HashSet<ZonaDeDanio>();
+            jefe.Activar(Jugador.transform, LimitesArena);
+
+            var limite = Time.time + 5f;
+            while (jefe.EstadoActual != ESTADOS_JEFE.VULNERABLE && Time.time < limite)
+            {
+                foreach (var zona in Object.FindObjectsByType<ZonaDeDanio>())
+                {
+                    if (zona.name.EndsWith("Martillazo"))
+                    {
+                        golpes.Add(zona);
+                    }
+                }
+
+                yield return null;
+            }
+
+            Assert.AreEqual(ESTADOS_JEFE.VULNERABLE, jefe.EstadoActual, "Tras el combo, el martillo queda clavado.");
+            Assert.AreEqual(2, golpes.Count, "Dos martillazos antes de la ventana.");
+        }
+
+        [UnityTest]
+        public IEnumerator SaltoAplastante_MarcaLaCaida_YQuemaAlAterrizarConOndas()
+        {
+            var jefe = CrearJefe("CentinelaArdiente");
+            SoloPatron(jefe, "SaltoAplastante");
+            yield return CrearJugadorEnSuelo(new Vector2(-6f, 0f));
+            var vidaJugador = Jugador.Vida.Vida;
+            jefe.Activar(Jugador.transform, LimitesArena);
+
+            ZonaDeDanio marca = null;
+            yield return EsperarHasta(() => (marca = Object.FindObjectsByType<ZonaDeDanio>().FirstOrDefault(z => z.name.EndsWith("Aterrizaje"))) != null, 3f, "la marca de la caída");
+            Assert.AreEqual(Jugador.Motor.Cuerpo.position.x, marca.transform.position.x, 0.5f, "Salta hacia donde está el jugador.");
+            Assert.IsFalse(marca.Activa, "Mientras vuela, la marca avisa sin quemar.");
+
+            yield return new WaitForSeconds(0.3f);
+            Assert.Greater(jefe.SueloY, 0.5f, "Está en el aire.");
+            Assert.AreEqual(vidaJugador, Jugador.Vida.Vida, "En el aire no hace daño.");
+
+            yield return EsperarHasta(() => Object.FindObjectsByType<ZonaDeDanio>().Any(z => z.name.EndsWith("OndaDelSalto")), 2f, "las ondas al aterrizar");
+            Assert.AreEqual(-6f, jefe.Centro.x, 0.8f, "Cae donde marcó.");
+            yield return EsperarHasta(() => Jugador.Vida.Vida < vidaJugador, 1f, "que la caída queme al jugador que no se apartó");
+        }
 
         [UnityTest]
         public IEnumerator Martillazo_GolpeaAlJugadorDelante_YDejaAlJefeVulnerable()

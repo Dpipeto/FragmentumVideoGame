@@ -23,6 +23,9 @@ namespace Fragmentum.Data
 
         [Tooltip("Elige los patrones al azar en lugar de en orden.")]
         public bool aleatorio;
+
+        [Tooltip("Multiplica la velocidad del jefe al perseguir durante esta fase: la Ira acelera según pierde vida.")]
+        [Min(0.1f)] public float multiplicadorVelocidad = 1f;
     }
 
     /// <summary>

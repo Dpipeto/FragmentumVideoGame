@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cba49e80cd9bdc4fba0fe38f34ea4bb, type: 3}
+  m_Name: Cinematica_Jefe_Ira
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.CutsceneData
+  id: Jefe_Ira
+  diapositivas:
+  - imagen: {fileID: 0}
+    texto: 
+    carteles:
+    - texto: CENTINELA ARDIENTE
+      inicio: 0.2
+      duracion: 2.8
+      posicion: 1
+      titulo: 1
+    - texto: "[Presentaci\xF3n \xB7 Ira \xB7 pendiente de guion]"
+      inicio: 0.6
+      duracion: 2.4
+      posicion: 2
+      titulo: 0
+    duracion: 3
+    audio: {fileID: 0}
+  - imagen: {fileID: 0}
+    texto: "Centinela Ardiente: [Antes del combate \xB7 Ira \xB7 pendiente de guion] Centinela Ardiente encarna la ira."
+    carteles: []
+    duracion: 4.5
+    audio: {fileID: 0}
+  saltable: 1
+  soloPrimeraVez: 0
+  sobreElJuego: 1
+  opacidadVelo: 0.55
+  fundidoImagen: 0.4
+  fundidoTexto: 0.4
+  margenTexto: 0.8
+  bloqueoSalto: 1
+  avisoSaltar: Pulsa cualquier tecla para saltar
+  finAviso: 4
+  opacidadAviso: 0.45
+  musica: {fileID: 0}

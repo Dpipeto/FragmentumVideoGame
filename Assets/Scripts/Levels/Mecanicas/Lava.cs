@@ -6,7 +6,8 @@ namespace Fragmentum.Levels.Mecanicas
     /// <summary>
     /// Lava (Anexo A, mundo de la Ira): muerte instantánea por trigger, para el jugador y para los
     /// enemigos. Como la zona de caída, envía un <see cref="Golpe.Letal"/>, que atraviesa los
-    /// i-frames y el escudo de la Defensa Reforzada.
+    /// i-frames y el escudo de la Defensa Reforzada. No quema a quien sea
+    /// <see cref="IInmuneALava"/>: el Golem de Ceniza la cruza andando.
     ///
     /// Se ve: el color late despacio (provisional hasta que haya el tile animado, PENDIENTES B10).
     /// </summary>
@@ -48,6 +49,11 @@ namespace Fragmentum.Levels.Mecanicas
             }
 
             var raiz = otro.attachedRigidbody != null ? otro.attachedRigidbody.gameObject : otro.gameObject;
+            if (raiz.GetComponentInParent<IInmuneALava>() is { InmuneALava: true })
+            {
+                return;
+            }
+
             var objetivo = raiz.GetComponentInParent<IGolpeable>();
             if (objetivo != null && objetivo.EstaVivo)
             {

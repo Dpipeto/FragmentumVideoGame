@@ -106,6 +106,22 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarHasta(() => enemigo == null || !enemigo.Vida.EstaVivo, 2f, "que el enemigo muera en la lava");
         }
 
+        [UnityTest]
+        public IEnumerator Lava_NoQuemaAlGolemDeCeniza()
+        {
+            Suelo(-10f, 10f, yArriba: -1f);
+            var lava = Instanciar<Lava>(nameof(Lava), Vector2.zero).GetComponent<Collider2D>();
+
+            var objeto = Object.Instantiate(CargarPrefab("Assets/Prefabs/Enemigos/Enemigo_GolemCeniza.prefab"), new Vector3(0f, 0.5f, 0f), Quaternion.identity);
+            Creados.Add(objeto);
+            var golem = objeto.GetComponent<EnemyController>();
+            Assert.IsTrue(golem.InmuneALava, "Es de ceniza y magma: sus datos lo hacen inmune.");
+
+            yield return ComprobarQueNunca(() => golem == null || !golem.Vida.EstaVivo, 1.5f, "La lava no mata al Golem de Ceniza.");
+            Assert.IsTrue(golem.GetComponent<Collider2D>().IsTouching(lava), "Y la estaba tocando todo el tiempo.");
+            Assert.AreEqual(golem.Vida.VidaMaxima, golem.Vida.Vida, "Ni le quita vida.");
+        }
+
         // --- Torreta de fuego ---
 
         [UnityTest]

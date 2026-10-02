@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GolemCeniza
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.EnemyData
   nombreCanonico: Golem de Ceniza
-  descripcion: "Ira (mini-jefe, vida 10): lento, telegraf\xEDa mucho el golpe y apenas retrocede."
+  descripcion: "Ira (mini-jefe, vida 10): lento, telegraf\xEDa mucho el golpe y apenas retrocede. Es de ceniza y magma: la lava no lo quema y la cruza andando."
   vidaMaxima: 10
   danio: 2
   danioContacto: 1
@@ -23,6 +23,7 @@ MonoBehaviour:
   toleranciaWaypoint: 0.2
   esperaEnWaypoint: 1.5
   evitarBordes: 1
+  inmuneALava: 1
   deteccion: {fileID: 11400000, guid: 69124c2f72dee55459659af73a977899, type: 2}
   detectionRadius: 6
   factorHisteresis: 1.5

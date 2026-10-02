@@ -33,7 +33,7 @@ namespace Fragmentum.Enemies
     [DeclaraFSM("Enemigo")]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
-    public class EnemyController : MonoBehaviour
+    public class EnemyController : MonoBehaviour, IInmuneALava
     {
         public const string GrupoVivo = "VIVO";
 
@@ -102,6 +102,9 @@ namespace Fragmentum.Enemies
         public EnemyData Datos => datos;
 
         public Health Vida => _vida;
+
+        /// <summary>La lava no lo quema (lo dicen sus datos: el Golem de Ceniza).</summary>
+        public bool InmuneALava => datos != null && datos.inmuneALava;
 
         /// <summary>Hacia dónde mira: 1 derecha, -1 izquierda.</summary>
         public int Mirando { get; private set; } = 1;

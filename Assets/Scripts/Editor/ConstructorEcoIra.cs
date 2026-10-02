@@ -122,6 +122,14 @@ namespace Fragmentum.EditorTools
         public static readonly float[] SquashAtaque = { 1f, 1.15f, 1f, 0.9f };
 
         /// <summary>
+        /// Velocidad del clip de ataque en el prefab (estado Attack, parámetro VelocidadAtaque).
+        /// Los tiempos de la tabla son los del diseño; en la primera prueba el golpe se sintió
+        /// lento, así que se reproduce a 1,6×: a1 0,22 s, a2 + a3 0,08 s y el ataque entero 0,46 s.
+        /// Las proporciones no cambian: la anticipación sigue durando casi el triple que el golpe.
+        /// </summary>
+        public const float VelocidadAtaque = 1.6f;
+
+        /// <summary>
         /// Lo que avanza el cuerpo en una vuelta de r1 a r4 (un paso), medido en el arte: entre la
         /// pose con el pie de delante apoyado (r1, r2) y la de empuje (r3, r4) la cadera recorre
         /// ~300 px, y el paso entero son ~440 px (0,62 u). A ritmo 1 son 0,62 u / 0,48 s.
@@ -518,7 +526,16 @@ namespace Fragmentum.EditorTools
                 (AnimatorParams.Attack.Nombre, AnimatorControllerParameterType.Bool, 0f),
                 (AnimatorParams.Damage.Nombre, AnimatorControllerParameterType.Bool, 0f),
                 (AnimatorParams.Death.Nombre, AnimatorControllerParameterType.Bool, 0f),
-                (AnimatorParams.VelocidadCorrer.Nombre, AnimatorControllerParameterType.Float, 1f));
+                (AnimatorParams.VelocidadCorrer.Nombre, AnimatorControllerParameterType.Float, 1f),
+                (AnimatorParams.VelocidadAtaque.Nombre, AnimatorControllerParameterType.Float, 1f));
+
+            // Run sigue a la velocidad del cuerpo y Attack a la velocidad de ataque del prefab;
+            // los dos los escribe EnemigoAnimacion en cada fotograma.
+            var parametroDeVelocidad = new Dictionary<string, string>
+            {
+                [Run] = AnimatorParams.VelocidadCorrer.Nombre,
+                [Attack] = AnimatorParams.VelocidadAtaque.Nombre,
+            };
 
             var maquina = controlador.layers[0].stateMachine;
             var estados = new Dictionary<string, AnimatorState>();
@@ -530,8 +547,8 @@ namespace Fragmentum.EditorTools
                 estado.motion = clips[nombre];
                 estado.speed = 1f;
                 estado.writeDefaultValues = true; // al salir de Attack el squash vuelve a 1
-                estado.speedParameterActive = nombre == Run;
-                estado.speedParameter = nombre == Run ? AnimatorParams.VelocidadCorrer.Nombre : string.Empty;
+                estado.speedParameterActive = parametroDeVelocidad.TryGetValue(nombre, out var parametro);
+                estado.speedParameter = parametro ?? string.Empty;
                 estados[nombre] = estado;
             }
 
@@ -677,6 +694,7 @@ namespace Fragmentum.EditorTools
 
                 var animacion = objetoSprite.AddComponent<EnemigoAnimacion>();
                 Asignar(animacion, "velocidadNaturalCarrera", p => p.floatValue = VelocidadNaturalCarrera);
+                Asignar(animacion, nameof(EnemigoAnimacion.velocidadAtaque), p => p.floatValue = VelocidadAtaque);
                 Asignar(animacion, "materialDestello", p => p.objectReferenceValue = destello);
                 Asignar(animacion, "estallido", p => p.objectReferenceValue = estallido);
 

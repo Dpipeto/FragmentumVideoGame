@@ -28,8 +28,9 @@ namespace Fragmentum.Narrative
 
         public string ayudaComentario = "¿Algo que quieras anotar? (opcional)";
 
-        [Tooltip("Pide un código de participante para el pilotaje, solo mientras no se haya indicado.")]
-        public bool pedirParticipante = true;
+        [Tooltip("Pide un código de participante para el pilotaje, solo mientras no se haya indicado. " +
+                 "Apagado por decisión del diseño (PENDIENTES N12): el registro no identifica al jugador.")]
+        public bool pedirParticipante;
 
         public string ayudaParticipante = "Código de participante (opcional)";
 

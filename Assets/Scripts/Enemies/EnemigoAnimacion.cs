@@ -15,6 +15,8 @@ namespace Fragmentum.Enemies
     ///   <see cref="FinAtaque"/> termina el ataque y <see cref="FinMuerte"/> remata la muerte.
     /// - <see cref="velocidadAnimacion"/> marca el ritmo de todo el Animator: otro Eco con los
     ///   mismos clips va más lento o más rápido sin duplicar animaciones.
+    /// - <see cref="velocidadAtaque"/> acelera además solo el clip de ataque, sin cambiar sus
+    ///   proporciones: la anticipación sigue siendo más larga que el golpe.
     /// - El estado Run va al ritmo de la velocidad real del cuerpo: las piernas no patinan y,
     ///   parado a tiro durante el cooldown, el Eco no corre en el sitio.
     /// - Al recibir un golpe, el sprite se vuelve una silueta blanca durante 0,1 s. No hay
@@ -33,8 +35,12 @@ namespace Fragmentum.Enemies
         private const float MargenSeguridadMuerte = 1f;
 
         [Tooltip("Ritmo de todas las animaciones (Animator.speed). Los Ecos comparten clips y se distinguen por su ritmo. " +
-                 "También acorta la anticipación del ataque: a1 dura 0,35 s / este valor.")]
+                 "También acorta la anticipación del ataque: a1 dura 0,35 s / (este valor × velocidadAtaque).")]
         [Range(0.4f, 2f)] public float velocidadAnimacion = 1f;
+
+        [Tooltip("Multiplica solo el clip de ataque, encima del ritmo general: a 1,6 la anticipación (a1) dura 0,35 / 1,6 ≈ 0,22 s. " +
+                 "Los eventos del golpe se mueven con el clip, así que la ventana de daño sigue siendo a2 y a3.")]
+        [Range(0.5f, 3f)] public float velocidadAtaque = 1f;
 
         [Tooltip("Velocidad del cuerpo (u/s) a la que el ciclo de correr, a ritmo 1, avanza sin patinar. La mide ConstructorEcoIra en el arte.")]
         [SerializeField, Min(0.01f)] private float velocidadNaturalCarrera = 1.3f;
@@ -59,6 +65,7 @@ namespace Fragmentum.Enemies
         private Health _vida;
         private Material _materialNormal;
         private bool _tieneVelocidadCorrer;
+        private bool _tieneVelocidadAtaque;
         private float _finDestello = float.NegativeInfinity;
         private float _duracionAtaque;
         private float _duracionMuerte;
@@ -73,13 +80,16 @@ namespace Fragmentum.Enemies
         public float VelocidadNaturalCarrera => velocidadNaturalCarrera;
 
         /// <summary>Lo que dura el clip de ataque (hasta su evento FinAtaque) al ritmo actual.</summary>
-        public float DuracionAtaque => _duracionAtaque / Ritmo;
+        public float DuracionAtaque => _duracionAtaque / (Ritmo * RitmoAtaque);
 
         /// <summary>Lo que dura el clip de muerte (hasta su evento FinMuerte) al ritmo actual.</summary>
         public float DuracionMuerte => _duracionMuerte / Ritmo;
 
         // velocidadAnimacion, a salvo de un 0 puesto por código (el inspector no baja de 0,4).
         private float Ritmo => Mathf.Max(0.01f, velocidadAnimacion);
+
+        // velocidadAtaque, igual de a salvo. Si el controlador no tiene el parámetro, no se aplica.
+        private float RitmoAtaque => _tieneVelocidadAtaque ? Mathf.Max(0.01f, velocidadAtaque) : 1f;
 
         /// <summary>El sprite se ve ahora como silueta blanca.</summary>
         public bool DestelloActivo => materialDestello != null && _sprite != null && _sprite.sharedMaterial == materialDestello;
@@ -117,12 +127,18 @@ namespace Fragmentum.Enemies
             foreach (var parametro in _animator.parameters)
             {
                 _tieneVelocidadCorrer |= parametro.nameHash == AnimatorParams.VelocidadCorrer.Hash;
+                _tieneVelocidadAtaque |= parametro.nameHash == AnimatorParams.VelocidadAtaque.Hash;
             }
         }
 
         private void Update()
         {
             _animator.speed = Ritmo;
+            if (_tieneVelocidadAtaque)
+            {
+                _animator.SetFloat(AnimatorParams.VelocidadAtaque.Hash, RitmoAtaque);
+            }
+
             if (!_tieneVelocidadCorrer || _cuerpo == null)
             {
                 return;

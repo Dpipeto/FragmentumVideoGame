@@ -37,7 +37,8 @@ namespace Fragmentum.Core
         public static readonly Parametro Movement = new Parametro("Movement");
         public static readonly Parametro Walk = new Parametro("Walk");
 
-        // Multiplicador de velocidad del estado Ataque: 1 / duración del golpe en segundos.
+        // Multiplicador de velocidad del estado Ataque. En Kael, 1 / duración del golpe en
+        // segundos; en los Ecos, la velocidadAtaque de su EnemigoAnimacion.
         public static readonly Parametro VelocidadAtaque = new Parametro("VelocidadAtaque");
 
         // Multiplicador del estado Run de los Ecos: velocidad real / la del ciclo dibujado.

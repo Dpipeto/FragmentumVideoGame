@@ -2409,6 +2409,14 @@ PrefabInstance:
       value: EcoIra
       objectReference: {fileID: 0}
     - target: {fileID: 5551342067718451771, guid: f7db2c8661bbeb34c93fedb9753d0041, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5551342067718451771, guid: f7db2c8661bbeb34c93fedb9753d0041, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5551342067718451771, guid: f7db2c8661bbeb34c93fedb9753d0041, type: 3}
       propertyPath: m_LocalPosition.x
       value: 12.5
       objectReference: {fileID: 0}

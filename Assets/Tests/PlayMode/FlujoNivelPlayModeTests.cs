@@ -155,16 +155,31 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator EntrarEnLaArena_CierraLaPuerta_YActivaALaCentinela()
+        public IEnumerator EntrarEnLaArena_PresentaALaCentinela_YDespuesEmpiezaElCombate()
         {
             yield return EntrarEnNivel1();
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
             var salida = Object.FindAnyObjectByType<SalidaNivel>();
+            var camara = Camera.main.GetComponent<CameraMovement>();
             Assert.IsFalse(salida.Abierta, "Con el jefe vivo, la salida está cerrada: no se puede esquivar el combate.");
             Assert.IsFalse(arena.PuertasCerradas);
 
             yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
 
+            // Primero, la presentación: el diálogo antes del combate, sobre la arena congelada.
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar, la cinemática del jefe.");
+            Assert.AreSame(Nivel1.cinematicaJefe, Juego.CinematicaActual);
+            Assert.IsTrue(arena.Presentando);
+            Assert.IsTrue(arena.PuertasCerradas, "La puerta se cierra detrás del jugador ya durante la presentación.");
+            Assert.IsFalse(arena.Jefe.EnCombate, "El jefe espera a que termine.");
+            Assert.IsTrue(Interfaz.Cinematica.SobreElJuego, "Detrás se ve la arena, no negro.");
+            Assert.IsTrue(camara.Presentando, "La cámara enseña al jefe.");
+
+            yield return SaltarCinematicaSiHay();
+
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual);
+            Assert.IsFalse(arena.Presentando);
+            Assert.IsFalse(camara.Presentando, "La cámara vuelve con el jugador.");
             Assert.IsTrue(arena.EnCombate);
             Assert.IsTrue(arena.Jefe.EnCombate);
             Assert.IsTrue(arena.PuertasCerradas, "La puerta se cierra detrás del jugador.");
@@ -179,6 +194,7 @@ namespace Fragmentum.Tests.PlayMode
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
             var salida = Object.FindAnyObjectByType<SalidaNivel>();
             yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            yield return SaltarCinematicaSiHay();
             Assert.IsFalse(Jugador.Habilidades.Tiene(HABILIDADES.ATAQUE_CARGADO));
 
             arena.Jefe.Vida.Matar();
@@ -217,11 +233,13 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator MorirEnLaArena_ReiniciaElCombate()
+        public IEnumerator MorirEnLaArena_ReiniciaElCombate_SinRepetirLaPresentacion()
         {
             yield return EntrarEnNivel1();
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
             yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "La primera vez, la presentación del jefe.");
+            yield return SaltarCinematicaSiHay();
             arena.Jefe.Vida.RecibirGolpe(new Fragmentum.Core.Combate.Golpe(10, arena.Jefe.Centro));
 
             Jugador.Vida.Matar();
@@ -243,7 +261,8 @@ namespace Fragmentum.Tests.PlayMode
             }
 
             yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
-            Assert.IsTrue(arena.EnCombate, "Se puede volver a entrar.");
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual, "Al reintentar, la presentación no se repite.");
+            Assert.IsTrue(arena.EnCombate, "Se puede volver a entrar, y el combate empieza en el acto.");
         }
 
         private static IEnumerator EsperarHastaReal(System.Func<bool> condicion, float maximo, string descripcion)

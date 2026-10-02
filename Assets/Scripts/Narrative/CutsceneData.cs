@@ -80,6 +80,14 @@ namespace Fragmentum.Narrative
         [Tooltip("Solo se reproduce la primera vez (la cinemática inicial).")]
         public bool soloPrimeraVez;
 
+        [Header("Sobre el juego")]
+        [Tooltip("Para cinemáticas cortas dentro del nivel (la del jefe): detrás se ve la escena congelada, oscurecida y " +
+                 "con franjas de cine, en lugar de negro. Las diapositivas con imagen la tapan igualmente.")]
+        public bool sobreElJuego;
+
+        [Tooltip("Opacidad del velo negro sobre la escena cuando la cinemática va sobre el juego.")]
+        [Range(0f, 1f)] public float opacidadVelo = 0.55f;
+
         [Header("Tiempos (segundos)")]
         [Tooltip("Fundido cruzado entre imágenes, y desde y hacia negro al empezar y al terminar.")]
         [Min(0f)] public float fundidoImagen = 0.6f;

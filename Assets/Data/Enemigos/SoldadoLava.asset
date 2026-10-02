@@ -23,6 +23,7 @@ MonoBehaviour:
   toleranciaWaypoint: 0.2
   esperaEnWaypoint: 0.3
   evitarBordes: 1
+  inmuneALava: 0
   deteccion: {fileID: 11400000, guid: 69124c2f72dee55459659af73a977899, type: 2}
   detectionRadius: 7
   factorHisteresis: 1.5

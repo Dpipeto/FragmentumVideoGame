@@ -13,13 +13,17 @@ MonoBehaviour:
   m_Name: Martillazo
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronMartillazo
   nombre: Martillazo
-  descripcion: Se acerca, avisa y golpea delante; el martillo queda clavado 1,2 s (ventana vulnerable).
-  aviso: 0.6
+  descripcion: Se acerca, avisa y golpea delante dos veces seguidas; tras el segundo el martillo queda clavado 1,2 s (ventana vulnerable).
+  aviso: 0.55
   danio: 1
   color: {r: 1, g: 0.41960785, b: 0.20784314, a: 1}
   alcance: 3
   tiempoAcercamiento: 2.5
   tamanoGolpe: {x: 2.6, y: 2.6}
   duracionGolpe: 0.15
+  golpes: 2
+  avisoEncadenado: 0.35
+  acercamientoEncadenado: 0.8
+  impulsoEncadenado: 1.6
   abreVentana: 1
   duracionVentana: 0

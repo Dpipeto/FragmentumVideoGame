@@ -58,6 +58,45 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void CadaJefe_SePresentaConUnaCinematicaCortaSobreElJuego()
+        {
+            foreach (var nivel in BaseDeDatos().niveles)
+            {
+                var presentacion = nivel.cinematicaJefe;
+                if (nivel.jefe == null || nivel.emocion.id == EMOCIONES.INTEGRACION)
+                {
+                    Assert.IsNull(presentacion, $"{nivel.name}: sin jefe, o el final, que ya se presenta en su entrada.");
+                    continue;
+                }
+
+                Assert.IsNotNull(presentacion, $"{nivel.name}: falta la presentación del jefe.");
+                Assert.IsTrue(presentacion.sobreElJuego, "Se ve la arena detrás.");
+                Assert.IsFalse(presentacion.soloPrimeraVez, "Se ve cada vez que se carga el nivel (no al reintentar).");
+                Assert.IsTrue(presentacion.saltable);
+                Assert.LessOrEqual(presentacion.DuracionTotal, 10f, "Es corta.");
+                Assert.IsTrue(presentacion.diapositivas.SelectMany(d => d.carteles).Any(c => c.titulo && c.texto == nivel.jefe.nombreCanonico.ToUpperInvariant()),
+                    "Presenta al jefe por su nombre.");
+                Assert.IsTrue(presentacion.diapositivas.Any(d => d.texto != null && d.texto.StartsWith(nivel.jefe.nombreCanonico + ":")),
+                    "Y lleva su diálogo antes del combate.");
+            }
+        }
+
+        [Test]
+        public void ElRegistroEmocional_NoPideCodigoDeParticipante()
+        {
+            Assert.IsFalse(GeneradorNarrativa.CargarConfiguracionRegistro().pedirParticipante, "Decisión del diseño (PENDIENTES N12).");
+        }
+
+        [Test]
+        public void InteractuarEsPulsar_NoMantener()
+        {
+            var acciones = AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>("Assets/Settings/InputSystem_Actions.inputactions");
+            Assert.IsNotNull(acciones);
+            var interactuar = acciones.FindAction("Player/Interact", true);
+            Assert.IsEmpty(interactuar.interactions, "Decisión del diseño (PENDIENTES N4): E se pulsa, no se mantiene.");
+        }
+
+        [Test]
         public void ElFinal_TerminaConLaPreguntaDelAnexo()
         {
             var final = BaseDeDatos().niveles[5];
