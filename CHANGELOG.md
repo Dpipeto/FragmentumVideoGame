@@ -139,7 +139,7 @@ Además dio el visto bueno para fusionar las ramas que había (N6).
   - el registro no pide código;
   - `Interact` no lleva *Hold*;
   - el controlador del Eco tiene `VelocidadAtaque` en el estado Attack.
-- **Pruebas PlayMode: 98 de 100 correctas en la pasada completa.** Las nuevas que pasaron:
+- **Pruebas PlayMode: 99 de 99 correctas.** Hay 5 nuevas y 3 ampliadas:
   - el martillazo son dos golpes y la ventana solo se abre tras el segundo;
   - el salto marca la caída bajo el jugador, no hace daño en el aire, cae donde marcó, suelta
     las ondas y quema al jugador que no se apartó;
@@ -153,18 +153,17 @@ Además dio el visto bueno para fusionar las ramas que había (N6).
     - al terminar, el combate y la cámara de vuelta;
     - el diálogo va en la presentación y no se repite en el HUD;
     - sin presentación, la línea va en el HUD.
-- **Los 2 fallos eran de las propias pruebas, no del juego:**
+- **Dos fallos en la primera pasada (98 de 100), los dos de las propias pruebas:**
   - `MorirEnLaArena_ReiniciaElCombate` no sabía de la presentación: esperaba el Game Over con el
     juego todavía en la cinemática;
   - la prueba nueva de «la presentación no se repite» volvía a meter al jugador en la arena sin
     pasos de física entre medias, y Box2D no registraba la salida del trigger. La prueba antigua
     ya documentaba ese caso.
 
-  Las dos quedan unidas en una sola, `MorirEnLaArena_ReiniciaElCombate_SinRepetirLaPresentacion`,
-  que salta la presentación y espera esos pasos.
-- **Falta repetir PlayMode con ese cambio.** El total pasa a 99 pruebas. No se pudo repetir porque
-  el autor abrió el proyecto en el Editor durante la verificación, y el modo batch no puede
-  abrirlo a la vez.
+  Las dos quedan unidas en `MorirEnLaArena_ReiniciaElCombate_SinRepetirLaPresentacion`, que salta
+  la presentación y espera esos pasos. La segunda pasada completa dio 99 de 99.
+- **Regenerar todo otra vez** solo vuelve a tocar `TorretaFuego.prefab` y `ProjectSettings.asset`,
+  que se reescriben solos en cada regeneración y se descartan.
 
 ### Qué probar a mano (desde `Menu_Inicial`, «Nueva partida»)
 

@@ -38,9 +38,8 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N1** (control): está bien, no se toca.
 - **N4:** E se **pulsa**, no se mantiene. Ya está cambiado en el Input.
 - **N6:** `main` está al día hasta `enemigo-eco-ira`. Las ramas se conservan y no se ha subido
-  nada. La rama nueva `ajustes-nivel1` queda para fusionar cuando la pruebes. Antes falta repetir
-  las pruebas PlayMode: abriste Unity mientras corrían. Dime cuando lo cierres y las repito, o
-  ejecútalas tú en *Window → General → Test Runner → PlayMode*.
+  nada. La rama nueva `ajustes-nivel1` (234 EditMode y 99 PlayMode correctas) queda para
+  fusionar cuando la pruebes: dime «fusiona» y lo hago.
 - **N9:** el Golem de Ceniza ya no muere en la lava (la cruza andando) y la Centinela es más
   difícil (sigue en N16).
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
