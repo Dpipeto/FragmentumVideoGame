@@ -120,10 +120,10 @@ namespace Fragmentum.Tests.PlayMode
         // --- Patrones ---
 
         [UnityTest]
-        public IEnumerator Martillazo_EsUnComboDeDos_YSoloElUltimoDejaElMartilloClavado()
+        public IEnumerator Espadazo_EsUnComboDeDos_YSoloElUltimoDejaLaEspadaClavada()
         {
             var jefe = CrearJefe("CentinelaArdiente");
-            SoloPatron(jefe, "Martillazo");
+            SoloPatron(jefe, "Espadazo");
             yield return CrearJugadorEnSuelo(new Vector2(-2.8f, 0f));
             var golpes = new HashSet<ZonaDeDanio>();
             jefe.Activar(Jugador.transform, LimitesArena);
@@ -133,7 +133,7 @@ namespace Fragmentum.Tests.PlayMode
             {
                 foreach (var zona in Object.FindObjectsByType<ZonaDeDanio>())
                 {
-                    if (zona.name.EndsWith("Martillazo"))
+                    if (zona.name.EndsWith("Espadazo"))
                     {
                         golpes.Add(zona);
                     }
@@ -142,8 +142,8 @@ namespace Fragmentum.Tests.PlayMode
                 yield return null;
             }
 
-            Assert.AreEqual(ESTADOS_JEFE.VULNERABLE, jefe.EstadoActual, "Tras el combo, el martillo queda clavado.");
-            Assert.AreEqual(2, golpes.Count, "Dos martillazos antes de la ventana.");
+            Assert.AreEqual(ESTADOS_JEFE.VULNERABLE, jefe.EstadoActual, "Tras el combo, la espada queda clavada.");
+            Assert.AreEqual(2, golpes.Count, "Dos espadazos antes de la ventana.");
         }
 
         [UnityTest]
@@ -170,17 +170,17 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Martillazo_GolpeaAlJugadorDelante_YDejaAlJefeVulnerable()
+        public IEnumerator Espadazo_GolpeaAlJugadorDelante_YDejaAlJefeVulnerable()
         {
             var jefe = CrearJefe("CentinelaArdiente");
-            SoloPatron(jefe, "Martillazo");
+            SoloPatron(jefe, "Espadazo");
             yield return CrearJugadorEnSuelo(new Vector2(-2.8f, 0f));
             var vidaJugador = Jugador.Vida.Vida;
             jefe.Activar(Jugador.transform, LimitesArena);
 
-            yield return EsperarHasta(() => jefe.EstadoActual == ESTADOS_JEFE.VULNERABLE, 5f, "el martillo clavado");
+            yield return EsperarHasta(() => jefe.EstadoActual == ESTADOS_JEFE.VULNERABLE, 5f, "la espada clavada");
 
-            Assert.Less(Jugador.Vida.Vida, vidaJugador, "El martillazo alcanza al jugador que está delante.");
+            Assert.Less(Jugador.Vida.Vida, vidaJugador, "El espadazo alcanza al jugador que está delante.");
             Assert.AreEqual(-1, jefe.Mirando, "Se gira hacia el jugador, que está a su izquierda.");
         }
 
@@ -188,10 +188,10 @@ namespace Fragmentum.Tests.PlayMode
         public IEnumerator UnGolpe_NoInterrumpeElAtaqueDelJefe()
         {
             var jefe = CrearJefe("CentinelaArdiente");
-            SoloPatron(jefe, "Martillazo");
+            SoloPatron(jefe, "Espadazo");
             yield return CrearJugadorEnSuelo(new Vector2(-2.8f, 0f));
             jefe.Activar(Jugador.transform, LimitesArena);
-            yield return EsperarHasta(() => jefe.PatronActual != null, 2f, "que empiece el martillazo");
+            yield return EsperarHasta(() => jefe.PatronActual != null, 2f, "que empiece el espadazo");
             var patron = jefe.PatronActual;
 
             jefe.Vida.RecibirGolpe(new Golpe(1, jefe.Centro));
@@ -199,7 +199,7 @@ namespace Fragmentum.Tests.PlayMode
 
             Assert.AreEqual(ESTADOS_JEFE.PHASE_1, jefe.EstadoActual, "No hay estado DAMAGED: el jefe sigue en su fase.");
             Assert.AreSame(patron, jefe.PatronActual, "El ataque en curso continúa.");
-            yield return EsperarHasta(() => jefe.EstadoActual == ESTADOS_JEFE.VULNERABLE, 3f, "que el martillazo termine igualmente");
+            yield return EsperarHasta(() => jefe.EstadoActual == ESTADOS_JEFE.VULNERABLE, 3f, "que el espadazo termine igualmente");
         }
 
         [UnityTest]

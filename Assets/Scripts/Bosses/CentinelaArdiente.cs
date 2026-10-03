@@ -6,7 +6,7 @@ namespace Fragmentum.Bosses
     /// <summary>
     /// Centinela Ardiente, jefe del mundo de la Ira (Anexo A). Es la implementación de referencia.
     ///
-    /// - <b>Fase 1:</b> martillazo directo en combo de dos, que deja el martillo clavado 1,2 s
+    /// - <b>Fase 1:</b> espadazo directo en combo de dos, que deja la espada clavada 1,2 s
     ///   (ventana vulnerable), onda de suelo y salto aplastante.
     /// - <b>Fase 2</b> (50 % de vida): furia. Más rápida, combos de tres con ventana más corta,
     ///   ondas dobles y plataformas en erupción que obligan a moverse.

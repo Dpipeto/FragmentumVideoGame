@@ -65,7 +65,7 @@ namespace Fragmentum.Data
         public List<FaseJefe> fases = new List<FaseJefe>();
 
         [Header("Ventana vulnerable")]
-        [Tooltip("Segundos que dura la ventana si el patrón no dice otra cosa (Anexo A: 1,2 s de martillo clavado).")]
+        [Tooltip("Segundos que dura la ventana si el patrón no dice otra cosa (Anexo A: 1,2 s de espada clavada).")]
         [Min(0f)] public float duracionVulnerable = 1.2f;
 
         [Tooltip("Multiplica el daño recibido durante la ventana.")]

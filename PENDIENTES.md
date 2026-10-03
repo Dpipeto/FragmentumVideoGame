@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.14 — Ajustes tras la primera prueba del Nivel 1, 2026-10-02.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.15 — La Centinela lleva espada, 2026-10-02.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -10,7 +10,7 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
-| N16 | **Pelea otra vez con la Centinela Ardiente** en el Nivel 1 y dime si ya se siente la ira. | La hice más difícil: combos de martillazos, salto aplastante, ondas dobles y una tercera fase de «ira desatada» al 25 % (ver la Revisión 0.14). Ahora hay que ver si me pasé. | Juega desde `Menu_Inicial`. Si es demasiado, dime en qué ataque mueres. Las fases están en `Assets/Data/Jefes/CentinelaArdiente.asset` y los ataques (avisos, golpes, daño) en `Assets/Data/Jefes/Patrones`. |
+| N16 | **Pelea otra vez con la Centinela Ardiente** en el Nivel 1 y dime si ya se siente la ira. | La hice más difícil: combos de espadazos, salto aplastante, ondas dobles y una tercera fase de «ira desatada» al 25 % (ver la Revisión 0.14). Ahora hay que ver si me pasé. | Juega desde `Menu_Inicial`. Si es demasiado, dime en qué ataque mueres. Las fases están en `Assets/Data/Jefes/CentinelaArdiente.asset` y los ataques (avisos, golpes, daño) en `Assets/Data/Jefes/Patrones`. |
 | N17 | **Mira la presentación del jefe** al entrar en la arena y **escribe su diálogo**. | Ya funciona: se cierra la puerta, la cámara va hacia la Centinela y aparecen su nombre y una línea sobre la arena oscurecida. Dura 7,5 s y se salta con cualquier tecla pasado 1 s. El texto es provisional. | Escribe el texto en `Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset`: cada diapositiva tiene texto, carteles con tiempos y, si se dibuja, imagen. Puedes añadir diapositivas. Si prefieres pasarme el texto, lo vuelco yo. Detalle en B1. |
 | N15 | **Prueba el golpe del Eco de la Ira**, ahora más rápido. | El ataque va a 1,6×: a1 dura 0,22 s, el golpe 0,08 s y el ataque entero 0,46 s. Descansa 0,45 s entre golpes, antes 0,7. | Pelea con él en el Nivel 1 (x ≈ 12). Si sigue lento, sube `velocidadAtaque` en `EcoIra.prefab → Pivote/Sprite → EnemigoAnimacion` o baja `attackCooldown` en `Assets/Data/Enemigos/EcoIra.asset`. |
 | N18 | **¿Querías el Eco más grande?** En el Nivel 1, el Eco de x = 12,5 tiene escala 1,8 × 1,5. | Lo cambiaste en la escena y lo dejé tal cual. Con una escala distinta en X y en Y, los píxeles del dibujo quedan un 20 % más anchos que altos. Además, ese Eco mide el 90 % de Kael y los demás el 60 %. | Si lo quieres más grande en todo el juego, dime cuánto (por ejemplo, «al 80 % de Kael») y lo cambio en la importación, con la misma escala en X y en Y. Si fue una prueba, vuelve a poner la escala a 1 en la escena. |
@@ -24,14 +24,23 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 ### Arte que más necesito, por urgencia
 
 1. **Centinela Ardiente**, el jefe del Nivel 1. Es lo más visible que sigue siendo una cápsula, y
-   ahora tiene más ataques que leer: el jugador tiene que distinguir el martillazo, el golpe al
-   suelo, el salto y el rugido por la pose. La ficha está en B5.
+   ahora tiene más ataques que leer: el jugador tiene que distinguir el espadazo, el golpe al
+   suelo, el salto y el rugido por la pose. La ficha de B5 ya es con espada y dice qué poses de
+   tus conceptos sirven y cuáles faltan.
 2. **Kael: daño y muerte** (N3). Se ven en cada partida.
 3. **Golem de Ceniza**, el mini-jefe (N7). La ficha está en B4.
 4. **Lava animada, torreta de fuego con su bola, plataforma inestable y plataforma de
    combustión.** Se ven por todo el nivel (B10). Pueden ser tiles o tiras cortas en bucle.
 5. **Imágenes para la presentación de la Centinela y para el cierre de la Ira.** Son opcionales:
-   la presentación ya se ve bien sobre la arena sin imágenes (B1).
+   la presentación ya se ve bien sobre la arena sin imágenes (B1). `cinematicJefe1.jpeg` sirve
+   de punto de partida.
+
+### Resuelto en la v0.15
+
+- **La espada de la Centinela:** no es un problema. El Anexo A dice «martillazo», pero el ataque
+  funciona igual con espada: tajo de arriba abajo y la hoja clavada en el suelo es la ventana para
+  pegarle. En el juego ya se llama «espadazo» y la ficha de B5 describe la espada.
+- **Los conceptos del jefe no se importan:** hay que trabajarlos siguiendo la ficha de B5.
 
 ### Resuelto en la v0.14
 
@@ -45,6 +54,14 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.15: qué cambió respecto de la v0.14
+
+- **La Centinela lleva espada.** El ataque «martillazo» pasa a llamarse «espadazo» en el juego,
+  los datos y las pruebas. La mecánica no cambia. Va en la misma rama `ajustes-nivel1`.
+- **Ficha de la Centinela (B5) reescrita:** espada en vez de martillo, qué pose de
+  `PosiblesAnimacionesJefe1` sirve para cada clip y qué falta por dibujar. Los conceptos no se
+  importan.
 
 ## Revisión 0.14: qué cambió respecto de la v0.13
 
@@ -175,7 +192,7 @@ importarlas. Eso no lo puedo hacer yo: no genero ni edito imágenes.
 | `tileset_32 (1).png` | Tileset volcánico de basalto con lava | **Ya importado** en `Tesis2.0` con su paleta | — |
 | `posiblesanimaciiones kael.jpeg` | 8 poses de Kael: quieto, correr, saltar, caer, atacar, dash, herido y derrota | Recortar pose a pose, fondo transparente, PNG a 32 px por unidad, y montar los clips | P1 (fase 3) |
 | `AnimacionesGeneralesEnemigos.jpeg`, `EnemigosNiveles.jpeg` | Enemigos genéricos y por nivel | Igual | P1 (fase 4) |
-| `Jefes/Jefe1.jpeg`, `Fase2Jefe1.jpeg`, `PosiblesAnimacionesJefe1.jpeg` | Centinela Ardiente y su fase 2 | Igual | P2 (fase 7) |
+| `Jefes/Jefe1.jpeg`, `Fase2Jefe1.jpeg`, `PosiblesAnimacionesJefe1.jpeg` | Centinela Ardiente y su fase 2 | Son conceptos: no se importan. Guían los sprites, que se dibujan siguiendo la ficha de B5 | P1 |
 | `Jefes/jefe2.jpeg`, `jefe3.jpeg`, `Jefe4.jpeg`, `JefeFinal.jpeg` | Los otros cuatro jefes | Igual | P2 |
 | `Jefes/cinematicJefe1.jpeg`, `CinematicaJefefinal.jpeg` | Cinemáticas (imágenes fijas) | Recortar a 16:9 y guardar como PNG; van en `CutsceneData` | P2 (fase 8) |
 | `Jefes/fragmentos de alma.jpeg` | Iconos de los fragmentos de identidad | Recortar uno por fragmento | P2 |
@@ -413,7 +430,7 @@ rectángulos de color: avisan translúcidos y queman casi opacos.
 
 | Jefe | Estado | Falta | Prioridad |
 |---|---|---|---|
-| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, martillazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Sprites y animaciones (ficha abajo) y los VFX de la onda, las erupciones y la caída del salto. En la v1 existen `Characters/Bosses/Boss1/jefe1.1.png` y los clips `Idle`, `Walk` y `Attack`, que pueden servir de partida. | P1 |
+| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Sprites y animaciones (ficha abajo; conceptos en `Referencias/Arte/Jefes`) y los VFX de la onda, las erupciones y la caída del salto. En la v1 existen `Characters/Bosses/Boss1/jefe1.1.png` y los clips `Idle`, `Walk` y `Attack`, que pueden servir de partida. | P1 |
 | **Doncella del Lamento** (Tristeza) | Esqueleto: datos, prefab y dos fases sin patrones | Patrones de olas, inundación y congelamiento (Fase 10); todas las animaciones. Concepto: `Jefe2 (2).png` en la v1. | P2 |
 | **Espectro del Pavor** (Miedo) | Esqueleto: casi invisible en combate | Patrón de ataque con destello y clones (Fase 10); animaciones; la partícula que distingue al real. Concepto: `Jefe3 (2).png` en la v1. | P2 |
 | **Juez Silente** (Culpa) | Esqueleto: inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()` | Proyectar las memorias y conectarlas (`MemoryObject`, Fase 10); todo el arte. | P2 |
@@ -421,27 +438,55 @@ rectángulos de color: avisan translúcidos y queman casi opacos.
 
 #### Ficha: Centinela Ardiente (para dibujarla)
 
-**Qué es.** La Arquitecta de la Ira y el jefe del Nivel 1. Lleva un martillo. Se enfurece según
-pierde vida: más rápida, con menos pausas y, en la última fase, al rojo vivo (el rojo lo pongo yo
-por código).
+**Qué es.** La Arquitecta de la Ira y el jefe del Nivel 1: una armadura de roca volcánica con
+grietas de lava y un mandoble al rojo, como en tus conceptos. Se enfurece según pierde vida: más
+rápida, con menos pausas y, en la última fase, al rojo vivo (el rojo lo pongo yo por código).
+
+**La espada.** El Anexo A dice «martillazo», pero con espada funciona igual: el golpe es un tajo de
+arriba abajo y la hoja se queda clavada en el suelo, que es cuando se le pega. En el juego el ataque
+ya se llama «espadazo». Quema 2,6 × 2,6 u delante de ella: cabe un mandoble del largo de sus
+piernas, como el de los conceptos, así que no hay que tocar nada.
 
 **Tamaño.** 2,2 u de ancho y 3,4 u de alto, casi el doble que Kael. Recomendado a 1×, al detalle
 de Kael: unos 220 px de alto. Si la dibujas ampliada, que el lienzo no pase de 2048 px de lado; yo
 ajusto la importación.
+
+En `cinematicJefe1` es mucho más grande que Kael. En una cinemática vale, pero en el combate esa
+talla no dejaría sitio para esquivar. Si la quieres más grande, dímelo antes de dibujarla: cambian
+la hitbox y el alcance de los golpes.
+
+**Tus conceptos** (`Referencias/Arte/Jefes`). No los importo: sirven de guía. Las seis poses de
+`PosiblesAnimacionesJefe1` (de izquierda a derecha, fila de arriba y luego la de abajo) encajan así:
+
+| Pose del concepto | Clip |
+|---|---|
+| 1. De pie, la espada clavada y las manos en el pomo | Golpe al suelo: clava la espada y salen las ondas. También vale para la presentación |
+| 2. La espada baja, en diagonal (como en `Jefe1`) | Idle y base de Andar |
+| 3. La espada sobre la cabeza y el pecho encendido | Anticipación del espadazo: es el aviso que el jugador aprende a leer |
+| 4. El barrido con la estela | Golpe del espadazo |
+| 5. Las grietas estallan y alza el puño | Rugido |
+| 6. Apagada, gris y de rodillas | Muerte: la ira se enfría y «el suelo se estabiliza» |
+
+- **`Fase2Jefe1`**, con la armadura rota y el núcleo blanco a la vista, puede ser su aspecto desde
+  el 50 %. Es opcional: si la dibujas, cambio el sprite al entrar en la fase 2.
+- **Lo que falta en los conceptos:** el salto entero, la espada clavada (atrapada y sacándola) y
+  los fotogramas intermedios de cada clip.
+- **Al recortar:** los conceptos tienen pintado el cuadriculado de la transparencia. Los sprites
+  necesitan transparencia real.
 
 **Animaciones.** Cada ataque tiene que reconocerse por la pose antes de que llegue: así el jugador
 aprende a esquivarlo.
 
 | Clip | Qué hace | Tiempo en el juego | Fotogramas sugeridos |
 |---|---|---|---|
-| Idle | Quieta, el martillo en la mano | Bucle | 2–4 |
+| Idle | Quieta, la espada baja en la mano | Bucle | 2–4 |
 | Andar | Avanza hacia el jugador: 2,4 u/s, que llega a 3,8 en la última fase | Bucle; ajusto el ritmo a la velocidad | 4–6 |
-| Martillazo | Levanta el martillo y lo descarga delante | Anticipación: 0,55 s el primero y 0,3–0,35 s los encadenados. Golpe: 0,15 s | 3–4 |
-| Martillo clavado | El martillo queda hundido en el suelo y ella atrapada: es cuando se le pega | 1,2 s (0,9 s en furia) | 1–2, más 1–2 para sacarlo |
-| Golpe al suelo | Golpea el suelo y salen las ondas | Anticipación 0,5–0,6 s, golpe breve | 2–3 |
-| Salto | Se agacha, salta y cae con todo su peso | Agacharse 0,5 s, aire 0,8 s, caída breve | 4–5: agachada, subiendo, cayendo y aterrizaje |
+| Espadazo | Levanta la espada sobre la cabeza y la descarga delante | Anticipación: 0,55 s el primero y 0,3–0,35 s los encadenados. Golpe: 0,15 s | 3–4 |
+| Espada clavada | La hoja queda hundida en el suelo y ella atrapada: es cuando se le pega | 1,2 s (0,9 s en furia) | 1–2, más 1–2 para sacarla |
+| Golpe al suelo | Clava la espada y salen las ondas | Anticipación 0,5–0,6 s, golpe breve | 2–3 |
+| Salto | Se agacha, salta y cae con todo su peso, la espada por delante | Agacharse 0,5 s, aire 0,8 s, caída breve | 4–5: agachada, subiendo, cayendo y aterrizaje |
 | Rugido | Al empezar las fases 2 y 3 | 0,9 s | 2–3 |
-| Muerte | Explosión o derrumbe | 2 s | 3–5 |
+| Muerte | Se apaga y cae de rodillas | 2 s | 3–5 |
 | Daño | — | Por código: destello | Ninguno |
 
 **Formato.** El mismo que el Eco y el Golem.
@@ -551,6 +596,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.15 (2026-10-02)** — La Centinela lleva espada: el «martillazo» pasa a ser «espadazo» y la ficha de B5 se reescribe con las poses de los conceptos, que no se importan.
 - **0.14 (2026-10-02)** — Respuestas a la primera prueba del Nivel 1, en la rama `ajustes-nivel1`.
   - Resueltos N1, N4, N6, N9, N12, N13 y N14.
   - Nuevos N16 (pelear con la Centinela), N17 (presentación del jefe) y N18 (escala del Eco).

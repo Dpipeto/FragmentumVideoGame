@@ -66,10 +66,10 @@ namespace Fragmentum.EditorTools
             // Centinela Ardiente. Tras la primera prueba se sentía fácil: ahora encadena golpes,
             // salta sobre el jugador y tiene una tercera fase de ira desatada (CHANGELOG). Los
             // avisos nunca bajan de 0,3 s: más rápida, pero siempre legible.
-            var martillazo = Patron<PatronMartillazo>("Martillazo", sobrescribir, p =>
+            var espadazo = Patron<PatronEspadazo>("Espadazo", sobrescribir, p =>
             {
-                p.nombre = "Martillazo";
-                p.descripcion = "Se acerca, avisa y golpea delante dos veces seguidas; tras el segundo el martillo queda clavado 1,2 s (ventana vulnerable).";
+                p.nombre = "Espadazo";
+                p.descripcion = "Se acerca, avisa y golpea delante dos veces seguidas; tras el segundo la espada queda clavada 1,2 s (ventana vulnerable).";
                 p.aviso = 0.55f;
                 p.danio = 1;
                 p.golpes = 2;
@@ -77,10 +77,10 @@ namespace Fragmentum.EditorTools
                 p.color = Hex("FF6B35");
             });
 
-            var martillazoFuria = Patron<PatronMartillazo>("MartillazoFuria", sobrescribir, p =>
+            var espadazoFuria = Patron<PatronEspadazo>("EspadazoFuria", sobrescribir, p =>
             {
-                p.nombre = "Martillazo de furia";
-                p.descripcion = "Combo de tres martillazos, echándose encima del jugador entre uno y otro. La ventana dura menos (0,9 s).";
+                p.nombre = "Espadazo de furia";
+                p.descripcion = "Combo de tres espadazos, echándose encima del jugador entre uno y otro. La ventana dura menos (0,9 s).";
                 p.aviso = 0.45f;
                 p.danio = 1;
                 p.golpes = 3;
@@ -160,9 +160,9 @@ namespace Fragmentum.EditorTools
                 j.tamano = new Vector2(2.2f, 3.4f);
                 j.fases = new List<FaseJefe>
                 {
-                    Fase("Martillazo y onda de suelo", 1f, 0.7f, 1f, martillazo, onda, salto, martillazo, onda),
-                    Fase("Furia: plataformas en erupción (50 %)", 0.5f, 0.5f, 1.3f, ondaDoble, martillazoFuria, erupcion, salto, martillazoFuria, erupcion),
-                    Fase("Ira desatada (25 %)", 0.25f, 0.3f, 1.6f, ondaDoble, erupcionRafaga, salto, martillazoFuria, salto, ondaDoble, martillazoFuria),
+                    Fase("Espadazo y onda de suelo", 1f, 0.7f, 1f, espadazo, onda, salto, espadazo, onda),
+                    Fase("Furia: plataformas en erupción (50 %)", 0.5f, 0.5f, 1.3f, ondaDoble, espadazoFuria, erupcion, salto, espadazoFuria, erupcion),
+                    Fase("Ira desatada (25 %)", 0.25f, 0.3f, 1.6f, ondaDoble, erupcionRafaga, salto, espadazoFuria, salto, ondaDoble, espadazoFuria),
                 };
             });
 

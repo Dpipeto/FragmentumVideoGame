@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f4ddd8d03da85b49929d881980e9e55, type: 3}
-  m_Name: Martillazo
-  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronMartillazo
-  nombre: Martillazo
-  descripcion: Se acerca, avisa y golpea delante dos veces seguidas; tras el segundo el martillo queda clavado 1,2 s (ventana vulnerable).
+  m_Name: Espadazo
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronEspadazo
+  nombre: Espadazo
+  descripcion: Se acerca, avisa y golpea delante dos veces seguidas; tras el segundo la espada queda clavada 1,2 s (ventana vulnerable).
   aviso: 0.55
   danio: 1
   color: {r: 1, g: 0.41960785, b: 0.20784314, a: 1}

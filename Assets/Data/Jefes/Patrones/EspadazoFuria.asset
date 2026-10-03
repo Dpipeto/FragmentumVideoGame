@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f4ddd8d03da85b49929d881980e9e55, type: 3}
-  m_Name: MartillazoFuria
-  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronMartillazo
-  nombre: Martillazo de furia
-  descripcion: "Combo de tres martillazos, ech\xE1ndose encima del jugador entre uno y otro. La ventana dura menos (0,9 s)."
+  m_Name: EspadazoFuria
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronEspadazo
+  nombre: Espadazo de furia
+  descripcion: "Combo de tres espadazos, ech\xE1ndose encima del jugador entre uno y otro. La ventana dura menos (0,9 s)."
   aviso: 0.45
   danio: 1
   color: {r: 1, g: 0.41960785, b: 0.20784314, a: 1}

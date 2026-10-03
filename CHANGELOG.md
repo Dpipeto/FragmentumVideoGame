@@ -22,7 +22,8 @@ Rama `ajustes-nivel1`, que sale de `enemigo-eco-ira`. El autor jugó el Nivel 1 
 - la Centinela se siente fácil: tiene que transmitir la ira;
 - al entrar en la arena tiene que haber una cinemática corta con el diálogo del jefe.
 
-Además dio el visto bueno para fusionar las ramas que había (N6).
+Además dio el visto bueno para fusionar las ramas que había (N6). Después señaló que los
+conceptos de la Centinela llevan espada, no martillo (sección 6).
 
 ### 1. El golpe del Eco de la Ira era lento
 
@@ -55,13 +56,13 @@ Además dio el visto bueno para fusionar las ramas que había (N6).
 - **Problema.** El combate no transmitía la ira del mundo.
 - **Causa.**
   - Un solo ataque cada vez, con pausas de 0,9 s.
-  - El martillazo, que es el que abre la ventana, era siempre el mismo.
+  - El espadazo, que es el que abre la ventana, era siempre el mismo.
   - La fase 2 solo añadía erupciones.
   - Con 24 de vida y una ventana de 1,2 s a doble daño, caía en unas cuatro ventanas.
 - **Solución.** Casi todo son datos. Solo hay un patrón nuevo, el salto, y tres campos nuevos.
   - **Patrones ampliados:**
-    - `PatronMartillazo.golpes`: el martillazo es un combo y solo el último deja el martillo
-      clavado;
+    - `PatronEspadazo.golpes`: el espadazo es un combo y solo el último deja la espada
+      clavada;
     - `PatronOndaSuelo.repeticiones`: hay que saltar una onda detrás de otra.
   - **Patrón nuevo, `PatronSaltoAplastante`:**
     - salta hacia el jugador y marca en el suelo dónde caerá desde que despega;
@@ -73,19 +74,19 @@ Además dio el visto bueno para fusionar las ramas que había (N6).
 
     | Fase | Desde | Velocidad | Pausa | Ataques, en orden |
     |---|---|---|---|---|
-    | 1 | 100 % | ×1 (2,4 u/s) | 0,7 s | martillazo ×2, onda, salto, martillazo ×2, onda |
-    | 2 · Furia | 50 % | ×1,3 | 0,5 s | onda doble, martillazo ×3, erupción (4), salto, martillazo ×3, erupción |
-    | 3 · Ira desatada | 25 % | ×1,6 | 0,3 s | onda doble, ráfaga de erupciones (6), salto, martillazo ×3, salto, onda doble, martillazo ×3 |
+    | 1 | 100 % | ×1 (2,4 u/s) | 0,7 s | espadazo ×2, onda, salto, espadazo ×2, onda |
+    | 2 · Furia | 50 % | ×1,3 | 0,5 s | onda doble, espadazo ×3, erupción (4), salto, espadazo ×3, erupción |
+    | 3 · Ira desatada | 25 % | ×1,6 | 0,3 s | onda doble, ráfaga de erupciones (6), salto, espadazo ×3, salto, onda doble, espadazo ×3 |
 
   - **El rugido.** Al empezar las fases 2 y 3 ruge 0,9 s, quieta y sin atacar: es la señal de que
     el combate cambia. Lo hace el nuevo paso `EsperaAlEmpezarFase` del Template Method. En la
     fase 3, además, se pone al rojo.
   - **Vida y velocidad.** La vida sube de 24 a 30 y la velocidad de 2,2 a 2,4 u/s.
   - **Ventana vulnerable.** En la fase 1 sigue durando 1,2 s, como pide el Anexo A. En las fases 2
-    y 3, el martillazo de furia la deja en 0,9 s.
+    y 3, el espadazo de furia la deja en 0,9 s.
   - **Límites, para que siga siendo justo:**
     - ningún aviso baja de 0,3 s;
-    - cada fase tiene un martillazo que abre la ventana, así que siempre hay por dónde ganarle.
+    - cada fase tiene un espadazo que abre la ventana, así que siempre hay por dónde ganarle.
   - **Para la tesis.** La tercera fase no está en el Anexo A: hay que anotarla en el capítulo de
     diseño.
 
@@ -125,6 +126,28 @@ Además dio el visto bueno para fusionar las ramas que había (N6).
 - **Cambio del autor en el Nivel 1:** el primer Eco, en x = 12,5, tiene escala 1,8 × 1,5. Se
   conserva tal cual; la pregunta va en PENDIENTES (N18).
 
+### 6. La Centinela lleva espada, no martillo
+
+- **Problema.** El autor señaló que los conceptos de la Centinela (`Referencias/Arte/Jefes`) llevan
+  un mandoble, mientras el juego hablaba de martillazos.
+- **Causa.** El Anexo A describe la fase 1 como «martillazo directo». Se tomó al pie de la letra:
+  el patrón se llamó `PatronMartillazo` y la ficha de arte pedía un martillo.
+- **Solución.** Solo cambian los nombres: la mecánica funciona igual con cualquier arma.
+  - **El golpe.** Es un tajo de arriba abajo y la espada queda clavada en el suelo: esa es la
+    ventana vulnerable.
+  - **Los nombres.** `PatronMartillazo` pasa a `PatronEspadazo`, y los assets `Martillazo` y
+    `MartillazoFuria` a `Espadazo` y `EspadazoFuria`. Se renombraron con su `.meta`: el GUID no
+    cambia y `CentinelaArdiente.asset` los sigue encontrando.
+  - **El alcance.** La zona del golpe (2,6 × 2,6 u delante) ya cubre un mandoble del largo de sus
+    piernas, como el de los conceptos. No se toca.
+  - **El arte.** La ficha de B5 en `PENDIENTES.md` describe la espada y dice qué pose de los
+    conceptos sirve para cada clip. Los conceptos no se importan: el autor los va a trabajar
+    siguiendo la ficha.
+  - **Entradas anteriores.** Las de este CHANGELOG conservan el nombre antiguo.
+- **Para la tesis.** Anotar que el «martillazo» del Anexo A se implementó como espadazo.
+- **Verificación.** Tras el cambio se repitió todo: compilación sin errores ni avisos, 234 de 234
+  pruebas EditMode y 99 de 99 PlayMode. La regeneración no creó assets nuevos.
+
 ### Verificación
 
 - **Compilación** con `dotnet build`: 0 errores y 0 avisos.
@@ -140,7 +163,7 @@ Además dio el visto bueno para fusionar las ramas que había (N6).
   - `Interact` no lleva *Hold*;
   - el controlador del Eco tiene `VelocidadAtaque` en el estado Attack.
 - **Pruebas PlayMode: 99 de 99 correctas.** Hay 5 nuevas y 3 ampliadas:
-  - el martillazo son dos golpes y la ventana solo se abre tras el segundo;
+  - el espadazo son dos golpes y la ventana solo se abre tras el segundo;
   - el salto marca la caída bajo el jugador, no hace daño en el aire, cae donde marcó, suelta
     las ondas y quema al jugador que no se apartó;
   - la fase 3 llega al 25 % (1 → 2 → 3), ruge sin atacar, persigue más rápido y se pone al rojo;
@@ -177,7 +200,7 @@ Además dio el visto bueno para fusionar las ramas que había (N6).
   - al terminar, empieza el combate;
   - si mueres y vuelves, ya no sale.
 - **Centinela:**
-  - el martillazo son dos golpes y solo después se queda clavado;
+  - el espadazo son dos golpes y solo después se queda clavada la espada;
   - el salto marca en el suelo dónde caerá: apártate y salta la onda;
   - al 50 % ruge y se acelera;
   - al 25 % ruge otra vez, se pone al rojo y apenas descansa.

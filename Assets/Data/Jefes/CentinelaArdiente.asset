@@ -21,7 +21,7 @@ MonoBehaviour:
   danioContacto: 1
   velocidad: 2.4
   fases:
-  - nombre: Martillazo y onda de suelo
+  - nombre: Espadazo y onda de suelo
     umbralVida: 1
     patrones:
     - {fileID: 11400000, guid: 3130ca1e98550ce4ab1db9f94e3a2524, type: 2}

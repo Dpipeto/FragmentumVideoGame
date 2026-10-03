@@ -360,7 +360,7 @@ namespace Fragmentum.Bosses
         /// <summary>
         /// Pide la ventana vulnerable: el jefe se detiene y recibe más daño durante
         /// <paramref name="duracion"/> segundos (por defecto, los de sus datos). La abre un patrón
-        /// (el martillo clavado de la Centinela) o el propio jefe (la memoria correcta del Juez).
+        /// (la espada clavada de la Centinela) o el propio jefe (la memoria correcta del Juez).
         /// </summary>
         public void AbrirVentanaVulnerable(float duracion = -1f)
         {

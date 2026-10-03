@@ -4,16 +4,19 @@ using UnityEngine;
 namespace Fragmentum.Bosses.Patrones
 {
     /// <summary>
-    /// Martillazo directo (Centinela Ardiente). El jefe se acerca al jugador, avisa, descarga el
-    /// martillo delante de él y lo deja clavado: mientras tanto queda vulnerable (Anexo A: 1,2 s).
-    /// Es el momento de devolverle el golpe.
+    /// Espadazo directo (Centinela Ardiente). El jefe se acerca al jugador, avisa levantando la
+    /// espada, la descarga delante de él y la deja clavada en el suelo: mientras tanto queda
+    /// vulnerable (Anexo A: 1,2 s). Es el momento de devolverle el golpe.
+    ///
+    /// El Anexo A lo llama «martillazo directo», pero el arte de la Centinela lleva un mandoble:
+    /// es un tajo descendente. La mecánica es la misma.
     ///
     /// Con <see cref="golpes"/> &gt; 1 es un combo: tras cada golpe vuelve a echarse encima del
-    /// jugador y golpea otra vez con un aviso más corto. El martillo solo se queda clavado en el
+    /// jugador y golpea otra vez con un aviso más corto. La espada solo se queda clavada en el
     /// último: la Ira no deja respirar hasta que se agota.
     /// </summary>
-    [CreateAssetMenu(menuName = "Fragmentum/Jefes/Patrón: martillazo", fileName = "PatronMartillazo")]
-    public class PatronMartillazo : PatronAtaque
+    [CreateAssetMenu(menuName = "Fragmentum/Jefes/Patrón: espadazo", fileName = "PatronEspadazo")]
+    public class PatronEspadazo : PatronAtaque
     {
         [Tooltip("Distancia horizontal (entre centros) desde la que golpea.")]
         [Min(0f)] public float alcance = 3f;
@@ -27,7 +30,7 @@ namespace Fragmentum.Bosses.Patrones
         [Min(0.02f)] public float duracionGolpe = 0.15f;
 
         [Header("Combo")]
-        [Tooltip("Martillazos seguidos. Solo el último deja el martillo clavado.")]
+        [Tooltip("Espadazos seguidos. Solo el último deja la espada clavada.")]
         [Min(1)] public int golpes = 1;
 
         [Tooltip("Aviso de los golpes que siguen al primero: más corto, pero siempre visible.")]
@@ -40,7 +43,7 @@ namespace Fragmentum.Bosses.Patrones
         [Min(0.1f)] public float impulsoEncadenado = 1.6f;
 
         [Header("Ventana vulnerable")]
-        [Tooltip("Con el martillo clavado el jefe queda vulnerable.")]
+        [Tooltip("Con la espada clavada el jefe queda vulnerable.")]
         public bool abreVentana = true;
 
         [Tooltip("Duración de la ventana; 0 = la del JefeData.")]
@@ -60,7 +63,7 @@ namespace Fragmentum.Bosses.Patrones
                 yield return new WaitForSeconds(espera);
 
                 var centro = jefe.PuntoDelante(jefe.MedioAncho + tamanoGolpe.x * 0.5f - 0.3f, tamanoGolpe.y * 0.5f);
-                jefe.CrearZona("Martillazo", centro, tamanoGolpe, danio, 0f, duracionGolpe, Vector2.zero, color);
+                jefe.CrearZona("Espadazo", centro, tamanoGolpe, danio, 0f, duracionGolpe, Vector2.zero, color);
                 yield return new WaitForSeconds(duracionGolpe);
             }
 
