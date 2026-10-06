@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Fragmentum.EditorTools;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -16,6 +19,9 @@ namespace Fragmentum.Tests
     ///
     /// Los 8 clips tienen los tiempos del LEEME, sin normalizar; la espada clavada forcejea sin
     /// fotograma extra y la muerte se queda en D4.
+    ///
+    /// El controlador tiene un estado por clip, sin estados sueltos ni transiciones rotas: el
+    /// rugido y la muerte interrumpen cualquier estado, y la muerte no tiene salida.
     /// </summary>
     public class CentinelaArteTests
     {
@@ -285,6 +291,138 @@ namespace Fragmentum.Tests
                     Assert.IsFalse(mueve, $"{definicion.Estado}: el sprite no se mueve; si no, el jefe saltaría al cambiar de clip.");
                 }
             }
+        }
+
+        // --- Controlador ---
+
+        private static AnimatorController Controlador()
+        {
+            var controlador = ConstructorCentinela.Controlador;
+            Assert.IsNotNull(controlador, $"Falta {ConstructorCentinela.RutaControlador}: ejecuta Fragmentum → Regenerar todo.");
+            return controlador;
+        }
+
+        private static Dictionary<string, AnimatorState> Estados() =>
+            Controlador().layers[0].stateMachine.states.Select(s => s.state).ToDictionary(s => s.name);
+
+        private static string Descripcion(AnimatorStateTransition t) =>
+            $"{t.destinationState.name}:{(t.hasExitTime ? t.exitTime.ToString("0.###", CultureInfo.InvariantCulture) : "-")}:" +
+            string.Join(",", t.conditions.Select(c => $"{c.mode}{c.parameter}"));
+
+        private static readonly string[] Ataques =
+        {
+            ConstructorCentinela.Espadazo, ConstructorCentinela.EspadaClavada, ConstructorCentinela.GolpeSuelo,
+            ConstructorCentinela.Salto, ConstructorCentinela.Rugido,
+        };
+
+        [Test]
+        public void ElControlador_TieneUnEstadoPorClip_YEmpiezaEnIdle()
+        {
+            var estados = Estados();
+            CollectionAssert.AreEquivalent(ConstructorCentinela.Clips.Select(c => c.Estado), estados.Keys);
+            Assert.AreEqual(ConstructorCentinela.Idle, Controlador().layers[0].stateMachine.defaultState.name);
+            Assert.AreEqual(1, Controlador().layers.Length);
+
+            foreach (var estado in estados.Values)
+            {
+                Assert.AreSame(Clip(estado.name), estado.motion, $"{estado.name} reproduce su clip.");
+                Assert.AreEqual(1f, estado.speed, $"{estado.name}: los tiempos del LEEME, sin acelerar ni frenar.");
+                Assert.IsFalse(estado.speedParameterActive, estado.name);
+                Assert.IsTrue(estado.writeDefaultValues, $"{estado.name}: al salir de EspadaClavada el forcejeo vuelve a 0.");
+            }
+
+            CollectionAssert.AreEqual(
+                new[] { "Walk:Bool", "Espadazo:Trigger", "Clavar:Bool", "GolpeSuelo:Trigger", "Salto:Trigger", "Rugido:Trigger", "Death:Bool" },
+                Controlador().parameters.Select(p => $"{p.name}:{p.type}"));
+        }
+
+        [Test]
+        public void LaMuerteYElRugido_InterrumpenCualquierEstado_YLaMuerteNoTieneSalida()
+        {
+            var maquina = Controlador().layers[0].stateMachine;
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    "Muerte:-:IfDeath",
+                    "Rugido:-:IfRugido,IfNotDeath",
+                    "Espadazo:-:IfEspadazo,IfNotDeath",
+                    "GolpeSuelo:-:IfGolpeSuelo,IfNotDeath",
+                    "Salto:-:IfSalto,IfNotDeath",
+                },
+                maquina.anyStateTransitions.Select(Descripcion),
+                "La muerte va la primera; los demás no la interrumpen.");
+
+            var repiten = maquina.anyStateTransitions.Where(t => t.canTransitionToSelf).Select(t => t.destinationState.name);
+            CollectionAssert.AreEquivalent(new[] { ConstructorCentinela.Espadazo, ConstructorCentinela.GolpeSuelo }, repiten,
+                "Solo se repiten los combos de espadazos y la onda doble; la muerte y el rugido no se reinician.");
+
+            Assert.IsEmpty(Estados()[ConstructorCentinela.Muerte].transitions, "D4, la ceniza con el fragmento, se queda en pantalla.");
+        }
+
+        [Test]
+        public void ElEspadazo_ClavaLaEspadaAlAcabarE2_OSigueHastaE4()
+        {
+            var espadazo = ConstructorCentinela.ClipDe(ConstructorCentinela.Espadazo);
+            var finE2 = (0.55f + 0.08f) / espadazo.Duracion;
+            var clavar = Estados()[ConstructorCentinela.Espadazo].transitions[0];
+            Assert.AreEqual(ConstructorCentinela.EspadaClavada, clavar.destinationState.name);
+            Assert.IsTrue(clavar.hasExitTime);
+            Assert.AreEqual(finE2, clavar.exitTime, 1e-4f, "Justo cuando empezaría E3.");
+            Assert.AreEqual("IfClavar", string.Join(",", clavar.conditions.Select(c => $"{c.mode}{c.parameter}")));
+        }
+
+        [Test]
+        public void CadaAtaque_VuelveAIdleAlAcabar_OAAndarSiYaCamina()
+        {
+            var estados = Estados();
+            CollectionAssert.AreEqual(new[] { "Andar:-:IfWalk" }, estados[ConstructorCentinela.Idle].transitions.Select(Descripcion));
+            CollectionAssert.AreEqual(new[] { "Idle:-:IfNotWalk" }, estados[ConstructorCentinela.Andar].transitions.Select(Descripcion));
+
+            foreach (var ataque in Ataques)
+            {
+                // Andar va antes: si ya camina, no se ve ni un fotograma del idle frontal.
+                var finales = estados[ataque].transitions.Skip(ataque == ConstructorCentinela.Espadazo ? 1 : 0).Select(Descripcion);
+                CollectionAssert.AreEqual(new[] { "Andar:1:IfWalk", "Idle:1:" }, finales, ataque);
+            }
+        }
+
+        [Test]
+        public void NingunEstadoSuelto_NiTransicionesRotas_NiMezclas()
+        {
+            var controlador = Controlador();
+            var maquina = controlador.layers[0].stateMachine;
+            var estados = Estados();
+            var parametros = controlador.parameters.ToDictionary(p => p.name, p => p.type);
+            var todas = estados.Values.SelectMany(e => e.transitions).Concat(maquina.anyStateTransitions).ToList();
+
+            foreach (var t in todas)
+            {
+                Assert.IsNotNull(t.destinationState, $"{t.name}: sin destino.");
+                Assert.IsTrue(estados.ContainsValue(t.destinationState), $"{t.name}: el destino no está en el controlador.");
+                Assert.IsTrue(t.hasFixedDuration, t.name);
+                Assert.AreEqual(0f, t.duration, $"{t.name}: sin mezcla entre fotogramas de pixel art.");
+                Assert.AreEqual(0f, t.offset, t.name);
+                Assert.IsTrue(t.hasExitTime || t.conditions.Length > 0, $"{t.name}: sin condición ni tiempo de salida se tomaría siempre.");
+                foreach (var condicion in t.conditions)
+                {
+                    Assert.IsTrue(parametros.TryGetValue(condicion.parameter, out var tipo), $"{t.name}: falta el parámetro {condicion.parameter}.");
+                    Assert.That(tipo, Is.EqualTo(AnimatorControllerParameterType.Bool).Or.EqualTo(AnimatorControllerParameterType.Trigger), condicion.parameter);
+                    Assert.That(condicion.mode, Is.EqualTo(AnimatorConditionMode.If).Or.EqualTo(AnimatorConditionMode.IfNot), condicion.parameter);
+                }
+            }
+
+            foreach (var estado in estados.Values.Where(e => e != maquina.defaultState))
+            {
+                Assert.IsTrue(todas.Any(t => t.destinationState == estado), $"Nada lleva a {estado.name}.");
+            }
+
+            // Solo los ataques esperan a acabar su clip (y el espadazo, a acabar E2 para clavar).
+            foreach (var estado in estados.Values)
+            {
+                Assert.AreEqual(Ataques.Contains(estado.name), estado.transitions.Any(t => t.hasExitTime), estado.name);
+            }
+
+            Assert.IsFalse(maquina.anyStateTransitions.Any(t => t.hasExitTime), "Lo que interrumpe no espera.");
         }
 
         [Test]

@@ -105,6 +105,42 @@ encargo para integrarlo en cinco fases, parando al final de cada una:
 - **Los eventos de animación** (golpes, ventanas y fin de cada clip) se añaden en la fase D, junto
   con el componente que los recibe.
 
+### Fase C: Animator
+
+- **El controlador.** `CentinelaArdiente.controller` está en la misma carpeta que los clips y
+  tiene un estado por clip. Lo arma `ConstructorCentinela` desde la misma tabla, con el menú
+  *Fragmentum → Jefes → Generar los clips y el Animator de la Centinela* o con «Regenerar todo».
+  Empieza en Idle.
+- **Los parámetros** están en `AnimatorParams`, para que el código del jefe use los mismos nombres:
+
+  | Parámetro | Tipo | Qué hace |
+  |---|---|---|
+  | `Walk` | bool | Idle ↔ Andar mientras se mueve |
+  | `Espadazo`, `GolpeSuelo`, `Salto`, `Rugido` | disparador | empiezan su clip al momento, desde cualquier estado |
+  | `Clavar` | bool | el espadazo acaba con la espada clavada (C1-C4) en vez de E3-E4 |
+  | `Death` | bool | muere desde cualquier estado |
+
+- **El rugido y la muerte interrumpen cualquier estado.** La muerte va la primera y nada la
+  interrumpe: el estado Muerte no tiene salida y se queda en D4.
+- **Los ataques salen de cualquier estado, no solo de Andar.**
+  - **Problema.** El encargo pedía pasar de Caminar al ataque al entrar en rango.
+  - **Por qué no encaja.** En el combate actual los ataques se encadenan (dos o tres espadazos
+    seguidos, la onda doble) y cada golpe tiene que coincidir con su zona de daño. Si el ataque
+    esperara a que acabe el clip anterior, el dibujo iría por detrás del daño.
+  - **Solución.** Salen de cualquier estado. Solo el espadazo y el golpe al suelo pueden volver a
+    empezar sobre sí mismos; el salto, el rugido y la muerte no se reinician.
+- **La espada clavada sale del espadazo.** Con `Clavar`, el espadazo pasa a C1 justo al acabar E2
+  (a los 0,63 s de sus 1,15 s). Sin él sigue con E3 y E4. El jefe lo decide al empezar el último
+  espadazo del combo.
+- **Al acabar, a Idle o a Andar.** Cada ataque vuelve a Idle al acabar su clip, sin corte: E4 es
+  la pose de guardia. Si el jefe ya camina, va directo a Andar, porque el idle es frontal y un
+  solo fotograma suyo entre dos poses de perfil se notaría.
+- **Sin mezclas.** Todas las transiciones duran 0, porque son fotogramas de pixel art. Solo
+  esperan a su clip las de fin de ataque y la de clavar la espada; lo que interrumpe no espera.
+- **Write defaults en todos los estados:** al salir de la espada clavada, el forcejeo vuelve a 0.
+  Para la fase D, el sprite tiene que estar a altura 0 dentro del jefe, porque el forcejeo fija
+  la altura, no la suma.
+
 ### Verificación (fase A)
 
 - **Compilación** con `dotnet build` y en Unity 6000.6.3f1 en modo batch: 0 errores y 0 avisos.
@@ -130,6 +166,26 @@ encargo para integrarlo en cinco fases, parando al final de cada una:
   - el forcejeo sube un píxel cada 0,3 s, en escalones y solo en C2;
   - ningún otro clip mueve el sprite, tampoco el salto.
 - **Pruebas PlayMode: 99 de 99 correctas.** No cambian: el jefe todavía no usa el arte.
+
+### Verificación (fase C)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 250 de 250 correctas.** Hay 5 nuevas en `CentinelaArteTests` sobre el
+  controlador:
+  - un estado por clip, sin acelerar ni frenar, y empieza en Idle;
+  - la muerte y el rugido interrumpen cualquier estado, y la muerte no tiene salida;
+  - el espadazo clava la espada justo al acabar E2;
+  - cada ataque vuelve a Idle al acabar, o a Andar si ya camina;
+  - ningún estado suelto, ninguna transición rota (sin destino o con un parámetro que no existe)
+    y ninguna mezcla.
+- **Pruebas PlayMode: 104 de 104 correctas.** Hay 5 nuevas en `CentinelaAnimatorPlayModeTests`, con
+  el Animator reproduciendo de verdad:
+  - cada ataque pasa por sus fotogramas con los tiempos del LEEME (margen de 0,05 s) y vuelve al
+    idle;
+  - con `Clavar`, de E2 a C1; C2 dura 1,2 s y solo ahí el sprite sube un píxel y baja;
+  - un segundo espadazo durante E3 vuelve a empezar en E1;
+  - si ya camina, de G3 pasa a andar sin ver el idle;
+  - el rugido corta el espadazo, la muerte corta el rugido y, después, nada la saca de D4.
 
 ---
 

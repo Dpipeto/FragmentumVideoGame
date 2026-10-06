@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Fragmentum.Core;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 using static Fragmentum.EditorTools.UtilidadesEditor;
 
@@ -12,8 +14,9 @@ namespace Fragmentum.EditorTools
     /// 1. importa los 29 fotogramas de <see cref="CarpetaSprites"/> como pixel art, con el mismo
     ///    lienzo y el mismo pivote en los pies para todos (si no, saltaría al cambiar de clip);
     /// 2. crea los 8 clips desde <see cref="Clips"/>, con los tiempos del diseño y el forcejeo de
-    ///    la espada clavada.
-    /// El controlador y el prefab llegan en las siguientes fases.
+    ///    la espada clavada;
+    /// 3. arma su controlador (<see cref="RutaControlador"/>), con un estado por clip.
+    /// El prefab llega en la siguiente fase.
     ///
     /// El arte llega limpio y alineado desde <c>Tesis/Jefe1 animaciones/limpios</c>, que tiene su
     /// LEEME. Los PNG no se retocan: cualquier recorte o reescalado rompe el anclaje común.
@@ -148,20 +151,20 @@ namespace Fragmentum.EditorTools
 
         // --- Menús y modo batch ---
 
-        [MenuItem("Fragmentum/Jefes/Generar los clips de la Centinela", priority = 142)]
+        [MenuItem("Fragmentum/Jefes/Generar los clips y el Animator de la Centinela", priority = 142)]
         public static void MenuConstruir()
         {
             if (Construir())
             {
-                EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<AnimationClip>(ClipDe(Idle).Ruta));
+                EditorGUIUtility.PingObject(Controlador);
             }
         }
 
         // --- Construcción ---
 
         /// <summary>
-        /// Fija los ajustes de importación y crea los clips. Devuelve false solo si algo falló; si
-        /// faltan fotogramas avisa y no construye nada.
+        /// Fija los ajustes de importación y crea los clips y el controlador. Devuelve false solo si
+        /// algo falló; si faltan fotogramas avisa y no construye nada.
         /// </summary>
         public static bool Construir()
         {
@@ -192,13 +195,11 @@ namespace Fragmentum.EditorTools
             }
 
             AsegurarCarpeta(CarpetaAnimaciones);
-            foreach (var definicion in Clips)
-            {
-                CrearClip(definicion, sprites);
-            }
+            var clips = Clips.ToDictionary(c => c.Estado, c => CrearClip(c, sprites));
+            ArmarControlador(clips);
 
             AssetDatabase.SaveAssets();
-            Debug.Log($"[Fragmentum] Centinela Ardiente: {sprites.Count} fotogramas y {Clips.Length} clips en {CarpetaAnimaciones}.");
+            Debug.Log($"[Fragmentum] Centinela Ardiente: {sprites.Count} fotogramas, {Clips.Length} clips y su controlador en {CarpetaAnimaciones}.");
             return true;
         }
 
@@ -299,6 +300,175 @@ namespace Fragmentum.EditorTools
             }
 
             return curva;
+        }
+
+        // --- 3. Controlador ---
+
+        public const string RutaControlador = CarpetaAnimaciones + "/CentinelaArdiente.controller";
+
+        public static AnimatorController Controlador => AssetDatabase.LoadAssetAtPath<AnimatorController>(RutaControlador);
+
+        /// <summary>El fotograma en el que el espadazo se convierte en espada clavada, si toca.</summary>
+        public const string FotogramaClavar = "E3";
+
+        private static readonly Dictionary<string, Vector3> PosicionEstados = new Dictionary<string, Vector3>
+        {
+            [Idle] = new Vector3(300f, 120f, 0f),
+            [Andar] = new Vector3(300f, 240f, 0f),
+            [Espadazo] = new Vector3(580f, 0f, 0f),
+            [EspadaClavada] = new Vector3(860f, 0f, 0f),
+            [GolpeSuelo] = new Vector3(580f, 100f, 0f),
+            [Salto] = new Vector3(580f, 200f, 0f),
+            [Rugido] = new Vector3(580f, 300f, 0f),
+            [Muerte] = new Vector3(860f, 300f, 0f),
+        };
+
+        /// <summary>
+        /// Un estado por clip. Lo maneja el código del jefe (fase D) con estos parámetros:
+        /// - Walk: Idle ↔ Andar mientras se mueve.
+        /// - Espadazo, GolpeSuelo, Salto y Rugido (disparadores): empiezan su clip al momento, desde
+        ///   cualquier estado. En el combate actual los ataques se encadenan (combos de espadazos,
+        ///   ondas dobles) y el golpe tiene que coincidir con su zona de daño: no pueden esperar a que
+        ///   acabe el clip anterior. El rugido interrumpe lo que esté haciendo.
+        /// - Clavar: el espadazo acaba con la espada clavada (C1-C4) en vez de recuperarse (E3-E4).
+        ///   Se fija al empezar el espadazo y el cambio se hace justo al acabar E2.
+        /// - Death: muere desde cualquier estado y se queda en D4: Muerte no tiene salida.
+        /// Cada ataque vuelve a Idle al acabar, o a Andar si ya camina (para no enseñar un fotograma
+        /// del idle frontal). Ninguna transición mezcla (duración 0): de E4 a Idle sale sin corte.
+        /// </summary>
+        private static AnimatorController ArmarControlador(IReadOnlyDictionary<string, AnimationClip> clips)
+        {
+            var controlador = Controlador ?? AnimatorController.CreateAnimatorControllerAtPath(RutaControlador);
+
+            AsegurarParametros(controlador,
+                (AnimatorParams.Walk.Nombre, AnimatorControllerParameterType.Bool),
+                (AnimatorParams.Espadazo.Nombre, AnimatorControllerParameterType.Trigger),
+                (AnimatorParams.Clavar.Nombre, AnimatorControllerParameterType.Bool),
+                (AnimatorParams.GolpeSuelo.Nombre, AnimatorControllerParameterType.Trigger),
+                (AnimatorParams.Salto.Nombre, AnimatorControllerParameterType.Trigger),
+                (AnimatorParams.Rugido.Nombre, AnimatorControllerParameterType.Trigger),
+                (AnimatorParams.Death.Nombre, AnimatorControllerParameterType.Bool));
+
+            var maquina = controlador.layers[0].stateMachine;
+            var estados = new Dictionary<string, AnimatorState>();
+            foreach (var definicion in Clips)
+            {
+                var nombre = definicion.Estado;
+                var estado = maquina.states.Select(s => s.state).FirstOrDefault(s => s.name == nombre) ??
+                             maquina.AddState(nombre, PosicionEstados[nombre]);
+                estado.motion = clips[nombre];
+                estado.speed = 1f;
+                estado.speedParameterActive = false;
+                estado.writeDefaultValues = true; // al salir de EspadaClavada el forcejeo vuelve a 0
+                estados[nombre] = estado;
+            }
+
+            foreach (var sobrante in maquina.states.Select(s => s.state).Where(s => !estados.ContainsKey(s.name)).ToList())
+            {
+                maquina.RemoveState(sobrante);
+            }
+
+            maquina.defaultState = estados[Idle];
+            maquina.anyStatePosition = new Vector3(40f, 0f, 0f);
+            maquina.entryPosition = new Vector3(40f, 120f, 0f);
+            maquina.exitPosition = new Vector3(1100f, 120f, 0f);
+
+            var si = AnimatorConditionMode.If;
+            var no = AnimatorConditionMode.IfNot;
+            var anda = new[] { Condicion(si, AnimatorParams.Walk) };
+            var clavada = ClipDe(Espadazo);
+            var finE2 = clavada.Inicio(System.Array.IndexOf(clavada.Fotogramas, FotogramaClavar)) / clavada.Duracion;
+
+            Transiciones(estados[Idle], ("Echa a andar", estados[Andar], null, anda));
+            Transiciones(estados[Andar], ("Se para", estados[Idle], null, new[] { Condicion(no, AnimatorParams.Walk) }));
+            Transiciones(estados[Espadazo],
+                ("Clava la espada", estados[EspadaClavada], finE2, new[] { Condicion(si, AnimatorParams.Clavar) }),
+                ("Acaba andando", estados[Andar], 1f, anda),
+                ("Acaba", estados[Idle], 1f, new AnimatorCondition[0]));
+            foreach (var ataque in new[] { EspadaClavada, GolpeSuelo, Salto, Rugido })
+            {
+                Transiciones(estados[ataque],
+                    ("Acaba andando", estados[Andar], 1f, anda),
+                    ("Acaba", estados[Idle], 1f, new AnimatorCondition[0]));
+            }
+
+            Transiciones(estados[Muerte]);
+
+            var vivo = Condicion(no, AnimatorParams.Death);
+            DesdeCualquierEstado(maquina,
+                ("Muere", estados[Muerte], false, new[] { Condicion(si, AnimatorParams.Death) }),
+                ("Ruge", estados[Rugido], false, new[] { Condicion(si, AnimatorParams.Rugido), vivo }),
+                ("Espadazo", estados[Espadazo], true, new[] { Condicion(si, AnimatorParams.Espadazo), vivo }),
+                ("Golpea el suelo", estados[GolpeSuelo], true, new[] { Condicion(si, AnimatorParams.GolpeSuelo), vivo }),
+                ("Salta", estados[Salto], false, new[] { Condicion(si, AnimatorParams.Salto), vivo }));
+
+            EditorUtility.SetDirty(controlador);
+            return controlador;
+        }
+
+        // Se reutilizan por nombre: así regenerar no cambia los identificadores del archivo.
+        // salida = null: sin tiempo de salida; si no, el tiempo normalizado del clip.
+        private static void Transiciones(AnimatorState desde, params (string nombre, AnimatorState hasta, float? salida, AnimatorCondition[] condiciones)[] deseadas)
+        {
+            foreach (var sobrante in desde.transitions.Where(t => deseadas.All(d => d.nombre != t.name)).ToList())
+            {
+                desde.RemoveTransition(sobrante);
+            }
+
+            foreach (var (nombre, hasta, salida, condiciones) in deseadas)
+            {
+                var transicion = desde.transitions.FirstOrDefault(t => t.name == nombre) ?? desde.AddTransition(hasta);
+                transicion.destinationState = hasta;
+                Configurar(transicion, nombre, salida, condiciones);
+            }
+
+            // El orden importa: la primera que se cumple gana.
+            desde.transitions = deseadas.Select(d => desde.transitions.First(t => t.name == d.nombre)).ToArray();
+        }
+
+        private static void DesdeCualquierEstado(AnimatorStateMachine maquina, params (string nombre, AnimatorState hasta, bool repetir, AnimatorCondition[] condiciones)[] deseadas)
+        {
+            foreach (var sobrante in maquina.anyStateTransitions.Where(t => deseadas.All(d => d.nombre != t.name)).ToList())
+            {
+                maquina.RemoveAnyStateTransition(sobrante);
+            }
+
+            foreach (var (nombre, hasta, repetir, condiciones) in deseadas)
+            {
+                var transicion = maquina.anyStateTransitions.FirstOrDefault(t => t.name == nombre) ?? maquina.AddAnyStateTransition(hasta);
+                transicion.destinationState = hasta;
+                Configurar(transicion, nombre, null, condiciones);
+                transicion.canTransitionToSelf = repetir;
+            }
+
+            // La muerte va la primera: gana a cualquier disparador del mismo fotograma.
+            maquina.anyStateTransitions = deseadas.Select(d => maquina.anyStateTransitions.First(t => t.name == d.nombre)).ToArray();
+        }
+
+        private static void Configurar(AnimatorStateTransition transicion, string nombre, float? salida, AnimatorCondition[] condiciones)
+        {
+            transicion.name = nombre;
+            transicion.hasExitTime = salida.HasValue;
+            transicion.exitTime = salida ?? 1f;
+            transicion.hasFixedDuration = true;
+            transicion.duration = 0f;
+            transicion.offset = 0f;
+            transicion.interruptionSource = TransitionInterruptionSource.None;
+            transicion.conditions = condiciones;
+        }
+
+        private static AnimatorCondition Condicion(AnimatorConditionMode modo, in AnimatorParams.Parametro parametro) =>
+            new AnimatorCondition { mode = modo, parameter = parametro.Nombre, threshold = 0f };
+
+        private static void AsegurarParametros(AnimatorController controlador, params (string nombre, AnimatorControllerParameterType tipo)[] deseados)
+        {
+            var actuales = controlador.parameters;
+            if (actuales.Length == deseados.Length && actuales.Zip(deseados, (a, d) => a.name == d.nombre && a.type == d.tipo).All(x => x))
+            {
+                return;
+            }
+
+            controlador.parameters = deseados.Select(d => new AnimatorControllerParameter { name = d.nombre, type = d.tipo }).ToArray();
         }
     }
 }

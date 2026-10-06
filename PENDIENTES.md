@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.17 — Arte de la Centinela: clips (fase B), 2026-10-05.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.18 — Arte de la Centinela: Animator (fase C), 2026-10-05.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -53,6 +53,14 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.18: qué cambió respecto de la v0.17
+
+- **Arte de la Centinela, fase C (Animator):** `CentinelaArdiente.controller`, con un estado por
+  clip. El rugido y la muerte interrumpen cualquier estado y la muerte se queda en D4. El
+  espadazo puede acabar con la espada clavada.
+- **Un cambio respecto de tu encargo:** los ataques salen de cualquier estado, no solo de Caminar,
+  porque el combate actual los encadena y el golpe tiene que coincidir con el daño (CHANGELOG).
 
 ## Revisión 0.17: qué cambió respecto de la v0.16
 
@@ -448,7 +456,7 @@ rectángulos de color: avisan translúcidos y queman casi opacos.
 
 | Jefe | Estado | Falta | Prioridad |
 |---|---|---|---|
-| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Integración del arte, en curso en la rama `centinela-arte`. Hechas la fase A (los 29 sprites, importados en `Assets/Sprites/Jefes/Centinela`) y la B (los 8 clips, en `Assets/Animaciones/Jefes/Centinela`). Faltan el Animator, la conexión con los ataques y la verificación (fases C a E). Después, los VFX de la onda, las erupciones y la caída del salto. | P1 |
+| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Integración del arte, en curso en la rama `centinela-arte`. Hechas la fase A (los 29 sprites, importados en `Assets/Sprites/Jefes/Centinela`), la B (los 8 clips, en `Assets/Animaciones/Jefes/Centinela`) y la C (su Animator, `CentinelaArdiente.controller`). Faltan la conexión con los ataques y la verificación (fases D y E). Después, los VFX de la onda, las erupciones y la caída del salto. | P1 |
 | **Doncella del Lamento** (Tristeza) | Esqueleto: datos, prefab y dos fases sin patrones | Patrones de olas, inundación y congelamiento (Fase 10); todas las animaciones. Concepto: `Jefe2 (2).png` en la v1. | P2 |
 | **Espectro del Pavor** (Miedo) | Esqueleto: casi invisible en combate | Patrón de ataque con destello y clones (Fase 10); animaciones; la partícula que distingue al real. Concepto: `Jefe3 (2).png` en la v1. | P2 |
 | **Juez Silente** (Culpa) | Esqueleto: inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()` | Proyectar las memorias y conectarlas (`MemoryObject`, Fase 10); todo el arte. | P2 |
@@ -617,6 +625,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.18 (2026-10-05)** — Arte de la Centinela, fase C: el Animator.
 - **0.17 (2026-10-05)** — Arte de la Centinela, fase B: los 8 clips. Se añade lo nuevo de la segunda versión del encargo.
 - **0.16 (2026-10-05)** — Arte de la Centinela, fase A: los 29 sprites, importados en la rama `centinela-arte`. B5 y la lista de arte al día.
 - **0.15 (2026-10-02)** — La Centinela lleva espada: el «martillazo» pasa a ser «espadazo» y la ficha de B5 se reescribe con las poses de los conceptos, que no se importan.

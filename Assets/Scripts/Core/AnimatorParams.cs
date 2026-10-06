@@ -44,6 +44,16 @@ namespace Fragmentum.Core
         // Multiplicador del estado Run de los Ecos: velocidad real / la del ciclo dibujado.
         public static readonly Parametro VelocidadCorrer = new Parametro("VelocidadCorrer");
 
+        // La Centinela Ardiente. Andar y morir usan Walk y Death; cada ataque tiene su disparador,
+        // que lo empieza al momento desde cualquier estado.
+        public static readonly Parametro Espadazo = new Parametro("Espadazo");
+        public static readonly Parametro GolpeSuelo = new Parametro("GolpeSuelo");
+        public static readonly Parametro Salto = new Parametro("Salto");
+        public static readonly Parametro Rugido = new Parametro("Rugido");
+
+        // El espadazo acaba con la espada clavada (C1-C4) en vez de recuperarse (E3-E4).
+        public static readonly Parametro Clavar = new Parametro("Clavar");
+
         /// <summary>¿El Animator tiene este parámetro? Avisa una sola vez por parámetro ausente.</summary>
         public static bool Existe(Animator animator, in Parametro parametro)
         {
