@@ -46,6 +46,9 @@ namespace Fragmentum.EditorTools
             // material de destello del Eco).
             ok &= ConstructorCentinela.Construir();
             ok &= GeneradorJefes.Construir();
+            // Si algo del arte de la Centinela no cuadra (un sprite reimportado sin sus ajustes,
+            // un clip o el prefab tocados a mano), la regeneración falla con su nombre.
+            ok &= VerificadorCentinela.Verificar();
             ok &= GeneradorMecanicas.CrearPrefabs();
             ok &= ConstructorFondoMundo1.Construir();
 

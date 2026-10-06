@@ -208,6 +208,28 @@ Aprobado por el autor tras la fase C («de acuerdo con todo»). El combate sigue
 - **Se mantiene** el destello rojo del aviso durante la anticipación, como hasta ahora.
 - **No se ha tocado** `EnemyController.cs` ni `GameManager.cs`.
 
+### Fase E: verificación
+
+- **El menú** *Fragmentum → Jefes → Verificar Centinela* (`VerificadorCentinela`) revisa los cinco
+  puntos del encargo:
+  1. los 29 sprites existen, con su lienzo de 262×252, sus píxeles por unidad (49; 58 el idle), el
+     pivote de los pies, Point, sin compresión, Full Rect, sin mipmaps y Clamp;
+  2. los 8 clips existen, con sus fotogramas en su sitio y la duración de la tabla (margen de
+     1 ms);
+  3. el Animator tiene los 8 estados con su clip y ninguno suelto, y ninguna transición rota: sin
+     destino, con un parámetro que no existe o sin condición ni tiempo de salida;
+  4. en el prefab, todo lo que hace daño (el contacto, la capa EnemyWeapon) está apagado en
+     reposo, el fragmento está escondido, el sprite está en los pies y lleva su Animator;
+  5. cada evento de animación llama a una función que existe en `AnimacionJefe`.
+- **Falla ruidosamente:** un error en la consola por cada problema, con el nombre de lo que falta
+  o está mal (por ejemplo, «Sprite D4: 100 píxeles por unidad (debe ser 49)»).
+- **También al final de «Regenerar todo».** Si algo no cuadra, la regeneración falla y
+  `verificar.ps1 -Unity` también. El importador ya vuelve a poner los ajustes de los sprites en
+  cada reimportación; el verificador avisa si eso dejara de pasar, o si un clip, el Animator o el
+  prefab se tocan a mano.
+- **Cada comprobación recibe lo que revisa.** Así las pruebas le pasan copias u objetos en memoria
+  rotos a propósito, sin tocar el arte del proyecto.
+
 ### Qué probar a mano (fase D)
 
 Desde `Menu_Inicial`, «Nueva partida», hasta la arena del Nivel 1:
@@ -299,6 +321,23 @@ Desde `Menu_Inicial`, «Nueva partida», hasta la arena del Nivel 1:
   - el Animator solo de la fase C recibe ahora los eventos con un receptor vacío;
   - la derrota que se desvanece se prueba con un jefe sin arte (la Doncella);
   - el flujo del Nivel 1 recoge el fragmento antes de comprobar la recompensa.
+
+### Verificación (fase E)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** termina con «[Centinela] Verificación correcta: 29 sprites, 8 clips, el
+  Animator, el prefab y los eventos».
+- **Pruebas EditMode: 260 de 260 correctas.** Hay 6 nuevas en `VerificadorCentinelaTests`:
+  - el proyecto pasa la verificación;
+  - un sprite con otro lienzo, 100 píxeles por unidad, el pivote en el centro, filtro bilineal y
+    comprimido se nombra con cada problema (y el idle pide 58);
+  - un clip igualado a 0,25 s y con E3 donde va E2 se nombra;
+  - una copia del Animator sin Salto, con un estado suelto, una transición a un parámetro que no
+    existe y otra sin condición se nombra;
+  - el prefab con el contacto encendido, el fragmento visible y el sprite fuera de los pies se
+    nombra;
+  - un evento a una función que no existe, o que no es un evento válido, se nombra.
+- **Pruebas PlayMode: 115 de 115 correctas.** No cambian.
 
 ---
 
