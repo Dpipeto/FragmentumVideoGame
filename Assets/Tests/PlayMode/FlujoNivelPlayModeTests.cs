@@ -188,7 +188,7 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator DerrotarALaCentinela_OtorgaFragmentoYHabilidad_YAbreLaSalida()
+        public IEnumerator DerrotarALaCentinela_YRecogerSuFragmento_OtorgaLaHabilidad_YAbreLaSalida()
         {
             yield return EntrarEnNivel1();
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
@@ -201,8 +201,16 @@ namespace Fragmentum.Tests.PlayMode
             yield return null;
             yield return null;
 
-            // Tarea C: al derrotar al jefe se otorgan el fragmento y la habilidad, en el acto.
+            // La Centinela cae y se queda en su ceniza, con el fragmento: aún no hay recompensa.
             Assert.IsTrue(arena.JefeDerrotado);
+            Assert.IsTrue(arena.Jefe.DejaFragmento);
+            CollectionAssert.DoesNotContain(Gestor.Datos.fragmentos, "IRA", "El fragmento hay que recogerlo.");
+            yield return EsperarHastaReal(() => arena.Jefe.Fragmento.Disponible, 4f, "que el fragmento aparezca en la ceniza (D4)");
+            Assert.IsFalse(arena.Superada, "La arena no se abre antes de recogerlo.");
+            CollectionAssert.DoesNotContain(Gestor.Datos.fragmentos, "IRA");
+
+            // Tarea C: al recoger el fragmento se otorgan el fragmento y la habilidad, en el acto.
+            yield return LlevarJugadorA(new Vector2(arena.Jefe.Fragmento.Centro.x, 0.05f));
             CollectionAssert.Contains(Gestor.Datos.fragmentos, "IRA");
             Assert.IsTrue(Jugador.Habilidades.Tiene(HABILIDADES.ATAQUE_CARGADO), "El Ataque Cargado se puede usar ya, antes de salir.");
             CollectionAssert.Contains(new SaveSystem(CarpetaGuardado).Cargar().fragmentos, "IRA", "Y queda guardado.");

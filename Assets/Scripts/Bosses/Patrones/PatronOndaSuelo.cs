@@ -1,4 +1,5 @@
 using System.Collections;
+using Fragmentum.Core;
 using UnityEngine;
 
 namespace Fragmentum.Bosses.Patrones
@@ -16,6 +17,9 @@ namespace Fragmentum.Bosses.Patrones
     [CreateAssetMenu(menuName = "Fragmentum/Jefes/Patrón: onda de suelo", fileName = "PatronOndaSuelo")]
     public class PatronOndaSuelo : PatronAtaque
     {
+        // Segundos que se ve G3 entre dos golpes al suelo seguidos.
+        private const float MuestraOnda = 0.2f;
+
         [Min(0.1f)] public float velocidadOnda = 9f;
 
         [Tooltip("Distancia que recorre cada onda.")]
@@ -39,16 +43,23 @@ namespace Fragmentum.Bosses.Patrones
         {
             jefe.Detener();
             jefe.MirarAlJugador();
-            jefe.Avisar(aviso);
-            yield return new WaitForSeconds(aviso);
+
+            // Con arte, las ondas salen con G3, el fotograma de la onda en el suelo.
+            yield return jefe.Golpear(AnimatorParams.GolpeSuelo, aviso);
 
             var duracion = alcance / velocidadOnda;
             for (var i = 0; i < repeticiones; i++)
             {
                 if (i > 0)
                 {
-                    jefe.Avisar(intervalo);
-                    yield return new WaitForSeconds(intervalo);
+                    // Con arte, G3 se ve un momento antes del siguiente golpe: es la pose que mata.
+                    var muestra = jefe.TieneArte ? Mathf.Min(MuestraOnda, intervalo * 0.5f) : 0f;
+                    if (muestra > 0f)
+                    {
+                        yield return new WaitForSeconds(muestra);
+                    }
+
+                    yield return jefe.Golpear(AnimatorParams.GolpeSuelo, intervalo - muestra);
                 }
 
                 var y = jefe.SueloY + tamanoOnda.y * 0.5f;

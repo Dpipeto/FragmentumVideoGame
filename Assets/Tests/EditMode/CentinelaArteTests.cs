@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Fragmentum.Bosses;
 using Fragmentum.EditorTools;
 using NUnit.Framework;
 using UnityEditor;
@@ -423,6 +424,158 @@ namespace Fragmentum.Tests
             }
 
             Assert.IsFalse(maquina.anyStateTransitions.Any(t => t.hasExitTime), "Lo que interrumpe no espera.");
+        }
+
+        // --- Eventos de animación ---
+
+        [Test]
+        public void LosEventos_CaenAlEmpezarSuFotograma_YLasVentanasDuranLoQueSeVen()
+        {
+            // Copiados del diseño, no leídos de la tabla: Golpe en E2, G3 y J2; ventanas de E3 y C2.
+            var esperados = new Dictionary<string, string[]>
+            {
+                [ConstructorCentinela.Idle] = new string[0],
+                [ConstructorCentinela.Andar] = new string[0],
+                [ConstructorCentinela.Espadazo] = new[] { "Golpe@0.55", "FinGolpe@0.63", "VentanaCorta@0.63(0.22)" },
+                [ConstructorCentinela.EspadaClavada] = new[] { "FinGolpe@0", "Ventana@0.09(1.2)" },
+                [ConstructorCentinela.GolpeSuelo] = new[] { "Golpe@0.57" },
+                [ConstructorCentinela.Rugido] = new string[0],
+                [ConstructorCentinela.Salto] = new[] { "Golpe@0.5", "EnElAire@1.033", "Aterrizaje@1.05" },
+                [ConstructorCentinela.Muerte] = new[] { "FinMuerte@2.1" },
+            };
+
+            string Describir(AnimationEvent e) =>
+                $"{e.functionName}@{e.time.ToString("0.###", CultureInfo.InvariantCulture)}" +
+                (e.floatParameter != 0f ? $"({e.floatParameter.ToString("0.###", CultureInfo.InvariantCulture)})" : string.Empty);
+
+            foreach (var definicion in ConstructorCentinela.Clips)
+            {
+                var eventos = AnimationUtility.GetAnimationEvents(Clip(definicion.Estado));
+                CollectionAssert.AreEquivalent(esperados[definicion.Estado], eventos.Select(Describir), definicion.Estado);
+            }
+        }
+
+        [Test]
+        public void CadaEvento_LlamaAUnaFuncionQueExisteEnAnimacionJefe()
+        {
+            foreach (var definicion in ConstructorCentinela.Clips)
+            {
+                foreach (var evento in AnimationUtility.GetAnimationEvents(Clip(definicion.Estado)))
+                {
+                    var metodo = typeof(AnimacionJefe).GetMethod(evento.functionName);
+                    Assert.IsNotNull(metodo, $"{definicion.Estado}: AnimacionJefe no tiene {evento.functionName}.");
+                    Assert.IsTrue(metodo.IsPublic && metodo.ReturnType == typeof(void), evento.functionName);
+                    var parametros = metodo.GetParameters();
+                    Assert.That(parametros.Length == 0 || (parametros.Length == 1 && parametros[0].ParameterType == typeof(float)),
+                        $"{evento.functionName}: un evento solo puede pasar un float.");
+                }
+            }
+        }
+
+        // --- Prefab ---
+
+        private static GameObject PrefabCentinela()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{GeneradorJefes.CarpetaPrefabs}/{ConstructorCentinela.NombreDatos}.prefab");
+            Assert.IsNotNull(prefab, "Falta el prefab de la Centinela: ejecuta Fragmentum → Regenerar todo.");
+            return prefab;
+        }
+
+        [Test]
+        public void ElPrefab_LlevaElArte_ConElSpriteEnLosPies_YSinCapsula()
+        {
+            var prefab = PrefabCentinela();
+            var arte = prefab.GetComponentInChildren<AnimacionJefe>(true);
+            Assert.IsNotNull(arte, "El sprite lleva AnimacionJefe, que recibe los eventos.");
+            Assert.AreEqual("Pivote", arte.transform.parent.name, "Se voltea con el pivote.");
+            Assert.AreEqual(Vector3.zero, arte.transform.localPosition, "A altura 0: los pies en el origen del jefe y el forcejeo parte de ahí.");
+            Assert.AreEqual(Vector3.one, arte.transform.localScale, "El tamaño lo dan los píxeles por unidad.");
+
+            var sprite = arte.GetComponent<SpriteRenderer>();
+            Assert.AreSame(Fotograma("I1"), sprite.sprite);
+            Assert.AreEqual(Color.white, sprite.color);
+            var animator = arte.GetComponent<Animator>();
+            Assert.AreSame(Controlador(), animator.runtimeAnimatorController);
+            Assert.AreEqual(AnimatorCullingMode.AlwaysAnimate, animator.cullingMode, "Los eventos llegan aunque esté fuera de cámara.");
+            Assert.IsFalse(animator.applyRootMotion);
+            Assert.IsNull(prefab.GetComponentInChildren<Core.SpriteProvisional>(true), "Con arte, sin cápsula provisional.");
+
+            var serializado = new SerializedObject(arte);
+            var anticipaciones = serializado.FindProperty("anticipaciones");
+            var leidas = Enumerable.Range(0, anticipaciones.arraySize).Select(i => anticipaciones.GetArrayElementAtIndex(i))
+                .Select(p => $"{p.FindPropertyRelative("estado").stringValue}@{p.FindPropertyRelative("segundos").floatValue.ToString("0.###", CultureInfo.InvariantCulture)}");
+            CollectionAssert.AreEquivalent(new[] { "Espadazo@0.55", "GolpeSuelo@0.57", "Salto@0.5" }, leidas, "Del inicio de cada ataque a su golpe.");
+            Assert.AreEqual(ConstructorEcoIra.RutaMaterialDestello,
+                AssetDatabase.GetAssetPath(serializado.FindProperty("materialDestello").objectReferenceValue), "Destella con la silueta del Eco.");
+
+            var jefe = new SerializedObject(prefab.GetComponent<Bosses.CentinelaArdiente>());
+            Assert.AreSame(arte, jefe.FindProperty("arte").objectReferenceValue);
+            Assert.IsNotNull(jefe.FindProperty("fragmento").objectReferenceValue);
+
+            var contacto = prefab.GetComponentInChildren<Core.Combate.Hitbox>(true);
+            Assert.IsFalse(contacto.gameObject.activeSelf, "En reposo no hace daño: el contacto se enciende al empezar el combate.");
+
+            var datos = GeneradorJefes.CargarDatos(ConstructorCentinela.NombreDatos);
+            Assert.AreEqual(Color.white, datos.tinte, "Con arte, sin tinte.");
+            Assert.AreEqual(2.1f, datos.duracionDerrota, 1e-4f, "La muerte tarda 2,1 s en llegar a D4.");
+        }
+
+        [Test]
+        public void ElFragmento_EstaEscondido_ConSuMascaraSobreElDeD4_YSinTocarLaCeniza()
+        {
+            var prefab = PrefabCentinela();
+            var fragmento = prefab.GetComponentInChildren<FragmentoJefe>(true);
+            Assert.IsNotNull(fragmento);
+            Assert.IsFalse(fragmento.gameObject.activeSelf, "Aparece al llegar la muerte a D4.");
+            Assert.AreEqual("Pivote", fragmento.transform.parent.name);
+            Assert.AreEqual(0, fragmento.gameObject.layer, "Capa Default: la toca el jugador.");
+
+            var zona = fragmento.GetComponent<BoxCollider2D>();
+            Assert.IsTrue(zona.isTrigger);
+            Assert.AreEqual(0f, fragmento.transform.localPosition.y + zona.offset.y - zona.size.y * 0.5f, 1e-4f, "Desde el suelo: se recoge sin saltar.");
+
+            var mascara = fragmento.GetComponentInChildren<SpriteMask>(true);
+            Assert.IsFalse(mascara.enabled, "La máscara solo borra el fragmento al recogerlo.");
+
+            // La máscara en píxeles de D4 (fila 0 abajo), respecto del pivote.
+            var centro = (Vector2)(fragmento.transform.localPosition + mascara.transform.localPosition) * ConstructorCentinela.PixelesPorUnidad;
+            var medio = Vector2.Scale(mascara.transform.localScale, mascara.sprite.bounds.size) * (ConstructorCentinela.PixelesPorUnidad * 0.5f);
+            var pivote = new Vector2(ConstructorCentinela.Pivote.x * ConstructorCentinela.AnchoLienzo, ConstructorCentinela.Pivote.y * ConstructorCentinela.AltoLienzo);
+            var minimo = pivote + centro - medio;
+            var maximo = pivote + centro + medio;
+
+            var textura = new Texture2D(2, 2);
+            try
+            {
+                Assert.IsTrue(textura.LoadImage(File.ReadAllBytes(Path.GetFullPath(Path.Combine(Application.dataPath, "..", ConstructorCentinela.RutaSprite("D4"))))));
+                var pixeles = textura.GetPixels32();
+                int ancho = textura.width, alto = textura.height;
+                bool Opaco(int x, int y) => pixeles[y * ancho + x].a > 0;
+                bool Dentro(int x, int y) => x + 0.5f > minimo.x && x + 0.5f < maximo.x && y + 0.5f > minimo.y && y + 0.5f < maximo.y;
+
+                // El fragmento: las filas opacas de arriba, hasta la primera fila vacía.
+                var arriba = Enumerable.Range(0, alto).Reverse().First(y => Enumerable.Range(0, ancho).Any(x => Opaco(x, y)));
+                var abajo = arriba;
+                while (Enumerable.Range(0, ancho).Any(x => Opaco(x, abajo - 1))) abajo--;
+
+                for (var y = 0; y < alto; y++)
+                {
+                    for (var x = 0; x < ancho; x++)
+                    {
+                        if (!Opaco(x, y))
+                        {
+                            continue;
+                        }
+
+                        var delFragmento = y >= abajo;
+                        Assert.AreEqual(delFragmento, Dentro(x, y), delFragmento ? $"La máscara no tapa el píxel ({x}, {y}) del fragmento." : $"La máscara borraría ceniza en ({x}, {y}).");
+                    }
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(textura);
+            }
         }
 
         [Test]

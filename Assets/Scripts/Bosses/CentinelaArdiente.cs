@@ -15,10 +15,12 @@ namespace Fragmentum.Bosses
     ///   combate se sentía fácil y no transmitía la ira.
     /// - Al entrar en las fases 2 y 3 <b>ruge</b>: un aviso largo y quieta, antes de que empiece la
     ///   fase. Es la señal de que el combate cambia.
-    /// - <b>Muerte:</b> explosión (provisional: destello y desvanecido) y «el suelo se
-    ///   estabiliza»: al cortarse los ataques desaparecen todas las erupciones.
-    /// - <b>Recompensa:</b> Fragmento de la Ira → Ataque Cargado. La otorga la arena al recibir
-    ///   <c>OnJefeDerrotado</c>.
+    /// - <b>Muerte:</b> cae (D1-D3) y se queda en D4, la ceniza con el fragmento blanco flotando.
+    ///   «El suelo se estabiliza»: al cortarse los ataques desaparecen todas las erupciones.
+    /// - <b>Recompensa:</b> Fragmento de la Ira → Ataque Cargado. La otorga la arena cuando Kael
+    ///   recoge el fragmento de la ceniza (<c>OnFragmentoRecogido</c>).
+    /// - <b>Espada clavada:</b> mientras forcejea en C2, late en contrafase: brilla con el sprite
+    ///   abajo y se apaga al subir.
     ///
     /// Casi todo es dato: los patrones y los umbrales están en <c>Assets/Data/Jefes</c>. La clase
     /// solo redefine los pasos propios de este jefe (patrón Template Method).
@@ -30,6 +32,9 @@ namespace Fragmentum.Bosses
         // Color al rojo de la ira desatada, mezclado con el tinte de sus datos (con arte, blanco).
         private static readonly Color AlRojo = new Color(1f, 0.32f, 0.12f, 1f);
 
+        // Brasa del latido de la espada clavada.
+        private static readonly Color Brasa = new Color(1f, 0.78f, 0.45f, 1f);
+
         [Tooltip("Cuánto se enrojece el jefe en la fase 3 (0 = nada, 1 = rojo puro).")]
         [SerializeField, Range(0f, 1f)] private float enrojecimientoFase3 = 0.45f;
 
@@ -38,6 +43,7 @@ namespace Fragmentum.Bosses
             if (fase >= 2)
             {
                 Avisar(Rugido);
+                Rugir();
             }
 
             if (fase >= 3)
@@ -46,8 +52,13 @@ namespace Fragmentum.Bosses
             }
         }
 
-        // Ruge quieta antes de la primera embestida de la fase.
+        // Ruge quieta antes de la primera embestida de la fase. Dura lo que el clip (R1-R3, 0,9 s).
         protected override float EsperaAlEmpezarFase(int fase, FaseJefe datosFase) =>
             fase >= 2 ? Rugido : base.EsperaAlEmpezarFase(fase, datosFase);
+
+        // Con arte, el latido va en contrafase con el forcejeo de C2: el sprite abajo, brasa;
+        // arriba, casi apagado.
+        protected override Color ColorVentana(Color colorBase) =>
+            TieneArte ? Color.Lerp(colorBase, Brasa, Arte.Elevado ? 0.15f : 0.7f) : base.ColorVentana(colorBase);
     }
 }

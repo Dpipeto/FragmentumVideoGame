@@ -1,4 +1,5 @@
 using System.Collections;
+using Fragmentum.Core;
 using UnityEngine;
 
 namespace Fragmentum.Bosses.Patrones
@@ -30,7 +31,9 @@ namespace Fragmentum.Bosses.Patrones
         public override IEnumerator Ejecutar(BossController jefe)
         {
             jefe.Detener();
-            jefe.Avisar(aviso * 0.5f);
+
+            // Golpea el suelo y la lava empieza a brotar: con arte, las erupciones salen con G3.
+            yield return jefe.Golpear(AnimatorParams.GolpeSuelo, aviso * 0.5f);
 
             var limites = jefe.Limites;
             for (var i = 0; i < erupciones; i++)

@@ -141,6 +141,86 @@ encargo para integrarlo en cinco fases, parando al final de cada una:
   Para la fase D, el sprite tiene que estar a altura 0 dentro del jefe, porque el forcejeo fija
   la altura, no la suma.
 
+### Fase D: el arte en el combate
+
+Aprobado por el autor tras la fase C («de acuerdo con todo»). El combate sigue siendo el actual
+(opción B); lo que cambia es que el dibujo marca el ritmo.
+
+- **`AnimacionJefe`** (nuevo, en el objeto del sprite, como `EnemigoAnimacion` en el Eco) une el
+  Animator con `BossController`:
+  - recibe los eventos de los clips y los reenvía al jefe;
+  - pone `Walk` según la velocidad del cuerpo;
+  - al recibir un golpe, el sprite se vuelve una silueta blanca 0,1 s con el material del Eco.
+    Un tinte blanco no se vería sobre el arte.
+- **Los golpes salen con el dibujo (eventos de animación):**
+
+  | Evento | Fotograma | Qué hace |
+  |---|---|---|
+  | `Golpe` | E2, G3, J2 | sale la zona del tajo, las ondas (o la lava) y el salto |
+  | `FinGolpe` | E3, C1 | se apaga la zona del tajo: dura lo que se ve E2 |
+  | `VentanaCorta` | E3 | 0,22 s de daño doble, sin detener al jefe |
+  | `Ventana` | C2 | la ventana vulnerable, 1,2 s: lo que se ve la espada clavada |
+  | `EnElAire` | final de J4 | si aún vuela, J4 se sostiene hasta tocar el suelo |
+  | `Aterrizaje` | J5 | salen las ondas del salto |
+  | `FinMuerte` | D4 | aparece el fragmento |
+
+  Los patrones esperan estos momentos con `BossController.Golpear`, `TerminarGolpe` y
+  `EsperarMomento`. Sin arte (los otros cuatro jefes, todavía cápsulas) siguen yendo por tiempo,
+  como antes.
+- **Los ajustes de tiempo aprobados:**
+  1. **Espadazos encadenados:** su aviso (0,35 o 0,3 s) es más corto que E1 (0,55 s), así que el
+     clip empieza ya avanzado y E1 dura justo el aviso. Los demás fotogramas no cambian.
+  2. **Ventana de furia:** dura lo que C2 (1,2 s) en todas las fases, porque la abre C2. Antes, en
+     la furia, eran 0,9 s.
+  3. **Salto:** J2 y J3 suman 0,4 s, justo lo alto de un vuelo de 0,8 s. J4 se sostiene desde ahí
+     hasta tocar el suelo y J5 llega con el aterrizaje. El vuelo no cambia.
+  4. **Erupciones:** usan GolpeSuelo: la lava brota con G3. El rugido queda solo para los cambios
+     de fase.
+  5. **Muerte:** la derrota dura 2,1 s, lo que tarda en llegar a D4, y D4 se queda: no se
+     desvanece ni desaparece.
+  6. **E3:** ventana corta de daño doble (0,22 s).
+- **Onda doble.** Entre dos golpes al suelo seguidos se ve G3 0,2 s, la pose que mata: el segundo
+  golpe acorta su G1 para no alargar el intervalo.
+- **El fragmento de la ceniza** (`FragmentoJefe`, nuevo):
+  - **Problema.** D4 trae el fragmento blanco dibujado encima de la ceniza, y hasta ahora la arena
+    daba la recompensa al derrotar al jefe.
+  - **Solución.** Al llegar a D4 aparece un trigger que va del suelo al fragmento: basta con que
+    Kael entre en la ceniza, sin saltar.
+  - **Al recogerlo:** `BossController.OnFragmentoRecogido` (evento) y `RecogerFragmento()`
+    (método público) avisan; la arena otorga entonces el fragmento y la habilidad y abre las
+    puertas.
+  - **El dibujo:** una máscara del tamaño del fragmento lo borra de D4 y la ceniza se queda, sin
+    sprite nuevo. El fragmento flota 20 px por encima de la ceniza, así que la máscara no la toca
+    (`ConstructorCentinela.MedirFragmento` lo mide en el PNG).
+- **El latido de la espada clavada** va en contrafase con el forcejeo: con el sprite abajo, brasa;
+  arriba, casi apagado (`CentinelaArdiente.ColorVentana`).
+- **El rugido** del cambio de fase reproduce R1-R3, que dura lo mismo que la espera de la fase
+  (0,9 s).
+- **El prefab** (`Assets/Prefabs/Jefes/CentinelaArdiente.prefab`) lo sigue generando
+  `GeneradorJefes`, que ahora lo viste con `ConstructorCentinela.Vestir`:
+  - el sprite, a altura 0 y escala 1 en el pivote, con I1 y sin la cápsula provisional;
+  - el Animator con su controlador, animando siempre: los eventos llegan aunque el jefe esté fuera
+    de cámara;
+  - `AnimacionJefe`, con la anticipación de cada ataque leída de la tabla;
+  - el fragmento, escondido hasta D4.
+- **Datos:** el arte manda sobre dos: `tinte` blanco y `duracionDerrota` 2,1 s. «Regenerar todo»
+  los fija en `CentinelaArdiente.asset`.
+- **Se mantiene** el destello rojo del aviso durante la anticipación, como hasta ahora.
+- **No se ha tocado** `EnemyController.cs` ni `GameManager.cs`.
+
+### Qué probar a mano (fase D)
+
+Desde `Menu_Inicial`, «Nueva partida», hasta la arena del Nivel 1:
+
+- El tajo hace daño mientras se ve E2. En el combo, el segundo espadazo se ve venir menos.
+- Con la espada clavada (C2) late y forcejea, y cada golpe vale el doble. En E3 también, un
+  instante.
+- La onda sale del golpe al suelo y, en la onda doble, se ve G3 entre los golpes.
+- El salto: J4 en el aire hasta caer y J5 al tocar el suelo, con las ondas.
+- Al cambiar de fase ruge.
+- Al morir se queda en la ceniza. La puerta no se abre hasta que Kael entra en ella y recoge el
+  fragmento, que desaparece del dibujo.
+
 ### Verificación (fase A)
 
 - **Compilación** con `dotnet build` y en Unity 6000.6.3f1 en modo batch: 0 errores y 0 avisos.
@@ -186,6 +266,39 @@ encargo para integrarlo en cinco fases, parando al final de cada una:
   - un segundo espadazo durante E3 vuelve a empezar en E1;
   - si ya camina, de G3 pasa a andar sin ver el idle;
   - el rugido corta el espadazo, la muerte corta el rugido y, después, nada la saca de D4.
+
+### Verificación (fase D)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Regenerar dos veces** deja el prefab de la Centinela y la escena del Nivel 1 idénticos.
+- **Pruebas EditMode: 254 de 254 correctas.** Hay 4 nuevas en `CentinelaArteTests`:
+  - los eventos caen al empezar su fotograma, con los tiempos copiados del diseño, y las ventanas
+    duran lo que se ven;
+  - cada evento llama a una función que existe en `AnimacionJefe` (punto 5 de la verificación del
+    encargo);
+  - el prefab lleva el arte, con el sprite en los pies, sin cápsula y con el contacto apagado en
+    reposo;
+  - la máscara del fragmento tapa todos sus píxeles y ninguno de la ceniza.
+- **Pruebas PlayMode: 115 de 115 correctas.** Hay 11 nuevas en `CentinelaPlayModeTests`, con el
+  prefab, el jugador y la física reales:
+  - el tajo solo hace daño mientras se ve E2, y la ventana es C2 y dura 1,2 s;
+  - en la furia, E1 se acorta en los encadenados (0,45 y 0,3 s), E2 no cambia y la ventana sigue
+    durando 1,2 s;
+  - E3 da daño doble y E1, normal;
+  - las ondas salen con G3 y, en la onda doble, se ve G3 entre los golpes;
+  - la lava brota con G3;
+  - el salto despega con J2, J4 dura 0,4 s y J5 llega con el suelo, con las ondas;
+  - al cambiar de fase ruge;
+  - un golpe recibido pone la silueta blanca 0,1 s;
+  - el latido va en contrafase con el forcejeo;
+  - al caer se queda en D4 y la recompensa espera al fragmento: Kael lo recoge entrando en la
+    ceniza y la máscara lo borra;
+  - al reiniciar vuelve al idle.
+
+  Cambian 3:
+  - el Animator solo de la fase C recibe ahora los eventos con un receptor vacío;
+  - la derrota que se desvanece se prueba con un jefe sin arte (la Doncella);
+  - el flujo del Nivel 1 recoge el fragmento antes de comprobar la recompensa.
 
 ---
 

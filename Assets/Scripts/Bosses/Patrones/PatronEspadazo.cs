@@ -1,4 +1,5 @@
 using System.Collections;
+using Fragmentum.Core;
 using UnityEngine;
 
 namespace Fragmentum.Bosses.Patrones
@@ -54,26 +55,35 @@ namespace Fragmentum.Bosses.Patrones
             for (var golpe = 0; golpe < golpes; golpe++)
             {
                 var primero = golpe == 0;
+                var ultimo = golpe == golpes - 1;
                 yield return Acercarse(jefe, primero ? tiempoAcercamiento : acercamientoEncadenado, primero ? 1f : impulsoEncadenado);
 
                 jefe.Detener();
                 jefe.MirarAlJugador();
-                var espera = primero ? aviso : avisoEncadenado;
-                jefe.Avisar(espera);
-                yield return new WaitForSeconds(espera);
+
+                // Con arte, el golpe sale con E2 (los encadenados empiezan el clip ya avanzado) y el
+                // último deja la espada clavada (C1-C4) en lugar de recuperarse (E3-E4).
+                yield return jefe.Golpear(AnimatorParams.Espadazo, primero ? aviso : avisoEncadenado, ultimo && abreVentana);
 
                 var centro = jefe.PuntoDelante(jefe.MedioAncho + tamanoGolpe.x * 0.5f - 0.3f, tamanoGolpe.y * 0.5f);
-                jefe.CrearZona("Espadazo", centro, tamanoGolpe, danio, 0f, duracionGolpe, Vector2.zero, color);
-                yield return new WaitForSeconds(duracionGolpe);
+                var zona = jefe.CrearZona("Espadazo", centro, tamanoGolpe, danio, 0f, duracionGolpe, Vector2.zero, color);
+                yield return jefe.TerminarGolpe(zona, duracionGolpe);
             }
 
-            if (abreVentana)
+            // Sin arte la ventana se abre aquí. Con arte la abre C2 (la espada clavada) y dura lo
+            // que se ve. En los dos casos el jefe corta el patrón al entrar en ella.
+            if (abreVentana && !jefe.TieneArte)
             {
                 jefe.AbrirVentanaVulnerable(duracionVentana);
             }
 
-            // El jefe corta el patrón al entrar en la ventana; si no la abre, una breve recuperación.
             yield return new WaitForSeconds(0.3f);
+
+            // Por si el evento de C2 no hubiera llegado.
+            if (abreVentana && jefe.TieneArte)
+            {
+                jefe.AbrirVentanaVulnerable(duracionVentana);
+            }
         }
 
         private IEnumerator Acercarse(BossController jefe, float segundos, float impulso)

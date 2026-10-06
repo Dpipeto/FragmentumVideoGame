@@ -295,6 +295,8 @@ MonoBehaviour:
   sprite: {fileID: 7079298153865193447}
   animator: {fileID: 7711794253713653223}
   contacto: {fileID: 1551024635567550830}
+  arte: {fileID: 0}
+  fragmento: {fileID: 0}
   currentState: 0
   registrarTransiciones: 0
   opacidadOculto: 0.25

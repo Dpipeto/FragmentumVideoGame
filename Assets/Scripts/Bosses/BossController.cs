@@ -26,6 +26,10 @@ namespace Fragmentum.Bosses
     ///   de su <see cref="FaseJefe"/>.
     /// - <b>Sin estado DAMAGED:</b> un golpe solo hace parpadear al jefe y no interrumpe el ataque.
     ///   En la v1 un golpe podía dejar al jefe congelado.
+    /// - <b>Con arte</b> (<see cref="AnimacionJefe"/>, de momento la Centinela): los golpes salen
+    ///   cuando el dibujo golpea (eventos de animación), las ventanas las abren sus fotogramas y,
+    ///   al caer, el jefe se queda en su último fotograma y deja el fragmento que hay que recoger.
+    ///   Sin arte, los mismos patrones van por tiempo y el jefe se desvanece.
     ///
     /// El jefe espera quieto hasta que la arena lo activa (<see cref="Activar"/>). Si el jugador
     /// muere durante el combate, la arena lo devuelve al principio (<see cref="Reiniciar"/>).
@@ -38,6 +42,9 @@ namespace Fragmentum.Bosses
         public const string GrupoCombate = "COMBATE";
 
         private const float DuracionParpadeo = 0.12f;
+
+        // Margen sobre el tiempo esperado antes de seguir sin el evento de animación.
+        private const float MargenEvento = 0.25f;
 
         [Tooltip("Vida, fases, patrones y ventana vulnerable del jefe.")]
         [SerializeField] protected JefeData datos;
@@ -53,6 +60,12 @@ namespace Fragmentum.Bosses
         [Tooltip("Hitbox del cuerpo (capa EnemyWeapon): daño por contacto durante el combate.")]
         [SerializeField] private Hitbox contacto;
 
+        [Tooltip("Arte animado del jefe (vacío = se busca solo). Sin él, el jefe usa su sprite provisional y sus ataques van por tiempo.")]
+        [SerializeField] private AnimacionJefe arte;
+
+        [Tooltip("Fragmento que deja al caer y que el jugador recoge (la Centinela, en su ceniza). Vacío = la recompensa llega al derrotarlo.")]
+        [SerializeField] private FragmentoJefe fragmento;
+
         [Header("Depuración")]
         [SerializeField] private ESTADOS_JEFE currentState;
 
@@ -60,6 +73,7 @@ namespace Fragmentum.Bosses
 
         private readonly List<GameObject> _efectos = new List<GameObject>();
         private readonly int[] _siguientePatron = new int[JefeData.MaxFases];
+        private readonly int[] _momentos = new int[Enum.GetValues(typeof(MOMENTOS_JEFE)).Length];
         private MaquinaEstados<ESTADOS_JEFE> _maquina;
         private Rigidbody2D _cuerpo;
         private Collider2D _colisionador;
@@ -76,6 +90,7 @@ namespace Fragmentum.Bosses
         private float _duracionVentana;
         private float _finParpadeo = float.NegativeInfinity;
         private float _finAviso = float.NegativeInfinity;
+        private float _finVentanaCorta = float.NegativeInfinity;
         private bool _derrotado;
 
         /// <summary>Cambio de estado: (anterior, nuevo). Para audio, VFX y depuración.</summary>
@@ -89,6 +104,12 @@ namespace Fragmentum.Bosses
         /// identidad y habilidad (tarea C).
         /// </summary>
         public event Action<BossController> OnJefeDerrotado;
+
+        /// <summary>
+        /// El jugador recogió el fragmento que dejó el jefe al caer. Si el jefe deja fragmento
+        /// (<see cref="DejaFragmento"/>), la arena otorga la recompensa aquí y no al derrotarlo.
+        /// </summary>
+        public event Action<BossController> OnFragmentoRecogido;
 
         public JefeData Datos => datos;
 
@@ -105,6 +126,23 @@ namespace Fragmentum.Bosses
         public int Fase => _faseNotificada + 1;
 
         public bool EsVulnerable => EnCombate && _maquina.EstadoActual == ESTADOS_JEFE.VULNERABLE;
+
+        /// <summary>
+        /// ¿Recibe ahora el daño multiplicado? En la ventana vulnerable y en la ventana corta que
+        /// abre un fotograma (E3, la recuperación del espadazo de la Centinela).
+        /// </summary>
+        public bool RecibeDanioDoble => EsVulnerable || (EnCombate && Time.time < _finVentanaCorta);
+
+        /// <summary>¿Tiene arte animado? Entonces los golpes salen con los eventos del dibujo.</summary>
+        public bool TieneArte => arte != null && arte.Lista;
+
+        /// <summary>¿Deja al caer un fragmento que hay que recoger para obtener la recompensa?</summary>
+        public bool DejaFragmento => fragmento != null && TieneArte;
+
+        public bool FragmentoRecogido => fragmento != null && fragmento.Recogido;
+
+        /// <summary>El fragmento que deja al caer, o null.</summary>
+        public FragmentoJefe Fragmento => fragmento;
 
         /// <summary>Patrón que se está ejecutando ahora, o null (entre patrones o fuera de combate).</summary>
         public PatronAtaque PatronActual { get; private set; }
@@ -158,6 +196,8 @@ namespace Fragmentum.Bosses
             get => _colorBase;
             set => _colorBase = value;
         }
+
+        protected AnimacionJefe Arte => arte;
 
         internal float Fraccion => _vida.VidaMaxima > 0 ? (float)_vida.Vida / _vida.VidaMaxima : 0f;
 
@@ -230,6 +270,13 @@ namespace Fragmentum.Bosses
         {
         }
 
+        /// <summary>
+        /// Color mientras recibe daño doble (ventana vulnerable o corta). Por defecto, un pulso
+        /// amarillo; la Centinela late en contrafase con el forcejeo de la espada clavada.
+        /// </summary>
+        protected virtual Color ColorVentana(Color colorBase) =>
+            Color.Lerp(colorBase, new Color(1f, 0.95f, 0.55f), 0.55f + 0.25f * Mathf.Sin(Time.time * 18f));
+
         // --- Ciclo de vida ---
 
         protected virtual void Awake()
@@ -238,6 +285,8 @@ namespace Fragmentum.Bosses
             _colisionador = GetComponent<Collider2D>();
             _vida = GetComponent<SaludJefe>();
             if (animator == null) animator = GetComponentInChildren<Animator>();
+            if (arte == null) arte = GetComponentInChildren<AnimacionJefe>();
+            if (fragmento == null) fragmento = GetComponentInChildren<FragmentoJefe>(true);
             if (sprite == null) sprite = GetComponentInChildren<SpriteRenderer>();
             if (pivote == null && sprite != null) pivote = sprite.transform.parent != transform ? sprite.transform.parent : sprite.transform;
 
@@ -252,7 +301,7 @@ namespace Fragmentum.Bosses
             _maquina.Registrar(new BossDefeatedState(this, _maquina));
             _maquina.OnStateChanged += AlCambiarEstado;
 
-            _vida.EsVulnerable = () => EsVulnerable;
+            _vida.EsVulnerable = () => RecibeDanioDoble;
             AplicarDatos();
         }
 
@@ -338,6 +387,7 @@ namespace Fragmentum.Bosses
 
             _faseNotificada = -1;
             _ventanaPedida = -1f;
+            _finVentanaCorta = float.NegativeInfinity;
             Array.Clear(_siguientePatron, 0, _siguientePatron.Length);
             transform.position = _posicionInicial;
             _cuerpo.position = _posicionInicial;
@@ -347,6 +397,11 @@ namespace Fragmentum.Bosses
             FijarContacto(false);
             Mirando = -1;
             _colorBase = datos.tinte;
+            if (arte != null)
+            {
+                arte.Reiniciar();
+            }
+
             AlReiniciarse();
         }
 
@@ -370,7 +425,85 @@ namespace Fragmentum.Bosses
             }
         }
 
+        /// <summary>
+        /// Ventana corta de daño doble que no detiene al jefe ni corta su ataque. La abre un
+        /// fotograma: E3, la recuperación del espadazo de la Centinela.
+        /// </summary>
+        public void AbrirVentanaCorta(float segundos)
+        {
+            if (EnCombate)
+            {
+                _finVentanaCorta = Time.time + segundos;
+            }
+        }
+
+        /// <summary>
+        /// El jugador recoge el fragmento que dejó el jefe al caer. Lo llama
+        /// <see cref="FragmentoJefe"/> al tocarlo; es público para que el juego (o una prueba) lo
+        /// pueda dar por recogido.
+        /// </summary>
+        public void RecogerFragmento()
+        {
+            if (!_derrotado || fragmento == null || fragmento.Recogido)
+            {
+                return;
+            }
+
+            fragmento.Borrar();
+            OnFragmentoRecogido?.Invoke(this);
+        }
+
         // --- Acciones para los patrones ---
+
+        /// <summary>
+        /// Avisa del ataque y espera hasta su golpe. Con arte, el clip del ataque empieza para que
+        /// el golpe llegue en <paramref name="anticipacion"/> segundos y se espera a su evento
+        /// Golpe: la zona de daño sale cuando el dibujo golpea. Sin arte, esos segundos.
+        /// <paramref name="clavar"/>: el espadazo acaba con la espada clavada (C1-C4).
+        /// </summary>
+        public IEnumerator Golpear(AnimatorParams.Parametro ataque, float anticipacion, bool clavar = false)
+        {
+            Avisar(anticipacion);
+            if (TieneArte && arte.Atacar(ataque, anticipacion, clavar))
+            {
+                yield return EsperarMomento(MOMENTOS_JEFE.GOLPE, anticipacion + MargenEvento);
+            }
+            else
+            {
+                yield return new WaitForSeconds(anticipacion);
+            }
+        }
+
+        /// <summary>
+        /// Espera a que acabe el golpe. Con arte, al evento FinGolpe (pasó el fotograma del golpe),
+        /// y entonces borra su zona de daño; sin arte, <paramref name="duracion"/> segundos.
+        /// </summary>
+        public IEnumerator TerminarGolpe(ZonaDeDanio zona, float duracion)
+        {
+            if (!TieneArte)
+            {
+                yield return new WaitForSeconds(duracion);
+                yield break;
+            }
+
+            yield return EsperarMomento(MOMENTOS_JEFE.FIN_GOLPE, duracion + MargenEvento);
+            if (zona != null)
+            {
+                _efectos.Remove(zona.gameObject);
+                Destroy(zona.gameObject);
+            }
+        }
+
+        /// <summary>Espera al siguiente momento del dibujo (evento de animación), como mucho <paramref name="maximo"/> segundos.</summary>
+        public IEnumerator EsperarMomento(MOMENTOS_JEFE momento, float maximo)
+        {
+            var visto = _momentos[(int)momento];
+            var limite = Time.time + maximo;
+            while (_momentos[(int)momento] == visto && Time.time < limite)
+            {
+                yield return null;
+            }
+        }
 
         /// <summary>Camina hacia el jugador sin salir de la arena (en FixedUpdate).</summary>
         public void Perseguir(float factorVelocidad = 1f)
@@ -497,6 +630,18 @@ namespace Fragmentum.Bosses
 
         internal void EntrarEnVulnerable() => Detener();
 
+        /// <summary>Un evento de animación marcó un momento del combate.</summary>
+        internal void NotificarMomento(MOMENTOS_JEFE momento) => _momentos[(int)momento]++;
+
+        /// <summary>Ruge (cambio de fase): con arte, el clip interrumpe lo que esté haciendo.</summary>
+        protected void Rugir()
+        {
+            if (TieneArte)
+            {
+                arte.Rugir();
+            }
+        }
+
         /// <summary>Corta el patrón en curso y borra sus zonas de daño.</summary>
         internal void DetenerAtaques()
         {
@@ -528,7 +673,7 @@ namespace Fragmentum.Bosses
 
             AlSerDerrotado();
             OnJefeDerrotado?.Invoke(this);
-            StartCoroutine(Desvanecer(datos.duracionDerrota));
+            StartCoroutine(TieneArte ? CaerConArte() : Desvanecer(datos.duracionDerrota));
         }
 
         // --- Patrones ---
@@ -570,7 +715,24 @@ namespace Fragmentum.Bosses
             }
         }
 
-        // «Explosión visual» provisional hasta que haya arte (PENDIENTES B5): destello y desvanecido.
+        // Con arte, el dibujo cae y se queda en su último fotograma (D4, la ceniza con el
+        // fragmento): ni se desvanece ni desaparece. Al llegar ahí aparece el fragmento.
+        private IEnumerator CaerConArte()
+        {
+            if (sprite != null)
+            {
+                sprite.color = datos.tinte; // sin aviso ni ira: la ceniza, con sus colores
+            }
+
+            arte.Morir();
+            yield return EsperarMomento(MOMENTOS_JEFE.FIN_MUERTE, datos.duracionDerrota + MargenEvento);
+            if (fragmento != null)
+            {
+                fragmento.Aparecer();
+            }
+        }
+
+        // «Explosión visual» provisional de los jefes sin arte (PENDIENTES B5): destello y desvanecido.
         private IEnumerator Desvanecer(float duracion)
         {
             var escala = pivote != null ? pivote.localScale : Vector3.one;
@@ -660,9 +822,9 @@ namespace Fragmentum.Bosses
             }
 
             var color = _colorBase;
-            if (EsVulnerable)
+            if (RecibeDanioDoble)
             {
-                color = Color.Lerp(_colorBase, new Color(1f, 0.95f, 0.55f), 0.55f + 0.25f * Mathf.Sin(Time.time * 18f));
+                color = ColorVentana(_colorBase);
             }
 
             if (Time.time < _finAviso && Mathf.Repeat(Time.time * 8f, 1f) < 0.5f)

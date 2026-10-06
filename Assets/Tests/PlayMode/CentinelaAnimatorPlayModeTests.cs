@@ -37,6 +37,7 @@ namespace Fragmentum.Tests.PlayMode
             _sprite = objetoSprite.AddComponent<SpriteRenderer>();
             _animator = objetoSprite.AddComponent<Animator>();
             _animator.runtimeAnimatorController = CargarAsset<RuntimeAnimatorController>(RutaControlador);
+            objetoSprite.AddComponent<ReceptorEventosJefe>();
             yield return null;
             Assert.AreEqual("I1", Fotograma, "Empieza en el idle frontal.");
         }

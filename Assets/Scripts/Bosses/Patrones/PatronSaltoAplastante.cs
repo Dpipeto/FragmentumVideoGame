@@ -1,4 +1,5 @@
 using System.Collections;
+using Fragmentum.Core;
 using UnityEngine;
 
 namespace Fragmentum.Bosses.Patrones
@@ -39,11 +40,10 @@ namespace Fragmentum.Bosses.Patrones
 
         public override IEnumerator Ejecutar(BossController jefe)
         {
-            // Se agacha: el aviso de siempre.
+            // Se agacha: el aviso de siempre. Con arte, J1, y despega con J2.
             jefe.Detener();
             jefe.MirarAlJugador();
-            jefe.Avisar(aviso);
-            yield return new WaitForSeconds(aviso);
+            yield return jefe.Golpear(AnimatorParams.Salto, aviso);
 
             // La marca aparece al despegar y empieza a quemar justo al caer.
             var destino = jefe.Saltar(jefe.CentroJugador.x, tiempoVuelo);
@@ -51,12 +51,20 @@ namespace Fragmentum.Bosses.Patrones
             jefe.CrearZona("Aterrizaje", new Vector2(destino, suelo + tamanoImpacto.y * 0.5f), tamanoImpacto, danio,
                 tiempoVuelo, duracionImpacto, Vector2.zero, color);
 
-            // Espera a tocar suelo (con un límite, por si algo lo frena en el aire).
-            yield return new WaitForSeconds(tiempoVuelo * 0.5f);
-            var limite = Time.time + tiempoVuelo * 1.5f;
-            while (Time.time < limite && !jefe.EnSuelo)
+            // Espera a tocar suelo (con un límite, por si algo lo frena en el aire). Con arte, a J5:
+            // el dibujo sostiene J4 hasta que el cuerpo aterriza.
+            if (jefe.TieneArte)
             {
-                yield return new WaitForFixedUpdate();
+                yield return jefe.EsperarMomento(MOMENTOS_JEFE.ATERRIZAJE, tiempoVuelo * 2f);
+            }
+            else
+            {
+                yield return new WaitForSeconds(tiempoVuelo * 0.5f);
+                var limite = Time.time + tiempoVuelo * 1.5f;
+                while (Time.time < limite && !jefe.EnSuelo)
+                {
+                    yield return new WaitForFixedUpdate();
+                }
             }
 
             jefe.Detener();

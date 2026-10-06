@@ -235,10 +235,13 @@ namespace Fragmentum.Tests.PlayMode
 
         // --- Derrota y reinicio ---
 
+        // Un jefe sin arte (la Doncella, de momento cápsula) se desvanece. La Centinela, con arte,
+        // se queda en su ceniza: CentinelaPlayModeTests.
         [UnityTest]
-        public IEnumerator Derrota_EmiteElEvento_ApagaElDanio_YDesvanece()
+        public IEnumerator Derrota_EmiteElEvento_ApagaElDanio_YSinArteSeDesvanece()
         {
-            var jefe = CrearJefe("CentinelaArdiente");
+            var jefe = CrearJefe("DoncellaLamento");
+            Assert.IsFalse(jefe.TieneArte);
             yield return CrearJugadorEnSuelo(new Vector2(-10f, 0f));
             var derrotas = 0;
             jefe.OnJefeDerrotado += _ => derrotas++;

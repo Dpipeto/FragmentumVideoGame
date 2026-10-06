@@ -75,10 +75,11 @@ namespace Fragmentum.Data
         public bool inmuneFueraDeVulnerable;
 
         [Header("Derrota")]
-        [Tooltip("Segundos que dura la «explosión» antes de desaparecer.")]
+        [Tooltip("Sin arte, segundos que dura la «explosión» antes de desaparecer. Con arte, lo que tarda la muerte en llegar a su último fotograma (la Centinela, 2,1 s hasta D4).")]
         [Min(0f)] public float duracionDerrota = 2f;
 
         [Header("Aspecto provisional (sin arte, PENDIENTES B5)")]
+        [Tooltip("Color del sprite. Con arte, blanco: los colores son los del dibujo.")]
         public Color tinte = Color.white;
 
         public Vector2 tamano = new Vector2(2f, 3.2f);

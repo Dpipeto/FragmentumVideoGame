@@ -263,6 +263,8 @@ MonoBehaviour:
   sprite: {fileID: 8022600644257066585}
   animator: {fileID: 8614786105910448431}
   contacto: {fileID: 5351267135634935482}
+  arte: {fileID: 0}
+  fragmento: {fileID: 0}
   currentState: 0
   registrarTransiciones: 0
 --- !u!1 &3668259455814769751

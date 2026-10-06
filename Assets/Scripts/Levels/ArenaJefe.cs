@@ -21,8 +21,10 @@ namespace Fragmentum.Levels
     ///   combate. Se ve una sola vez cada vez que se carga el nivel: al reintentar, no se repite.
     ///   Con cinemática, las líneas «antes del jefe» del HUD no se muestran: el diálogo va en ella.
     ///
-    /// - <b>Derrota del jefe:</b> el <see cref="LevelManager"/> otorga ya el fragmento y la
-    ///   habilidad; tras una breve pausa se abren las puertas y aparece la salida del nivel.
+    /// - <b>Derrota del jefe:</b> el <see cref="LevelManager"/> otorga el fragmento y la
+    ///   habilidad; tras una breve pausa se abren las puertas y aparece la salida del nivel. Si
+    ///   el jefe deja su fragmento en el suelo (la Centinela, en su ceniza), todo eso espera a que
+    ///   el jugador lo recoja (<see cref="BossController.OnFragmentoRecogido"/>).
     /// - <b>Muerte del jugador:</b> al reaparecer en el checkpoint, el combate vuelve a empezar: el
     ///   jefe recupera la vida y su sitio, y las puertas se abren.
     /// </summary>
@@ -38,7 +40,7 @@ namespace Fragmentum.Levels
         [Tooltip("Bordes horizontales de la arena (mínimo, máximo): el jefe no los cruza y sus ataques tampoco.")]
         [SerializeField] private Vector2 limites = new Vector2(55f, 80f);
 
-        [Tooltip("Segundos entre la derrota del jefe y la apertura de la arena.")]
+        [Tooltip("Segundos entre la recompensa (al derrotar al jefe o al recoger su fragmento) y la apertura de la arena.")]
         [SerializeField] private float esperaTrasDerrota = 2f;
 
         [Tooltip("Cámara que presenta al jefe durante su cinemática. Vacío = la cámara principal.")]
@@ -132,6 +134,7 @@ namespace Fragmentum.Levels
             if (jefe != null)
             {
                 jefe.OnJefeDerrotado -= AlDerrotarJefe;
+                jefe.OnFragmentoRecogido -= AlRecogerFragmento;
             }
 
             DejarDeEsperarCinematica();
@@ -282,6 +285,29 @@ namespace Fragmentum.Levels
             if (_nivel != null)
             {
                 _nivel.MusicaDeJefe(false);
+            }
+
+            // El fragmento se queda en el suelo: la recompensa llega cuando el jugador lo recoja.
+            if (derrotado.DejaFragmento && !derrotado.FragmentoRecogido)
+            {
+                derrotado.OnFragmentoRecogido += AlRecogerFragmento;
+                return;
+            }
+
+            Recompensar(derrotado);
+        }
+
+        private void AlRecogerFragmento(BossController derrotado)
+        {
+            derrotado.OnFragmentoRecogido -= AlRecogerFragmento;
+            Recompensar(derrotado);
+        }
+
+        // Fragmento y habilidad del nivel; tras una pausa, la arena se abre.
+        private void Recompensar(BossController derrotado)
+        {
+            if (_nivel != null)
+            {
                 _nivel.JefeDerrotado(derrotado);
             }
 

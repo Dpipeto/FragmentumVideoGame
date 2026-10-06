@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Fragmentum.Bosses;
 using Fragmentum.Core;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using Object = UnityEngine.Object;
 using static Fragmentum.EditorTools.UtilidadesEditor;
 
 namespace Fragmentum.EditorTools
@@ -15,8 +17,9 @@ namespace Fragmentum.EditorTools
     ///    lienzo y el mismo pivote en los pies para todos (si no, saltaría al cambiar de clip);
     /// 2. crea los 8 clips desde <see cref="Clips"/>, con los tiempos del diseño y el forcejeo de
     ///    la espada clavada;
-    /// 3. arma su controlador (<see cref="RutaControlador"/>), con un estado por clip.
-    /// El prefab llega en la siguiente fase.
+    /// 3. arma su controlador (<see cref="RutaControlador"/>), con un estado por clip;
+    /// 4. viste el prefab del jefe (<see cref="Vestir"/>, lo llama <c>GeneradorJefes</c>): los
+    ///    fotogramas, el Animator, <c>AnimacionJefe</c> y el fragmento de la ceniza de D4.
     ///
     /// El arte llega limpio y alineado desde <c>Tesis/Jefe1 animaciones/limpios</c>, que tiene su
     /// LEEME. Los PNG no se retocan: cualquier recorte o reescalado rompe el anclaje común.
@@ -149,12 +152,79 @@ namespace Fragmentum.EditorTools
         /// <summary>El fotograma de la espada clavada, el que forcejea.</summary>
         public const string FotogramaForcejeo = "C2";
 
+        /// <summary>
+        /// Un evento de animación: la función de <see cref="AnimacionJefe"/> a la que llama al
+        /// empezar un fotograma.
+        /// </summary>
+        public sealed class Evento
+        {
+            public string Estado;
+            public string Fotograma;
+            public string Funcion;
+
+            /// <summary>Lleva como parámetro lo que dura el fotograma: las ventanas duran lo que se ve.</summary>
+            public bool ConDuracion;
+
+            /// <summary>Segundos antes del inicio del fotograma (EnElAire: el último instante de J4).</summary>
+            public float Antes;
+        }
+
+        /// <summary>
+        /// Los momentos del dibujo que marcan el combate:
+        /// - Golpe: E2 (el tajo), G3 (la onda) y J2 (el despegue). Ahí sale la zona de daño.
+        /// - FinGolpe: E3 o C1, cuando acaba el tajo; su zona se apaga.
+        /// - VentanaCorta (E3) y Ventana (C2): daño doble lo que dura el fotograma.
+        /// - EnElAire: al acabar J4, si el cuerpo aún vuela, J4 se sostiene hasta tocar el suelo.
+        /// - Aterrizaje (J5) y FinMuerte (D4).
+        /// </summary>
+        public static readonly Evento[] Eventos =
+        {
+            new Evento { Estado = Espadazo, Fotograma = "E2", Funcion = nameof(AnimacionJefe.Golpe) },
+            new Evento { Estado = Espadazo, Fotograma = "E3", Funcion = nameof(AnimacionJefe.FinGolpe) },
+            new Evento { Estado = Espadazo, Fotograma = "E3", Funcion = nameof(AnimacionJefe.VentanaCorta), ConDuracion = true },
+            new Evento { Estado = EspadaClavada, Fotograma = "C1", Funcion = nameof(AnimacionJefe.FinGolpe) },
+            new Evento { Estado = EspadaClavada, Fotograma = "C2", Funcion = nameof(AnimacionJefe.Ventana), ConDuracion = true },
+            new Evento { Estado = GolpeSuelo, Fotograma = "G3", Funcion = nameof(AnimacionJefe.Golpe) },
+            new Evento { Estado = Salto, Fotograma = "J2", Funcion = nameof(AnimacionJefe.Golpe) },
+            new Evento { Estado = Salto, Fotograma = "J5", Funcion = nameof(AnimacionJefe.EnElAire), Antes = SeQueda },
+            new Evento { Estado = Salto, Fotograma = "J5", Funcion = nameof(AnimacionJefe.Aterrizaje) },
+            new Evento { Estado = Muerte, Fotograma = "D4", Funcion = nameof(AnimacionJefe.FinMuerte) },
+        };
+
+        /// <summary>Instante del evento dentro de su clip.</summary>
+        public static float Instante(Evento evento)
+        {
+            var clip = ClipDe(evento.Estado);
+            return clip.Inicio(System.Array.IndexOf(clip.Fotogramas, evento.Fotograma)) - evento.Antes;
+        }
+
+        /// <summary>Parámetro del evento: lo que dura su fotograma si es una ventana; si no, 0.</summary>
+        public static float Parametro(Evento evento)
+        {
+            if (!evento.ConDuracion)
+            {
+                return 0f;
+            }
+
+            var clip = ClipDe(evento.Estado);
+            return clip.Duraciones[System.Array.IndexOf(clip.Fotogramas, evento.Fotograma)];
+        }
+
+        /// <summary>
+        /// Anticipación de cada ataque: del inicio de su clip a su evento Golpe. La usa
+        /// <see cref="AnimacionJefe"/> para empezar el clip ya avanzado cuando el ataque va más
+        /// rápido que el dibujo (los espadazos encadenados).
+        /// </summary>
+        public static (string estado, float segundos)[] Anticipaciones =>
+            Eventos.Where(e => e.Funcion == nameof(AnimacionJefe.Golpe)).Select(e => (e.Estado, Instante(e))).ToArray();
+
         // --- Menús y modo batch ---
 
         [MenuItem("Fragmentum/Jefes/Generar los clips y el Animator de la Centinela", priority = 142)]
         public static void MenuConstruir()
         {
-            if (Construir())
+            // El prefab del jefe se viste con lo que se acaba de generar.
+            if (Construir() && GeneradorJefes.CrearPrefabs())
             {
                 EditorGUIUtility.PingObject(Controlador);
             }
@@ -197,6 +267,7 @@ namespace Fragmentum.EditorTools
             AsegurarCarpeta(CarpetaAnimaciones);
             var clips = Clips.ToDictionary(c => c.Estado, c => CrearClip(c, sprites));
             ArmarControlador(clips);
+            AjustarDatos();
 
             AssetDatabase.SaveAssets();
             Debug.Log($"[Fragmentum] Centinela Ardiente: {sprites.Count} fotogramas, {Clips.Length} clips y su controlador en {CarpetaAnimaciones}.");
@@ -255,6 +326,11 @@ namespace Fragmentum.EditorTools
 
             var altura = EditorCurveBinding.FloatCurve(string.Empty, typeof(Transform), "m_LocalPosition.y");
             AnimationUtility.SetEditorCurve(clip, altura, definicion.Estado == EspadaClavada ? CurvaForcejeo(definicion) : null);
+
+            AnimationUtility.SetAnimationEvents(clip, Eventos
+                .Where(e => e.Estado == definicion.Estado)
+                .Select(e => new AnimationEvent { time = Instante(e), functionName = e.Funcion, floatParameter = Parametro(e) })
+                .ToArray());
 
             var ajustes = AnimationUtility.GetAnimationClipSettings(clip);
             ajustes.loopTime = definicion.Bucle;
@@ -469,6 +545,185 @@ namespace Fragmentum.EditorTools
             }
 
             controlador.parameters = deseados.Select(d => new AnimatorControllerParameter { name = d.nombre, type = d.tipo }).ToArray();
+        }
+
+        // --- 4. Datos y prefab ---
+
+        /// <summary>Nombre del asset de datos y del prefab del jefe.</summary>
+        public const string NombreDatos = "CentinelaArdiente";
+
+        /// <summary>Ancho del trigger del fragmento: desde el suelo hasta él, basta con entrar en la ceniza.</summary>
+        public const float AnchoRecogida = 1f;
+
+        /// <summary>
+        /// El arte manda sobre dos datos del jefe: sin tinte (los colores son los del dibujo) y la
+        /// derrota dura lo que tarda la muerte en llegar a D4.
+        /// </summary>
+        public static float DuracionDerrota => ClipDe(Muerte).Inicio(ClipDe(Muerte).Fotogramas.Length - 1);
+
+        private static void AjustarDatos()
+        {
+            var datos = GeneradorJefes.CargarDatos(NombreDatos);
+            if (datos == null || (datos.tinte == Color.white && Mathf.Approximately(datos.duracionDerrota, DuracionDerrota)))
+            {
+                return;
+            }
+
+            datos.tinte = Color.white;
+            datos.duracionDerrota = DuracionDerrota;
+            EditorUtility.SetDirty(datos);
+        }
+
+        /// <summary>
+        /// Viste el prefab de la Centinela con su arte; lo llama <c>GeneradorJefes</c> al crearlo.
+        /// El sprite va a altura 0 dentro del pivote (el forcejeo fija esa altura) y con escala 1:
+        /// el tamaño lo dan los píxeles por unidad. Devuelve false si el arte no está generado:
+        /// entonces el jefe se queda con su cápsula provisional.
+        /// </summary>
+        public static bool Vestir(GameObject objetoSprite, Transform pivote, BossController jefe)
+        {
+            var controlador = Controlador;
+            var reposo = AssetDatabase.LoadAssetAtPath<Sprite>(RutaSprite(ClipDe(Idle).Fotogramas[0]));
+            if (controlador == null || reposo == null)
+            {
+                return false;
+            }
+
+            objetoSprite.transform.localPosition = Vector3.zero;
+            objetoSprite.transform.localScale = Vector3.one;
+
+            var sprite = objetoSprite.GetComponent<SpriteRenderer>();
+            sprite.sprite = reposo;
+            sprite.color = Color.white;
+
+            var animator = objetoSprite.GetComponent<Animator>();
+            animator.runtimeAnimatorController = controlador;
+            animator.applyRootMotion = false;
+            // Los eventos marcan el combate: tienen que llegar aunque el jefe esté fuera de cámara.
+            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+
+            var arte = objetoSprite.AddComponent<AnimacionJefe>();
+            var anticipaciones = Anticipaciones;
+            Asignar(arte, "anticipaciones", p =>
+            {
+                p.arraySize = anticipaciones.Length;
+                for (var i = 0; i < anticipaciones.Length; i++)
+                {
+                    var elemento = p.GetArrayElementAtIndex(i);
+                    elemento.FindPropertyRelative("estado").stringValue = anticipaciones[i].estado;
+                    elemento.FindPropertyRelative("segundos").floatValue = anticipaciones[i].segundos;
+                }
+            });
+            var destello = AssetDatabase.LoadAssetAtPath<Material>(ConstructorEcoIra.RutaMaterialDestello);
+            if (destello == null)
+            {
+                Debug.LogWarning($"[Fragmentum] Falta {ConstructorEcoIra.RutaMaterialDestello}: la Centinela no destellará al recibir golpes.");
+            }
+
+            Asignar(arte, "materialDestello", p => p.objectReferenceValue = destello);
+            Asignar(jefe, "arte", p => p.objectReferenceValue = arte);
+
+            var fragmento = CrearFragmento(pivote, sprite);
+            Asignar(jefe, "fragmento", p => p.objectReferenceValue = fragmento);
+            return true;
+        }
+
+        /// <summary>
+        /// El fragmento que flota sobre la ceniza en D4, medido en el dibujo: las filas opacas de
+        /// arriba, separadas de la ceniza por al menos una fila vacía. Devuelve su centro y su
+        /// tamaño en unidades, respecto del pivote (los pies), o null si no hay fragmento separado.
+        /// </summary>
+        public static (Vector2 centro, Vector2 tamano)? MedirFragmento()
+        {
+            var ruta = RutaSprite(ClipDe(Muerte).Fotogramas.Last());
+            var textura = new Texture2D(2, 2);
+            try
+            {
+                if (!File.Exists(ruta) || !textura.LoadImage(File.ReadAllBytes(ruta)))
+                {
+                    return null;
+                }
+
+                var ancho = textura.width;
+                var alto = textura.height;
+                var pixeles = textura.GetPixels32(); // fila 0 = la de abajo
+                bool Opaca(int fila) => Enumerable.Range(0, ancho).Any(x => pixeles[fila * ancho + x].a > 0);
+
+                // De arriba abajo: el primer bloque de filas opacas es el fragmento.
+                var arriba = alto - 1;
+                while (arriba >= 0 && !Opaca(arriba)) arriba--;
+                var abajo = arriba;
+                while (abajo > 0 && Opaca(abajo - 1)) abajo--;
+                var hayCeniza = Enumerable.Range(0, Mathf.Max(0, abajo - 1)).Any(Opaca);
+                if (arriba < 0 || !hayCeniza)
+                {
+                    return null;
+                }
+
+                int izquierda = ancho, derecha = -1;
+                for (var y = abajo; y <= arriba; y++)
+                {
+                    for (var x = 0; x < ancho; x++)
+                    {
+                        if (pixeles[y * ancho + x].a > 0)
+                        {
+                            izquierda = Mathf.Min(izquierda, x);
+                            derecha = Mathf.Max(derecha, x);
+                        }
+                    }
+                }
+
+                var pivote = new Vector2(Pivote.x * ancho, Pivote.y * alto);
+                var centro = (new Vector2(izquierda + derecha + 1, abajo + arriba + 1) * 0.5f - pivote) / PixelesPorUnidad;
+                var tamano = new Vector2(derecha - izquierda + 1, arriba - abajo + 1) / PixelesPorUnidad;
+                return (centro, tamano);
+            }
+            finally
+            {
+                Object.DestroyImmediate(textura);
+            }
+        }
+
+        // El trigger va del suelo al fragmento y la máscara (apagada) lo tapa al recogerlo.
+        private static FragmentoJefe CrearFragmento(Transform pivote, SpriteRenderer dibujo)
+        {
+            var medida = MedirFragmento();
+            if (medida == null)
+            {
+                Debug.LogWarning("[Fragmentum] No se encontró el fragmento en D4: la Centinela no dejará fragmento que recoger.");
+                return null;
+            }
+
+            var (centro, tamano) = medida.Value;
+            var objeto = new GameObject("Fragmento"); // capa Default: la toca el jugador
+            objeto.transform.SetParent(pivote, false);
+            objeto.transform.localPosition = new Vector3(centro.x, 0f, 0f);
+
+            var cima = centro.y + tamano.y * 0.5f;
+            var zona = objeto.AddComponent<BoxCollider2D>();
+            zona.isTrigger = true;
+            zona.size = new Vector2(AnchoRecogida, cima);
+            zona.offset = new Vector2(0f, cima * 0.5f);
+
+            var objetoMascara = new GameObject("Mascara");
+            objetoMascara.transform.SetParent(objeto.transform, false);
+            objetoMascara.transform.localPosition = new Vector3(0f, centro.y, 0f);
+            var mascara = objetoMascara.AddComponent<SpriteMask>();
+            mascara.sprite = SpriteCuadrado;
+            mascara.enabled = false;
+            if (mascara.sprite != null)
+            {
+                // Un píxel de margen alrededor del fragmento; la ceniza queda 20 px más abajo.
+                var margen = 2f / PixelesPorUnidad;
+                var medidaSprite = mascara.sprite.bounds.size;
+                objetoMascara.transform.localScale = new Vector3((tamano.x + margen) / medidaSprite.x, (tamano.y + margen) / medidaSprite.y, 1f);
+            }
+
+            var fragmento = objeto.AddComponent<FragmentoJefe>();
+            Asignar(fragmento, "dibujo", p => p.objectReferenceValue = dibujo);
+            Asignar(fragmento, "mascara", p => p.objectReferenceValue = mascara);
+            objeto.SetActive(false); // aparece al llegar la muerte a D4
+            return fragmento;
         }
     }
 }

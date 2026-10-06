@@ -156,7 +156,9 @@ namespace Fragmentum.EditorTools
                 j.duracionVulnerable = 1.2f;
                 j.multiplicadorVulnerable = 2f;
                 j.inmuneFueraDeVulnerable = false;
-                j.tinte = Hex("CC4400");
+                // Con arte: sin tinte, y la derrota dura lo que la muerte hasta D4 (ConstructorCentinela).
+                j.tinte = Color.white;
+                j.duracionDerrota = ConstructorCentinela.DuracionDerrota;
                 j.tamano = new Vector2(2.2f, 3.4f);
                 j.fases = new List<FaseJefe>
                 {
@@ -299,22 +301,29 @@ namespace Fragmentum.EditorTools
 
                 var objetoSprite = new GameObject("Sprite") { layer = raiz.layer };
                 objetoSprite.transform.SetParent(pivote, false);
-                objetoSprite.transform.localPosition = new Vector3(0f, tamano.y * 0.5f, 0f);
                 var sprite = objetoSprite.AddComponent<SpriteRenderer>();
-                sprite.sprite = SpriteCapsula;
-                sprite.color = datos.tinte;
                 sprite.sortingOrder = 5;
-                if (sprite.sprite != null)
-                {
-                    // La cápsula base mide 1 × 2 u.
-                    objetoSprite.transform.localScale = new Vector3(tamano.x, tamano.y * 0.5f, 1f);
-                }
-
                 var animator = objetoSprite.AddComponent<Animator>();
-                var provisional = objetoSprite.AddComponent<SpriteProvisional>();
-                Asignar(provisional, "assetPendiente", p => p.stringValue = $"Sprite y animaciones de {datos.nombreCanonico} (PENDIENTES B5)");
-                Asignar(provisional, "color", p => p.colorValue = datos.tinte);
-                Asignar(provisional, "tamano", p => p.vector2Value = tamano);
+
+                // Los jefes con arte (de momento, la Centinela) llevan sus fotogramas, su Animator
+                // y su fragmento; los demás, la cápsula provisional.
+                var conArte = nombre == ConstructorCentinela.NombreDatos && ConstructorCentinela.Vestir(objetoSprite, pivote, controlador);
+                if (!conArte)
+                {
+                    objetoSprite.transform.localPosition = new Vector3(0f, tamano.y * 0.5f, 0f);
+                    sprite.sprite = SpriteCapsula;
+                    sprite.color = datos.tinte;
+                    if (sprite.sprite != null)
+                    {
+                        // La cápsula base mide 1 × 2 u.
+                        objetoSprite.transform.localScale = new Vector3(tamano.x, tamano.y * 0.5f, 1f);
+                    }
+
+                    var provisional = objetoSprite.AddComponent<SpriteProvisional>();
+                    Asignar(provisional, "assetPendiente", p => p.stringValue = $"Sprite y animaciones de {datos.nombreCanonico} (PENDIENTES B5)");
+                    Asignar(provisional, "color", p => p.colorValue = datos.tinte);
+                    Asignar(provisional, "tamano", p => p.vector2Value = tamano);
+                }
 
                 // Contacto: tocar al jefe hace daño mientras combate.
                 var objetoContacto = new GameObject("Contacto") { layer = Capa(Capas.EnemyWeapon) };

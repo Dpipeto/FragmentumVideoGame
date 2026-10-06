@@ -42,8 +42,10 @@ namespace Fragmentum.EditorTools
             ok &= ConstructorJugador.CrearPrefab() != null;
             ok &= GeneradorEnemigos.CrearPrefabs() != null;
             ok &= ConstructorEcoIra.Construir();
-            ok &= GeneradorJefes.Construir();
+            // El arte de la Centinela va antes que los prefabs de jefes, que lo usan (y usan el
+            // material de destello del Eco).
             ok &= ConstructorCentinela.Construir();
+            ok &= GeneradorJefes.Construir();
             ok &= GeneradorMecanicas.CrearPrefabs();
             ok &= ConstructorFondoMundo1.Construir();
 
