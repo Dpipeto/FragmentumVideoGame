@@ -43,6 +43,7 @@ namespace Fragmentum.EditorTools
             ok &= GeneradorEnemigos.CrearPrefabs() != null;
             ok &= ConstructorEcoIra.Construir();
             ok &= GeneradorJefes.Construir();
+            ok &= ConstructorCentinela.Construir();
             ok &= GeneradorMecanicas.CrearPrefabs();
             ok &= ConstructorFondoMundo1.Construir();
 

@@ -23,7 +23,8 @@ encargo para integrarlo en cinco fases, parando al final de cada una:
 
 ### Decisiones que ajustan el encargo
 
-- **Problema.** El encargo estaba escrito en parte sobre la v1:
+- **Problema.** El encargo (y una segunda versión que llegó después, con las mismas peticiones)
+  estaba escrito en parte sobre la v1:
   - daño con `PlayerMovement.takeDamage` y el tag `"Weapon"`;
   - un `CentinelaController` y un prefab nuevos;
   - scripts en `Assets/Editor`, clips en `Assets/Animations` y menús en `Tools/`.
@@ -41,6 +42,11 @@ encargo para integrarlo en cinco fases, parando al final de cada una:
     `Assets/Animaciones` y menús en `Fragmentum/…`. La verificación será un menú y, además,
     pruebas automáticas.
   - **`D4 (2).png` es el D4 definitivo.** Se copia como `D4.png`.
+  - **De la segunda versión se añade lo que encaja con ese combate:**
+    - D4, la ceniza con el fragmento, se queda en pantalla y Kael recoge el fragmento;
+    - la altura del salto la pone el cuerpo, no el sprite;
+    - el forcejeo de la espada clavada, sin fotograma extra;
+    - los golpes salen de eventos de animación.
 
 ### Fase A: importación
 
@@ -65,6 +71,40 @@ encargo para integrarlo en cinco fases, parando al final de cada una:
 - **Densidad.** Un píxel del dibujo mide 1/49 u (1/58 en el idle) y uno de Kael 1/64 u, así que los
   de la Centinela son un 30 % más gruesos. Es la escala del LEEME y no se cambia.
 
+### Fase B: clips
+
+- **La tabla.** `ConstructorCentinela.Clips` tiene los 8 clips con los tiempos del LEEME, sin
+  normalizar. El menú *Fragmentum → Jefes → Generar los clips de la Centinela* y «Regenerar todo»
+  los crean en `Assets/Animaciones/Jefes/Centinela` (`Centinela_Idle.anim`, etc.). Si cambia un
+  tiempo, se cambia en la tabla y se regeneran.
+
+  | Clip | Fotogramas y duración (s) | Bucle |
+  |---|---|---|
+  | Idle | I1 0,40 · I2 0,40 · I3 0,40 · I2 0,40 | sí |
+  | Andar | A1 0,15 · A2 0,15 · A4 0,15 · A2 0,15 | sí |
+  | Espadazo | **E1 0,55** · E2 0,08 · E3 0,22 · E4 0,30 | no |
+  | EspadaClavada | C1 0,09 · **C2 1,20** · C4 0,18 | no |
+  | GolpeSuelo | **G1 0,50** · G2 0,07 · G3 0,40 | no |
+  | Rugido | R1 0,35 · R2 0,35 · R3 0,20 | no |
+  | Salto | **J1 0,50** · J2 0,10 · J3 0,30 · J4 0,15 · J5 0,45 | no |
+  | Muerte | D1 0,40 · D2 0,50 · D3 1,20 · D4 (se queda) | no |
+
+- **Duración exacta.** Unity alarga un fotograma (1/60 s) los clips de sprites tras su última
+  clave. Como en el Eco, la clave de cierre va un fotograma antes y cada clip dura lo que dice la
+  tabla.
+- **D4 se queda.** La muerte no tiene clave de cierre: D4 aparece a los 2,1 s y el clip, sin bucle,
+  se detiene en él.
+- **El forcejeo de C2.** No hay fotograma extra. El sprite sube 0,02 u (un píxel del dibujo) y vuelve
+  a 0 cada 0,3 s, en escalones (tangentes *Constant*), solo mientras dura C2.
+- **El latido de color va en la fase D, no en el clip.** `BossController` reescribe el color del
+  sprite en cada `LateUpdate` (aviso, ventana, golpe), así que una curva de color en el clip no se
+  vería. Irá en contrafase con el forcejeo, desde el componente que reciba los eventos.
+- **El salto no sube el sprite.** J3 y J4 están anclados al suelo como los demás: la altura la pone
+  el cuerpo del jefe con su tiro parabólico (`BossController.Saltar`). Ningún clip, salvo el
+  forcejeo, mueve el sprite.
+- **Los eventos de animación** (golpes, ventanas y fin de cada clip) se añaden en la fase D, junto
+  con el componente que los recibe.
+
 ### Verificación (fase A)
 
 - **Compilación** con `dotnet build` y en Unity 6000.6.3f1 en modo batch: 0 errores y 0 avisos.
@@ -74,6 +114,21 @@ encargo para integrarlo en cinco fases, parando al final de cada una:
   - los pies apoyan en la fila 237 y solo la onda de G3 la cruza;
   - mide 3,4 u, casi el doble que Kael, y el idle mide lo mismo que andando;
   - el sprite de un jefe sin ajustes propios recibe igualmente los de pixel art.
+- **Pruebas PlayMode: 99 de 99 correctas.** No cambian: el jefe todavía no usa el arte.
+
+### Verificación (fase B)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 245 de 245 correctas.** Hay 6 nuevas en `CentinelaArteTests`:
+  - la tabla usa los fotogramas del arte y solo C1b se queda fuera;
+  - los clips tienen los tiempos del LEEME, copiados en la prueba y no leídos de la tabla, con
+    margen de 1 ms;
+  - la muerte acaba en D4 y se queda ahí;
+  - en los tres ataques la anticipación es el fotograma más largo y el golpe no pasa de 0,15 s.
+    (El LEEME dice que E2, G2 y J4 son los más cortos, pero en su tabla J2, el despegue, dura
+    0,10 s y J4 0,15 s. Mandan los tiempos de la tabla.);
+  - el forcejeo sube un píxel cada 0,3 s, en escalones y solo en C2;
+  - ningún otro clip mueve el sprite, tampoco el salto.
 - **Pruebas PlayMode: 99 de 99 correctas.** No cambian: el jefe todavía no usa el arte.
 
 ---
