@@ -6,16 +6,17 @@ namespace Fragmentum.EditorTools
     /// <summary>
     /// El arte del Golem de Ceniza y de las mecánicas del Nivel 1, desde el menú y desde
     /// «Regenerar todo»: importa los fotogramas con los ajustes de <see cref="TablaArte"/> y
-    /// construye los clips de <see cref="ConstructorGolem"/> y de <see cref="ConstructorMecanicas"/>.
+    /// construye los clips y los controladores de <see cref="ConstructorGolem"/> y de
+    /// <see cref="ConstructorMecanicas"/>.
     /// </summary>
     public static class ArteNivel1
     {
-        [MenuItem("Fragmentum/Niveles/Generar los clips del Golem y de las mecánicas", priority = 134)]
+        [MenuItem("Fragmentum/Niveles/Generar los clips y los Animators del Golem y de las mecánicas", priority = 134)]
         public static void MenuConstruir()
         {
             if (Construir())
             {
-                EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(ConstructorGolem.CarpetaAnimaciones));
+                EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(ConstructorGolem.RutaControlador));
             }
         }
 

@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Fragmentum.EditorTools;
+using Fragmentum.Levels.Mecanicas;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -17,6 +19,13 @@ namespace Fragmentum.Tests
     /// esperados se copian del encargo, no de <see cref="TablaArte"/>: una errata en la tabla salta
     /// aquí. Los pivotes se comprueban además contra los píxeles: caen en el suelo del Golem y de
     /// la torreta y en la superficie que se pisa de las plataformas.
+    ///
+    /// Fase B (clips): los del Golem tienen los tiempos del encargo, sin uniformar; los de las
+    /// mecánicas son los estados que sostiene su script.
+    ///
+    /// Fase C (Animators): el del Golem se mueve con los parámetros de la FSM del enemigo; los de
+    /// las mecánicas, con el entero que pone su script. Ninguno tiene estados sueltos ni
+    /// transiciones rotas, y regenerarlos no cambia nada.
     /// </summary>
     public class GolemMecanicasArteTests
     {
@@ -438,10 +447,180 @@ namespace Fragmentum.Tests
             Assert.IsFalse(clips.Any(c => c.Contains("Lava")), "La lava es un solo fotograma: no tiene clip.");
         }
 
-        [Test]
-        public void RegenerarLosClips_NoCambiaNada()
+        // --- Fase C: Animators ---
+
+        private const string ControladorGolem = AnimGolem + "/GolemCeniza.controller";
+
+        private static readonly (string ruta, System.Type estados, string[] nombres)[] ControladoresMecanicas =
         {
-            var rutas = ClipsGolem.Concat(ClipsMecanicas).Select(c => c.Ruta).ToList();
+            (AnimMecanicas + "/Torreta.controller", typeof(ESTADOS_TORRETA), new[] { "Reposo", "Carga", "Disparo" }),
+            (AnimMecanicas + "/Plataforma.controller", typeof(ESTADOS_PLATAFORMA), new[] { "Intacta", "Agrietada", "Rompe" }),
+            (AnimMecanicas + "/Combustion.controller", typeof(ESTADOS_COMBUSTION), new[] { "Apagada", "Calienta", "Encendida" }),
+        };
+
+        private static AnimatorController CargarControlador(string ruta)
+        {
+            var controlador = AssetDatabase.LoadAssetAtPath<AnimatorController>(ruta);
+            Assert.IsNotNull(controlador, $"Falta el Animator {ruta}.");
+            return controlador;
+        }
+
+        private static Dictionary<string, AnimatorState> EstadosDe(AnimatorController controlador) =>
+            controlador.layers[0].stateMachine.states.Select(s => s.state).ToDictionary(s => s.name);
+
+        private static AnimatorStateTransition Transicion(AnimatorState desde, string nombre)
+        {
+            var transicion = desde.transitions.FirstOrDefault(t => t.name == nombre);
+            Assert.IsNotNull(transicion, $"Falta la transición «{nombre}» desde {desde.name}.");
+            return transicion;
+        }
+
+        private static bool Pide(AnimatorStateTransition transicion, string parametro, AnimatorConditionMode modo) =>
+            transicion.conditions.Any(c => c.parameter == parametro && c.mode == modo);
+
+        [Test]
+        public void ElAnimatorDelGolem_TieneUnEstadoPorClip_YEmpiezaEnIdle()
+        {
+            var controlador = CargarControlador(ControladorGolem);
+            var estados = EstadosDe(controlador);
+            CollectionAssert.AreEquivalent(new[] { "Idle", "Andar", "Ataque", "Muerte" }, estados.Keys);
+            Assert.AreEqual("Idle", controlador.layers[0].stateMachine.defaultState.name);
+
+            foreach (var esperado in ClipsGolem)
+            {
+                var estado = System.IO.Path.GetFileNameWithoutExtension(esperado.Ruta).Replace("Golem_", string.Empty);
+                Assert.AreEqual(CargarClip(esperado.Ruta), estados[estado].motion, $"{estado} reproduce {esperado.Ruta}.");
+            }
+
+            // Los parámetros que ya escribe la FSM del enemigo y EnemigoAnimacion.
+            CollectionAssert.AreEquivalent(new[] { "MovEn", "Attack", "Damage", "Death", "VelocidadCorrer", "VelocidadAtaque" },
+                controlador.parameters.Select(p => p.name));
+            Assert.AreEqual("VelocidadCorrer", estados["Andar"].speedParameter, "El andar sigue la velocidad real.");
+            Assert.IsTrue(estados["Andar"].speedParameterActive);
+            Assert.AreEqual("VelocidadAtaque", estados["Ataque"].speedParameter);
+        }
+
+        [Test]
+        public void ElGolem_AtacaDesdeIdleOAndando_YAlAcabarVuelveAIdle()
+        {
+            var estados = EstadosDe(CargarControlador(ControladorGolem));
+
+            foreach (var (desde, nombre) in new[] { ("Idle", "Ya a tiro"), ("Andar", "Entra en rango") })
+            {
+                var atacar = Transicion(estados[desde], nombre);
+                Assert.AreEqual(estados["Ataque"], atacar.destinationState);
+                Assert.IsTrue(Pide(atacar, "Attack", AnimatorConditionMode.If));
+                Assert.AreEqual(atacar, estados[desde].transitions[0], $"Desde {desde}, atacar va primero.");
+            }
+
+            var termina = Transicion(estados["Ataque"], "Termina el golpe");
+            Assert.AreEqual(estados["Idle"], termina.destinationState);
+            Assert.IsTrue(termina.hasExitTime);
+            Assert.AreEqual(1f, termina.exitTime, "El ataque se ve entero: A1, A3, A4 y A5.");
+
+            var interrumpido = Transicion(estados["Ataque"], "Golpe interrumpido");
+            Assert.IsTrue(Pide(interrumpido, "Attack", AnimatorConditionMode.IfNot));
+        }
+
+        [Test]
+        public void ElGolem_ParadoRespira_YSoloAndaSiSeMueve()
+        {
+            var estados = EstadosDe(CargarControlador(ControladorGolem));
+
+            var anda = Transicion(estados["Idle"], "Echa a andar");
+            Assert.AreEqual(estados["Andar"], anda.destinationState);
+            Assert.IsTrue(Pide(anda, "MovEn", AnimatorConditionMode.If));
+            var umbralAnda = anda.conditions.Single(c => c.parameter == "VelocidadCorrer" && c.mode == AnimatorConditionMode.Greater).threshold;
+
+            var para = Transicion(estados["Andar"], "Se para");
+            Assert.AreEqual(estados["Idle"], para.destinationState);
+            var umbralPara = para.conditions.Single(c => c.parameter == "VelocidadCorrer" && c.mode == AnimatorConditionMode.Less).threshold;
+            Assert.Less(umbralPara, umbralAnda, "Con un margen entre los dos, no parpadea entre Idle y Andar al arrancar o frenar.");
+
+            Assert.IsTrue(Pide(Transicion(estados["Andar"], "Lo pierde"), "MovEn", AnimatorConditionMode.IfNot));
+        }
+
+        [Test]
+        public void LaMuerteDelGolem_InterrumpeCualquierEstado_YNoTieneSalida()
+        {
+            var controlador = CargarControlador(ControladorGolem);
+            var maquina = controlador.layers[0].stateMachine;
+            var muere = maquina.anyStateTransitions.Single();
+            Assert.AreEqual("Muerte", muere.destinationState.name);
+            Assert.IsTrue(Pide(muere, "Death", AnimatorConditionMode.If));
+            Assert.IsFalse(muere.canTransitionToSelf, "Si volviera a sí misma, la muerte se reiniciaría en cada fotograma.");
+            Assert.IsEmpty(EstadosDe(controlador)["Muerte"].transitions, "De la muerte no se sale: se queda en D4.");
+        }
+
+        [Test]
+        public void CadaMecanica_SaltaAlEstadoQuePideSuScript()
+        {
+            foreach (var (ruta, tipo, nombres) in ControladoresMecanicas)
+            {
+                var controlador = CargarControlador(ruta);
+                var maquina = controlador.layers[0].stateMachine;
+                var estados = EstadosDe(controlador);
+
+                // Un solo parámetro, el entero que pone el script; ninguno del jugador.
+                Assert.AreEqual(1, controlador.parameters.Length, ruta);
+                Assert.AreEqual("Estado", controlador.parameters[0].name, ruta);
+                Assert.AreEqual(AnimatorControllerParameterType.Int, controlador.parameters[0].type, ruta);
+
+                // Un estado por valor del enum, en su orden, y empieza en el primero.
+                var valores = System.Enum.GetValues(tipo);
+                Assert.AreEqual(valores.Length, nombres.Length, $"{ruta}: un estado por valor de {tipo.Name}.");
+                CollectionAssert.AreEquivalent(nombres, estados.Keys, ruta);
+                Assert.AreEqual(nombres[0], maquina.defaultState.name, ruta);
+
+                for (var i = 0; i < nombres.Length; i++)
+                {
+                    var salto = maquina.anyStateTransitions.SingleOrDefault(t => t.destinationState == estados[nombres[i]]);
+                    Assert.IsNotNull(salto, $"{ruta}: nada lleva a {nombres[i]}.");
+                    var condicion = salto.conditions.Single();
+                    Assert.AreEqual(AnimatorConditionMode.Equals, condicion.mode, ruta);
+                    Assert.AreEqual(i, (int)condicion.threshold, $"{ruta}: {nombres[i]} es Estado = {i} ({valores.GetValue(i)}).");
+                    Assert.IsFalse(salto.hasExitTime, $"{ruta}: el cambio es inmediato; el tiempo lo pone el script.");
+                    Assert.IsFalse(salto.canTransitionToSelf, ruta);
+                    Assert.IsEmpty(estados[nombres[i]].transitions, $"{ruta}: {nombres[i]} no cambia solo.");
+                }
+            }
+        }
+
+        [Test]
+        public void NingunAnimatorDelNivel1_TieneEstadosSueltosNiTransicionesRotas()
+        {
+            foreach (var ruta in ControladoresMecanicas.Select(c => c.ruta).Prepend(ControladorGolem))
+            {
+                var controlador = CargarControlador(ruta);
+                var maquina = controlador.layers[0].stateMachine;
+                var parametros = controlador.parameters.Select(p => p.name).ToList();
+                var transiciones = maquina.states.SelectMany(s => s.state.transitions).Concat(maquina.anyStateTransitions).ToList();
+
+                Assert.IsEmpty(maquina.stateMachines, $"{ruta}: sin submáquinas.");
+                foreach (var transicion in transiciones)
+                {
+                    Assert.IsNotNull(transicion.destinationState, $"{ruta}: «{transicion.name}» no lleva a ningún estado.");
+                    Assert.IsTrue(transicion.hasExitTime || transicion.conditions.Length > 0, $"{ruta}: «{transicion.name}» no tiene condición ni tiempo de salida.");
+                    Assert.AreEqual(0f, transicion.duration, $"{ruta}: «{transicion.name}» mezclaría fotogramas.");
+                    foreach (var condicion in transicion.conditions)
+                    {
+                        CollectionAssert.Contains(parametros, condicion.parameter, $"{ruta}: «{transicion.name}» usa un parámetro que no existe.");
+                    }
+                }
+
+                foreach (var estado in maquina.states.Select(s => s.state))
+                {
+                    Assert.IsNotNull(estado.motion, $"{ruta}: {estado.name} sin clip.");
+                    Assert.IsTrue(estado == maquina.defaultState || transiciones.Any(t => t.destinationState == estado), $"{ruta}: nada lleva a {estado.name}.");
+                }
+            }
+        }
+
+        [Test]
+        public void RegenerarClipsYAnimators_NoCambiaNada()
+        {
+            var rutas = ClipsGolem.Concat(ClipsMecanicas).Select(c => c.Ruta)
+                .Concat(ControladoresMecanicas.Select(c => c.ruta)).Append(ControladorGolem).ToList();
             var antes = rutas.ToDictionary(r => r, File.ReadAllText);
 
             Assert.IsTrue(ArteNivel1.Construir());

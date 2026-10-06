@@ -54,6 +54,10 @@ namespace Fragmentum.Core
         // El espadazo acaba con la espada clavada (C1-C4) en vez de recuperarse (E3-E4).
         public static readonly Parametro Clavar = new Parametro("Clavar");
 
+        // Las mecánicas con arte (torreta, plataformas): el estado de su ciclo, un entero que
+        // pone su script con los valores de su enum (ESTADOS_TORRETA, …).
+        public static readonly Parametro EstadoMecanica = new Parametro("Estado");
+
         /// <summary>¿El Animator tiene este parámetro? Avisa una sola vez por parámetro ausente.</summary>
         public static bool Existe(Animator animator, in Parametro parametro)
         {
@@ -88,6 +92,14 @@ namespace Fragmentum.Core
             if (Existe(animator, parametro))
             {
                 animator.SetFloat(parametro.Hash, valor);
+            }
+        }
+
+        public static void FijarEntero(Animator animator, in Parametro parametro, int valor)
+        {
+            if (Existe(animator, parametro))
+            {
+                animator.SetInteger(parametro.Hash, valor);
             }
         }
 

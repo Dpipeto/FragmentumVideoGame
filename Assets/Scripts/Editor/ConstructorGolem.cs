@@ -1,4 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
+using Fragmentum.Core;
+using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 using static Fragmentum.EditorTools.UtilidadesEditor;
 using Clip = Fragmentum.EditorTools.ClipsDeSprites.Clip;
@@ -11,7 +15,8 @@ namespace Fragmentum.EditorTools
     ///    lienzo (90×92) y el pivote en la línea de suelo (fila 88) para todos: se puede cortar de
     ///    cualquier clip a cualquier otro sin que el sprite salte. Los ajustes están en
     ///    <see cref="TablaArte"/>;
-    /// 2. crea los 4 clips desde <see cref="Clips"/>, con los tiempos del diseño.
+    /// 2. crea los 4 clips desde <see cref="Clips"/>, con los tiempos del diseño;
+    /// 3. arma su controlador (<see cref="RutaControlador"/>), con un estado por clip.
     ///
     /// El arte llega limpio y alineado desde <c>Tesis/Imagenes/limpios</c>, que tiene su LEEME. Los
     /// PNG no se retocan. El Golem está dibujado mirando a la derecha
@@ -55,11 +60,34 @@ namespace Fragmentum.EditorTools
 
         public static string RutaClip(string estado) => ClipDe(estado).Ruta(CarpetaAnimaciones);
 
-        // --- Construcción ---
+        // --- Andar ---
 
         /// <summary>
-        /// Fija los ajustes de importación y crea los clips. Devuelve false solo si algo falló; si
-        /// faltan fotogramas avisa y no construye nada.
+        /// Velocidad del cuerpo (u/s) a la que el andar va a los tiempos de la tabla (0,13 s por
+        /// fotograma). El dibujo no tiene zancada que medir (el pie de atrás no se mueve en los
+        /// cuatro fotogramas), así que la referencia es su velocidad persiguiendo: al patrullar, a
+        /// 1 u/s, anda a la mitad de ritmo. La usa <c>EnemigoAnimacion</c> (fase D).
+        /// </summary>
+        public const float VelocidadNaturalAndar = 2f;
+
+        /// <summary>
+        /// Por debajo de este ritmo de andar (velocidad real / natural) el Golem se para y respira;
+        /// por encima de <see cref="RitmoEnMarcha"/> vuelve a andar. Entre los dos no cambia: así no
+        /// parpadea entre Idle y Andar cuando arranca o frena.
+        /// </summary>
+        public const float RitmoParado = 0.05f;
+
+        public const float RitmoEnMarcha = 0.15f;
+
+        // --- Construcción ---
+
+        public const string RutaControlador = CarpetaAnimaciones + "/GolemCeniza.controller";
+
+        public static AnimatorController Controlador => AssetDatabase.LoadAssetAtPath<AnimatorController>(RutaControlador);
+
+        /// <summary>
+        /// Fija los ajustes de importación y crea los clips y el controlador. Devuelve false solo
+        /// si algo falló; si faltan fotogramas avisa y no construye nada.
         /// </summary>
         public static bool Construir()
         {
@@ -74,13 +102,69 @@ namespace Fragmentum.EditorTools
             }
 
             AsegurarCarpeta(CarpetaAnimaciones);
-            foreach (var clip in Clips)
-            {
-                ClipsDeSprites.Crear(CarpetaAnimaciones, clip, sprites);
-            }
+            var clips = Clips.ToDictionary(c => c.Estado, c => (Motion)ClipsDeSprites.Crear(CarpetaAnimaciones, c, sprites));
+            ArmarControlador(clips);
 
-            Debug.Log($"[Fragmentum] Golem de Ceniza: {sprites.Count} fotogramas y {Clips.Length} clips en {CarpetaAnimaciones}.");
+            Debug.Log($"[Fragmentum] Golem de Ceniza: {sprites.Count} fotogramas, {Clips.Length} clips y {RutaControlador}.");
             return true;
+        }
+
+        /// <summary>
+        /// Cuatro estados movidos por los parámetros que ya escribe la FSM del enemigo (MovEn,
+        /// Attack, Death) y por el ritmo de andar que escribe <c>EnemigoAnimacion</c>:
+        /// - ataca desde Idle o andando en cuanto la FSM entra en ATTACK (la FSM encadena
+        ///   transiciones en un mismo fotograma: puede llegar a ATTACK sin que se vea MovEn);
+        /// - al acabar el golpe vuelve a Idle y, si se mueve, a Andar: parado a distancia de ataque
+        ///   mientras espera, respira en vez de quedarse congelado a media zancada;
+        /// - la muerte interrumpe cualquier estado y no tiene salida (se queda en D4).
+        ///
+        /// Sin estado de daño: el Golem no tiene animación de daño ni se aturde; al recibir un
+        /// golpe destella sin dejar su ataque. Damage se declara porque la FSM lo apaga al morir.
+        /// </summary>
+        private static void ArmarControlador(IReadOnlyDictionary<string, Motion> clips)
+        {
+            var controlador = ControladoresAnimator.CargarOCrear(RutaControlador);
+            ControladoresAnimator.AsegurarParametros(controlador,
+                (AnimatorParams.MovEn.Nombre, AnimatorControllerParameterType.Bool, 0f),
+                (AnimatorParams.Attack.Nombre, AnimatorControllerParameterType.Bool, 0f),
+                (AnimatorParams.Damage.Nombre, AnimatorControllerParameterType.Bool, 0f),
+                (AnimatorParams.Death.Nombre, AnimatorControllerParameterType.Bool, 0f),
+                (AnimatorParams.VelocidadCorrer.Nombre, AnimatorControllerParameterType.Float, 1f),
+                (AnimatorParams.VelocidadAtaque.Nombre, AnimatorControllerParameterType.Float, 1f));
+
+            var maquina = controlador.layers[0].stateMachine;
+            var estados = ControladoresAnimator.Estados(maquina, Clips.Select(c => (c.Estado, clips[c.Estado])).ToList(),
+                new Dictionary<string, string>
+                {
+                    [Andar] = AnimatorParams.VelocidadCorrer.Nombre,
+                    [Ataque] = AnimatorParams.VelocidadAtaque.Nombre,
+                });
+
+            var si = AnimatorConditionMode.If;
+            var no = AnimatorConditionMode.IfNot;
+            AnimatorCondition Si(in AnimatorParams.Parametro p) => ControladoresAnimator.Condicion(si, p.Nombre);
+            AnimatorCondition No(in AnimatorParams.Parametro p) => ControladoresAnimator.Condicion(no, p.Nombre);
+            var ritmo = AnimatorParams.VelocidadCorrer.Nombre;
+
+            // Atacar va primero: al entrar en ATTACK la FSM apaga MovEn, y pararse se cumpliría también.
+            ControladoresAnimator.Transiciones(estados[Idle],
+                new ControladoresAnimator.Transicion("Ya a tiro", estados[Ataque], null, Si(AnimatorParams.Attack)),
+                new ControladoresAnimator.Transicion("Echa a andar", estados[Andar], null,
+                    Si(AnimatorParams.MovEn), ControladoresAnimator.Condicion(AnimatorConditionMode.Greater, ritmo, RitmoEnMarcha)));
+            ControladoresAnimator.Transiciones(estados[Andar],
+                new ControladoresAnimator.Transicion("Entra en rango", estados[Ataque], null, Si(AnimatorParams.Attack)),
+                new ControladoresAnimator.Transicion("Lo pierde", estados[Idle], null, No(AnimatorParams.MovEn), No(AnimatorParams.Attack)),
+                new ControladoresAnimator.Transicion("Se para", estados[Idle], null,
+                    ControladoresAnimator.Condicion(AnimatorConditionMode.Less, ritmo, RitmoParado), No(AnimatorParams.Attack)));
+            ControladoresAnimator.Transiciones(estados[Ataque],
+                new ControladoresAnimator.Transicion("Termina el golpe", estados[Idle], 1f),
+                new ControladoresAnimator.Transicion("Golpe interrumpido", estados[Idle], null, No(AnimatorParams.Attack)));
+            ControladoresAnimator.Transiciones(estados[Muerte]);
+
+            ControladoresAnimator.DesdeCualquierEstado(maquina,
+                new ControladoresAnimator.Transicion("Muere", estados[Muerte], null, Si(AnimatorParams.Death)));
+
+            EditorUtility.SetDirty(controlador);
         }
     }
 }

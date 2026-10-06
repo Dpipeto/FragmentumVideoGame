@@ -148,6 +148,46 @@ Con el arte llegó un encargo en cinco fases, parando al final de cada una:
 - **Para la fase C.** Una vuelta del andar del Golem dura 0,52 s; para que los pies no patinen,
   el ritmo del clip seguirá la velocidad real, como en el Eco.
 
+### Fase C: Animators
+
+- **El menú** pasa a ser *Fragmentum → Niveles → Generar los clips y los Animators del Golem y
+  de las mecánicas*. Los controladores los arma `ControladoresAnimator`, que reutiliza estados y
+  transiciones por nombre: regenerar no cambia los archivos.
+- **El Golem** (`GolemCeniza.controller`): cuatro estados, movidos por los parámetros que ya
+  escribe la FSM del enemigo (`MovEn`, `Attack`, `Death`) y por el ritmo de andar que escribe
+  `EnemigoAnimacion` (`VelocidadCorrer`):
+
+  | Desde | Hacia | Cuándo |
+  |---|---|---|
+  | Idle | Ataque | `Attack` («Ya a tiro»: la FSM puede llegar a ATTACK sin que se vea `MovEn`) |
+  | Idle | Andar | `MovEn` y ritmo > 0,15 |
+  | Andar | Ataque | `Attack` (va primero) |
+  | Andar | Idle | pierde al jugador, o ritmo < 0,05 (se para) |
+  | Ataque | Idle | al acabar el clip, o si la FSM corta el ataque |
+  | Cualquiera | Muerte | `Death`; sin salida: se queda en D4 |
+
+  - **Problema.** El andar no puede seguir la zancada del dibujo, como en el Eco: el pie de atrás
+    no se mueve en los cuatro fotogramas (columnas 21–33), así que no hay zancada que medir.
+  - **Solución.** La referencia es su velocidad persiguiendo, 2 u/s
+    (`ConstructorGolem.VelocidadNaturalAndar`): persiguiendo anda a los tiempos de la tabla
+    (0,13 s), patrullando a 1 u/s a la mitad de ritmo, y parado respira en Idle. Entre pararse
+    (ritmo < 0,05) y echar a andar (> 0,15) hay margen, para que no parpadee entre los dos.
+    `EnemigoAnimacion` recibe el valor en la fase D.
+  - **Sin estado de daño:** el Golem no tiene animación de daño ni se aturde (decisiones 4 y 5).
+    `Damage` se declara porque la FSM lo apaga al morir.
+- **Las mecánicas** (`Torreta.controller`, `Plataforma.controller` y `Combustion.controller`):
+  un estado por clip y un solo parámetro, el entero `Estado`, que pone su script.
+  - Cada valor es el de un enum nuevo del juego, en `Levels/Mecanicas/EstadosMecanicas.cs`:
+    `ESTADOS_TORRETA` (reposo, carga, disparo), `ESTADOS_PLATAFORMA` (intacta, agrietada, rota)
+    y `ESTADOS_COMBUSTION` (apagada, calienta, encendida). El editor comprueba que haya un clip
+    por valor y en su orden.
+  - Desde cualquier estado se salta al del valor pedido, al instante y nunca a sí mismo; ningún
+    estado cambia solo. Ningún parámetro viene del jugador.
+  - **Por qué no una cadena** reposo → carga → disparo: el script puede saltar (por ejemplo, volver
+    a reposo cuando el nivel se reinicia), y una cadena dejaría el Animator atascado si se salta
+    un paso. El ciclo y sus tiempos viven en el script.
+  - `AnimatorParams` gana `EstadoMecanica` y `FijarEntero`.
+
 ### Verificación (fase A)
 
 - **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
@@ -177,6 +217,30 @@ Con el arte llegó un encargo en cinco fases, parando al final de cada una:
   - los 9 clips de las mecánicas, con el último fotograma que se queda, y la lava sin clip;
   - regenerar los clips no cambia nada.
 - **Pruebas PlayMode: 115 correctas.** No cambian.
+
+### Verificación (fase C)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 279 correctas.** Hay 6 nuevas en `GolemMecanicasArteTests`:
+  - el Animator del Golem tiene un estado por clip, empieza en Idle y usa los parámetros de la
+    FSM; andar y atacar siguen sus parámetros de velocidad;
+  - ataca desde Idle o andando (atacar va primero) y vuelve a Idle al acabar el clip entero;
+  - parado respira, y entre pararse y echar a andar hay margen;
+  - la muerte interrumpe cualquier estado, no vuelve a sí misma y no tiene salida;
+  - cada mecánica salta al estado que pide su script: un solo parámetro entero, un estado por
+    valor de su enum y en su orden, y ninguno cambia solo;
+  - ningún Animator tiene estados sueltos, transiciones rotas ni mezclas.
+
+  La de regenerar ahora incluye los controladores.
+- **Pruebas PlayMode: 121 correctas.** Hay 6 nuevas en
+  `GolemMecanicasAnimatorPlayModeTests`, con los Animators reproduciendo de verdad:
+  - el Golem respira (I1 · I2 · I3 · I2, 0,40 s), anda a 0,13 s por fotograma a su velocidad
+    natural y al doble a media velocidad, y parado vuelve a respirar;
+  - el ataque: A1 0,50, A3 0,08, A4 0,14, A5 0,26 y vuelta a Idle;
+  - ataca andando, y si la FSM corta el ataque vuelve a Idle;
+  - la muerte interrumpe el ataque y se queda en D4 pase lo que pase;
+  - cada mecánica muestra el fotograma del estado pedido y no cambia sola;
+  - la plataforma se ve partida 0,25 s y después solo el polvo.
 
 ---
 

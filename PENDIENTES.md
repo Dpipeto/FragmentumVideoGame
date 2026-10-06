@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.22 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: los clips (fase B), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.23 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: los Animators (fase C), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -66,6 +66,12 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.23: qué cambió respecto de la v0.22
+
+- **Fase C (Animators):** el del Golem, movido por la FSM del enemigo (anda al ritmo de su
+  velocidad y parado respira), y uno por mecánica, movido por un entero que pone su script.
+  Siguen las fases D (scripts y prefabs) y E (verificación).
 
 ## Revisión 0.22: qué cambió respecto de la v0.21
 
@@ -680,6 +686,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.23 (2026-10-06)** — Golem de Ceniza y mecánicas, fase C: los Animators.
 - **0.22 (2026-10-06)** — Golem de Ceniza y mecánicas, fase B: los clips, desde dos tablas.
 - **0.21 (2026-10-06)** — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1, fase A: los 30 sprites importados con una sola tabla, en la rama `golem-mecanicas`.
 - **0.20 (2026-10-05)** — Arte de la Centinela, fase E: el menú de verificación. La integración está completa, a falta de tu prueba.
