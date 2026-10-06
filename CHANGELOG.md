@@ -188,6 +188,101 @@ Con el arte llegó un encargo en cinco fases, parando al final de cada una:
     un paso. El ciclo y sus tiempos viven en el script.
   - `AnimatorParams` gana `EstadoMecanica` y `FijarEntero`.
 
+### Fase D: scripts y prefabs
+
+- **El menú** pasa a ser *Fragmentum → Niveles → Generar el arte del Golem, las mecánicas y las
+  cinemáticas del Nivel 1* (`ArteNivel1`). En «Regenerar todo» va después del Eco, porque el
+  Golem usa su material de destello, y antes que los prefabs de las mecánicas.
+
+#### El Golem de Ceniza (`Prefabs/Enemigos/GolemCeniza.prefab`, `ConstructorGolem`)
+
+- **Problema.** El encargo pedía un `GolemController` nuevo, con daño por `takeDamage`, el tag
+  `"Weapon"` y el signo de giro al revés que el Eco.
+- **Solución.** Es el mismo `EnemyController` que los demás, vestido como el Eco con
+  `EnemigoAnimacion`. Ya hace lo que pide el encargo: patrulla, persigue, se para a distancia de
+  ataque, golpea con el ciclo entero, espera y repite. Lo que el encargo pedía exponer está en su
+  asset (`GolemCeniza.asset`): vida máxima 10, velocidad 1 patrullando y 2 persiguiendo, rango de
+  detección 6, distancia de ataque 1,8 y 2 s entre ataques. Hacia dónde mira lo resuelve
+  `spriteMiraDerecha`: no hay signos copiados del Eco.
+- **Los golpes salen del dibujo.** Eventos en los clips: `AbrirGolpe` en A3, `CerrarGolpe` en A4,
+  `FinAtaque` al acabar A5 y `FinMuerte` al llegar a D4.
+- **La onda de A3**, ancha y baja: de 0,42 a 2,2 u por delante y 0,6 u de alto. Hace daño solo
+  los 0,08 s de A3 y se esquiva saltando.
+- **El contacto con el cuerpo** hace daño siempre.
+- **Hiperarmadura (decisión 4).** Un campo nuevo, `EnemyData.hiperarmadura`, y una condición en
+  `EnemyController.AlRecibirGolpe`: con ella, el golpe quita vida y destella, pero no pasa a
+  DAMAGED. No hay retroceso ni se corta el ataque.
+- **El destello (decisión 5).** Es la silueta del Eco (`Destello.mat`). `EnemigoAnimacion` gana
+  `colorDestello` (el color de la silueta, blanco por defecto), junto a `duracionDestello`.
+- **La muerte.** D1 a D3, y D4 (los restos) se queda 0,7 s antes de desvanecerse
+  (`restosEnPantalla`, nuevo en `EnemigoAnimacion`; al Eco no le cambia nada).
+- **El andar** va a los tiempos de la tabla a 2 u/s (fase C).
+- **Sus datos.** El constructor deja en el asset lo que cambia con el arte: tinte blanco,
+  hiperarmadura y la ventana del golpe del clip (0,50 a 0,58 de 0,98 s). Esa ventana solo se usa
+  sin animación. Lo demás no se toca.
+- **En el Nivel 1** (`PreparadorNivel`, paso 10), el Golem provisional (la cápsula de la Fase 4)
+  se sustituye por este, en su sitio y con su ruta de patrulla.
+
+#### Las mecánicas (`GeneradorMecanicas`)
+
+- **Con su arte, y medidas en él.** Cada collider sale de los píxeles nativos del encargo
+  (`GeneradorMecanicas.Geometria`), con el pivote de `TablaArte`. El Transform va donde se apoya
+  el pie. Los dibujos van detrás de los tiles del suelo, para que lo que se hunde en el terreno
+  no se vea por delante; la lava va por delante, porque su costra tiene que verse.
+- **Las zonas de daño, apagadas en reposo.** La llama de la torreta solo está activa en el disparo
+  y la de la combustión, encendida.
+- **Lava (decisión 2).** Sigue matando. `tramos` franjas centradas, alternando `Lava` y
+  `Lava_espejo`; las monta el propio componente, también en el editor, sin guardarlas en la
+  escena. El trigger empieza en la costra.
+- **Torreta.** Ciclo fijo: reposo 1,6 s, carga 0,7 s y disparo 0,35 s, los tres públicos; la carga
+  es el aviso.
+  - Al disparar, la llama hace daño y sale una bola.
+  - Dispara hacia donde mira: con la escala X negativa, a la izquierda.
+  - `desfase` evita que dos torretas disparen a la vez.
+  - La bola es un prefab (`BolaDeFuego`) con su Rigidbody2D, su collider y su script. Su sprite
+    es provisional: el círculo del proyecto, en naranja, porque falta Fireball3.
+- **Plataforma inestable.** Retardo antes de romperse 0,6 s, caída 0,6 s y reaparición 3 s, los
+  tres públicos.
+  - Se agrieta al pisarla y se rompe aunque el jugador se baje.
+  - Al romperse, el collider se apaga en el acto.
+  - Reaparece intacta, pero no si el jugador está donde reaparecería.
+- **Plataforma de combustión (decisión 3).** `PlataformaCaliente` pasa a `PlataformaCombustion`
+  (script y prefab con el mismo GUID, así que el Nivel 1 los conserva).
+  - Ciclo fijo: apagada 2 s, calienta 0,8 s (el aviso) y encendida 1 s.
+  - La llama solo hace daño encendida, y el collider no se apaga nunca.
+  - Tiene su propio script, distinto del de la plataforma inestable: allí el suelo falla y aquí
+    no.
+
+#### Las cinemáticas (sección 5 y decisión 6)
+
+- **Escala entera** (`CutsceneData.escalaEntera`, en `PantallaCinematica`). El plano mide en
+  pantalla su tamaño por el mayor entero que cabe, centrado y con los bordes en píxeles enteros.
+  El tamaño se pasa a unidades del Canvas dividiendo por su escala, así que el Canvas del resto
+  de la interfaz no se toca.
+- **La presentación** (`Cinematica_Jefe_Ira`) lleva `CinematicaJefe1` y `CinematicaJefe2`, opaca y
+  a escala entera. Sus textos son del guion (N17) y no se tocan.
+- **La Centinela ruge al empezar el combate**, también en la fase 1: se levanta tras el ojo que
+  se abre.
+- **La derrota** (`Cinematica_Derrota_Ira`, `CinematicaFinalLvl1`). Cuando la Centinela termina de
+  caer (`BossController.OnCaidaTerminada`, nuevo), la arena la reproduce
+  (`LevelData.cinematicaJefeDerrotado`, nuevo) y se vuelve al juego, con el fragmento en la
+  ceniza para recogerlo.
+- **`CinematicaFinalLvl2` entra sola:** al dejar su PNG en la carpeta y regenerar, se añade como
+  segundo plano. Hasta entonces, la regeneración avisa de que falta.
+
+#### Comprobado a ojo
+
+Un render del Nivel 1 en modo batch, con un script temporal que se borró, mostró:
+
+- la torreta sobre el suelo, sin que el bloque salte al disparar;
+- la plataforma inestable a ras del foso, con lo que sobra (mide 3,83 u en un foso de 3 u)
+  escondido tras los tiles;
+- las de combustión como rejillas en el suelo;
+- el Golem apoyado, a 2,7 u;
+- la lava en su pozo.
+
+Las piezas no se movieron. El recorrido sigue siendo el provisional; el definitivo es N10.
+
 ### Verificación (fase A)
 
 - **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
@@ -241,6 +336,41 @@ Con el arte llegó un encargo en cinco fases, parando al final de cada una:
   - la muerte interrumpe el ataque y se queda en D4 pase lo que pase;
   - cada mecánica muestra el fotograma del estado pedido y no cambia sola;
   - la plataforma se ve partida 0,25 s y después solo el polvo.
+
+### Verificación (fase D)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** monta el Golem y las mecánicas, pone los planos y sustituye el Golem del
+  Nivel 1. Avisa de que falta `CinematicaFinalLvl2`.
+- **Pruebas EditMode: 284 correctas.** Hay 5 nuevas en `GolemMecanicasArteTests`:
+  - el prefab del Golem: sus datos, su arte, su destello, la onda (ancha, baja y apagada) y el
+    contacto (siempre);
+  - sus eventos, en el inicio de A3, A4 y D4 y al acabar A5, a funciones que existen;
+  - los prefabs de las mecánicas, con los colliders medidos en el dibujo (la llama de la torreta
+    llega a la x 81 del disparo) y la bola montada;
+  - en reposo, ninguna zona de ataque encendida;
+  - las cinemáticas del jefe, con sus planos y a escala entera.
+
+  Se adaptan las del Nivel 1: el Golem con arte y la plataforma de combustión. También la de las
+  presentaciones de jefe: opaca si tiene planos.
+- **Pruebas PlayMode: 135 correctas.**
+  - 6 nuevas en `GolemPlayModeTests`, con el prefab, el jugador y la física reales:
+    - la onda solo hace daño en A3, tras 0,5 s de A1, y quita los 2 de su daño;
+    - los golpes no le cortan el ataque, pero destella;
+    - persigue andando y, parado a distancia de ataque, respira;
+    - mira hacia Kael;
+    - el contacto hace daño siempre;
+    - al morir se queda en D4 0,7 s y después se desvanece.
+  - `MecanicasPlayModeTests`, reescritas con 14 pruebas:
+    - la plataforma inestable se rompe aunque te bajes, desaparece y vuelve;
+    - la combustión cicla sola y solo quema encendida;
+    - la lava monta sus franjas alternadas, sin huecos y con el trigger desde la costra;
+    - la torreta cicla sola, la llama quema delante del bloque, la bola hiere y, volteada,
+      dispara a la izquierda.
+  - Una nueva en `NarrativaPlayModeTests`: el plano mide k × 240 por k × 135 píxeles, con los
+    bordes en píxeles enteros.
+  - Una nueva en `CentinelaPlayModeTests`: al empezar el combate ruge y después ataca.
+  - El flujo del Nivel 1 pasa por la cinemática de la derrota antes de recoger el fragmento.
 
 ---
 

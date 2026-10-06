@@ -111,6 +111,12 @@ namespace Fragmentum.Bosses
         /// </summary>
         public event Action<BossController> OnFragmentoRecogido;
 
+        /// <summary>
+        /// El jefe terminó de caer: con arte, su último fotograma (la Centinela, en D4); sin arte,
+        /// al acabar de desvanecerse. La arena reproduce aquí la cinemática de su derrota.
+        /// </summary>
+        public event Action<BossController> OnCaidaTerminada;
+
         public JefeData Datos => datos;
 
         public SaludJefe Vida => _vida;
@@ -730,6 +736,8 @@ namespace Fragmentum.Bosses
             {
                 fragmento.Aparecer();
             }
+
+            OnCaidaTerminada?.Invoke(this);
         }
 
         // «Explosión visual» provisional de los jefes sin arte (PENDIENTES B5): destello y desvanecido.
@@ -753,6 +761,7 @@ namespace Fragmentum.Bosses
                 yield return null;
             }
 
+            OnCaidaTerminada?.Invoke(this);
             gameObject.SetActive(false);
         }
 

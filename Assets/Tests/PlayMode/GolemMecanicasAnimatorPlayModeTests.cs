@@ -37,6 +37,7 @@ namespace Fragmentum.Tests.PlayMode
             _sprite = objeto.AddComponent<SpriteRenderer>();
             _animator = objeto.AddComponent<Animator>();
             _animator.runtimeAnimatorController = CargarAsset<RuntimeAnimatorController>(rutaControlador);
+            objeto.AddComponent<ReceptorEventosEnemigo>();
             yield return null;
         }
 

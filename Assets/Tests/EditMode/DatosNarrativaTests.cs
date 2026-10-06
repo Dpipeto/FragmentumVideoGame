@@ -70,7 +70,17 @@ namespace Fragmentum.Tests
                 }
 
                 Assert.IsNotNull(presentacion, $"{nivel.name}: falta la presentación del jefe.");
-                Assert.IsTrue(presentacion.sobreElJuego, "Se ve la arena detrás.");
+                if (presentacion.diapositivas.Any(d => d.imagen != null))
+                {
+                    // Con sus planos (la Centinela): opaca y a escala entera, como pixel art.
+                    Assert.IsFalse(presentacion.sobreElJuego, $"{nivel.name}: con planos, la presentación es opaca.");
+                    Assert.IsTrue(presentacion.escalaEntera, $"{nivel.name}: los planos se ven a escala entera.");
+                }
+                else
+                {
+                    Assert.IsTrue(presentacion.sobreElJuego, $"{nivel.name}: sin planos, se ve la arena detrás.");
+                }
+
                 Assert.IsFalse(presentacion.soloPrimeraVez, "Se ve cada vez que se carga el nivel (no al reintentar).");
                 Assert.IsTrue(presentacion.saltable);
                 Assert.LessOrEqual(presentacion.DuracionTotal, 10f, "Es corta.");

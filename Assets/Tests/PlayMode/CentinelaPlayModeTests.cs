@@ -238,6 +238,24 @@ namespace Fragmentum.Tests.PlayMode
         // --- Rugido, golpes recibidos y latido ---
 
         [UnityTest]
+        public IEnumerator AlEmpezarElCombate_Ruge_YDespuesAtaca()
+        {
+            // Tras su presentación (el ojo que se abre), la Centinela se levanta rugiendo.
+            yield return Preparar(-2.8f, "Espadazo");
+            yield return null;
+            yield return null;
+            Assert.AreEqual("R1", Fotograma, "Al empezar el combate ruge.");
+            var registro = new Registro();
+            yield return Durante(1.6f, () => registro.Anotar(Fotograma));
+            var primerAtaque = registro.Fotogramas.FindIndex(f => f.fotograma == "E1");
+            Assert.Greater(primerAtaque, 0, "Después del rugido, el primer espadazo.");
+            var antes = registro.Fotogramas.Take(primerAtaque).Select(f => f.fotograma).ToList();
+            CollectionAssert.IsSubsetOf(new[] { "R1", "R2", "R3" }, antes, "El rugido entero.");
+            Assert.IsTrue(antes.All(f => f.StartsWith("R") || f.StartsWith("I") || f.StartsWith("A")),
+                "Antes de atacar, solo el rugido (y el idle o el andar). " + string.Join(", ", antes));
+        }
+
+        [UnityTest]
         public IEnumerator AlCambiarDeFase_Ruge()
         {
             yield return Preparar(-10f);

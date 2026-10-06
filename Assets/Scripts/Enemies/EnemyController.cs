@@ -23,7 +23,8 @@ namespace Fragmentum.Enemies
     ///   de exigir asignarlo a mano en cada escena.
     /// - Patrulla entre waypoints y, si no tiene, se queda en IDLE sin lanzar excepciones.
     /// - Tiene cooldown de ataque por tiempo, histéresis en la persecución, estado DAMAGED con
-    ///   i-frames que interrumpe el ataque y un DEAD real que apaga colisiones y lo destruye.
+    ///   i-frames que interrumpe el ataque (salvo con <see cref="EnemyData.hiperarmadura"/>, el
+    ///   Golem de Ceniza) y un DEAD real que apaga colisiones y lo destruye.
     /// - La vida es entera y los parámetros viven en <see cref="EnemyData"/>.
     /// - El Animator se fija en el OnEnter de cada estado, no con cuatro SetBool por frame.
     /// - Con arte (el Eco de la Ira), los fotogramas del clip marcan la ventana del golpe y el
@@ -490,8 +491,9 @@ namespace Fragmentum.Enemies
                 return;
             }
 
+            // Con hiperarmadura el golpe quita vida y destella (EnemigoAnimacion), pero no aturde.
             var actual = _maquina.EstadoActual;
-            if (actual != ESTADOS_ENEMIGO.DAMAGED && actual != ESTADOS_ENEMIGO.DEAD)
+            if (!datos.hiperarmadura && actual != ESTADOS_ENEMIGO.DAMAGED && actual != ESTADOS_ENEMIGO.DEAD)
             {
                 _maquina.TransitionTo(ESTADOS_ENEMIGO.DAMAGED);
             }

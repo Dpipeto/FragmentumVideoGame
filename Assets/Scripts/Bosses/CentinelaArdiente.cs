@@ -13,8 +13,9 @@ namespace Fragmentum.Bosses
     /// - <b>Fase 3</b> (25 %): ira desatada. Casi sin pausas entre ataques, erupciones en ráfaga
     ///   y el cuerpo al rojo. No está en el Anexo A: se añadió tras la primera prueba, porque el
     ///   combate se sentía fácil y no transmitía la ira.
-    /// - Al entrar en las fases 2 y 3 <b>ruge</b>: un aviso largo y quieta, antes de que empiece la
-    ///   fase. Es la señal de que el combate cambia.
+    /// - Al empezar el combate y al entrar en las fases 2 y 3 <b>ruge</b>: un aviso largo y quieta,
+    ///   antes de su primer ataque. Al empezar, es la Centinela que se levanta tras su presentación
+    ///   (el ojo que se abre); después, la señal de que el combate cambia.
     /// - <b>Muerte:</b> cae (D1-D3) y se queda en D4, la ceniza con el fragmento blanco flotando.
     ///   «El suelo se estabiliza»: al cortarse los ataques desaparecen todas las erupciones.
     /// - <b>Recompensa:</b> Fragmento de la Ira → Ataque Cargado. La otorga la arena cuando Kael
@@ -40,11 +41,8 @@ namespace Fragmentum.Bosses
 
         protected override void AlCambiarDeFase(int fase)
         {
-            if (fase >= 2)
-            {
-                Avisar(Rugido);
-                Rugir();
-            }
+            Avisar(Rugido);
+            Rugir();
 
             if (fase >= 3)
             {
@@ -52,9 +50,8 @@ namespace Fragmentum.Bosses
             }
         }
 
-        // Ruge quieta antes de la primera embestida de la fase. Dura lo que el clip (R1-R3, 0,9 s).
-        protected override float EsperaAlEmpezarFase(int fase, FaseJefe datosFase) =>
-            fase >= 2 ? Rugido : base.EsperaAlEmpezarFase(fase, datosFase);
+        // Ruge quieta antes de la primera embestida de cada fase. Dura lo que el clip (R1-R3, 0,9 s).
+        protected override float EsperaAlEmpezarFase(int fase, FaseJefe datosFase) => Rugido;
 
         // Con arte, el latido va en contrafase con el forcejeo de C2: el sprite abajo, brasa;
         // arriba, casi apagado.

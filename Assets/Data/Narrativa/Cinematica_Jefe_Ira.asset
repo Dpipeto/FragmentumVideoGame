@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.CutsceneData
   id: Jefe_Ira
   diapositivas:
-  - imagen: {fileID: 0}
+  - imagen: {fileID: 21300000, guid: 5779b510b7cf8394fa18731360f99103, type: 3}
     texto: 
     carteles:
     - texto: CENTINELA ARDIENTE
@@ -29,15 +29,16 @@ MonoBehaviour:
       titulo: 0
     duracion: 3
     audio: {fileID: 0}
-  - imagen: {fileID: 0}
+  - imagen: {fileID: 21300000, guid: 8e6b3385b9adb4249982fe5310a9cd15, type: 3}
     texto: "Centinela Ardiente: [Antes del combate \xB7 Ira \xB7 pendiente de guion] Centinela Ardiente encarna la ira."
     carteles: []
     duracion: 4.5
     audio: {fileID: 0}
   saltable: 1
   soloPrimeraVez: 0
-  sobreElJuego: 1
+  sobreElJuego: 0
   opacidadVelo: 0.55
+  escalaEntera: 1
   fundidoImagen: 0.4
   fundidoTexto: 0.4
   margenTexto: 0.8

@@ -166,13 +166,14 @@ namespace Fragmentum.Tests.PlayMode
 
             yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
 
-            // Primero, la presentación: el diálogo antes del combate, sobre la arena congelada.
+            // Primero, la presentación: los planos del jefe y el diálogo antes del combate.
             Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar, la cinemática del jefe.");
             Assert.AreSame(Nivel1.cinematicaJefe, Juego.CinematicaActual);
             Assert.IsTrue(arena.Presentando);
             Assert.IsTrue(arena.PuertasCerradas, "La puerta se cierra detrás del jugador ya durante la presentación.");
             Assert.IsFalse(arena.Jefe.EnCombate, "El jefe espera a que termine.");
-            Assert.IsTrue(Interfaz.Cinematica.SobreElJuego, "Detrás se ve la arena, no negro.");
+            Assert.IsFalse(Interfaz.Cinematica.SobreElJuego, "Con sus planos (Kael ante la Centinela, el ojo que se abre), es opaca.");
+            Assert.Greater(Interfaz.Cinematica.EscalaEntera, 0, "Y los planos se ven a escala entera.");
             Assert.IsTrue(camara.Presentando, "La cámara enseña al jefe.");
 
             yield return SaltarCinematicaSiHay();
@@ -206,6 +207,14 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsTrue(arena.Jefe.DejaFragmento);
             CollectionAssert.DoesNotContain(Gestor.Datos.fragmentos, "IRA", "El fragmento hay que recogerlo.");
             yield return EsperarHastaReal(() => arena.Jefe.Fragmento.Disponible, 4f, "que el fragmento aparezca en la ceniza (D4)");
+
+            // Al terminar de caer, la cinemática de la derrota (la sala vacía); después, de vuelta al juego.
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Cuando la Centinela termina de caer, su cinemática.");
+            Assert.IsNotNull(Nivel1.cinematicaJefeDerrotado);
+            Assert.AreEqual(Nivel1.cinematicaJefeDerrotado, Juego.CinematicaActual);
+            yield return SaltarCinematicaSiHay();
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual, "Y se vuelve al juego, con el fragmento en la ceniza.");
+            Assert.IsTrue(arena.Jefe.Fragmento.Disponible);
             Assert.IsFalse(arena.Superada, "La arena no se abre antes de recogerlo.");
             CollectionAssert.DoesNotContain(Gestor.Datos.fragmentos, "IRA");
 

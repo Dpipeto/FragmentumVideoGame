@@ -2453,7 +2453,9 @@ MonoBehaviour:
   velocidadNaturalCarrera: 1.2916667
   materialDestello: {fileID: 2100000, guid: 20e4a05da50e7b3418038b6f39244735, type: 2}
   duracionDestello: 0.1
+  colorDestello: {r: 1, g: 1, b: 1, a: 1}
   estallido: {fileID: 4630984843684467649}
+  restosEnPantalla: 0
   duracionFundido: 0.4
 --- !u!1 &3558274055848475688
 GameObject:

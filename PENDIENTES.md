@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.23 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: los Animators (fase C), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.24 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: en el juego (fase D), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,6 +14,7 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 | N17 | **Mira la presentación del jefe** al entrar en la arena y **escribe su diálogo**. | Ya funciona: se cierra la puerta, la cámara va hacia la Centinela y aparecen su nombre y una línea sobre la arena oscurecida. Dura 7,5 s y se salta con cualquier tecla pasado 1 s. El texto es provisional. | Escribe el texto en `Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset`: cada diapositiva tiene texto, carteles con tiempos y, si se dibuja, imagen. Puedes añadir diapositivas. Si prefieres pasarme el texto, lo vuelco yo. Detalle en B1. |
 | N15 | **Prueba el golpe del Eco de la Ira**, ahora más rápido. | El ataque va a 1,6×: a1 dura 0,22 s, el golpe 0,08 s y el ataque entero 0,46 s. Descansa 0,45 s entre golpes, antes 0,7. | Pelea con él en el Nivel 1 (x ≈ 12). Si sigue lento, sube `velocidadAtaque` en `EcoIra.prefab → Pivote/Sprite → EnemigoAnimacion` o baja `attackCooldown` en `Assets/Data/Enemigos/EcoIra.asset`. |
 | N18 | **¿Querías el Eco más grande?** En el Nivel 1, el Eco de x = 12,5 tiene escala 1,8 × 1,5. | Lo cambiaste en la escena y lo dejé tal cual. Con una escala distinta en X y en Y, los píxeles del dibujo quedan un 20 % más anchos que altos. Además, ese Eco mide el 90 % de Kael y los demás el 60 %. | Si lo quieres más grande en todo el juego, dime cuánto (por ejemplo, «al 80 % de Kael») y lo cambio en la importación, con la misma escala en X y en Y. Si fue una prueba, vuelve a poner la escala a 1 en la escena. |
+| N20 | **Juega el Nivel 1 con el Golem, las mecánicas y las cinemáticas.** | Ya tienen su arte y su comportamiento nuevo. Mira sobre todo:<br>• si el medio segundo de A1 del Golem se lee y su onda se salta bien;<br>• el ritmo de la torreta (reposo 1,6 s, carga 0,7 s, disparo 0,35 s) y el de la combustión (2 s, 0,8 s y 1 s);<br>• la plataforma inestable (0,6 s agrietada);<br>• los planos del jefe a escala entera. | Los tiempos son públicos: en el inspector de cada prefab de `Assets/Prefabs/Mecanicas`. Los del Golem, en `Assets/Data/Enemigos/GolemCeniza.asset`. Si algo no se lee, dime qué y en qué tiempo. |
 | N19 | **Corrige el Anexo A de `Tesis.docx`:** la plataforma de combustión ya no quema por estar encima. | Aceptaste el ciclo fijo del nuevo encargo: apagada → calienta → encendida, sin depender del jugador. El Anexo A dice que quema si te quedas encima más de 2 s. | Yo no toco `Tesis.docx`. Basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». |
 | N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después dash, wall slide y agacharse (y, para la Fase 10, nado). | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Solo el Eco de la Ira tiene arte. | Ver «Arte que más necesito», justo debajo. |
@@ -66,6 +67,19 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.24: qué cambió respecto de la v0.23
+
+- **Fase D (en el juego):**
+  - el Golem de Ceniza con su arte sustituye a la cápsula en el Nivel 1, con hiperarmadura y la
+    onda de A3;
+  - la lava, la torreta, la plataforma inestable y la de combustión, con su arte y sus ciclos
+    nuevos;
+  - la bola de la torreta, con sprite provisional;
+  - los planos del jefe, a escala entera: la presentación y la nueva cinemática de la derrota;
+  - la Centinela ruge al empezar el combate.
+- **Nuevo N20:** juega ese tramo. Queda la fase E (verificación).
+- **B1, B4 y B10, al día.**
 
 ## Revisión 0.23: qué cambió respecto de la v0.22
 
@@ -347,7 +361,8 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 | Cinemática (asset) | Dónde suena | Falta | Prioridad |
 |---|---|---|---|
 | `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | ✔ 12 planos y guion (80 s). Falta, opcional, la música o el sonido (campo `musica` del asset, o `audio` de cada plano) | P2 |
-| `Cinematica_Jefe_Ira` (~7,5 s, sobre el juego) | Al entrar en la arena de la Centinela, antes del combate (una vez por carga del nivel) | Guion del diálogo (N17). Las imágenes son opcionales: sin ellas se ve la arena oscurecida con franjas de cine | P1 |
+| `Cinematica_Jefe_Ira` (~7,5 s, con sus planos y a escala entera) | Al entrar en la arena de la Centinela, antes del combate (una vez por carga del nivel) | ✔ Planos `CinematicaJefe1` y `CinematicaJefe2`. Falta el guion del diálogo (N17) | P1 |
+| `Cinematica_Derrota_Ira` (a escala entera) | Cuando la Centinela termina de caer, antes de recoger el fragmento | ✔ `CinematicaFinalLvl1`. Falta `CinematicaFinalLvl2` (los huecos de los fragmentos): al dejarla en `Assets/Sprites/Cinematicas/Nivel1` y regenerar, entra sola | P1 |
 | `Cinematica_Jefe_Tristeza`, `_Miedo`, `_Culpa` | Al entrar en la arena de cada jefe | Guion; imágenes opcionales | P2 |
 | `Cinematica_Cierre_Ira` | Al superar el mundo de la Ira | Guion e imágenes | P1 |
 | `Cinematica_Cierre_Tristeza`, `_Miedo`, `_Culpa` | Al superar cada mundo | Guion e imágenes | P2 |
@@ -449,7 +464,7 @@ cápsulas tintadas con un color de la paleta de su mundo.
 | — | Genérico | ✔ `Generico` / `Enemigo.prefab` | Cápsula gris | — | — |
 | Ira | **Eco de la Ira** | ✔ `EcoIra` / `EcoIra.prefab`; en el Nivel 1 y en `PruebaEnemigos` | ✔ 12 fotogramas, 4 clips (Idle, Run, Attack, Death). El ataque va a 1,6× | Audio; probar el golpe nuevo (N15) | P1 |
 | Ira | Soldado de lava | ✔ `SoldadoLava` / `Enemigo_SoldadoLava`; el Eco ocupa su sitio en el Nivel 1 | Cápsula naranja | — | P2 |
-| Ira | Golem de Ceniza (mini-jefe, vida 10) | ✔ `GolemCeniza` / `Enemigo_GolemCeniza` (más grande). Inmune a la lava | Cápsula ceniza | Arte: ficha abajo (N7) | P1 |
+| Ira | Golem de Ceniza (mini-jefe, vida 10) | ✔ `GolemCeniza.prefab`, con su arte. Inmune a la lava; los golpes no lo aturden (hiperarmadura) | ✔ Arte final (15 fotogramas) | Opcional: rehacer A2 (el LEEME trae el prompt) | P1 |
 | Ira | Torreta de fuego fija | ✔ Es una mecánica, no un enemigo: `TorretaFuego` / `Mecanicas/TorretaFuego.prefab` (Fase 9) | Bloque oscuro con boca naranja; la bola de fuego es un cuadrado naranja | Sprite de la torreta y de la bola (B10) | P1 |
 | Tristeza | Lamento | ✔ `Lamento` / `Enemigo_Lamento` | Cápsula azul | Ralentizar al jugador al tocarlo (Anexo: «reducen velocidad al contacto»), Fase 10 | P2 |
 | Tristeza | Esculturas Vivientes, Medusas de Hielo | ✗ | ✗ | Movimiento sinusoidal de las medusas (Fase 10) | P2 |
@@ -652,10 +667,10 @@ ningún clip importado en la v2.
 
 | Asset | Componente *(propuesto)* | Existe / candidato | Prioridad |
 |---|---|---|---|
-| Plataforma que se desmorona | `PlataformaInestable` (Fase 9) | Provisional: rectángulo marrón que tiembla y desaparece. Candidato: `Pixel Adventure 1/Traps/Falling Platforms`. El sprite va en el hijo `Visual` de `Mecanicas/PlataformaInestable.prefab`. | P1 |
-| Plataforma de combustión (estado caliente) | `PlataformaCaliente` (Fase 9) | Provisional: rectángulo que se tiñe de rojo con el calor. Candidato: `FireSet` + tinte. El tinte funciona igual con un sprite (campos `colorFrio` y `colorAlRojo`). | P1 |
-| Lava (animada) | `Lava` (Fase 9) | Provisional: rectángulo cuyo color late. Candidatos de la v1: `Top Down Lava…/Burning Lava`, `Tiles/Lava.prefab`, `lava2.prefab`. Si se pinta con tiles, el prefab sigue haciendo falta como zona mortal (se le puede quitar el `Visual`). | P1 |
-| Torreta de fuego y su bola | `TorretaFuego` + `Proyectil` (Fase 9) | Provisional: bloque oscuro con boca naranja y un cuadrado naranja como bola. El destello de aviso tiñe el `Visual`. | P1 |
+| Plataforma que se desmorona | `PlataformaInestable` | ✔ Arte final: intacta, agrietada (el aviso), rota y polvo. Se rompe aunque te bajes; los tiempos son públicos. | — |
+| Plataforma de combustión | `PlataformaCombustion` (antes `PlataformaCaliente`) | ✔ Arte final: apagada, calienta y encendida, en un ciclo fijo. Falta corregir el Anexo A (N19). | — |
+| Lava | `Lava` | ✔ Arte final: la franja y su espejo, alternados (`tramos`). Es un solo fotograma: si se quiere que se mueva, harían falta más (opcional). | P3 |
+| Torreta de fuego y su bola | `TorretaFuego` + `Proyectil` | ✔ Arte final de la torreta (reposo, carga y disparo). **Falta la bola** (Fireball3 por regenerar): el prefab `BolaDeFuego` lleva el círculo del proyecto en naranja. | P1 |
 | Checkpoint | `Checkpoint` (Fase 6) | Provisional: un mástil y un paño que se tiñe con el acento del mundo al activarse. Candidatos de la v1: `Pixel Adventure 1/Items/Checkpoints` (bandera animada) y `tileset/Puerta/respawn point_*`. El sprite va en `Nivel/Checkpoints/L1_CP1/Pano` (campo `indicador` del `Checkpoint`). | P1 |
 | Salida del nivel | `SalidaNivel` (Fase 6) | Provisional: un portal translúcido del color de acento. Falta decidir su aspecto; en los niveles con jefe (Fase 7) puede bastar la puerta de la arena. | P2 |
 | VFX del ataque cargado | modificador de `ATTACK` | ✗ | P1 |
@@ -686,6 +701,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.24 (2026-10-06)** — Golem de Ceniza y mecánicas, fase D: scripts, prefabs y cinemáticas en el juego.
 - **0.23 (2026-10-06)** — Golem de Ceniza y mecánicas, fase C: los Animators.
 - **0.22 (2026-10-06)** — Golem de Ceniza y mecánicas, fase B: los clips, desde dos tablas.
 - **0.21 (2026-10-06)** — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1, fase A: los 30 sprites importados con una sola tabla, en la rama `golem-mecanicas`.

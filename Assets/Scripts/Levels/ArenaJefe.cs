@@ -25,6 +25,9 @@ namespace Fragmentum.Levels
     ///   habilidad; tras una breve pausa se abren las puertas y aparece la salida del nivel. Si
     ///   el jefe deja su fragmento en el suelo (la Centinela, en su ceniza), todo eso espera a que
     ///   el jugador lo recoja (<see cref="BossController.OnFragmentoRecogido"/>).
+    /// - <b>Cinemática de la derrota:</b> si el nivel tiene (<c>LevelData.cinematicaJefeDerrotado</c>),
+    ///   se reproduce cuando el jefe termina de caer (<see cref="BossController.OnCaidaTerminada"/>)
+    ///   y al acabar se vuelve al juego, con el fragmento ya en el suelo para recogerlo.
     /// - <b>Muerte del jugador:</b> al reaparecer en el checkpoint, el combate vuelve a empezar: el
     ///   jefe recupera la vida y su sitio, y las puertas se abren.
     /// </summary>
@@ -117,6 +120,7 @@ namespace Fragmentum.Levels
             if (jefe != null)
             {
                 jefe.OnJefeDerrotado += AlDerrotarJefe;
+                jefe.OnCaidaTerminada += AlTerminarCaida;
             }
             else
             {
@@ -134,6 +138,7 @@ namespace Fragmentum.Levels
             if (jefe != null)
             {
                 jefe.OnJefeDerrotado -= AlDerrotarJefe;
+                jefe.OnCaidaTerminada -= AlTerminarCaida;
                 jefe.OnFragmentoRecogido -= AlRecogerFragmento;
             }
 
@@ -295,6 +300,18 @@ namespace Fragmentum.Levels
             }
 
             Recompensar(derrotado);
+        }
+
+        // El jefe terminó de caer: la cinemática de su derrota, si el nivel tiene. Al acabar, la
+        // FSM global vuelve al juego.
+        private void AlTerminarCaida(BossController caido)
+        {
+            var cinematica = _nivel != null && _nivel.Nivel != null ? _nivel.Nivel.cinematicaJefeDerrotado : null;
+            if (cinematica != null && GameStateMachine.Instancia != null &&
+                (GameManager.Instancia == null || GameManager.Instancia.DebeVerse(cinematica)))
+            {
+                GameStateMachine.Instancia.IniciarCinematica(cinematica);
+            }
         }
 
         private void AlRecogerFragmento(BossController derrotado)

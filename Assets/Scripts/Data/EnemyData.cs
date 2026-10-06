@@ -76,7 +76,11 @@ namespace Fragmentum.Data
         public float finVentanaGolpe = 0.4f;
 
         [Header("Daño recibido")]
-        [Tooltip("Segundos de aturdimiento tras un golpe. Interrumpe el ataque.")]
+        [Tooltip("Hiperarmadura: los golpes le quitan vida y lo hacen destellar, pero no lo aturden ni cortan su ataque " +
+                 "(Golem de Ceniza: sin animación de daño y con 10 de vida, si cada golpe lo aturdiera apenas llegaría a atacar).")]
+        public bool hiperarmadura;
+
+        [Tooltip("Segundos de aturdimiento tras un golpe. Interrumpe el ataque. Sin efecto con hiperarmadura.")]
         public float damagedDuration = 0.35f;
 
         [Tooltip("Velocidad del retroceso al recibir un golpe.")]

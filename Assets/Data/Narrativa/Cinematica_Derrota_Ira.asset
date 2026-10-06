@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cba49e80cd9bdc4fba0fe38f34ea4bb, type: 3}
+  m_Name: Cinematica_Derrota_Ira
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.CutsceneData
+  id: Derrota_Ira
+  diapositivas:
+  - imagen: {fileID: 21300000, guid: 39a7473749acb194da2cb0b8d90ea264, type: 3}
+    texto: 
+    carteles: []
+    duracion: 4.5
+    audio: {fileID: 0}
+  saltable: 1
+  soloPrimeraVez: 0
+  sobreElJuego: 0
+  opacidadVelo: 0.55
+  escalaEntera: 1
+  fundidoImagen: 0.6
+  fundidoTexto: 0.4
+  margenTexto: 0.8
+  bloqueoSalto: 1
+  avisoSaltar: Pulsa cualquier tecla para saltar
+  finAviso: 4
+  opacidadAviso: 0.45
+  musica: {fileID: 0}

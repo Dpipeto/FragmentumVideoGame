@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Fragmentum.Core;
 using Fragmentum.EditorTools;
 using Fragmentum.Levels.Mecanicas;
 using NUnit.Framework;
@@ -629,6 +630,182 @@ namespace Fragmentum.Tests
             {
                 Assert.AreEqual(antes[ruta], File.ReadAllText(ruta), $"{ruta} cambió al regenerar.");
             }
+        }
+
+        // --- Fase D: scripts y prefabs ---
+
+        private const string PrefabGolem = "Assets/Prefabs/Enemigos/GolemCeniza.prefab";
+        private const string PrefabsMecanicas = "Assets/Prefabs/Mecanicas";
+
+        private static GameObject CargarPrefab(string ruta)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ruta);
+            Assert.IsNotNull(prefab, $"Falta el prefab {ruta}.");
+            return prefab;
+        }
+
+        private static T Campo<T>(Object objeto, string campo) where T : Object =>
+            new SerializedObject(objeto).FindProperty(campo).objectReferenceValue as T;
+
+        private static Rect Caja(BoxCollider2D caja) => new Rect(caja.offset - caja.size / 2f, caja.size);
+
+        [Test]
+        public void ElPrefabDelGolem_EsUnEnemigoConSuArte_YSusDatos()
+        {
+            var prefab = CargarPrefab(PrefabGolem);
+            var enemigo = prefab.GetComponent<Fragmentum.Enemies.EnemyController>();
+            Assert.IsNotNull(enemigo, "El Golem es un enemigo más (EnemyController), no un jefe.");
+
+            var datos = enemigo.Datos;
+            Assert.AreEqual(AssetDatabase.LoadAssetAtPath<Fragmentum.Data.EnemyData>("Assets/Data/Enemigos/GolemCeniza.asset"), datos);
+            Assert.IsTrue(datos.hiperarmadura, "Los golpes no le cortan el ataque.");
+            Assert.IsTrue(datos.spriteMiraDerecha, "Está dibujado mirando a la derecha.");
+            Assert.AreEqual(Color.white, datos.tinte, "Con arte, sin tinte.");
+            Assert.IsTrue(datos.inmuneALava);
+
+            var animacion = prefab.GetComponentInChildren<Fragmentum.Enemies.EnemigoAnimacion>(true);
+            Assert.IsNotNull(animacion);
+            var animator = animacion.GetComponent<Animator>();
+            Assert.AreEqual(CargarControlador(ControladorGolem), animator.runtimeAnimatorController);
+            Assert.AreEqual(AnimatorCullingMode.AlwaysAnimate, animator.cullingMode, "Fuera de cámara también: si no, los eventos no llegan.");
+            Assert.AreEqual(Vector3.zero, animacion.transform.localPosition, "El sprite en los pies: el pivote del arte es el suelo.");
+            Assert.AreEqual("Golem_I1", animacion.GetComponent<SpriteRenderer>().sprite.name);
+            Assert.AreEqual(ConstructorGolem.VelocidadNaturalAndar, animacion.VelocidadNaturalCarrera);
+            Assert.AreEqual("Assets/Sprites/Enemigos/Materiales/Destello.mat", AssetDatabase.GetAssetPath(Campo<Material>(animacion, "materialDestello")),
+                "Destella con la silueta (el color del SpriteRenderer no aclara el gris).");
+            Assert.AreEqual(Color.white, animacion.ColorDestello);
+            Assert.Greater(animacion.RestosEnPantalla, 0f, "Los restos (D4) se quedan un momento.");
+
+            var arma = prefab.transform.Find("Pivote/Arma");
+            Assert.IsFalse(arma.gameObject.activeSelf, "La onda está apagada en reposo.");
+            var onda = Caja(arma.GetComponent<BoxCollider2D>());
+            var centro = (Vector2)arma.localPosition;
+            Assert.Greater(onda.width, 2f * onda.height, "La onda es ancha y baja.");
+            Assert.Less(centro.y + onda.yMax, 0.7f, "Baja: se esquiva saltando.");
+            Assert.Greater(centro.x + onda.xMax, 2f, "Llega más allá del puño que toca el suelo.");
+            Assert.IsTrue(prefab.transform.Find("Contacto").gameObject.activeSelf, "El contacto con el cuerpo hace daño siempre.");
+        }
+
+        [Test]
+        public void LosEventosDelGolem_CaenEnSuFotograma_YLlamanAEnemigoAnimacion()
+        {
+            var esperados = new (string clip, string funcion, float tiempo)[]
+            {
+                ("Golem_Ataque", "AbrirGolpe", 0.50f),
+                ("Golem_Ataque", "CerrarGolpe", 0.58f),
+                ("Golem_Ataque", "FinAtaque", 0.98f),
+                ("Golem_Muerte", "FinMuerte", 1.30f),
+            };
+
+            foreach (var (clip, funcion, tiempo) in esperados)
+            {
+                var eventos = CargarClip($"{AnimGolem}/{clip}.anim").events;
+                var evento = eventos.SingleOrDefault(e => e.functionName == funcion);
+                Assert.IsNotNull(evento, $"{clip}: falta el evento {funcion}.");
+                Assert.AreEqual(tiempo, evento.time, 0.001f, $"{clip}: {funcion}.");
+
+                var metodo = typeof(Fragmentum.Enemies.EnemigoAnimacion).GetMethod(funcion);
+                Assert.IsNotNull(metodo, $"{funcion} no existe en EnemigoAnimacion.");
+                Assert.IsTrue(metodo.IsPublic && metodo.ReturnType == typeof(void) && metodo.GetParameters().Length == 0, funcion);
+            }
+
+            Assert.IsEmpty(CargarClip($"{AnimGolem}/Golem_Idle.anim").events);
+            Assert.IsEmpty(CargarClip($"{AnimGolem}/Golem_Andar.anim").events);
+        }
+
+        [Test]
+        public void LosPrefabsDeLasMecanicas_LlevanSuArte_YColliders_MedidosEnElDibujo()
+        {
+            // Torreta: el bloque (x 16-61, y 1-40) es suelo; la llama del disparo llega a x 81.
+            var torreta = CargarPrefab($"{PrefabsMecanicas}/TorretaFuego.prefab");
+            var bloque = Caja(torreta.GetComponent<BoxCollider2D>());
+            Assert.AreEqual(46f / 24f, bloque.width, 0.01f);
+            Assert.AreEqual(40f / 24f, bloque.height, 0.01f);
+            Assert.AreEqual(0f, bloque.yMin, 0.05f, "El pivote cae en la base del bloque.");
+            var llamaTorreta = torreta.transform.Find("Llama").GetComponent<BoxCollider2D>();
+            Assert.IsTrue(llamaTorreta.isTrigger);
+            Assert.AreEqual((82f - 0.287f * 82f) / 24f, Caja(llamaTorreta).xMax, 0.02f, "La llama llega hasta x 81 del disparo (con su pivote corrido).");
+            Assert.Greater(Caja(llamaTorreta).xMin, bloque.xMax - 0.1f, "La llama empieza delante del bloque.");
+            Assert.AreEqual(CargarPrefab($"{PrefabsMecanicas}/BolaDeFuego.prefab"), Campo<Component>(torreta.GetComponent<TorretaFuego>(), "bola")?.gameObject);
+            ComprobarDibujo(torreta, "Torreta_1_reposo", "Torreta");
+
+            // Plataforma inestable: de la superficie (fila 21) hacia abajo, todo el ancho.
+            var plataforma = CargarPrefab($"{PrefabsMecanicas}/PlataformaInestable.prefab");
+            var cuerpo = Caja(plataforma.GetComponent<BoxCollider2D>());
+            Assert.AreEqual(184f / 48f, cuerpo.width, 0.01f);
+            Assert.AreEqual(42f / 48f, cuerpo.height, 0.01f);
+            Assert.AreEqual(0f, cuerpo.yMax, 0.01f, "La superficie a la altura del Transform.");
+            Assert.IsTrue(plataforma.GetComponent<BoxCollider2D>().enabled, "Intacta, sostiene.");
+            ComprobarDibujo(plataforma, "Plataforma_1_intacta", "Plataforma");
+
+            // Combustión: la superficie (fila 26) y la base (fila 87); la llama, encima.
+            var combustion = CargarPrefab($"{PrefabsMecanicas}/PlataformaCombustion.prefab");
+            var base_ = Caja(combustion.GetComponent<BoxCollider2D>());
+            Assert.AreEqual(164f / 48f, base_.width, 0.01f);
+            Assert.AreEqual(62f / 48f, base_.height, 0.01f);
+            Assert.AreEqual(0f, base_.yMax, 0.01f, "La superficie a la altura del Transform.");
+            Assert.AreEqual(GameTags.HotPlatform, combustion.tag);
+            var llamaCombustion = Caja(combustion.transform.Find("Llama").GetComponent<BoxCollider2D>());
+            Assert.AreEqual(26f / 48f, llamaCombustion.yMax, 0.01f, "La llama sube hasta la fila 0.");
+            ComprobarDibujo(combustion, "Combustion_1_apagada", "Combustion");
+
+            // Lava: el trigger desde la costra (fila 0) hacia abajo, y sus dos franjas.
+            var lava = CargarPrefab($"{PrefabsMecanicas}/Lava.prefab");
+            var zona = lava.GetComponent<BoxCollider2D>();
+            Assert.IsTrue(zona.isTrigger);
+            Assert.AreEqual(151f / 48f, zona.size.x, 0.01f);
+            Assert.AreEqual(64f / 48f, zona.size.y, 0.01f);
+            Assert.AreEqual(0f, Caja(zona).yMax, 0.01f, "El daño empieza en la costra, no más abajo.");
+            Assert.AreEqual("Lava", Campo<Sprite>(lava.GetComponent<Lava>(), "franja").name);
+            Assert.AreEqual("Lava_espejo", Campo<Sprite>(lava.GetComponent<Lava>(), "franjaEspejo").name);
+            Assert.AreEqual(0, lava.transform.childCount, "Las franjas no se guardan: las monta el componente.");
+
+            // La bola de la torreta: montada y referenciada, con sprite provisional.
+            var bola = CargarPrefab($"{PrefabsMecanicas}/BolaDeFuego.prefab");
+            Assert.AreEqual(LayerMask.NameToLayer(Capas.EnemyWeapon), bola.layer);
+            Assert.AreEqual(RigidbodyType2D.Kinematic, bola.GetComponent<Rigidbody2D>().bodyType);
+            Assert.IsTrue(bola.GetComponent<CircleCollider2D>().isTrigger);
+            Assert.IsNotNull(bola.GetComponent<Fragmentum.Core.Combate.Hitbox>());
+            Assert.IsNotNull(bola.GetComponent<Fragmentum.Core.Combate.Proyectil>());
+            Assert.IsNotNull(bola.GetComponentInChildren<SpriteRenderer>().sprite, "Lleva un sprite provisional (falta Fireball3).");
+        }
+
+        private static void ComprobarDibujo(GameObject prefab, string primerFotograma, string controlador)
+        {
+            var dibujo = prefab.transform.Find("Sprite");
+            Assert.IsNotNull(dibujo, $"{prefab.name}: falta su dibujo.");
+            Assert.AreEqual(Vector3.zero, dibujo.localPosition, $"{prefab.name}: el pivote del arte es el del prefab.");
+            Assert.AreEqual(primerFotograma, dibujo.GetComponent<SpriteRenderer>().sprite.name);
+            Assert.AreEqual(CargarControlador($"{AnimMecanicas}/{controlador}.controller"), dibujo.GetComponent<Animator>().runtimeAnimatorController);
+        }
+
+        [Test]
+        public void EnReposo_NingunaZonaDeAtaqueEstaEncendida()
+        {
+            Assert.IsFalse(CargarPrefab(PrefabGolem).transform.Find("Pivote/Arma").gameObject.activeSelf, "Golem: la onda, solo en A3.");
+            Assert.IsFalse(CargarPrefab($"{PrefabsMecanicas}/TorretaFuego.prefab").transform.Find("Llama").gameObject.activeSelf, "Torreta: la llama, solo al disparar.");
+            Assert.IsFalse(CargarPrefab($"{PrefabsMecanicas}/PlataformaCombustion.prefab").transform.Find("Llama").gameObject.activeSelf, "Combustión: la llama, solo encendida.");
+        }
+
+        [Test]
+        public void LasCinematicasDelJefe_LlevanSusPlanos_AEscalaEntera()
+        {
+            var presentacion = AssetDatabase.LoadAssetAtPath<Fragmentum.Narrative.CutsceneData>("Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset");
+            Assert.IsTrue(presentacion.escalaEntera);
+            Assert.IsFalse(presentacion.sobreElJuego, "Con los planos, opaca.");
+            Assert.AreEqual("CinematicaJefe1", presentacion.diapositivas[0].imagen.name, "Kael diminuto en la nave, la Centinela esperando.");
+            Assert.AreEqual("CinematicaJefe2", presentacion.diapositivas[1].imagen.name, "El ojo que se abre.");
+
+            var derrota = AssetDatabase.LoadAssetAtPath<Fragmentum.Narrative.CutsceneData>("Assets/Data/Narrativa/Cinematica_Derrota_Ira.asset");
+            Assert.IsNotNull(derrota, "Falta la cinemática de la derrota de la Centinela.");
+            Assert.IsTrue(derrota.escalaEntera);
+            Assert.IsFalse(derrota.soloPrimeraVez);
+            Assert.AreEqual("CinematicaFinalLvl1", derrota.diapositivas[0].imagen.name, "La sala vacía, la espada clavada.");
+            Assert.IsTrue(derrota.diapositivas.All(d => d.imagen != null), "Sin plano no hay diapositiva: CinematicaFinalLvl2 entra al llegar.");
+
+            var nivel = AssetDatabase.LoadAssetAtPath<Fragmentum.Data.LevelDatabase>("Assets/Data/Niveles/LevelDatabase.asset").niveles
+                .Single(n => n != null && n.cinematicaJefe == presentacion);
+            Assert.AreEqual(derrota, nivel.cinematicaJefeDerrotado, "El Nivel 1 la reproduce cuando la Centinela termina de caer.");
         }
 
         [Test]

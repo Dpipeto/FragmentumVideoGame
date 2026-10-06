@@ -130,19 +130,24 @@ namespace Fragmentum.EditorTools
                 d.tinte = Color.white;
             });
 
+            // Con arte (ConstructorGolem): los golpes no lo aturden (hiperarmadura) y la ventana del
+            // golpe la marcan los eventos de A3 y A4; estos tiempos (los del clip) solo se usan si
+            // el prefab se queda sin animación.
             Datos("GolemCeniza", sobrescribir, d =>
             {
                 d.nombreCanonico = "Golem de Ceniza";
-                d.descripcion = "Ira (mini-jefe, vida 10): lento, telegrafía mucho el golpe y apenas retrocede. " +
+                d.descripcion = "Ira (mini-jefe, vida 10): lento y pesado. Levanta los puños medio segundo (A1) y golpea el suelo " +
+                                "con una onda baja (A3) que se esquiva saltando. Los golpes no lo detienen. " +
                                 "Es de ceniza y magma: la lava no lo quema y la cruza andando.";
                 d.vidaMaxima = 10; d.danio = 2; d.danioContacto = 1;
                 d.velocidadPatrulla = 1f; d.velocidadPersecucion = 2f; d.esperaEnWaypoint = 1.5f;
                 d.inmuneALava = true;
                 d.deteccion = vision; d.detectionRadius = 6f;
                 d.attackRadius = 1.8f; d.alturaAtaque = 2.2f; d.attackCooldown = 2f;
-                d.duracionAtaque = 0.9f; d.inicioVentanaGolpe = 0.5f; d.finVentanaGolpe = 0.7f;
+                d.duracionAtaque = 0.98f; d.inicioVentanaGolpe = 0.5f; d.finVentanaGolpe = 0.58f;
+                d.hiperarmadura = true;
                 d.damagedDuration = 0.2f; d.resistenciaRetroceso = 0.9f; d.deathDelay = 2f;
-                d.tinte = Hex("5C4033");
+                d.tinte = Color.white;
             });
 
             Datos("Lamento", sobrescribir, d =>

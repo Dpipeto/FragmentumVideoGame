@@ -24,7 +24,8 @@ namespace Fragmentum.EditorTools
     /// - si la escena todavía no tiene suelo que colisione, un <b>suelo provisional</b> con fosos
     ///   y algunos enemigos del mundo, dentro de un objeto que se borra al pintar el nivel;
     /// - si el nivel tiene jefe, la <b>arena</b> (Fase 7): entrada, puerta y el prefab del jefe;
-    /// - en el mundo de la Ira, el <b>fondo con parallax</b> con sus hitos repartidos.
+    /// - en el mundo de la Ira, el <b>fondo con parallax</b> con sus hitos repartidos;
+    /// - el Golem de Ceniza con su arte en lugar del provisional.
     ///
     /// Es idempotente: ejecutarla otra vez sobre una escena preparada no cambia nada, y la
     /// escena solo se guarda si cambió.
@@ -206,7 +207,7 @@ namespace Fragmentum.EditorTools
             //    pintado a mano se colocan arrastrando los prefabs de Assets/Prefabs/Mecanicas.
             var provisional = RaizProvisional(escena);
             if (provisional != null && TieneMecanicasDeMundo(nivel) && Buscar<TorretaFuego>(escena) == null &&
-                Buscar<PlataformaInestable>(escena) == null && Buscar<PlataformaCaliente>(escena) == null)
+                Buscar<PlataformaInestable>(escena) == null && Buscar<PlataformaCombustion>(escena) == null)
             {
                 cambios |= CrearMecanicasIra(escena, provisional, nivel);
             }
@@ -225,6 +226,10 @@ namespace Fragmentum.EditorTools
             {
                 cambios |= ConstructorFondoMundo1.Colocar(escena, nivel);
             }
+
+            // 10. El Golem de Ceniza sin arte (la cápsula de la Fase 4) se sustituye por el que lo
+            //     tiene, en su sitio y con su ruta de patrulla.
+            cambios |= ConstructorGolem.SustituirGolemsSinArte(escena) > 0;
 
             return cambios;
         }
@@ -253,8 +258,8 @@ namespace Fragmentum.EditorTools
             }
 
             creadas += Colocar(escena, mecanicas, GeneradorMecanicas.TorretaFuego, s1.hastaX - 1f, AlturaSuelo);
-            creadas += Colocar(escena, mecanicas, GeneradorMecanicas.PlataformaCaliente, s2.desdeX + 8.5f, AlturaSuelo + 0.3f);
-            creadas += Colocar(escena, mecanicas, GeneradorMecanicas.PlataformaCaliente, s2.desdeX + 12f, AlturaSuelo + 0.3f);
+            creadas += Colocar(escena, mecanicas, GeneradorMecanicas.PlataformaCombustion, s2.desdeX + 8.5f, AlturaSuelo + 0.3f);
+            creadas += Colocar(escena, mecanicas, GeneradorMecanicas.PlataformaCombustion, s2.desdeX + 12f, AlturaSuelo + 0.3f);
             creadas += Colocar(escena, mecanicas, GeneradorMecanicas.Lava, s2.hastaX - 3.5f, AlturaSuelo + 0.05f);
 
             if (fosos.Count > 1)

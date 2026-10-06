@@ -30,12 +30,13 @@ MonoBehaviour:
   attackRadius: 1.8
   alturaAtaque: 2.2
   attackCooldown: 2
-  duracionAtaque: 0.9
+  duracionAtaque: 0.98
   inicioVentanaGolpe: 0.5
-  finVentanaGolpe: 0.7
+  finVentanaGolpe: 0.58
+  hiperarmadura: 1
   damagedDuration: 0.2
   retroceso: {x: 4, y: 3}
   resistenciaRetroceso: 0.9
   deathDelay: 2
   spriteMiraDerecha: 1
-  tinte: {r: 0.36078432, g: 0.2509804, b: 0.2, a: 1}
+  tinte: {r: 1, g: 1, b: 1, a: 1}
