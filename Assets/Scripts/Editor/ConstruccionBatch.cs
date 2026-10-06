@@ -44,6 +44,8 @@ namespace Fragmentum.EditorTools
             // Kael va antes que el prefab del jugador, que lo usa.
             ok &= ConstructorArteKael.Construir();
             ok &= ConstructorJugador.CrearPrefab() != null;
+            // Los clips del Golem y de las mecánicas, antes que los prefabs que los usarán.
+            ok &= ArteNivel1.Construir();
             ok &= GeneradorEnemigos.CrearPrefabs() != null;
             ok &= ConstructorEcoIra.Construir();
             // El arte de la Centinela va antes que los prefabs de jefes, que lo usan (y usan el

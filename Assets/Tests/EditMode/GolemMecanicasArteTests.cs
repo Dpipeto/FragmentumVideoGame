@@ -305,6 +305,153 @@ namespace Fragmentum.Tests
             Assert.AreEqual(0, TablaArte.AplicarATodo(), "Algún sprite con regla tenía otros ajustes.");
         }
 
+        // --- Fase B: clips ---
+
+        private const float SeQueda = 1f / 60f;
+
+        private sealed class ClipEsperado
+        {
+            public string Ruta;
+            public bool Bucle;
+            public (string sprite, float duracion)[] Fotogramas;
+
+            public float Duracion => Fotogramas.Sum(f => f.duracion);
+        }
+
+        private const string AnimGolem = "Assets/Animaciones/Enemigos/GolemCeniza";
+        private const string AnimMecanicas = "Assets/Animaciones/Mecanicas";
+
+        // Sección 3 del encargo, copiada tal cual.
+        private static readonly ClipEsperado[] ClipsGolem =
+        {
+            new ClipEsperado
+            {
+                Ruta = AnimGolem + "/Golem_Idle.anim", Bucle = true,
+                Fotogramas = new[] { ("Golem_I1", 0.40f), ("Golem_I2", 0.40f), ("Golem_I3", 0.40f), ("Golem_I2", 0.40f) },
+            },
+            new ClipEsperado
+            {
+                Ruta = AnimGolem + "/Golem_Andar.anim", Bucle = true,
+                Fotogramas = new[] { ("Golem_W1", 0.13f), ("Golem_W2", 0.13f), ("Golem_W3", 0.13f), ("Golem_W4", 0.13f) },
+            },
+            new ClipEsperado
+            {
+                Ruta = AnimGolem + "/Golem_Ataque.anim",
+                Fotogramas = new[] { ("Golem_A1", 0.50f), ("Golem_A3", 0.08f), ("Golem_A4", 0.14f), ("Golem_A5", 0.26f) },
+            },
+            new ClipEsperado
+            {
+                Ruta = AnimGolem + "/Golem_Muerte.anim",
+                Fotogramas = new[] { ("Golem_D1", 0.35f), ("Golem_D2", 0.45f), ("Golem_D3", 0.50f), ("Golem_D4", SeQueda) },
+            },
+        };
+
+        // Sección 4: cada estado de la mecánica, un fotograma que se queda (el tiempo lo pone el
+        // script). Al romperse, la plataforma se ve partida un momento y después el polvo.
+        private static readonly ClipEsperado[] ClipsMecanicas =
+        {
+            new ClipEsperado { Ruta = AnimMecanicas + "/Torreta_Reposo.anim", Fotogramas = new[] { ("Torreta_1_reposo", SeQueda) } },
+            new ClipEsperado { Ruta = AnimMecanicas + "/Torreta_Carga.anim", Fotogramas = new[] { ("Torreta_2_carga", SeQueda) } },
+            new ClipEsperado { Ruta = AnimMecanicas + "/Torreta_Disparo.anim", Fotogramas = new[] { ("Torreta_3_disparo", SeQueda) } },
+            new ClipEsperado { Ruta = AnimMecanicas + "/Plataforma_Intacta.anim", Fotogramas = new[] { ("Plataforma_1_intacta", SeQueda) } },
+            new ClipEsperado { Ruta = AnimMecanicas + "/Plataforma_Agrietada.anim", Fotogramas = new[] { ("Plataforma_2_agrietada", SeQueda) } },
+            new ClipEsperado { Ruta = AnimMecanicas + "/Plataforma_Rompe.anim", Fotogramas = new[] { ("Plataforma_3_rota", 0.25f), ("Plataforma_4_polvo", SeQueda) } },
+            new ClipEsperado { Ruta = AnimMecanicas + "/Combustion_Apagada.anim", Fotogramas = new[] { ("Combustion_1_apagada", SeQueda) } },
+            new ClipEsperado { Ruta = AnimMecanicas + "/Combustion_Calienta.anim", Fotogramas = new[] { ("Combustion_2_calienta", SeQueda) } },
+            new ClipEsperado { Ruta = AnimMecanicas + "/Combustion_Encendida.anim", Fotogramas = new[] { ("Combustion_3_encendida", SeQueda) } },
+        };
+
+        private static AnimationClip CargarClip(string ruta)
+        {
+            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(ruta);
+            Assert.IsNotNull(clip, $"Falta el clip {ruta}.");
+            return clip;
+        }
+
+        /// <summary>El sprite que muestra el clip en el instante t.</summary>
+        private static string SpriteEn(AnimationClip clip, float t)
+        {
+            var claves = AnimationUtility.GetObjectReferenceCurve(clip, ClipsDeSprites.BindingSprite);
+            var visible = claves.Where(c => c.time <= t + 1e-4f).OrderBy(c => c.time).LastOrDefault();
+            return visible.value != null ? visible.value.name : null;
+        }
+
+        private static void ComprobarClip(ClipEsperado esperado)
+        {
+            var clip = CargarClip(esperado.Ruta);
+            Assert.AreEqual(esperado.Duracion, clip.length, 0.001f, $"{esperado.Ruta}: dura lo que suma la tabla.");
+            Assert.AreEqual(esperado.Bucle, AnimationUtility.GetAnimationClipSettings(clip).loopTime, $"{esperado.Ruta}: bucle.");
+
+            var inicio = 0f;
+            foreach (var (sprite, duracion) in esperado.Fotogramas)
+            {
+                Assert.AreEqual(sprite, SpriteEn(clip, inicio + 0.001f), $"{esperado.Ruta}: a los {inicio:0.###} s empieza {sprite}.");
+                Assert.AreEqual(sprite, SpriteEn(clip, inicio + duracion - 0.002f), $"{esperado.Ruta}: {sprite} dura {duracion:0.###} s.");
+                inicio += duracion;
+            }
+        }
+
+        [Test]
+        public void LosClipsDelGolem_TienenLosTiemposDelEncargo()
+        {
+            foreach (var esperado in ClipsGolem)
+            {
+                ComprobarClip(esperado);
+            }
+        }
+
+        [Test]
+        public void ElAtaqueDelGolem_NoEstaUniformado_YVaDeA1AA3()
+        {
+            var ataque = ClipsGolem[2].Fotogramas;
+            Assert.GreaterOrEqual(ataque[0].duracion, 6f * ataque[1].duracion, "A1 (anticipación) tiene que durar mucho más que A3 (impacto).");
+            Assert.AreEqual(0.08f, ConstructorGolem.ClipDe(ConstructorGolem.Ataque).Duraciones.Min(), 1e-5f, "A3 es el fotograma más corto.");
+            Assert.AreEqual(4, ConstructorGolem.ClipDe(ConstructorGolem.Ataque).Duraciones.Distinct().Count(), "Las duraciones del ataque no se reparten por igual.");
+
+            var todos = ConstructorGolem.Clips.SelectMany(c => c.Fotogramas).ToList();
+            CollectionAssert.DoesNotContain(todos, "Golem_A2", "No hay A2: el salto de A1 a A3 es el golpe.");
+            Assert.AreEqual(15, todos.Distinct().Count(), "Los 15 fotogramas del Golem se usan.");
+        }
+
+        [Test]
+        public void LaMuerteDelGolem_SeQuedaEnD4()
+        {
+            var muerte = CargarClip(AnimGolem + "/Golem_Muerte.anim");
+            Assert.IsFalse(AnimationUtility.GetAnimationClipSettings(muerte).loopTime);
+            Assert.AreEqual("Golem_D4", SpriteEn(muerte, 100f), "Sin bucle, el clip se detiene en D4.");
+        }
+
+        [Test]
+        public void LosClipsDeLasMecanicas_SonLosEstadosQueSostieneSuScript()
+        {
+            foreach (var esperado in ClipsMecanicas)
+            {
+                ComprobarClip(esperado);
+                Assert.AreEqual(esperado.Fotogramas.Last().sprite, SpriteEn(CargarClip(esperado.Ruta), 100f), $"{esperado.Ruta}: el último fotograma se queda.");
+            }
+
+            // Los 10 fotogramas de la torreta y las plataformas se usan; la lava no tiene clip.
+            var usados = ConstructorMecanicas.TodosLosClips.SelectMany(c => c.Fotogramas).Distinct().ToList();
+            Assert.AreEqual(10, usados.Count);
+            var clips = AssetDatabase.FindAssets("t:AnimationClip", new[] { AnimMecanicas }).Select(AssetDatabase.GUIDToAssetPath).ToList();
+            Assert.AreEqual(ClipsMecanicas.Length, clips.Count, string.Join("\n", clips));
+            Assert.IsFalse(clips.Any(c => c.Contains("Lava")), "La lava es un solo fotograma: no tiene clip.");
+        }
+
+        [Test]
+        public void RegenerarLosClips_NoCambiaNada()
+        {
+            var rutas = ClipsGolem.Concat(ClipsMecanicas).Select(c => c.Ruta).ToList();
+            var antes = rutas.ToDictionary(r => r, File.ReadAllText);
+
+            Assert.IsTrue(ArteNivel1.Construir());
+
+            foreach (var ruta in rutas)
+            {
+                Assert.AreEqual(antes[ruta], File.ReadAllText(ruta), $"{ruta} cambió al regenerar.");
+            }
+        }
+
         [Test]
         public void UnPNGNuevoEnMecanicas_SeImportaConLaReglaDeSuGrupo()
         {

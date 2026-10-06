@@ -108,6 +108,46 @@ Con el arte llegó un encargo en cinco fases, parando al final de cada una:
   el de la Centinela: la última fila de píxeles se hunde 1 px de arte en el suelo, que es lo que
   hace que pise.
 
+### Fase B: clips
+
+- **El menú** *Fragmentum → Niveles → Generar los clips del Golem y de las mecánicas*
+  (`ArteNivel1`) construye los clips desde dos tablas: `ConstructorGolem.Clips` y
+  `ConstructorMecanicas.Mecanicas`. «Regenerar todo» también lo hace, antes de los prefabs que
+  los usarán.
+- **Un solo constructor de clips**, `ClipsDeSprites`, con el criterio de la Centinela:
+  - una clave por fotograma y una de cierre, para que el clip dure exactamente lo de la tabla;
+  - el fotograma que dura 1/60 s se queda en pantalla al acabar el clip;
+  - si el clip ya existe, se rehace sobre el mismo asset y conserva su identificador.
+- **El Golem** (`Assets/Animaciones/Enemigos/GolemCeniza`), con los tiempos del encargo:
+
+  | Clip | Fotogramas y duración (s) | Bucle |
+  |---|---|---|
+  | `Golem_Idle` | I1 0,40 · I2 0,40 · I3 0,40 · I2 0,40 | sí |
+  | `Golem_Andar` | W1 0,13 · W2 0,13 · W3 0,13 · W4 0,13 | sí |
+  | `Golem_Ataque` | **A1 0,50** · **A3 0,08** · A4 0,14 · A5 0,26 | no |
+  | `Golem_Muerte` | D1 0,35 · D2 0,45 · D3 0,50 · D4 se queda | no |
+
+  - **El ataque no se uniforma:** A1, medio segundo con los puños en alto, es la ventana para
+    reaccionar, y A3, el impacto, dura 0,08 s. Sin A2: el salto de A1 a A3 es el golpe.
+- **Las mecánicas** (`Assets/Animaciones/Mecanicas`): un clip por estado.
+  - **Problema.** El encargo no da tiempos por fotograma para las mecánicas: sus tiempos son los
+    del script, públicos para ajustar la dificultad (cuánto avisa la torreta, cuánto aguanta la
+    plataforma, el ciclo de la combustión). Si estuvieran dentro del clip, cambiarlos en el
+    inspector descuadraría el dibujo.
+  - **Solución.** Cada estado es un fotograma que se queda, y el script decide cuánto dura:
+
+    | Mecánica | Estados (clip) |
+    |---|---|
+    | Torreta | `Torreta_Reposo` · `Torreta_Carga` · `Torreta_Disparo` |
+    | Plataforma inestable | `Plataforma_Intacta` · `Plataforma_Agrietada` · `Plataforma_Rompe` |
+    | Combustión | `Combustion_Apagada` · `Combustion_Calienta` · `Combustion_Encendida` |
+
+  - **La rotura es el único clip de dos fotogramas:** se ve partida en tres trozos 0,25 s
+    (`Plataforma_3_rota`) y después el polvo, que se queda hasta que el script la esconde.
+  - **La lava no tiene clip:** es un solo fotograma, que se repite alternando con su espejo.
+- **Para la fase C.** Una vuelta del andar del Golem dura 0,52 s; para que los pies no patinen,
+  el ritmo del clip seguirá la velocidad real, como en el Eco.
+
 ### Verificación (fase A)
 
 - **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
@@ -124,6 +164,19 @@ Con el arte llegó un encargo en cinco fases, parando al final de cada una:
   - un PNG nuevo en `Mecanicas` recibe la regla de su grupo.
 - **Pruebas PlayMode: 115 correctas.** No cambian.
 - **Regenerar** no cambia nada más que los sprites nuevos y sus carpetas.
+
+### Verificación (fase B)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 273 correctas.** Hay 5 nuevas en `GolemMecanicasArteTests`:
+  - los 4 clips del Golem duran lo de la tabla del encargo (margen de 1 ms), con su bucle y cada
+    fotograma en su sitio;
+  - el ataque no está uniformado: A1 dura al menos seis veces A3, las cuatro duraciones son
+    distintas y no hay A2;
+  - la muerte se detiene en D4;
+  - los 9 clips de las mecánicas, con el último fotograma que se queda, y la lava sin clip;
+  - regenerar los clips no cambia nada.
+- **Pruebas PlayMode: 115 correctas.** No cambian.
 
 ---
 
