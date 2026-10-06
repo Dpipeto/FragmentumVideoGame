@@ -9,6 +9,75 @@
 
 ---
 
+## Arte de la Centinela Ardiente (2026-10-05)
+
+Rama `centinela-arte`, que sale de `ajustes-nivel1`. El autor terminó el arte del jefe: 29 sprites
+limpios y alineados en `Tesis/Jefe1 animaciones/limpios`, con su LEEME. Con el arte llegó un
+encargo para integrarlo en cinco fases, parando al final de cada una:
+
+- A: importación;
+- B: clips;
+- C: Animator;
+- D: controlador y prefab;
+- E: verificación.
+
+### Decisiones que ajustan el encargo
+
+- **Problema.** El encargo estaba escrito en parte sobre la v1:
+  - daño con `PlayerMovement.takeDamage` y el tag `"Weapon"`;
+  - un `CentinelaController` y un prefab nuevos;
+  - scripts en `Assets/Editor`, clips en `Assets/Animations` y menús en `Tools/`.
+
+  En la v2 el daño va por `IGolpeable` y capas de física, y la Centinela ya existe como jefe
+  completo: `BossController`, arena, presentación y recompensa. Seguirlo al pie de la letra
+  habría dejado dos jefes y dos formas de hacer daño.
+- **Solución.** Antes de empezar se le preguntó al autor, que decidió:
+  - **La Centinela que ya existe.** El arte va en `CentinelaArdiente`, no en un controlador
+    nuevo.
+  - **El combate actual.** Se mantienen las tres fases (50 % y 25 %), los combos, las ondas que
+    recorren la arena, las erupciones y el daño doble con la espada clavada. Los clips se
+    ajustan a ese combate.
+  - **Las convenciones de la v2:** editor en `Assets/Scripts/Editor`, clips en
+    `Assets/Animaciones` y menús en `Fragmentum/…`. La verificación será un menú y, además,
+    pruebas automáticas.
+  - **`D4 (2).png` es el D4 definitivo.** Se copia como `D4.png`.
+
+### Fase A: importación
+
+- **Los sprites.** Los 29 PNG se copian sin tocar a `Assets/Sprites/Jefes/Centinela`; son idénticos
+  byte a byte a los del arte.
+- **El importador.** `ImportadorJefes` es un postprocessor que ajusta todo lo que cae en
+  `Assets/Sprites/Jefes`. Así los ajustes sobreviven a un reimport:
+  - a cualquier jefe, los de pixel art (`ArteJefes.Ajustar`): sprite único, Point, sin
+    compresión ni mipmaps, Clamp y Full Rect;
+  - a la Centinela, además (`ConstructorCentinela.AjustarImportador`): 49 px por unidad, 58 el
+    idle frontal (I1–I3), y el pivote común (0,534; 0,060).
+
+  Sigue el patrón del Eco: `ImportadorEnemigos` llama a `ConstructorEcoIra`. Cuando otro jefe
+  tenga arte, se añade su carpeta.
+- **Escala.** Andando, la Centinela mide 3,4 u: casi el doble que Kael (1,77 u) y lo mismo que su
+  caja de jefe. El idle frontal está dibujado más grande y a 58 px por unidad mide lo mismo.
+
+### Notas sobre el arte (no se ha tocado)
+
+- **A4** es el paso en el aire: la planta queda 3 px por encima del suelo.
+- **G3** baja 8 px por debajo de la línea de suelo: es la onda del golpe.
+- **Densidad.** Un píxel del dibujo mide 1/49 u (1/58 en el idle) y uno de Kael 1/64 u, así que los
+  de la Centinela son un 30 % más gruesos. Es la escala del LEEME y no se cambia.
+
+### Verificación (fase A)
+
+- **Compilación** con `dotnet build` y en Unity 6000.6.3f1 en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 239 de 239 correctas.** Hay 5 nuevas, en `CentinelaArteTests`:
+  - los 29 se importan como pixel art, con el lienzo entero y el pivote común;
+  - el idle frontal va a 58 px por unidad y el resto a 49;
+  - los pies apoyan en la fila 237 y solo la onda de G3 la cruza;
+  - mide 3,4 u, casi el doble que Kael, y el idle mide lo mismo que andando;
+  - el sprite de un jefe sin ajustes propios recibe igualmente los de pixel art.
+- **Pruebas PlayMode: 99 de 99 correctas.** No cambian: el jefe todavía no usa el arte.
+
+---
+
 ## Ajustes tras la primera prueba del Nivel 1 (2026-10-02)
 
 Rama `ajustes-nivel1`, que sale de `enemigo-eco-ira`. El autor jugó el Nivel 1 y contestó a

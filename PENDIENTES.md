@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.15 — La Centinela lleva espada, 2026-10-02.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.16 — Arte de la Centinela: importación (fase A), 2026-10-05.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -23,10 +23,9 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 
 ### Arte que más necesito, por urgencia
 
-1. **Centinela Ardiente**, el jefe del Nivel 1. Es lo más visible que sigue siendo una cápsula, y
-   ahora tiene más ataques que leer: el jugador tiene que distinguir el espadazo, el golpe al
-   suelo, el salto y el rugido por la pose. La ficha de B5 ya es con espada y dice qué poses de
-   tus conceptos sirven y cuáles faltan.
+1. **Centinela Ardiente:** ✔ *recibida.* Los 29 sprites ya están importados y la integración
+   sigue por fases (B5). Opcional, según su LEEME: rehacer `R2`, que salió sobreexpuesto. Basta
+   con sustituir el PNG en `Assets/Sprites/Jefes/Centinela`: los ajustes se aplican solos.
 2. **Kael: daño y muerte** (N3). Se ven en cada partida.
 3. **Golem de Ceniza**, el mini-jefe (N7). La ficha está en B4.
 4. **Lava animada, torreta de fuego con su bola, plataforma inestable y plataforma de
@@ -54,6 +53,16 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.16: qué cambió respecto de la v0.15
+
+- **Arte de la Centinela, fase A (importación),** en la rama nueva `centinela-arte`, que sale de
+  `ajustes-nivel1`. Los 29 sprites están en `Assets/Sprites/Jefes/Centinela` con sus ajustes:
+  49 px por unidad, 58 el idle frontal, y el pivote en los pies. Los fija un importador, así que
+  sobreviven a un reimport.
+- **Tus respuestas al encargo:** el arte va en la Centinela que ya existe, el combate se queda
+  como está, `D4 (2).png` es el D4 y se siguen las rutas de la v2.
+- **B5 al día.** La ficha de la Centinela se conserva como referencia de tiempos.
 
 ## Revisión 0.15: qué cambió respecto de la v0.14
 
@@ -430,13 +439,16 @@ rectángulos de color: avisan translúcidos y queman casi opacos.
 
 | Jefe | Estado | Falta | Prioridad |
 |---|---|---|---|
-| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Sprites y animaciones (ficha abajo; conceptos en `Referencias/Arte/Jefes`) y los VFX de la onda, las erupciones y la caída del salto. En la v1 existen `Characters/Bosses/Boss1/jefe1.1.png` y los clips `Idle`, `Walk` y `Attack`, que pueden servir de partida. | P1 |
+| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Integración del arte, en curso en la rama `centinela-arte`. Hecha la fase A: los 29 sprites, importados en `Assets/Sprites/Jefes/Centinela`. Faltan los clips, el Animator, la conexión con los ataques y la verificación (fases B a E). Después, los VFX de la onda, las erupciones y la caída del salto. | P1 |
 | **Doncella del Lamento** (Tristeza) | Esqueleto: datos, prefab y dos fases sin patrones | Patrones de olas, inundación y congelamiento (Fase 10); todas las animaciones. Concepto: `Jefe2 (2).png` en la v1. | P2 |
 | **Espectro del Pavor** (Miedo) | Esqueleto: casi invisible en combate | Patrón de ataque con destello y clones (Fase 10); animaciones; la partícula que distingue al real. Concepto: `Jefe3 (2).png` en la v1. | P2 |
 | **Juez Silente** (Culpa) | Esqueleto: inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()` | Proyectar las memorias y conectarlas (`MemoryObject`, Fase 10); todo el arte. | P2 |
 | **El Verdadero Soldado** (Final) | Esqueleto: tres fases; no cae sin `CompletarIntegracion()` | Combate espejo, secciones de cada mundo y el plataformeo final (Fase 10); todo el arte (el concepto **no está** en el proyecto). | P2 |
 
 #### Ficha: Centinela Ardiente (para dibujarla)
+
+> **Ya está dibujada:** el arte está en `Assets/Sprites/Jefes/Centinela`. La ficha se conserva
+> como referencia de los tiempos del combate.
 
 **Qué es.** La Arquitecta de la Ira y el jefe del Nivel 1: una armadura de roca volcánica con
 grietas de lava y un mandoble al rojo, como en tus conceptos. Se enfurece según pierde vida: más
@@ -596,6 +608,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.16 (2026-10-05)** — Arte de la Centinela, fase A: los 29 sprites, importados en la rama `centinela-arte`. B5 y la lista de arte al día.
 - **0.15 (2026-10-02)** — La Centinela lleva espada: el «martillazo» pasa a ser «espadazo» y la ficha de B5 se reescribe con las poses de los conceptos, que no se importan.
 - **0.14 (2026-10-02)** — Respuestas a la primera prueba del Nivel 1, en la rama `ajustes-nivel1`.
   - Resueltos N1, N4, N6, N9, N12, N13 y N14.
