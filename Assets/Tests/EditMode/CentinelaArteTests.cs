@@ -581,15 +581,15 @@ namespace Fragmentum.Tests
         [Test]
         public void ElImportadorDeJefes_DaAjustesDePixelArt_AOtroJefeSinTabla()
         {
-            const string carpeta = ArteJefes.Carpeta + "/_PruebaImportador";
+            const string carpeta = TablaArte.CarpetaJefes + "/_PruebaImportador";
             var ruta = carpeta + "/Fotograma.png";
             var textura = new Texture2D(4, 4);
             try
             {
-                Assert.IsTrue(AssetDatabase.IsValidFolder(ArteJefes.Carpeta), $"Falta {ArteJefes.Carpeta}.");
+                Assert.IsTrue(AssetDatabase.IsValidFolder(TablaArte.CarpetaJefes), $"Falta {TablaArte.CarpetaJefes}.");
                 if (!AssetDatabase.IsValidFolder(carpeta))
                 {
-                    AssetDatabase.CreateFolder(ArteJefes.Carpeta, "_PruebaImportador");
+                    AssetDatabase.CreateFolder(TablaArte.CarpetaJefes, "_PruebaImportador");
                 }
 
                 File.WriteAllBytes(ruta, textura.EncodeToPNG());

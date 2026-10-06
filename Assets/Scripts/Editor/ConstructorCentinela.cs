@@ -14,7 +14,8 @@ namespace Fragmentum.EditorTools
     /// <summary>
     /// El arte de la Centinela Ardiente, jefe del Mundo 1:
     /// 1. importa los 29 fotogramas de <see cref="CarpetaSprites"/> como pixel art, con el mismo
-    ///    lienzo y el mismo pivote en los pies para todos (si no, saltaría al cambiar de clip);
+    ///    lienzo y el mismo pivote en los pies para todos (si no, saltaría al cambiar de clip); los
+    ///    ajustes están en <see cref="TablaArte"/>, con las constantes de aquí;
     /// 2. crea los 8 clips desde <see cref="Clips"/>, con los tiempos del diseño y el forcejeo de
     ///    la espada clavada;
     /// 3. arma su controlador (<see cref="RutaControlador"/>), con un estado por clip;
@@ -28,7 +29,7 @@ namespace Fragmentum.EditorTools
     /// </summary>
     public static class ConstructorCentinela
     {
-        public const string CarpetaSprites = ArteJefes.Carpeta + "/Centinela";
+        public const string CarpetaSprites = TablaArte.CarpetaJefes + "/Centinela";
         public const string CarpetaAnimaciones = "Assets/Animaciones/Jefes/Centinela";
 
         // --- Lienzo, escala y pivote (del LEEME del arte) ---
@@ -249,7 +250,7 @@ namespace Fragmentum.EditorTools
             foreach (var archivo in Archivos)
             {
                 var ruta = RutaSprite(archivo);
-                if (AssetImporter.GetAtPath(ruta) is TextureImporter importador && AjustarImportador(importador))
+                if (AssetImporter.GetAtPath(ruta) is TextureImporter importador && TablaArte.Ajustar(importador))
                 {
                     importador.SaveAndReimport();
                 }
@@ -272,24 +273,6 @@ namespace Fragmentum.EditorTools
             AssetDatabase.SaveAssets();
             Debug.Log($"[Fragmentum] Centinela Ardiente: {sprites.Count} fotogramas, {Clips.Length} clips y su controlador en {CarpetaAnimaciones}.");
             return true;
-        }
-
-        // --- 1. Importación ---
-
-        /// <summary>
-        /// Ajustes de un fotograma de la Centinela: los de pixel art de todos los jefes, sus
-        /// píxeles por unidad y el pivote de los pies. Devuelve si cambió algo. Lo usan
-        /// <see cref="Construir"/> y <see cref="ImportadorJefes"/>, que los fija en cada importación.
-        /// </summary>
-        public static bool AjustarImportador(TextureImporter importador)
-        {
-            var ppu = PixelesPorUnidadDe(Path.GetFileNameWithoutExtension(importador.assetPath));
-            return ArteJefes.Ajustar(importador, ajustes =>
-            {
-                ajustes.spritePixelsPerUnit = ppu;
-                ajustes.spriteAlignment = (int)SpriteAlignment.Custom;
-                ajustes.spritePivot = Pivote;
-            });
         }
 
         // --- 2. Clips ---

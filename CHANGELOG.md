@@ -9,6 +9,124 @@
 
 ---
 
+## Golem de Ceniza, mecánicas y cinemáticas del Nivel 1 (2026-10-06)
+
+Rama `golem-mecanicas`, que sale de `centinela-arte`. El autor entregó 30 PNG limpios en
+`Tesis/Imagenes/limpios`, con su LEEME:
+
+- 15 fotogramas del Golem de Ceniza;
+- 12 de mecánicas: la lava (y su espejo), la torreta (3), la plataforma inestable (4) y la
+  plataforma de combustión (3);
+- 3 planos de cinemática del Nivel 1.
+
+Con el arte llegó un encargo en cinco fases, parando al final de cada una:
+
+- A: importación;
+- B: clips;
+- C: Animators;
+- D: controladores y prefabs;
+- E: verificación.
+
+### Decisiones que ajustan el encargo
+
+- **Problema.** Como el de la Centinela, el encargo estaba escrito en parte sobre la v1:
+  `playerScript.takeDamage`, el tag `"Weapon"`, un `GolemController` nuevo, `Assets/Editor` y
+  menús en `Tools/`. Además, al medir el arte y leer el proyecto aparecieron seis cosas que no
+  cuadraban.
+- **Solución.** Se le preguntaron al autor, que aceptó las seis recomendaciones:
+  1. **La torreta disparando está dibujada 15 px más a la izquierda** que en reposo y en carga:
+     el bloque ocupa x 1–45 en vez de 16–61 (se midió comparando los ladrillos). Su pivote X
+     pasa de 0,470 a 0,287 y el bloque no salta al disparar. El PNG no se toca.
+  2. **La lava sigue matando**, como dice el Anexo A. El encargo pedía daño continuo «igual que
+     `DeadZone`», pero `DeadZone` mata, en la v1 y en la v2.
+  3. **La plataforma de combustión pasa a un ciclo fijo** (apagada → calienta → encendida) que no
+     depende del jugador, como pide el encargo: la inestable se resuelve moviéndose rápido y esta,
+     esperando. El Anexo A (quema si te quedas encima 2 s) queda desactualizado; lo corrige el
+     autor en el documento.
+  4. **El Golem aguanta los golpes sin interrumpirse:** destella, pero sigue con su ataque. No
+     tiene animación de daño, y con 10 de vida, si cada golpe lo aturdiera, apenas llegaría a
+     atacar. Necesita un cambio mínimo en `EnemyController` (fase D).
+  5. **El destello del golpe es la silueta blanca**, como en el Eco y la Centinela.
+     `SpriteRenderer.color` solo multiplica: no puede aclarar el gris del Golem.
+  6. **`CinematicaFinalLvl1` sale cuando D4 termina de caer.** Después se vuelve al juego para
+     que Kael recoja el fragmento.
+
+  Y, como con la Centinela:
+  - las convenciones de la v2: el editor en `Assets/Scripts/Editor`, los clips en
+    `Assets/Animaciones`, los menús en `Fragmentum/…` y la verificación como menú y pruebas;
+  - el daño de la v2: `Hitbox`, `Golpe` e `IGolpeable`;
+  - el Golem sigue siendo `EnemyController` con su `EnemyData`, vestido como el Eco con
+    `EnemigoAnimacion`. Lo de hacia dónde mira ya lo resuelve `EnemyData.spriteMiraDerecha`;
+  - `Lava`, `TorretaFuego` y `PlataformaInestable` se amplían en vez de escribirse de nuevo.
+- **Una errata del encargo.** 240×135 no escala a 1280×720 sin interpolar: sería ×5,33. Ahí la
+  escala entera es ×5 (1200×675), con un borde negro fino.
+
+### Fase A: importación
+
+- **Los sprites.** Los 30 PNG se copian sin tocar; son idénticos byte a byte a los del arte:
+  - `Assets/Sprites/Enemigos/GolemCeniza`, los 15 del Golem;
+  - `Assets/Sprites/Mecanicas`, los 12 de las mecánicas;
+  - `Assets/Sprites/Cinematicas/Nivel1`, los 3 planos.
+- **Un solo importador, con una tabla.**
+  - **Problema.** Había tres postprocessors: `ImportadorJefes`, `ImportadorEnemigos` e
+    `ImportadorFondos`. El de enemigos repetía, copiados, los ajustes de pixel art de los jefes.
+    Añadir el Golem y las mecánicas habría sumado otro sitio donde se decide lo mismo.
+  - **Solución.** `ImportadorArte` (antes `ImportadorJefes`) es el único. Los ajustes salen de
+    `TablaArte` (antes `ArteJefes`): una fila por carpeta o grupo de archivos, con sus píxeles por
+    unidad y su pivote, y gana la más concreta.
+  - La Centinela y el Eco pasan a la tabla con las constantes de sus constructores; ninguno de
+    sus ajustes cambia, y una prueba lo comprueba. Los fondos, que se ajustan por capa, entran
+    por el mismo importador y siguen ajustándose en su constructor. Kael y la cinemática inicial
+    no tienen regla: los ajusta su constructor.
+  - «Regenerar todo» reaplica la tabla al empezar (`TablaArte.AplicarATodo`), por si algo se
+    importó antes de tener regla.
+- **La escala.** Un píxel de arte mide lo mismo en todo el juego, y la Centinela fijó la
+  referencia (49 px por unidad). Por eso los píxeles por unidad cambian por carpeta:
+
+  | Archivos | Px por unidad | Pivote | Tamaño |
+  |---|---|---|---|
+  | `GolemCeniza/Golem_*` | 24 | (0,443; 0,043), los pies | 2,7 u de alto |
+  | `Mecanicas/Torreta_*` | 24 | (0,470; 0,048), la base del bloque | 1,9 × 1,7 u |
+  | `Mecanicas/Torreta_3_disparo` | 24 | (0,287; 0,048), corrido 15 px | igual |
+  | `Mecanicas/Lava*` | 48 | (0; 1), la costra | 3,15 × 1,33 u |
+  | `Mecanicas/Plataforma_*` | 48 | (0,5; 0,852), la superficie | 3,83 u de ancho |
+  | `Mecanicas/Combustion_*` | 48 | (0,5; 0,708), la superficie | 3,42 u de ancho |
+  | `Cinematicas/Nivel1/*` | — | el centro | 240 × 135 px |
+
+  Todos: sprite único, Point, sin compresión, Full Rect, sin mipmaps y Clamp.
+- **Los pivotes caen donde se pisa**, no en el centro: una plataforma se coloca poniendo su
+  Transform justo donde el jugador apoya el pie. Las pruebas lo comprueban contra los píxeles.
+
+### Notas sobre el arte (no se ha tocado)
+
+- **No hay A2 del Golem:** el ataque va de A1 a A3, y funciona así. El LEEME trae el prompt para
+  rehacerlo.
+- **Falta la bola de fuego** (Fireball3 está por regenerar): el proyectil de la torreta llevará
+  un sprite provisional. **Falta `CinematicaFinalLvl2`**, el segundo plano del final; el LEEME
+  trae su prompt.
+- **El pivote del Golem y el de la torreta** caen en el borde de arriba de su fila más baja, como
+  el de la Centinela: la última fila de píxeles se hunde 1 px de arte en el suelo, que es lo que
+  hace que pise.
+
+### Verificación (fase A)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 268 correctas.** Hay 8 nuevas en `GolemMecanicasArteTests`:
+  - los 30 PNG, con el lienzo entero;
+  - cada uno con los píxeles por unidad y el pivote de su carpeta (los valores esperados se
+    copian del encargo, no de la tabla) y los ajustes de pixel art;
+  - los píxeles por unidad cambian por carpeta y los tamaños son los del encargo;
+  - los pivotes caen en el suelo del Golem (fila 88 en los 15) y de la torreta, en la superficie
+    de las plataformas (filas 21 y 26) y en la costra de la lava;
+  - la torreta no salta al disparar;
+  - la tabla da la regla más concreta y una sola por ruta;
+  - la tabla ya está aplicada a todo, también a la Centinela y al Eco;
+  - un PNG nuevo en `Mecanicas` recibe la regla de su grupo.
+- **Pruebas PlayMode: 115 correctas.** No cambian.
+- **Regenerar** no cambia nada más que los sprites nuevos y sus carpetas.
+
+---
+
 ## Arte de la Centinela Ardiente (2026-10-05)
 
 Rama `centinela-arte`, que sale de `ajustes-nivel1`. El autor terminó el arte del jefe: 29 sprites

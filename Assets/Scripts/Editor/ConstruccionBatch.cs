@@ -34,6 +34,10 @@ namespace Fragmentum.EditorTools
         {
             ConfiguradorProyecto.ConfigurarTodo();
 
+            // Los ajustes de importación del arte (píxeles por unidad y pivote por carpeta), por
+            // si algo se importó antes de que existiera su regla.
+            TablaArte.AplicarATodo();
+
             var ok = GeneradorProgresion.Construir();
 
             // Los prefabs se regeneran siempre: Unity conserva sus identificadores. El arte de

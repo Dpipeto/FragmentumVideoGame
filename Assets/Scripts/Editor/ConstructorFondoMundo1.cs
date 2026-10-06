@@ -16,7 +16,7 @@ namespace Fragmentum.EditorTools
     /// Monta el fondo con parallax del Mundo 1 (Ira, Fortaleza Volcánica) a partir de las seis
     /// imágenes de <see cref="CarpetaArte"/>:
     /// 1. les aplica los ajustes de importación de pixel art (también lo hace
-    ///    <see cref="ImportadorFondos"/> cada vez que se importan);
+    ///    <see cref="ImportadorArte"/> cada vez que se importan);
     /// 2. crea un material URP/Unlit transparente por cada capa repetible, porque los shaders 2D
     ///    de sprites ignoran el desplazamiento de textura;
     /// 3. arma el prefab <see cref="RutaPrefab"/> con las seis capas, sus velocidades y su orden de

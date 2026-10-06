@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.20 — Arte de la Centinela: integración completa (fase E), 2026-10-05.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.21 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: importación (fase A), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,7 +14,7 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 | N17 | **Mira la presentación del jefe** al entrar en la arena y **escribe su diálogo**. | Ya funciona: se cierra la puerta, la cámara va hacia la Centinela y aparecen su nombre y una línea sobre la arena oscurecida. Dura 7,5 s y se salta con cualquier tecla pasado 1 s. El texto es provisional. | Escribe el texto en `Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset`: cada diapositiva tiene texto, carteles con tiempos y, si se dibuja, imagen. Puedes añadir diapositivas. Si prefieres pasarme el texto, lo vuelco yo. Detalle en B1. |
 | N15 | **Prueba el golpe del Eco de la Ira**, ahora más rápido. | El ataque va a 1,6×: a1 dura 0,22 s, el golpe 0,08 s y el ataque entero 0,46 s. Descansa 0,45 s entre golpes, antes 0,7. | Pelea con él en el Nivel 1 (x ≈ 12). Si sigue lento, sube `velocidadAtaque` en `EcoIra.prefab → Pivote/Sprite → EnemigoAnimacion` o baja `attackCooldown` en `Assets/Data/Enemigos/EcoIra.asset`. |
 | N18 | **¿Querías el Eco más grande?** En el Nivel 1, el Eco de x = 12,5 tiene escala 1,8 × 1,5. | Lo cambiaste en la escena y lo dejé tal cual. Con una escala distinta en X y en Y, los píxeles del dibujo quedan un 20 % más anchos que altos. Además, ese Eco mide el 90 % de Kael y los demás el 60 %. | Si lo quieres más grande en todo el juego, dime cuánto (por ejemplo, «al 80 % de Kael») y lo cambio en la importación, con la misma escala en X y en Y. Si fue una prueba, vuelve a poner la escala a 1 en la escena. |
-| N7 | **Dibuja el Golem de Ceniza** (ficha en B4). | Me pediste cómo es para diseñarlo. Hoy es una cápsula marrón. | La ficha de B4 tiene su tamaño, su carácter, cada animación con sus tiempos y el alcance del golpe. Formato, igual que el Eco. |
+| N19 | **Corrige el Anexo A de `Tesis.docx`:** la plataforma de combustión ya no quema por estar encima. | Aceptaste el ciclo fijo del nuevo encargo: apagada → calienta → encendida, sin depender del jugador. El Anexo A dice que quema si te quedas encima más de 2 s. | Yo no toco `Tesis.docx`. Basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». |
 | N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después dash, wall slide y agacharse (y, para la Fase 10, nado). | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Solo el Eco de la Ira tiene arte. | Ver «Arte que más necesito», justo debajo. |
 | N11 | *En curso.* **Guion:** el diálogo de la presentación de cada jefe (N17), los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | Siguen con textos marcados como «pendiente de guion». | Edita los assets `Cinematica_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2), o pásame el texto. Prioridad: el mundo de la Ira. |
@@ -27,12 +27,25 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
    sigue por fases (B5). Opcional, según su LEEME: rehacer `R2`, que salió sobreexpuesto. Basta
    con sustituir el PNG en `Assets/Sprites/Jefes/Centinela`: los ajustes se aplican solos.
 2. **Kael: daño y muerte** (N3). Se ven en cada partida.
-3. **Golem de Ceniza**, el mini-jefe (N7). La ficha está en B4.
-4. **Lava animada, torreta de fuego con su bola, plataforma inestable y plataforma de
-   combustión.** Se ven por todo el nivel (B10). Pueden ser tiles o tiras cortas en bucle.
-5. **Imágenes para la presentación de la Centinela y para el cierre de la Ira.** Son opcionales:
-   la presentación ya se ve bien sobre la arena sin imágenes (B1). `cinematicJefe1.jpeg` sirve
-   de punto de partida.
+3. **Golem de Ceniza:** ✔ *recibido* (15 fotogramas), en integración por fases en la rama
+   `golem-mecanicas`. Opcional: rehacer **A2** (el LEEME trae el prompt); el ataque funciona sin él.
+4. **Mecánicas:** ✔ *recibidas* la lava, la torreta, la plataforma inestable y la de combustión.
+   Falta **la bola de fuego** de la torreta (Fireball3 por regenerar): hasta entonces, el
+   proyectil lleva un sprite provisional.
+5. **Cinemáticas del jefe:** ✔ *recibidas* `CinematicaJefe1`, `CinematicaJefe2` y
+   `CinematicaFinalLvl1`. Falta **`CinematicaFinalLvl2`**, el segundo plano del final, con los
+   huecos de los fragmentos visibles (el LEEME trae el prompt). El reproductor la espera.
+
+### Resuelto en la v0.21
+
+- **N7:** el Golem de Ceniza está dibujado. Llegó con las mecánicas y tres planos de cinemática.
+- **Las seis preguntas del nuevo encargo,** con lo que recomendé:
+  1. la torreta disparando lleva su propio pivote, para que el bloque no salte;
+  2. la lava sigue matando;
+  3. la combustión va por ciclo fijo (falta el Anexo A, N19);
+  4. el Golem aguanta los golpes sin interrumpir su ataque;
+  5. el destello es la silueta blanca;
+  6. `CinematicaFinalLvl1` sale cuando la Centinela termina de caer.
 
 ### Resuelto en la v0.15
 
@@ -53,6 +66,16 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.21: qué cambió respecto de la v0.20
+
+- **Golem de Ceniza, mecánicas y cinemáticas del Nivel 1, fase A (importación):** los 30 PNG
+  están en `Assets/Sprites` (`Enemigos/GolemCeniza`, `Mecanicas` y `Cinematicas/Nivel1`), cada
+  uno con los píxeles por unidad y el pivote de su carpeta.
+- **Un solo importador** (`ImportadorArte`) con una tabla (`TablaArte`). Sustituye a los tres de
+  antes; la Centinela y el Eco no cambian.
+- **Rama nueva** `golem-mecanicas`, que sale de `centinela-arte`. Siguen las fases B a E.
+- **N7 resuelto, N19 nuevo** (el Anexo A). La lista de arte, al día.
 
 ## Revisión 0.20: qué cambió respecto de la v0.19
 
@@ -651,6 +674,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.21 (2026-10-06)** — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1, fase A: los 30 sprites importados con una sola tabla, en la rama `golem-mecanicas`.
 - **0.20 (2026-10-05)** — Arte de la Centinela, fase E: el menú de verificación. La integración está completa, a falta de tu prueba.
 - **0.19 (2026-10-05)** — Arte de la Centinela, fase D: el jefe combate con su arte y deja el fragmento en la ceniza.
 - **0.18 (2026-10-05)** — Arte de la Centinela, fase C: el Animator.
