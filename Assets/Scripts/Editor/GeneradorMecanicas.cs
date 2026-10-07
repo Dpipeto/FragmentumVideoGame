@@ -94,13 +94,13 @@ namespace Fragmentum.EditorTools
 
             /// <summary>
             /// Un rectángulo de píxeles del lienzo de <paramref name="sprite"/> en unidades desde su
-            /// pivote, con los píxeles por unidad y el pivote de <see cref="TablaArte"/>.
+            /// pivote, con el lienzo, los píxeles por unidad y el pivote de <see cref="TablaArte"/>.
             /// </summary>
             public static Rect Rectangulo(string sprite, int x0, int x1, int y0, int y1)
             {
                 var ruta = ConstructorMecanicas.RutaSprite(sprite);
                 var regla = TablaArte.ReglaDe(ruta);
-                var lienzo = Lienzo(sprite);
+                var lienzo = (Vector2)(regla?.Lienzo ?? Vector2Int.zero);
                 var ppu = regla?.PixelesPorUnidad ?? 100f;
                 var pivote = regla?.Pivote ?? new Vector2(0.5f, 0.5f);
                 var pivoteX = pivote.x * lienzo.x;
@@ -108,15 +108,6 @@ namespace Fragmentum.EditorTools
                 return Rect.MinMaxRect(
                     (x0 - pivoteX) / ppu, (filaPivote - (y1 + 1)) / ppu,
                     (x1 + 1 - pivoteX) / ppu, (filaPivote - y0) / ppu);
-            }
-
-            // Lienzo de cada grupo (encargo, sección 4).
-            private static Vector2 Lienzo(string sprite)
-            {
-                if (sprite.StartsWith("Torreta_")) return new Vector2(82f, 42f);
-                if (sprite.StartsWith("Plataforma_")) return new Vector2(184f, 142f);
-                if (sprite.StartsWith("Combustion_")) return new Vector2(166f, 89f);
-                return new Vector2(151f, 64f);
             }
         }
 

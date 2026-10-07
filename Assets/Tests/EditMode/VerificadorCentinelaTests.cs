@@ -166,7 +166,7 @@ namespace Fragmentum.Tests
                 raiz.GetComponentInChildren<AnimacionJefe>(true).transform.localPosition = new Vector3(0f, 1f, 0f);
 
                 var problemas = VerificadorCentinela.ProblemasDelPrefab(raiz);
-                Assert.IsTrue(problemas.Any(p => p.Contains("el collider de ataque «Contacto» está encendido en reposo")), Lista(problemas));
+                Assert.IsTrue(problemas.Any(p => p.Contains("el collider de daño «Contacto» está encendido en reposo")), Lista(problemas));
                 Assert.IsTrue(problemas.Any(p => p.Contains("el fragmento está visible en reposo")), Lista(problemas));
                 Assert.IsTrue(problemas.Any(p => p.Contains("el sprite no está en los pies")), Lista(problemas));
             }

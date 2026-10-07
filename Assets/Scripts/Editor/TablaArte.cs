@@ -53,12 +53,19 @@ namespace Fragmentum.EditorTools
             /// <summary>Qué hay en esos archivos y por qué ese pivote.</summary>
             public readonly string Nota;
 
-            public Regla(string ruta, float? pixelesPorUnidad, Vector2? pivote, string nota)
+            /// <summary>
+            /// Tamaño en píxeles que comparten todos sus archivos (vacío: no se comprueba). Los PNG
+            /// no se recortan ni se reescalan: si uno cambia de lienzo, su pivote ya no cae donde debe.
+            /// </summary>
+            public readonly Vector2Int? Lienzo;
+
+            public Regla(string ruta, float? pixelesPorUnidad, Vector2? pivote, string nota, Vector2Int? lienzo = null)
             {
                 Ruta = ruta;
                 PixelesPorUnidad = pixelesPorUnidad;
                 Pivote = pivote;
                 Nota = nota;
+                Lienzo = lienzo;
             }
 
             public bool Vale(string ruta) => ruta.StartsWith(Ruta, StringComparison.Ordinal);
@@ -85,23 +92,31 @@ namespace Fragmentum.EditorTools
         private const float AnchoTorreta = 82f;
         public const float CorrimientoTorretaDisparo = 15f;
 
+        // Lienzos del encargo (sección 2), comunes a cada grupo.
+        private static readonly Vector2Int LienzoGolem = new Vector2Int(90, 92);
+        private static readonly Vector2Int LienzoTorreta = new Vector2Int(82, 42);
+        private static readonly Vector2Int LienzoLava = new Vector2Int(151, 64);
+        private static readonly Vector2Int LienzoPlataforma = new Vector2Int(184, 142);
+        private static readonly Vector2Int LienzoCombustion = new Vector2Int(166, 89);
+        private static readonly Vector2Int LienzoCinematica = new Vector2Int(240, 135);
+
         private static readonly Regla[] Tabla = new[]
             {
                 // Mundo 1: Golem de Ceniza, mecánicas y cinemáticas (Tesis/Imagenes/limpios, con su LEEME).
                 new Regla(CarpetaGolem + "/", 24f, new Vector2(0.443f, 0.043f),
-                    "Golem de Ceniza: 15 fotogramas de 90×92 con la línea de suelo en la fila 88; 2,7 u de alto."),
+                    "Golem de Ceniza: 15 fotogramas de 90×92 con la línea de suelo en la fila 88; 2,7 u de alto.", LienzoGolem),
                 new Regla(CarpetaMecanicas + "/Torreta_", 24f, new Vector2(0.470f, 0.048f),
-                    "Torreta: 82×42, el pivote en la base del bloque (x 16-61, y 1-40); 1,9 × 1,7 u."),
+                    "Torreta: 82×42, el pivote en la base del bloque (x 16-61, y 1-40); 1,9 × 1,7 u.", LienzoTorreta),
                 new Regla(CarpetaMecanicas + "/Torreta_3_disparo", 24f, new Vector2(0.470f - CorrimientoTorretaDisparo / AnchoTorreta, 0.048f),
-                    "Torreta disparando: el bloque está dibujado 15 px a la izquierda; el pivote se corre lo mismo."),
+                    "Torreta disparando: el bloque está dibujado 15 px a la izquierda; el pivote se corre lo mismo.", LienzoTorreta),
                 new Regla(CarpetaMecanicas + "/Lava", 48f, new Vector2(0f, 1f),
-                    "Lava y Lava_espejo: 151×64, el pivote en la esquina de arriba a la izquierda (la costra); 3,15 × 1,33 u."),
+                    "Lava y Lava_espejo: 151×64, el pivote en la esquina de arriba a la izquierda (la costra); 3,15 × 1,33 u.", LienzoLava),
                 new Regla(CarpetaMecanicas + "/Plataforma_", 48f, new Vector2(0.5f, 0.852f),
-                    "Plataforma inestable: 184×142, el pivote en la superficie (fila 21); 3,83 u de ancho."),
+                    "Plataforma inestable: 184×142, el pivote en la superficie (fila 21); 3,83 u de ancho.", LienzoPlataforma),
                 new Regla(CarpetaMecanicas + "/Combustion_", 48f, new Vector2(0.5f, 0.708f),
-                    "Plataforma de combustión: 166×89, el pivote en la superficie (fila 26); 3,42 u de ancho."),
+                    "Plataforma de combustión: 166×89, el pivote en la superficie (fila 26); 3,42 u de ancho.", LienzoCombustion),
                 new Regla(CarpetaCinematicasNivel1 + "/", null, null,
-                    "Planos del Nivel 1: 240×135 (16:9 exacto); se muestran a escala entera."),
+                    "Planos del Nivel 1: 240×135 (16:9 exacto); se muestran a escala entera.", LienzoCinematica),
 
                 // Jefes: pixel art, y la Centinela con su escala y el pivote de los pies.
                 new Regla(CarpetaJefes + "/", null, null,

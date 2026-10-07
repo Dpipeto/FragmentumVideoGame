@@ -57,6 +57,9 @@ namespace Fragmentum.EditorTools
             // un clip o el prefab tocados a mano), la regeneración falla con su nombre.
             ok &= VerificadorCentinela.Verificar();
             ok &= GeneradorMecanicas.CrearPrefabs();
+            // Lo mismo con el arte del Nivel 1 (el Golem, las mecánicas y los planos del jefe), ya
+            // con los prefabs de las mecánicas hechos.
+            ok &= VerificadorNivel1.Verificar();
             ok &= ConstructorFondoMundo1.Construir();
 
             if (regenerarEscenasDePrueba || !Existe(ConstructorJugador.RutaEscena))

@@ -63,6 +63,13 @@ namespace Fragmentum.Levels.Mecanicas
         /// <summary>¿Sostiene al jugador? (Su collider está activo.)</summary>
         public bool Sostiene => _cuerpo != null && _cuerpo.enabled;
 
+        /// <summary>
+        /// La regla del collider: sostiene intacta y agrietada, y deja de sostener en cuanto se
+        /// rompe (mientras se ve partida en tres trozos, Plataforma_3_rota, y el polvo). La aplica
+        /// este script y la comprueba el verificador del Nivel 1 contra el arte de cada estado.
+        /// </summary>
+        public static bool SostieneEn(ESTADOS_PLATAFORMA estado) => estado != ESTADOS_PLATAFORMA.BROKEN;
+
         private void Awake()
         {
             _cuerpo = GetComponent<BoxCollider2D>();
@@ -140,7 +147,7 @@ namespace Fragmentum.Levels.Mecanicas
         private void Romper(float ahora)
         {
             Estado = ESTADOS_PLATAFORMA.BROKEN;
-            _cuerpo.enabled = false;
+            _cuerpo.enabled = SostieneEn(Estado);
             _desapareceEn = ahora + duracionCaida;
             _vuelveEn = _desapareceEn + tiempoReaparicion;
             OnCaida?.Invoke(true);
@@ -149,7 +156,7 @@ namespace Fragmentum.Levels.Mecanicas
         private void Recomponer()
         {
             Estado = ESTADOS_PLATAFORMA.INTACT;
-            _cuerpo.enabled = true;
+            _cuerpo.enabled = SostieneEn(Estado);
             if (visual != null)
             {
                 visual.enabled = true;

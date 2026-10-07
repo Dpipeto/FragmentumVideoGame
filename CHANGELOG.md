@@ -283,6 +283,57 @@ Un render del Nivel 1 en modo batch, con un script temporal que se borró, mostr
 
 Las piezas no se movieron. El recorrido sigue siendo el provisional; el definitivo es N10.
 
+### Fase E: verificación
+
+- **El menú** *Fragmentum → Niveles → Verificar el arte del Nivel 1* (`VerificadorNivel1`) revisa
+  los seis puntos del encargo:
+  1. **Los 30 sprites** existen (15 del Golem, 12 de las mecánicas y 3 planos). Cada uno tiene el
+     lienzo, los píxeles por unidad y el pivote de la regla de su carpeta en `TablaArte`, y es
+     pixel art (Point, sin compresión, Full Rect, sin mipmaps, Clamp). Un PNG nuevo en esas
+     carpetas también se revisa contra su regla.
+  2. **Los 13 clips** existen, con sus fotogramas en su sitio, su bucle y la duración de su tabla
+     (margen de 1 ms). Los del Golem llevan exactamente los eventos de su tabla, y ningún clip
+     anima un collider.
+  3. **Los 4 Animators** (Golem, torreta, plataforma inestable y combustión) tienen un estado por
+     clip, ninguno suelto, y ninguna transición rota. Una transición está rota si no tiene
+     destino, si le faltan a la vez condición y tiempo de salida, o si su parámetro no existe o
+     es de otro tipo (un «mayor que» sobre un bool nunca se cumple). En las mecánicas, además,
+     cada valor de `Estado` lleva al estado de su clip.
+  4. **En los 6 prefabs**, lo que hace daño (una hitbox o la capa EnemyWeapon) está apagado en
+     reposo: la onda del Golem y las llamas de la torreta y de la combustión. Quedan fuera, por
+     decisión, el cuerpo del Golem (hace daño siempre) y la bola (solo existe disparada). La lava
+     mata con su propio trigger, no con una hitbox. También comprueba que cada prefab tiene sus
+     zonas de daño y que su dibujo usa su controlador.
+  5. **Cada evento de animación** llama a una función pública que existe en un script del objeto
+     de su Animator: `EnemigoAnimacion` en el Golem. En las mecánicas no hay ninguno.
+  6. **Lo que sostiene:**
+     - **La plataforma inestable.** El estado que muestra `Plataforma_3_rota` es un valor de
+       `Estado` en el que su script apaga el collider. La regla es nueva y pública
+       (`PlataformaInestable.SostieneEn`): el script la aplica y el verificador la compara con el
+       arte de cada estado.
+     - **La combustión.** Sostiene en todos sus fotogramas. Su suelo es el collider sólido de la
+       raíz, encendido. Ningún clip lo toca. La llama, que se enciende y se apaga, está en otro
+       objeto: si estuviera en la raíz, apagarla se llevaría el suelo.
+- **El arte que falta no es un fallo.** `CinematicaFinalLvl2` sale como aviso («Arte pendiente»).
+- **Falla ruidosamente,** con un error por problema y el nombre de lo que falta o está mal. Por
+  ejemplo: «Animator Torreta: Estado = 2 (FIRE) no lleva a Disparo; el dibujo no seguiría al
+  script».
+- **También al final de «Regenerar todo»,** después de los prefabs de las mecánicas. Si algo no
+  cuadra, la regeneración falla y `verificar.ps1 -Unity` también. El menú que genera el arte del
+  Nivel 1 también verifica al terminar.
+
+#### Cambios en lo que ya había
+
+- **Comprobaciones compartidas.** Las del verificador de la Centinela que valen para cualquier
+  arte (sprite, clip, Animator, eventos y daño en reposo) pasan a `ComprobacionesArte`, y los dos
+  verificadores las usan. Los mensajes de la Centinela no cambian, salvo «collider de ataque»,
+  que pasa a ser «collider de daño».
+- **Los eventos se comprueban contra los scripts que los reciben de verdad.** Antes era una clase
+  fija. También se aceptan los parámetros que un evento puede pasar (float, int, string, un
+  objeto o el propio evento).
+- **El lienzo de cada grupo está en `TablaArte`** (`Regla.Lienzo`). Lo usan el verificador y la
+  geometría de las mecánicas, que antes lo tenía repetido.
+
 ### Verificación (fase A)
 
 - **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
@@ -371,6 +422,33 @@ Las piezas no se movieron. El recorrido sigue siendo el provisional; el definiti
     bordes en píxeles enteros.
   - Una nueva en `CentinelaPlayModeTests`: al empezar el combate ruge y después ataca.
   - El flujo del Nivel 1 pasa por la cinemática de la derrota antes de recoger el fragmento.
+
+### Verificación (fase E)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** no cambia ningún archivo. Termina con:
+  - «[Centinela] Verificación correcta: 29 sprites, 8 clips…»;
+  - el aviso de `CinematicaFinalLvl2`;
+  - «[Nivel 1] Verificación correcta: 30 sprites, 13 clips, 4 Animators, 6 prefabs y sus eventos;
+    la plataforma inestable no sostiene rota y la de combustión siempre».
+- **Pruebas EditMode: 294 correctas.** Hay 10 nuevas en `VerificadorNivel1Tests`. Lo roto son
+  copias u objetos en memoria:
+  - el proyecto pasa la verificación;
+  - revisa 30 sprites, 13 clips, 4 Animators y 6 prefabs;
+  - un sprite con otro lienzo, 100 píxeles por unidad, filtro bilineal y comprimido se nombra
+    contra la regla del Golem y contra la de la torreta disparando (pivote 0,287);
+  - el ataque del Golem uniformado, con el evento fuera de A3 y un collider animado, se nombra;
+  - una torreta cuyo `Estado = 2` no lleva a Disparo, o con un estado suelto, se nombra;
+  - un «mayor que» sobre el bool `Attack` se nombra;
+  - la onda del Golem encendida se nombra, y el contacto no; una torreta sin llama o sin su
+    controlador, también;
+  - un evento sin función que lo reciba se nombra, en el Golem y en una mecánica;
+  - la plataforma inestable: la regla del collider, la plataforma rota mientras aún sostendría y
+    el prefab sin collider se nombran;
+  - la combustión: con la llama en la raíz o el suelo apagado, se nombra.
+
+  Se adapta una de `VerificadorCentinelaTests` («collider de daño»).
+- **Pruebas PlayMode: 135 correctas.** No cambian.
 
 ---
 

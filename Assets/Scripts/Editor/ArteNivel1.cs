@@ -9,14 +9,15 @@ namespace Fragmentum.EditorTools
     /// <see cref="TablaArte"/>, construye los clips, los controladores y el prefab del Golem
     /// (<see cref="ConstructorGolem"/>), los clips y los controladores de las mecánicas
     /// (<see cref="ConstructorMecanicas"/>; sus prefabs los arma <see cref="GeneradorMecanicas"/>)
-    /// y pone los planos en sus cinemáticas (<see cref="ConstructorCinematicasNivel1"/>).
+    /// y pone los planos en sus cinemáticas (<see cref="ConstructorCinematicasNivel1"/>). Desde el
+    /// menú, al acabar lo revisa <see cref="VerificadorNivel1"/>.
     /// </summary>
     public static class ArteNivel1
     {
         [MenuItem("Fragmentum/Niveles/Generar el arte del Golem, las mecánicas y las cinemáticas del Nivel 1", priority = 134)]
         public static void MenuConstruir()
         {
-            if (Construir() && GeneradorMecanicas.CrearPrefabs())
+            if (Construir() && GeneradorMecanicas.CrearPrefabs() && VerificadorNivel1.Verificar())
             {
                 EditorGUIUtility.PingObject(ConstructorGolem.Prefab);
             }

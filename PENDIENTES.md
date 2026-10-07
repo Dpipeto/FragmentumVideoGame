@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.24 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: en el juego (fase D), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.25 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: verificación (fase E), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -67,6 +67,15 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.25: qué cambió respecto de la v0.24
+
+- **Fase E (verificación):** el menú *Fragmentum → Niveles → Verificar el arte del Nivel 1*
+  revisa los 30 sprites, los 13 clips, los 4 Animators, los 6 prefabs y sus eventos. Comprueba
+  también que la plataforma inestable no sostiene cuando se ve rota y que la de combustión
+  sostiene siempre. Se ejecuta también al final de «Regenerar todo», que falla si algo no cuadra.
+- **La integración del Golem, las mecánicas y las cinemáticas del Nivel 1 está completa** en la
+  rama `golem-mecanicas`, a falta de tu prueba (N20) y de tu «fusiona».
 
 ## Revisión 0.24: qué cambió respecto de la v0.23
 
@@ -701,6 +710,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.25 (2026-10-06)** — Golem de Ceniza y mecánicas, fase E: el menú de verificación. La integración está completa, a falta de tu prueba.
 - **0.24 (2026-10-06)** — Golem de Ceniza y mecánicas, fase D: scripts, prefabs y cinemáticas en el juego.
 - **0.23 (2026-10-06)** — Golem de Ceniza y mecánicas, fase C: los Animators.
 - **0.22 (2026-10-06)** — Golem de Ceniza y mecánicas, fase B: los clips, desde dos tablas.
