@@ -81,7 +81,7 @@ namespace Fragmentum.Bosses.Patrones
         private void Lanzar(BossController jefe, int direccion, float salida, float y, float duracion)
         {
             var origen = new Vector2(jefe.Centro.x + direccion * salida, y);
-            jefe.CrearZona("OndaDeSuelo", origen, tamanoOnda, danio, 0f, duracion, new Vector2(direccion * velocidadOnda, 0f), color);
+            jefe.CrearZona("OndaDeSuelo", origen, tamanoOnda, danio, 0f, duracion, new Vector2(direccion * velocidadOnda, 0f), color, dibujarZona);
         }
     }
 }

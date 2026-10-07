@@ -22,7 +22,7 @@ namespace Fragmentum.UI
     /// </summary>
     public class PantallaMecanicas : PantallaSuperpuesta
     {
-        private const float AnchoColumna = 560f;
+        private const float AnchoColumna = 600f;
         private const float AnchoControles = 200f;
         private const float SeparacionColumnas = 60f;
         private const int TamanoNombre = 22;
@@ -285,7 +285,7 @@ namespace Fragmentum.UI
         private static RectTransform Columna(Transform padre, string nombre, string titulo)
         {
             var columna = FabricaUI.Objeto(nombre, padre);
-            var vertical = FabricaUI.Columna(columna, 14f);
+            var vertical = FabricaUI.Columna(columna, 10f);
             vertical.childAlignment = TextAnchor.UpperLeft;
             var elemento = columna.gameObject.AddComponent<LayoutElement>();
             elemento.preferredWidth = AnchoColumna;

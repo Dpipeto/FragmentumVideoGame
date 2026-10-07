@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: SaltoAplastante
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronSaltoAplastante
   nombre: Salto aplastante
-  descripcion: "Salta hacia el jugador; la ca\xEDda se marca en el suelo y quema al aterrizar (2 de da\xF1o), con una onda a cada lado."
+  descripcion: "Salta hacia el jugador y quema al aterrizar (2 de da\xF1o), con una onda a cada lado."
   aviso: 0.5
   danio: 2
   color: {r: 0.9098039, g: 0.3647059, b: 0.015686275, a: 1}
+  dibujarZona: 0
   tiempoVuelo: 0.8
   tamanoImpacto: {x: 3, y: 1.4}
   duracionImpacto: 0.15

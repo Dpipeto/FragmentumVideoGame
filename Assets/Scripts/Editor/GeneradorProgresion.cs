@@ -141,8 +141,9 @@ namespace Fragmentum.EditorTools
             Controles(invisibilidad, "{Ability}", sobrescribir);
             Controles(defensa, "Pasiva", sobrescribir);
 
-            // Los movimientos de Kael que explica esa pantalla.
-            Asset<GuiaMecanicas>("Habilidades/GuiaMecanicas", sobrescribir, g => g.movimientos = GuiaMecanicas.MovimientosPorDefecto());
+            // Los movimientos de Kael que explica esa pantalla. Si el asset ya existe, se le añaden los
+            // movimientos nuevos del diseño sin tocar los textos que haya.
+            CompletarGuia(Asset<GuiaMecanicas>("Habilidades/GuiaMecanicas", sobrescribir, g => g.movimientos = GuiaMecanicas.MovimientosPorDefecto()));
 
             var fIra = Asset<FragmentoData>("Fragmentos/Ira", sobrescribir, f => Fragmento(f, EMOCIONES.IRA, "Fragmento de la Ira", cargado));
             var fTristeza = Asset<FragmentoData>("Fragmentos/Tristeza", sobrescribir, f => Fragmento(f, EMOCIONES.TRISTEZA, "Fragmento de la Tristeza", dash));
@@ -265,6 +266,28 @@ namespace Fragmentum.EditorTools
             h.descripcion = descripcion;
             h.duracion = duracion;
             h.cooldown = cooldown;
+        }
+
+        // Inserta en su sitio los movimientos del diseño que el asset aún no tiene (por nombre).
+        private static void CompletarGuia(GuiaMecanicas guia)
+        {
+            var diseno = GuiaMecanicas.MovimientosPorDefecto();
+            var cambia = false;
+            for (var i = 0; i < diseno.Count; i++)
+            {
+                if (guia.movimientos.Exists(m => m != null && m.nombre == diseno[i].nombre))
+                {
+                    continue;
+                }
+
+                guia.movimientos.Insert(Mathf.Min(i, guia.movimientos.Count), diseno[i]);
+                cambia = true;
+            }
+
+            if (cambia)
+            {
+                EditorUtility.SetDirty(guia);
+            }
         }
 
         private static void Controles(HabilidadData h, string controles, bool sobrescribir)

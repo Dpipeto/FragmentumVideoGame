@@ -27,6 +27,11 @@ namespace Fragmentum.Bosses.Patrones
         [Tooltip("Color provisional de las zonas de daño (sin VFX, PENDIENTES B5).")]
         public Color color = new Color(1f, 0.45f, 0.1f, 1f);
 
+        [Tooltip("Dibujar la zona de daño como un rectángulo de color. Apagado cuando el dibujo del jefe ya " +
+                 "enseña el golpe (el espadazo, la caída del salto): el aviso es la animación. Encendido mientras " +
+                 "el ataque no tenga su propio arte (la onda, las erupciones), para que no haga daño invisible.")]
+        public bool dibujarZona = true;
+
         /// <summary>Ejecuta el ataque sobre el jefe. Termina cuando el ataque acaba.</summary>
         public abstract IEnumerator Ejecutar(BossController jefe);
     }

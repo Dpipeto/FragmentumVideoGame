@@ -17,6 +17,10 @@ MonoBehaviour:
     controles: '{Move/left,right}'
     descripcion: Corre a izquierda y derecha.
     requisito: 0
+  - nombre: Caminar
+    controles: '{Walk}'
+    descripcion: "Mant\xE9n mientras te mueves para ir despacio y sin ruido: en el mundo del Miedo, as\xED no te oyen."
+    requisito: 0
   - nombre: Saltar
     controles: '{Jump}'
     descripcion: "Mant\xE9n para saltar m\xE1s alto; suelta pronto para un salto corto."

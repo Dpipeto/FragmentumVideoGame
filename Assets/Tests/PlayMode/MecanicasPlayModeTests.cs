@@ -224,7 +224,7 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual(torreta.tiempoDisparo, estados[2].t - estados[1].t, Margen, "Disparo.");
 
             Assert.AreEqual(1, disparos.Count, "Una bola por disparo.");
-            Assert.AreEqual(GeneradorMecanicasNombres.BolaDeFuego, disparos[0].name, "La bola es la del prefab (sprite provisional).");
+            Assert.AreEqual(GeneradorMecanicasNombres.BolaDeFuego, disparos[0].name, "La bola es la del prefab.");
             Assert.Greater(disparos[0].Velocidad.x, 0f, "Dispara hacia donde mira el dibujo: a la derecha.");
             Assert.AreEqual(0f, disparos[0].Velocidad.y, "En horizontal: se esquiva saltando.");
         }
@@ -246,6 +246,13 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarHasta(() => disparado != null, torreta.tiempoReposo + torreta.tiempoCarga + 0.3f, "el primer disparo");
             yield return EsperarHasta(() => Jugador.Vida.Vida < vida, 2f, "que la bola de fuego alcance al jugador");
             yield return EsperarHasta(() => disparado == null, 0.2f, "que la bola desaparezca al golpear");
+
+            // Deja sus chispas un momento, sin hacer daño, y se van solas.
+            var restos = GameObject.Find("BolaDeFuego_Restos");
+            Assert.IsNotNull(restos, "Al apagarse deja sus chispas.");
+            Assert.AreEqual("Bola_3_disipa", restos.GetComponent<SpriteRenderer>().sprite.name);
+            Assert.IsNull(restos.GetComponent<Collider2D>(), "Las chispas no hacen daño.");
+            yield return EsperarHasta(() => restos == null, 0.5f, "que las chispas se apaguen");
         }
 
         [UnityTest]

@@ -66,7 +66,7 @@ namespace Fragmentum.Bosses.Patrones
                 yield return jefe.Golpear(AnimatorParams.Espadazo, primero ? aviso : avisoEncadenado, ultimo && abreVentana);
 
                 var centro = jefe.PuntoDelante(jefe.MedioAncho + tamanoGolpe.x * 0.5f - 0.3f, tamanoGolpe.y * 0.5f);
-                var zona = jefe.CrearZona("Espadazo", centro, tamanoGolpe, danio, 0f, duracionGolpe, Vector2.zero, color);
+                var zona = jefe.CrearZona("Espadazo", centro, tamanoGolpe, danio, 0f, duracionGolpe, Vector2.zero, color, dibujarZona);
                 yield return jefe.TerminarGolpe(zona, duracionGolpe);
             }
 

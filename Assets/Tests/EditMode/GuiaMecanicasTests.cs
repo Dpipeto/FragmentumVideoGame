@@ -48,6 +48,7 @@ namespace Fragmentum.Tests
         [TestCase("{Attack}", "CLIC / ENTER")]
         [TestCase("{Crouch}", "C / CTRL")]
         [TestCase("{Ability}", "Q")]
+        [TestCase("{Walk}", "ALT")]
         [TestCase("{Move/left,right}", "A D / ← →")]
         [TestCase("Mantén {Attack}", "Mantén CLIC / ENTER")]
         [TestCase("Pasiva", "Pasiva")]
@@ -83,7 +84,7 @@ namespace Fragmentum.Tests
             var filas = Filas(new DatosGuardado());
 
             var movimientos = filas.Where(f => !f.EsHabilidad).Select(f => f.Nombre).ToArray();
-            CollectionAssert.AreEqual(new[] { "Moverse", "Saltar", "Doble salto", "Pared", "Dash", "Atacar" }, movimientos,
+            CollectionAssert.AreEqual(new[] { "Moverse", "Caminar", "Saltar", "Doble salto", "Pared", "Dash", "Atacar" }, movimientos,
                 "Agacharse no aparece hasta llegar a un mundo donde sirve.");
 
             var habilidades = filas.Where(f => f.EsHabilidad).ToArray();
@@ -137,7 +138,7 @@ namespace Fragmentum.Tests
         [Test]
         public void ElGenerador_DejaLaGuia_LasTeclasDeCadaHabilidad_YLaGuiaEnLosSistemas()
         {
-            Assert.GreaterOrEqual(Guia().movimientos.Count, 6);
+            Assert.GreaterOrEqual(Guia().movimientos.Count, 7);
 
             foreach (var habilidad in BaseDeDatos().niveles.Where(n => n != null && n.fragmento != null && n.fragmento.habilidad != null)
                          .Select(n => n.fragmento.habilidad))
@@ -156,13 +157,28 @@ namespace Fragmentum.Tests
             try
             {
                 var filas = PantallaMecanicas.Calcular(guia, null, null, null, null, Acciones());
-                Assert.AreEqual(6, filas.Count, "Sin base de datos: los movimientos y ninguna habilidad.");
-                Assert.AreEqual("ESPACIO", filas[1].Controles);
+                Assert.AreEqual(7, filas.Count, "Sin base de datos: los movimientos y ninguna habilidad.");
+                Assert.AreEqual("ESPACIO", filas[2].Controles);
             }
             finally
             {
                 Object.DestroyImmediate(guia);
             }
+        }
+
+        [Test]
+        public void CaminarConAlt_DejaLaDireccionPorDebajoDelSigilo()
+        {
+            var jugador = AssetDatabase.LoadAssetAtPath<GameObject>(ConstructorJugador.RutaPrefab);
+            Assert.IsNotNull(jugador, $"Falta {ConstructorJugador.RutaPrefab}.");
+            var entrada = jugador.GetComponentInChildren<Fragmentum.Core.Input.FuenteInputJugador>(true);
+            var modo = jugador.GetComponentInChildren<PlayerModoMovimiento>(true);
+            var umbral = new SerializedObject(modo).FindProperty("umbralSigilo").floatValue;
+
+            Assert.Less(entrada.FactorCaminar, umbral, "Con Alt, Kael va por debajo del umbral del sigilo: no hace ruido.");
+            Assert.AreEqual(entrada.FactorCaminar, Fragmentum.Core.Input.FuenteInputJugador.ConCaminar(1f, true, entrada.FactorCaminar), 1e-5f);
+            Assert.AreEqual(-1f, Fragmentum.Core.Input.FuenteInputJugador.ConCaminar(-1f, false, entrada.FactorCaminar), 1e-5f, "Sin Alt, a fondo.");
+            Assert.AreEqual(PlayerModoMovimiento.Clasificar(entrada.FactorCaminar, umbral, 0.6f), MODOS_MOVIMIENTO.STEALTH);
         }
 
         [Test]

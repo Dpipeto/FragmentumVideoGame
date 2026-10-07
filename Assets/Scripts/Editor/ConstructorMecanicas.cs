@@ -124,6 +124,27 @@ namespace Fragmentum.EditorTools
 
         public static readonly Mecanica[] Mecanicas = { Torreta, Plataforma, Combustion };
 
+        public const string Vuelo = "Vuelo";
+
+        /// <summary>
+        /// La bola de fuego de la torreta: vuela con dos fotogramas en bucle. No es un ciclo de su
+        /// script, así que su controlador tiene un solo estado y ningún parámetro. Al apagarse deja
+        /// sus chispas (<see cref="FotogramaBolaDisipa"/>) un momento: eso lo pone el proyectil.
+        /// </summary>
+        public static readonly Clip BolaVuelo = new Clip
+        {
+            Nombre = "Bola_Vuelo", Estado = Vuelo, Fotogramas = new[] { "Bola_1_vuelo", "Bola_2_vuelo" },
+            Duraciones = new[] { 0.1f, 0.1f }, Bucle = true,
+        };
+
+        /// <summary>Las chispas que deja la bola al apagarse (sin clip: un solo fotograma).</summary>
+        public const string FotogramaBolaDisipa = "Bola_3_disipa";
+
+        /// <summary>Segundos que se ven las chispas.</summary>
+        public const float DuracionBolaDisipa = 0.2f;
+
+        public static string RutaControladorBola => $"{CarpetaAnimaciones}/Bola.controller";
+
         /// <summary>La lava: un solo fotograma y su espejo, sin clip.</summary>
         public static readonly string[] FotogramasLava = { "Lava", "Lava_espejo" };
 
@@ -163,6 +184,29 @@ namespace Fragmentum.EditorTools
             }
 
             Debug.Log($"[Fragmentum] Mecánicas: {sprites.Count} fotogramas, {clips.Length} clips y {Mecanicas.Length} controladores en {CarpetaAnimaciones}.");
+            return ConstruirBola();
+        }
+
+        // La bola, aparte: su clip en bucle y un controlador de un solo estado, sin parámetros.
+        private static bool ConstruirBola()
+        {
+            if (!ClipsDeSprites.CargarSprites(new[] { BolaVuelo }, RutaSprite, "la bola de fuego", out var sprites))
+            {
+                return false;
+            }
+
+            if (sprites == null)
+            {
+                return true;
+            }
+
+            var clip = ClipsDeSprites.Crear(CarpetaAnimaciones, BolaVuelo, sprites);
+            var controlador = ControladoresAnimator.CargarOCrear(RutaControladorBola);
+            var maquina = controlador.layers[0].stateMachine;
+            var estados = ControladoresAnimator.Estados(maquina, new[] { (BolaVuelo.Estado, (Motion)clip) });
+            ControladoresAnimator.Transiciones(estados[BolaVuelo.Estado]);
+            maquina.defaultState = estados[BolaVuelo.Estado];
+            EditorUtility.SetDirty(controlador);
             return true;
         }
 

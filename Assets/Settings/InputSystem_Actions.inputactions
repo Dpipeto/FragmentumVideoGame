@@ -87,6 +87,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Walk",
+                    "type": "Button",
+                    "id": "9eb54907-e2a1-4d7b-b4bd-0fa40c53c01e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Ability",
                     "type": "Button",
                     "id": "9a3e7c2d-5b41-4f86-8e0a-6d2c1f4b7a90",
@@ -380,6 +389,17 @@
                     "processors": "",
                     "groups": "XR",
                     "action": "Sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "76491a0a-6700-484e-a267-a09734876cdb",
+                    "path": "<Keyboard>/leftAlt",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Walk",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

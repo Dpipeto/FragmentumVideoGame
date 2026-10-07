@@ -17,12 +17,12 @@ namespace Fragmentum.EditorTools
     /// sigue montado como lo dejaron <see cref="ArteNivel1"/> y <see cref="GeneradorMecanicas"/>. Es
     /// la red que avisa si alguien reimporta un sprite y pierde sus ajustes, o si un clip, un
     /// Animator o un prefab cambian a mano:
-    /// 1. los 30 sprites existen (15 del Golem, 12 de las mecánicas y 3 planos), con el lienzo, los
+    /// 1. los 34 sprites existen (15 del Golem, 15 de las mecánicas con la bola y 4 planos), con el lienzo, los
     ///    píxeles por unidad y el pivote de su carpeta (<see cref="TablaArte"/>) y como pixel art.
     ///    Un PNG nuevo en esas carpetas también se revisa;
-    /// 2. los 13 clips existen, con sus fotogramas, sus eventos y la duración de su tabla (margen
+    /// 2. los 14 clips existen, con sus fotogramas, sus eventos y la duración de su tabla (margen
     ///    de 1 ms), y ninguno anima un collider;
-    /// 3. los 4 Animators (Golem, torreta, plataforma inestable y combustión) tienen un estado por
+    /// 3. los 5 Animators (Golem, torreta, plataforma inestable, combustión y bola) tienen un estado por
     ///    clip, ninguno suelto y ninguna transición rota, y en las mecánicas cada valor de
     ///    <c>Estado</c> lleva al estado de su clip;
     /// 4. en los 6 prefabs, lo que hace daño está apagado en reposo, salvo lo que daña siempre: el
@@ -118,15 +118,17 @@ namespace Fragmentum.EditorTools
         private static readonly string[] Planos =
         {
             ConstructorCinematicasNivel1.Jefe1, ConstructorCinematicasNivel1.Jefe2, ConstructorCinematicasNivel1.Final1,
+            ConstructorCinematicasNivel1.Final2,
         };
 
         /// <summary>
-        /// Los 30 sprites del encargo, sacados de las tablas de los constructores: los fotogramas de
-        /// los clips del Golem y de las mecánicas, la lava y los tres planos que llegaron.
+        /// Los 34 sprites del encargo, sacados de las tablas de los constructores: los fotogramas de
+        /// los clips del Golem y de las mecánicas, la lava, la bola de fuego y los cuatro planos.
         /// </summary>
         public static IReadOnlyList<string> Sprites =>
             ConstructorGolem.Clips.SelectMany(c => c.Fotogramas).Distinct().Select(ConstructorGolem.RutaSprite)
                 .Concat(ConstructorMecanicas.TodosLosClips.SelectMany(c => c.Fotogramas).Concat(ConstructorMecanicas.FotogramasLava)
+                    .Concat(ConstructorMecanicas.BolaVuelo.Fotogramas).Append(ConstructorMecanicas.FotogramaBolaDisipa)
                     .Distinct().Select(ConstructorMecanicas.RutaSprite))
                 .Concat(Planos.Select(ConstructorCinematicasNivel1.RutaImagen))
                 .ToList();
@@ -185,7 +187,7 @@ namespace Fragmentum.EditorTools
                     Eventos = ConstructorGolem.Eventos.Where(e => e.Estado == c.Estado)
                         .Select(e => (ConstructorGolem.Instante(e), e.Funcion)).ToArray(),
                 })
-                .Concat(ConstructorMecanicas.TodosLosClips.Select(c => new ClipEsperado
+                .Concat(ConstructorMecanicas.TodosLosClips.Append(ConstructorMecanicas.BolaVuelo).Select(c => new ClipEsperado
                 {
                     Ruta = c.Ruta(ConstructorMecanicas.CarpetaAnimaciones),
                     Definicion = c,
@@ -263,6 +265,12 @@ namespace Fragmentum.EditorTools
                     Estados = m.Clips.Select(c => (c.Estado, c.Nombre)).ToArray(),
                     Mecanica = m,
                 }))
+                .Append(new AnimatorEsperado
+                {
+                    Nombre = "Bola",
+                    Ruta = ConstructorMecanicas.RutaControladorBola,
+                    Estados = new[] { (ConstructorMecanicas.BolaVuelo.Estado, ConstructorMecanicas.BolaVuelo.Nombre) },
+                })
                 .ToList();
 
         /// <summary>
@@ -349,7 +357,7 @@ namespace Fragmentum.EditorTools
             // La bola solo existe disparada: hacer daño es todo lo que hace.
             new PrefabEsperado
             {
-                Ruta = RutaMecanica(GeneradorMecanicas.BolaDeFuego),
+                Ruta = RutaMecanica(GeneradorMecanicas.BolaDeFuego), Controlador = ConstructorMecanicas.RutaControladorBola,
                 ZonasDeDanio = new[] { GeneradorMecanicas.BolaDeFuego }, DananSiempre = new[] { GeneradorMecanicas.BolaDeFuego },
             },
         };

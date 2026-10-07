@@ -64,6 +64,8 @@ namespace Fragmentum.Data
         {
             new MecanicaGuia("Moverse", "{Move/left,right}",
                 "Corre a izquierda y derecha."),
+            new MecanicaGuia("Caminar", "{Walk}",
+                "Mantén mientras te mueves para ir despacio y sin ruido: en el mundo del Miedo, así no te oyen."),
             new MecanicaGuia("Saltar", "{Jump}",
                 "Mantén para saltar más alto; suelta pronto para un salto corto."),
             new MecanicaGuia("Doble salto", "{Jump} ×2",

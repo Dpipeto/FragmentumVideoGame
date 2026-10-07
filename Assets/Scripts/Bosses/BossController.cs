@@ -598,10 +598,14 @@ namespace Fragmentum.Bosses
             return impacto.collider != null ? impacto.point.y : SueloY;
         }
 
-        /// <summary>Crea una zona de daño del jefe (golpe, onda, erupción). Se borra si el ataque se corta.</summary>
-        public ZonaDeDanio CrearZona(string nombre, Vector2 centro, Vector2 tamano, int danio, float aviso, float duracion, Vector2 velocidad, Color color)
+        /// <summary>
+        /// Crea una zona de daño del jefe (golpe, onda, erupción). Se borra si el ataque se corta. Sin
+        /// <paramref name="dibujar"/>, no se ve: el golpe lo enseña la animación del jefe.
+        /// </summary>
+        public ZonaDeDanio CrearZona(string nombre, Vector2 centro, Vector2 tamano, int danio, float aviso, float duracion, Vector2 velocidad, Color color,
+            bool dibujar = true)
         {
-            var zona = ZonaDeDanio.Crear($"{name}_{nombre}", centro, tamano, danio, Capas.MascaraJugador, aviso, duracion, velocidad, color);
+            var zona = ZonaDeDanio.Crear($"{name}_{nombre}", centro, tamano, danio, Capas.MascaraJugador, aviso, duracion, velocidad, color, dibujar);
             _efectos.RemoveAll(e => e == null);
             _efectos.Add(zona.gameObject);
             return zona;

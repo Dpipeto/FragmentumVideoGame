@@ -12,7 +12,7 @@ namespace Fragmentum.Core.Combate
     ///
     /// El daño lo reparte un <see cref="Hitbox"/>, así que respeta las capas, los i-frames y los
     /// escudos como cualquier otro golpe. Sin VFX todavía: se dibuja como un rectángulo de color
-    /// (PENDIENTES B5).
+    /// (PENDIENTES B5), salvo que se cree sin dibujo porque el golpe ya lo enseña una animación.
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D), typeof(Hitbox))]
     public class ZonaDeDanio : MonoBehaviour
@@ -36,10 +36,11 @@ namespace Fragmentum.Core.Combate
 
         /// <summary>
         /// Crea la zona en la capa EnemyWeapon. <paramref name="objetivos"/> son las capas a las que
-        /// golpea; <paramref name="velocidad"/> en unidades por segundo (cero = quieta).
+        /// golpea; <paramref name="velocidad"/> en unidades por segundo (cero = quieta). Sin
+        /// <paramref name="dibujar"/>, el rectángulo no se ve y solo queda el daño.
         /// </summary>
         public static ZonaDeDanio Crear(string nombre, Vector2 centro, Vector2 tamano, int danio, LayerMask objetivos,
-            float aviso, float duracion, Vector2 velocidad, Color color)
+            float aviso, float duracion, Vector2 velocidad, Color color, bool dibujar = true)
         {
             var objeto = new GameObject(nombre);
             objeto.SetActive(false);
@@ -56,6 +57,7 @@ namespace Fragmentum.Core.Combate
             visual.drawMode = SpriteDrawMode.Sliced;
             visual.size = tamano;
             visual.sortingOrder = 8;
+            visual.enabled = dibujar;
 
             var zona = objeto.AddComponent<BoxCollider2D>();
             zona.isTrigger = true;

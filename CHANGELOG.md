@@ -9,6 +9,114 @@
 
 ---
 
+## Respuestas a la prueba del Nivel 1 (2026-10-07)
+
+Rama `ajustes-pendientes`, que sale de `menu-mecanicas`. El autor jugó el Nivel 1 y respondió
+a PENDIENTES:
+
+- la pelea, el golpe del Eco y su tamaño están bien;
+- el encuadre del ojo se queda;
+- no hace falta fuente bitmap;
+- los textos de la guía están bien.
+
+Además pidió cinco cosas.
+
+### 1. La bola de fuego, con su arte
+
+- **Problema.** La torreta disparaba un círculo naranja provisional.
+- **Causa.** Faltaba `Fireball3`. Llegó, y con ella las tres imágenes de la bola. No venían sobre
+  el fondo magenta de las demás, sino sobre el **damero gris y negro que imita la
+  transparencia, pintado dentro del JPG**. La limpieza de siempre no sirve.
+- **Solución.** Una limpieza nueva, `Tesis/Imagenes/limpios/script/limpiar_bola.py`:
+  - **Cada casilla del damero es un píxel del dibujo** (2048 / 50 = 40,96 px), así que se
+    trabaja en la rejilla nativa de 50 × 50, donde el fondo es predecible. En una paridad de
+    casilla toca negro y en la otra gris.
+  - **Es dibujo lo que se aparta del damero en su sitio:** el color saturado, el núcleo blanco y el
+    negro donde tocaba gris (el contorno).
+  - **El contorno que cae en casilla negra se recupera por vecindad.** Solo crece alrededor de la
+    bola, no de las chispas sueltas, que no llevan contorno. Al principio la franja de abajo, que
+    tiene el damero desplazado una casilla, se colaba como contorno.
+  - **El núcleo blanco se cuantiza aparte** para que no se mezcle con el naranja.
+  - **Las tres comparten lienzo** (40 × 29) para que la bola no salte al cambiar de fotograma.
+  - **El pivote va en el centro de la bola, no del lienzo,** para que la estela quede detrás.
+    Va a 24 px/u, la misma densidad que la torreta.
+
+  En el juego:
+  - **Vuelo:** la bola vuela en bucle con sus dos fotogramas (clip `Bola_Vuelo`, controlador
+    `Bola`, un solo estado).
+  - **Al apagarse:** al golpear, al tocar escenario o al acabar su alcance, el `Proyectil` deja el
+    tercer fotograma, las chispas, 0,2 s y sin daño.
+  - **La bola se destruye en el acto,** como antes, para que no pueda golpear dos veces.
+
+### 2. El segundo plano de la derrota
+
+- `CinematicaFinalLvl2` llegó regenerada con el prompt nuevo: Kael grande, de espaldas, con el
+  fragmento en el hombro y los huecos visibles. A 240 × 135 los huecos se leen; en el intento
+  anterior eran manchas de 2 px.
+- `cine.py` se adapta a las rutas de este PC y procesa solo los planos que se le piden. El plano
+  entra solo en la cinemática de la derrota, como estaba previsto.
+- **Lo que no cuadra** (N25, opcional): flota otro fragmento sobre la espada y hay cinco huecos
+  vacíos, no cuatro. El prompt de edición está en `Docs/Diseno/Prompts_Gemini.md`. Además, llegó
+  la copia de 2000 px y no el original de 2752; se procesa igual.
+
+### 3. Sin rectángulos naranjas donde la animación ya avisa
+
+- **Problema.** Los ataques de la Centinela pintaban su zona de daño como un rectángulo naranja.
+  El autor: «por eso se hicieron las animaciones».
+- **Solución.**
+  - `PatronAtaque.dibujarZona`: el espadazo (normal y de furia) y la marca de la caída del salto
+    ya no se pintan. Siguen haciendo el mismo daño.
+  - La **onda** y las **erupciones** no tienen arte todavía y siguen pintándose: si no, harían
+    daño invisible. Para las ondas del salto hay un campo aparte, `dibujarOndas`.
+  - El prompt de la onda está en `Docs/Diseno/Prompts_Gemini.md`.
+
+### 4. Caminar con Alt
+
+- **Problema.** El sigilo del mundo del Miedo cuenta como silencioso ir por debajo del 40 % de la
+  velocidad máxima. Con teclado, A y D van siempre a fondo.
+- **Solución.**
+  - Una acción nueva, `Walk`, en Alt izquierdo.
+  - `FuenteInputJugador` deja la dirección al 35 % mientras se mantiene (`factorCaminar`). La
+    velocidad de Kael ya seguía a la dirección, así que no se toca `PlayerController`.
+  - La guía de mecánicas tiene su fila «Caminar». El generador añade a la guía los movimientos
+    nuevos sin tocar los textos que ya había.
+
+### 5. Propuestas de diseño: el Nivel 1 y el guion
+
+El autor pidió que diseñara el recorrido del Nivel 1 (N10) y el guion (N11) a partir de la tesis.
+Son propuestas: no están en la escena ni en los assets hasta que las apruebe.
+
+- **`Docs/Diseno/Nivel1_Diseno.md` y su esquema a escala (`Nivel1_Diseno.png`):**
+  - la Ira empuja a correr, y cada peligro castiga la prisa;
+  - cada mecánica aparece tres veces: sin riesgo, sobre lava y con enemigos;
+  - los recuentos del Anexo A;
+  - las medidas de Kael que limitan huecos y subidas;
+  - tres cosas del Anexo A que no cuadran.
+- **`Docs/Diseno/Guion.md`:** los seis mundos. Cada cierre nombra la habilidad como un gesto
+  emocional: contener el golpe y soltarlo, avanzar bajo el agua, ocultarse sin perderse, resistir
+  sin negar.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»:**
+  - importa la bola y crea su clip, su controlador y su prefab;
+  - mete el segundo plano en la derrota;
+  - añade «Caminar» a la guía.
+- **Pruebas EditMode: 341 correctas.** Hay 5 nuevas:
+  - la bola: su clip en bucle, su controlador de un estado, su lienzo y su pivote;
+  - los patrones que no pintan su zona y los que sí;
+  - una zona sin dibujo sigue haciendo daño;
+  - Alt deja la dirección por debajo del umbral del sigilo;
+  - la tecla de `Walk`.
+
+  Se ponen al día las del verificador del Nivel 1 (34 sprites, 14 clips y 5 Animators), la del
+  prefab de la bola y la de la cinemática de la derrota.
+- **Pruebas PlayMode: 145 correctas.** La de la bola comprueba también que deja sus chispas, que
+  no hacen daño y que se apagan solas.
+
+---
+
 ## El build de Windows fallaba por las luces globales (2026-10-07)
 
 - **Problema.** *Build* y *Build and Run* fallaban en medio segundo con cuatro errores «More than
