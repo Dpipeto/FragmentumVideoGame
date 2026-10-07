@@ -70,11 +70,15 @@ namespace Fragmentum.Narrative
         [Tooltip("Tipografía de título, mayor que la normal.")]
         public bool titulo;
 
+        [Tooltip("Aparece y se va en seco, sin fundido (un rótulo que entra con un golpe).")]
+        public bool sinFundido;
+
         [Header("En la rejilla (cinemáticas en pixel art)")]
         [Tooltip("Colocarlo en un píxel del plano. Sin marcar, va centrado en su tercio.")]
         public bool enPunto;
 
-        [Tooltip("Píxel del plano donde se ancla el texto, contado desde arriba a la izquierda, como en el guion.")]
+        [Tooltip("Píxel de la imagen del plano donde se ancla el texto, contado desde arriba a la izquierda, como en el guion. " +
+                 "Se mueve con el encuadre del beat: el texto sigue a lo que acompaña.")]
         public Vector2Int punto;
 
         [Tooltip("Qué punto del bloque de texto cae en ese píxel, y cómo se alinean sus líneas.")]

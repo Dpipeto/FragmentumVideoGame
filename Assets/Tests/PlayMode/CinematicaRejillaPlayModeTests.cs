@@ -192,22 +192,24 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 5f);
         }
 
+        private static Cartel TextoDeKael() => new Cartel
+        {
+            texto = "No recuerdo esta sala.\nEl calor, sí.",
+            inicio = 0.1f,
+            duracion = 0.6f,
+            enPunto = true,
+            punto = new Vector2Int(24, 110),
+            alineacion = TextAnchor.UpperLeft,
+        };
+
         [UnityTest]
-        public IEnumerator ElTexto_SeEscribeEnLaRejilla_DondeDiceElCartel()
+        public IEnumerator ConFuenteBitmap_ElTextoSeEscribeEnLaRejilla_DondeDiceElCartel()
         {
             yield return EntrarEnNivel1();
-            var datos = Corta("ConTexto");
-            datos.diapositivas[1].carteles.Add(new Cartel
-            {
-                texto = "No recuerdo esta sala.\nEl calor, sí.",
-                inicio = 0.1f,
-                duracion = 0.6f,
-                enPunto = true,
-                punto = new Vector2Int(24, 110),
-                alineacion = TextAnchor.UpperLeft,
-            });
+            var datos = Corta("ConFuente");
+            datos.fuente = FabricaUI.Fuente; // en la prueba vale cualquier fuente: lo que se comprueba es dónde cae
+            datos.diapositivas[1].carteles.Add(TextoDeKael());
 
-            LogAssert.Expect(LogType.Warning, new Regex("'ConTexto' no tiene fuente bitmap"));
             Assert.IsTrue(Juego.IniciarCinematica(datos));
             yield return EsperarHasta(() => Reproductor.TextoActual.Length > 0, 2f, "el texto de Kael");
 
@@ -215,8 +217,89 @@ namespace Fragmentum.Tests.PlayMode
             var texto = Camara.Textos.First(t => t.Visible);
             Assert.AreEqual(new Vector2Int(24, 110), texto.Bloque.position, "Anclado en su píxel del plano.");
             Assert.IsTrue(texto.Vertices.All(v => Mathf.Approximately(v.x, Mathf.Round(v.x))), "En columnas enteras.");
+            Assert.IsTrue(Reproductor.TextosSobreLaRejilla.All(t => t.GetComponent<CanvasGroup>().alpha == 0f), "La interfaz no escribe nada.");
 
             yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 5f);
         }
+
+        [UnityTest]
+        public IEnumerator SinFuenteBitmap_ElTextoVaEnLaInterfaz_ALaEscalaYEnElPixelDelPlano()
+        {
+            yield return EntrarEnNivel1();
+            var datos = Corta("SinFuente");
+            datos.tamanoFuente = 5;
+            datos.diapositivas[1].carteles.Add(TextoDeKael());
+
+            Assert.IsTrue(Juego.IniciarCinematica(datos));
+            yield return EsperarHasta(() => Reproductor.TextoActual.Length > 0, 2f, "el texto de Kael");
+
+            Assert.AreEqual("No recuerdo esta sala.\nEl calor, sí.", Reproductor.TextoActual, "Como en la cinemática inicial: en la interfaz.");
+            Assert.IsFalse(Camara.Textos.Any(t => t.Visible), "La rejilla no escribe nada sin fuente bitmap.");
+
+            var texto = Reproductor.TextosSobreLaRejilla.First(t => t.GetComponent<CanvasGroup>().alpha > 0f);
+            var rejilla = CamaraCinematica.RectEnPantalla(Screen.width, Screen.height);
+            var k = rejilla.width / 240;
+            var factor = texto.canvas.scaleFactor;
+            var anclaEnPantalla = texto.rectTransform.anchoredPosition * factor;
+            Assert.AreEqual(rejilla.x + 24 * k, anclaEnPantalla.x, 0.01f, "Columna 24 del plano, en píxeles de pantalla.");
+            Assert.AreEqual(rejilla.y + (135 - 110) * k, anclaEnPantalla.y, 0.01f, "Fila 110 del plano.");
+            Assert.AreEqual(new Vector2(0f, 1f), texto.rectTransform.pivot, "Arriba a la izquierda.");
+            Assert.AreEqual(5 * k, texto.fontSize * factor, 1f, "La letra mide 5 píxeles del plano: a la escala de la imagen.");
+
+            yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 5f);
+        }
+
+        [UnityTest]
+        public IEnumerator LaPresentacionDelJefe_SeVeEntera_ConSusBrasasSuTextoYSuFlash()
+        {
+            yield return EntrarEnNivel1();
+            var presentacion = Nivel1.cinematicaJefe;
+            foreach (var cue in CuesSinClip(presentacion))
+            {
+                LogAssert.Expect(LogType.Warning, new Regex($"falta el audio «{cue}»"));
+            }
+
+            Assert.IsTrue(Juego.IniciarCinematica(presentacion));
+            var brasasEnLaSala = false;
+            var brasasEnElOjo = false;
+            var vioTextoDeKael = false;
+            var vioRotulo = false;
+            var encuadreDelOjo = new HashSet<Vector3>();
+            var fotogramasConFlash = 0;
+            var limite = Time.unscaledTime + 15f;
+            while (Juego.EstadoActual == ESTADOS_JUEGO.CUTSCENE)
+            {
+                var t = Reproductor.Tiempo;
+                var brasas = Camara.CapaBrasas.Dibujos.Any(d => d.enabled);
+                brasasEnLaSala |= t > 1.5f && t < 6.3f && brasas;
+                brasasEnElOjo |= t > 6.9f && brasas;
+                vioTextoDeKael |= t > 4.5f && t < 5.9f && Reproductor.TextoActual.Contains("No recuerdo esta sala.");
+                vioRotulo |= t > 8.1f && Reproductor.TextoActual.Contains("CENTINELA ARDIENTE");
+                if (Camara.Plano.enabled && Camara.Plano.sprite != null && Camara.Plano.sprite.name == "CinematicaJefe2")
+                {
+                    encuadreDelOjo.Add(Camara.Plano.transform.localPosition);
+                }
+
+                if (Camara.FlashVisible)
+                {
+                    fotogramasConFlash++;
+                }
+
+                Assert.Less(Time.unscaledTime, limite, "La presentación no termina.");
+                yield return null;
+            }
+
+            Assert.IsTrue(brasasEnLaSala, "Brasas en la sala.");
+            Assert.IsFalse(brasasEnElOjo, "El ojo, sin brasas.");
+            Assert.IsTrue(vioTextoDeKael);
+            Assert.IsTrue(vioRotulo);
+            CollectionAssert.AreEquivalent(new[] { new Vector3(17f, 19f, 0f) }, encuadreDelOjo);
+            Assert.AreEqual(2, fotogramasConFlash, "Flash de 2 fotogramas.");
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual);
+        }
+
+        // Los cues de la presentación que todavía no tienen clip: cada uno avisa al sonar.
+        private static IEnumerable<string> CuesSinClip(CutsceneData cinematica) =>
+            cinematica.diapositivas.SelectMany(d => d.cues).Where(c => c.clip == null).Select(c => c.nombre);
     }
 }

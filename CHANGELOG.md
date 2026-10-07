@@ -43,7 +43,8 @@ adaptaciones:
    beat con el fundido incluido; con ese criterio, 3,5 y 5,5 son los tiempos del guion.
 6. **Varios cues por beat**, cada uno con su instante y su bucle. Con uno solo no cabe el sonido
    del guion.
-7. **Falta la fuente bitmap.** La fase C la necesita y espera a que llegue (PENDIENTES N21).
+7. **Falta la fuente bitmap.** Al final no hizo falta esperarla: el autor eligió el texto como en
+   la cinemática inicial (fase C). Con una fuente bitmap, pasa solo a la rejilla.
 8. **No se puede saltar el primer medio segundo** (el negro inicial). Así una tecla pulsada al
    entrar en la sala no se lleva el rótulo, que es lo que importa para el estudio.
 9. **Rutas y menús de la v2:** *Fragmentum → …* y `Assets/Data/Narrativa`; los planos siguen en
@@ -140,6 +141,85 @@ funcionando igual.
 - **Las dos cinemáticas del Nivel 1 que ya eran pixel art** (la presentación y la derrota) se ven
   ya con la cámara. Sus textos van con la fuente por defecto hasta que llegue la bitmap.
 
+### Fase C: la cinemática del jefe
+
+- **El texto, como en la cinemática inicial** (decisión del autor; ajusta la 7). No hacía falta
+  esperar a la fuente bitmap:
+  - **sin fuente bitmap** (`CutsceneData.fuente` vacía), el texto va en la interfaz, con la fuente
+    del juego y la sombra de la cinemática inicial;
+  - **pero a la escala de la imagen:** la letra mide `tamanoFuente` píxeles del plano (5, que son
+    40 px a 1080p, como en la inicial; el título, el doble) y se ancla en su píxel del plano, en
+    múltiplos de la escala;
+  - **con una fuente bitmap** en ese campo, el mismo texto pasa solo a la rejilla
+    (`TextoEnRejilla`).
+- **El texto sigue al encuadre de su plano.** El punto de un cartel es un píxel de la imagen y se
+  mueve con su desplazamiento. Así el rótulo cae bajo el ojo con (17, 19) y también con (0, 0).
+- **La cinemática** es `Cinematica_Jefe_Ira`, la «Cine01_EntradaJefe» del encargo. Conserva el
+  nombre porque el Nivel 1 y el generador de narrativa ya la usan. `ConstructorCinematicasNivel1`
+  la escribe desde el guion al regenerar, como la cinemática inicial. Conserva los clips de sonido y
+  la fuente que se pongan a mano.
+
+| Beat | Imagen | Subida · se mantiene · bajada | Lo demás |
+|---|---|---|---|
+| 1 | Negro | 0,5 s | `drone_sala` en bucle, hasta los 9,6 s |
+| 2 | `CinematicaJefe1` | 1,0 · 4,9 · 0 (corte seco) | Ver abajo |
+| 3 | Negro | 0,5 s | Silencio |
+| 4 | `CinematicaJefe2` | 1,1 · 1,6 · 0 | Ver abajo |
+
+- **Beat 2, la sala:**
+  - brasas;
+  - temblores de un píxel a los 1,9 y 3,1 s del beat (2,4 y 3,6 s de la cinemática);
+  - el texto de Kael, de los 4,0 a los 6,4 s, con fundidos de 0,4 s;
+  - cues: `amb_forja` (corte seco a los 6,4 s), `golpe_escala` (1,6 s), `respiracion_fuelle`
+    (en bucle de los 2,0 a los 6,0 s) y `voz_kael_01` (4,0 s).
+- **Beat 4, el ojo:**
+  - encuadrado (17, 19);
+  - el rótulo entra en seco a los 8,0 s y se queda hasta el final;
+  - flash de 2 fotogramas al terminar;
+  - cues: `brasa_aviva` (de los 6,9 a los 8,0 s) y `rotulo_metal` (8,0 s).
+
+- **Los textos,** medidos sobre los planos:
+  - **Kael:** «No recuerdo esta sala. / El calor, sí.», las dos líneas juntas, en la columna 22 y
+    la fila 113. Kael ocupa las columnas 22 a 25 y pisa en la fila 109: el texto queda alineado
+    bajo su silueta;
+  - **el rótulo:** «CENTINELA ARDIENTE» (título) y «Arquitecto de la Ira», centrados bajo el ojo.
+    En la imagen el ojo ocupa las columnas 73 a 155 y llega a la fila 67; el rótulo va en la fila
+    77 y el subtítulo en la 90. Entra en seco (cartel `sinFundido`, nuevo), con el golpe
+    metálico.
+- **La capa de brasas** (`CapaBrasas`, en la cámara de cinemáticas):
+  - son 16 puntos de un píxel del plano, no un dibujo;
+  - caen a entre 3 y 8 px/s, de píxel entero en píxel entero, con una deriva lateral de hasta
+    1,5 px/s;
+  - cambian de brillo a saltos cada 0,15 s, con tres colores de brasa;
+  - se apagan en el suelo de la sala (fila 110) y vuelven a caer desde arriba;
+  - su opacidad es la del plano: suben desde negro y cortan con él;
+  - dependen solo del tiempo y de una semilla, así que la cinemática se ve igual cada vez. Sus
+    valores se ajustan en el prefab.
+- **Una vez por partida** (`soloPrimeraVez`, se guarda en `GameManager`).
+- **El bloqueo para saltar es de medio segundo**, el negro inicial.
+- **Sin el aviso «pulsa cualquier tecla»** encima de los planos. Invitaría a saltarse la primera
+  vista, y el rótulo es lo que importa para el estudio. Se vuelve a poner en el asset
+  (`avisoSaltar`) si se quiere.
+- **`rugido_centinela`** no está en la cinemática: suena con el rugido del jefe, ya en el juego
+  (fase D). Si se pusiera en la cinemática, el flash la cortaría a los dos fotogramas.
+- **La captura:** *Fragmentum → Cinemáticas → Capturar la presentación del jefe del Nivel 1* la
+  fotografía como se ve en el juego, con el texto de la interfaz encima, a 1920 × 1080:
+  - a los 1,0, 4,5, 8,5 y 9,55 s;
+  - y el ojo sin el encuadre, para compararlo.
+
+  Las capturas se guardan en `Docs/Cinematicas/Presentacion_*.png`.
+
+#### Lo que no cuadra con el guion: el hueco del encuadre se ve
+
+El guion dice que, al desplazar el plano del ojo (17, 19), «el relleno que queda es negro, y el
+plano ya es negro», así que no se ve. Pero el fondo del plano no es negro: es un azul casi negro,
+RGB (16, 17, 22), y no tiene ni un píxel negro puro. Por eso se ven una franja de 17 píxeles a la
+izquierda y otra de 19 abajo, de negro (0, 0, 0). En `Presentacion_8.5s.png` se nota; en
+`Presentacion_8.5s_sin_encuadre.png` el plano llena la pantalla.
+
+Se deja como dice el guion, con el desplazamiento en el asset para compararlo con (0, 0). No se
+rellena nada: sería pintar sobre el arte (PENDIENTES N22).
+
 ### Verificación (fase A)
 
 - **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
@@ -182,6 +262,39 @@ funcionando igual.
   Se corrige una prueba de la torreta de la fase D que a veces fallaba. Medía el tiempo sin quemar
   desde que aparecía Kael, pero el ciclo de la torreta empieza al crearla; ahora espera a su
   disparo.
+
+### Verificación (fase C)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** escribe la presentación desde el guion y rehace la cámara con su capa de
+  brasas.
+- **Las capturas** (`Docs/Cinematicas/Presentacion_*.png`) se revisaron a ojo:
+  - las brasas son cuadrados de 8 × 8, en la rejilla;
+  - el texto de Kael queda bajo su silueta, legible sobre el suelo;
+  - el rótulo, centrado bajo el ojo, con y sin encuadre.
+- **Pruebas EditMode: 319 correctas.** Hay 9 nuevas en `CinematicaJefe1Tests`, con los tiempos copiados
+  del guion:
+  - cuatro beats que suman 9,6 s (± 1 ms), con sus fundidos y sus cortes secos;
+  - brasas solo en la sala, y los dos temblores de un píxel a los 2,4 y 3,6 s;
+  - el texto de Kael de 4,0 a 6,4 s, bajo su silueta;
+  - el ojo encuadrado (17, 19), el rótulo en seco de los 8,0 s al final, sin tocar el ojo, y el
+    flash de 2 fotogramas;
+  - los siete cues, donde dice el guion;
+  - una vez por partida, con el bloqueo de medio segundo y sin aviso, y es la del Nivel 1;
+  - regenerar conserva los clips puestos a mano;
+  - las brasas ocupan píxeles enteros y caen de uno en uno;
+  - el texto se mueve con el encuadre de su plano.
+
+  Se adaptan tres pruebas de la presentación anterior. Esperaban el diálogo provisional de la
+  Centinela y que se viera cada vez que se carga el nivel.
+- **Pruebas PlayMode: 142 correctas.** Hay 2 nuevas en `CinematicaRejillaPlayModeTests`:
+  - sin fuente bitmap, el texto va en la interfaz, anclado en su píxel del plano y con la letra a
+    la escala de la imagen;
+  - la presentación entera: brasas en la sala y no en el ojo, el texto de Kael, el rótulo, el ojo
+    encuadrado y el flash de 2 fotogramas. Cada cue que aún no tiene clip avisa con su nombre.
+
+  La del texto en la rejilla lleva ahora una fuente. La de la presentación en
+  `NarrativaPlayModeTests` busca el texto de Kael.
 
 ---
 

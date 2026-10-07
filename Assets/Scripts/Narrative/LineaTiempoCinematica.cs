@@ -310,7 +310,7 @@ namespace Fragmentum.Narrative
         /// <summary>Opacidad de un cartel, <paramref name="local"/> segundos después de empezar su diapositiva.</summary>
         public float AlfaTexto(Cartel cartel, float local)
         {
-            var fundido = Mathf.Min(_datos.fundidoTexto, cartel.duracion * 0.5f);
+            var fundido = cartel.sinFundido ? 0f : Mathf.Min(_datos.fundidoTexto, cartel.duracion * 0.5f);
             if (local < cartel.inicio || local > cartel.Fin)
             {
                 return 0f;

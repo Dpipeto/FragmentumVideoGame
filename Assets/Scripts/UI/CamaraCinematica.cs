@@ -22,7 +22,7 @@ namespace Fragmentum.UI
     /// Todo lo que se mueve aquí sale de cuatro sitios, y todo en la rejilla:
     /// - los fundidos (la opacidad de los planos; ninguno se mueve ni se escala);
     /// - el temblor (<see cref="Temblar"/>): la cámara se desplaza píxeles enteros;
-    /// - la capa de brasas (llega con la cinemática del jefe);
+    /// - la capa de brasas (<see cref="CapaBrasas"/>), de píxel entero en píxel entero;
     /// - el sonido, que lleva el reproductor.
     ///
     /// El encuadre de cada plano (<see cref="Pintar"/>), los textos (<see cref="TextoEnRejilla"/>)
@@ -56,6 +56,7 @@ namespace Fragmentum.UI
         // Orden de dibujo dentro de la cámara.
         private const int OrdenAbajo = 0;
         private const int OrdenEncima = 1;
+        internal const int OrdenBrasas = 5;
         private const int OrdenTexto = 10;
         private const int OrdenFlash = 20;
 
@@ -83,6 +84,9 @@ namespace Fragmentum.UI
         [Tooltip("Donde se crean los textos.")]
         [SerializeField] private Transform textos;
 
+        [Tooltip("Las brasas, en la misma rejilla.")]
+        [SerializeField] private CapaBrasas brasas;
+
         private readonly List<TextoEnRejilla> _textos = new List<TextoEnRejilla>();
         private int _temblorPixeles;
         private int _temblorRestante;
@@ -95,6 +99,8 @@ namespace Fragmentum.UI
         public SpriteRenderer Plano => plano;
 
         public SpriteRenderer PlanoEncima => planoEncima;
+
+        public CapaBrasas CapaBrasas => brasas;
 
         /// <summary>
         /// Por cuánto se multiplica cada píxel del plano en pantalla. Lo calcula la Pixel Perfect
@@ -155,6 +161,7 @@ namespace Fragmentum.UI
             Temblor = Vector2Int.zero;
             AplicarTemblor();
             Flash(false);
+            Brasas(false, 0f);
         }
 
         public void Ocultar()
@@ -199,6 +206,15 @@ namespace Fragmentum.UI
             _temblorRestante = Mathf.Max(_temblorRestante, fotogramas);
         }
 
+        /// <summary>Enciende o apaga la capa de brasas, con la opacidad del plano.</summary>
+        public void Brasas(bool activas, float alfa)
+        {
+            if (brasas != null)
+            {
+                brasas.Fijar(activas, alfa);
+            }
+        }
+
         /// <summary>Enciende o apaga el flash blanco. Cuántos fotogramas dura lo cuenta el reproductor.</summary>
         public void Flash(bool visible)
         {
@@ -217,9 +233,10 @@ namespace Fragmentum.UI
 
         /// <summary>
         /// Los textos que se ven, con su opacidad, escritos con la fuente de
-        /// <paramref name="cinematica"/>. Si no tiene fuente, se usa la de por defecto y se avisa.
+        /// <paramref name="cinematica"/> y movidos con el <paramref name="encuadre"/> de su plano. Si
+        /// no tiene fuente, se usa la de por defecto y se avisa.
         /// </summary>
-        public void Escribir(IReadOnlyList<LineaTiempoCinematica.TextoVisible> visibles, CutsceneData cinematica)
+        public void Escribir(IReadOnlyList<LineaTiempoCinematica.TextoVisible> visibles, CutsceneData cinematica, Vector2Int encuadre = default)
         {
             var fuente = cinematica != null && cinematica.fuente != null ? cinematica.fuente : null;
             if (fuente == null && visibles.Count > 0)
@@ -241,8 +258,7 @@ namespace Fragmentum.UI
                     tamano *= 2; // el título, al doble: un entero, sigue en la rejilla
                 }
 
-                var punto = cartel.enPunto ? cartel.punto : new Vector2Int(AnchoReferencia / 2, FilasTercio[(int)cartel.posicion]);
-                var alineacion = cartel.enPunto ? cartel.alineacion : TextAnchor.MiddleCenter;
+                var (punto, alineacion) = Anclaje(cartel, encuadre);
                 texto.gameObject.SetActive(true);
                 texto.Fijar(cartel.texto, fuente, tamano, cinematica != null ? cinematica.interlineado : 0, punto, alineacion,
                     cinematica != null ? cinematica.colorTexto : Color.white);
@@ -254,6 +270,17 @@ namespace Fragmentum.UI
                 _textos[i].gameObject.SetActive(false);
             }
         }
+
+        /// <summary>
+        /// Dónde va un cartel en la rejilla: en su píxel de la imagen, movido con el
+        /// <paramref name="encuadre"/> del plano (x a la derecha, y arriba), o centrado en su
+        /// tercio si no tiene uno. Lo usan la rejilla y la interfaz, para que el texto caiga en el
+        /// mismo sitio.
+        /// </summary>
+        public static (Vector2Int punto, TextAnchor alineacion) Anclaje(Cartel cartel, Vector2Int encuadre = default) =>
+            cartel.enPunto
+                ? (cartel.punto + new Vector2Int(encuadre.x, -encuadre.y), cartel.alineacion)
+                : (new Vector2Int(AnchoReferencia / 2, FilasTercio[(int)cartel.posicion]), TextAnchor.MiddleCenter);
 
         private TextoEnRejilla Texto(int indice)
         {
@@ -293,8 +320,8 @@ namespace Fragmentum.UI
             }
         }
 
-        // Un píxel blanco a 1 píxel por unidad, escalado a la rejilla entera.
-        private static Sprite Blanco
+        /// <summary>Un píxel blanco a 1 píxel por unidad: el flash (escalado a la rejilla) y las brasas.</summary>
+        internal static Sprite Blanco
         {
             get
             {
@@ -391,6 +418,10 @@ namespace Fragmentum.UI
             var objetoTextos = new GameObject("Textos") { layer = capa };
             objetoTextos.transform.SetParent(raiz.transform, false);
             componente.textos = objetoTextos.transform;
+
+            var objetoBrasas = new GameObject("Brasas") { layer = capa };
+            objetoBrasas.transform.SetParent(raiz.transform, false);
+            componente.brasas = objetoBrasas.AddComponent<CapaBrasas>();
             return componente;
         }
 

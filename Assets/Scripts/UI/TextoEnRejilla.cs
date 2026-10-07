@@ -254,8 +254,8 @@ namespace Fragmentum.UI
             }
         }
 
-        // Qué fracción del bloque queda a la izquierda y por encima del punto de anclaje.
-        private static (float x, float y) Factores(TextAnchor alineacion)
+        /// <summary>Qué fracción del bloque queda a la izquierda y por encima del punto de anclaje.</summary>
+        public static (float x, float y) Factores(TextAnchor alineacion)
         {
             var x = (int)alineacion % 3 * 0.5f;
             var y = (int)alineacion / 3 * 0.5f;

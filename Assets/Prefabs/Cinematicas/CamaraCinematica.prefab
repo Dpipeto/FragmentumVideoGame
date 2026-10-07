@@ -35,6 +35,7 @@ Transform:
   - {fileID: 5006511205988345620}
   - {fileID: 5548748881673764163}
   - {fileID: 72408847431668100}
+  - {fileID: 8934633228863395523}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8913933477687120771
@@ -55,6 +56,62 @@ MonoBehaviour:
   planoEncima: {fileID: 3718680157757585193}
   flash: {fileID: 6183575493024049571}
   textos: {fileID: 72408847431668100}
+  brasas: {fileID: 2809864104607494934}
+--- !u!1 &2328155170149254472
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8934633228863395523}
+  - component: {fileID: 2809864104607494934}
+  m_Layer: 12
+  m_Name: Brasas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8934633228863395523
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2328155170149254472}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9067651233433877141}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2809864104607494934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2328155170149254472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7556b5a63ed029f499187a3daf7bfa09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.UI.CapaBrasas
+  cantidad: 16
+  velocidad: {x: 3, y: 8}
+  deriva: 1.5
+  filaSuelo: 110
+  parpadeo: 0.15
+  brilloMinimo: 0.45
+  colores:
+  - {r: 0.9098039, g: 0.41568628, b: 0.16470589, a: 1}
+  - {r: 0.72156864, g: 0.1882353, b: 0.1254902, a: 1}
+  - {r: 0.9490196, g: 0.64705884, b: 0.25490198, a: 1}
+  semilla: 7
 --- !u!1 &3638101125918354788
 GameObject:
   m_ObjectHideFlags: 0

@@ -19,10 +19,12 @@ namespace Fragmentum.UI
     /// - Qué se ve en cada instante lo decide <see cref="LineaTiempoCinematica"/>; esta pantalla
     ///   solo lo aplica: fundidos cruzados entre imágenes o beats que suben desde negro y bajan a
     ///   negro con sus propios tiempos (<see cref="CutsceneData.montaje"/>).
-    /// - <b>Pixel art</b> (<see cref="CutsceneData.escalaEntera"/>): las imágenes, los textos, el
-    ///   encuadre, los temblores y el flash se dibujan con la cámara de cinemáticas
+    /// - <b>Pixel art</b> (<see cref="CutsceneData.escalaEntera"/>): las imágenes, el encuadre,
+    ///   las brasas, los temblores y el flash se dibujan con la cámara de cinemáticas
     ///   (<see cref="CamaraCinematica"/>), en la rejilla de 240 × 135 y ampliados por un entero sin
-    ///   interpolar. Siempre opaca.
+    ///   interpolar. Siempre opaca. El texto va en la misma rejilla si la cinemática tiene fuente
+    ///   bitmap; si no, en la interfaz, como en la cinemática inicial, pero a la escala de la
+    ///   imagen y anclado en su píxel del plano.
     /// - <b>Imágenes pintadas</b> (el resto): en la interfaz, con su proporción sobre fondo negro, y
     ///   los textos por tercios de la <b>imagen</b>, no de la pantalla.
     /// - <b>Sonido:</b> los cues de cada diapositiva suenan en su instante y se cortan en seco
@@ -50,6 +52,7 @@ namespace Fragmentum.UI
 
         private static readonly HashSet<string> AvisadasSinArte = new HashSet<string>();
         private static readonly HashSet<string> AvisadasSinCamara = new HashSet<string>();
+        private static readonly List<LineaTiempoCinematica.TextoVisible> SinTextos = new List<LineaTiempoCinematica.TextoVisible>();
 
         private sealed class Ranura
         {
@@ -73,6 +76,7 @@ namespace Fragmentum.UI
         private CanvasGroup _grupoAbajo;
         private CanvasGroup _grupoEncima;
         private readonly Dictionary<POSICIONES_CARTEL, Ranura> _ranuras = new Dictionary<POSICIONES_CARTEL, Ranura>();
+        private readonly List<(Text texto, CanvasGroup grupo, Shadow sombra)> _textosSobreRejilla = new List<(Text, CanvasGroup, Shadow)>();
         private Text _aviso;
         private CanvasGroup _grupoAviso;
         private AudioSource _audio;
@@ -115,7 +119,7 @@ namespace Fragmentum.UI
         {
             get
             {
-                if (EnRejilla && Camara != null)
+                if (EnRejilla && Camara != null && Actual != null && Actual.fuente != null)
                 {
                     return Camara.TextoVisible;
                 }
@@ -129,9 +133,20 @@ namespace Fragmentum.UI
                     }
                 }
 
+                foreach (var (textoUi, grupo, _) in _textosSobreRejilla)
+                {
+                    if (grupo.alpha > 0f && !string.IsNullOrEmpty(textoUi.text))
+                    {
+                        texto.AppendLine(textoUi.text);
+                    }
+                }
+
                 return texto.ToString().TrimEnd();
             }
         }
+
+        /// <summary>Los textos de la interfaz sobre la rejilla (pixel art sin fuente bitmap), para las pruebas.</summary>
+        public IReadOnlyList<Text> TextosSobreLaRejilla => _textosSobreRejilla.ConvertAll(t => t.texto);
 
         /// <summary>Opacidad actual del aviso «pulsa cualquier tecla».</summary>
         public float AlfaAviso => _grupoAviso != null ? _grupoAviso.alpha : 0f;
@@ -405,7 +420,8 @@ namespace Fragmentum.UI
 
             CortarCues();
             _audio.Stop();
-            Camara.Escribir(new List<LineaTiempoCinematica.TextoVisible>(), Actual);
+            Camara.Escribir(SinTextos, Actual);
+            EscribirSobreLaRejilla(SinTextos, Vector2Int.zero);
             EmpezarFlash(flash);
             _terminarTrasFlash = true;
         }
@@ -417,7 +433,15 @@ namespace Fragmentum.UI
             if (EnRejilla)
             {
                 Camara.Pintar(Imagen(abajo), abajo.Alfa, Encuadre(abajo), Imagen(encima), encima.Alfa, Encuadre(encima));
-                Camara.Escribir(textos, Actual);
+                var beat = abajo.Indice >= 0 ? Actual.diapositivas[abajo.Indice] : null;
+                Camara.Brasas(beat != null && beat.brasas, abajo.Alfa);
+
+                // Con fuente bitmap, el texto en la rejilla; sin ella, en la interfaz. En los dos casos
+                // se mueve con el encuadre de su plano.
+                var enLaRejilla = Actual.fuente != null;
+                var encuadreTexto = EncuadreDe(Linea.IndiceEn(t));
+                Camara.Escribir(enLaRejilla ? textos : SinTextos, Actual, encuadreTexto);
+                EscribirSobreLaRejilla(enLaRejilla ? SinTextos : textos, encuadreTexto);
                 if (Linea.TembloresEntre(_tAnterior, t) > 0)
                 {
                     Camara.Temblar(Actual.temblorPixeles, Actual.temblorFotogramas);
@@ -441,6 +465,7 @@ namespace Fragmentum.UI
                 Pintar(_abajo, _grupoAbajo, abajo);
                 Pintar(_encima, _grupoEncima, encima);
                 EscribirEnLaInterfaz(textos);
+                EscribirSobreLaRejilla(SinTextos, Vector2Int.zero);
             }
 
             foreach (var cue in Linea.CuesEntre(_tAnterior, t))
@@ -456,8 +481,10 @@ namespace Fragmentum.UI
 
         private Sprite Imagen(LineaTiempoCinematica.Capa capa) => capa.Indice >= 0 ? Actual.diapositivas[capa.Indice]?.imagen : null;
 
-        private Vector2Int Encuadre(LineaTiempoCinematica.Capa capa) =>
-            capa.Indice >= 0 && Actual.diapositivas[capa.Indice] != null ? Actual.diapositivas[capa.Indice].desplazamiento : Vector2Int.zero;
+        private Vector2Int Encuadre(LineaTiempoCinematica.Capa capa) => EncuadreDe(capa.Indice);
+
+        private Vector2Int EncuadreDe(int indice) =>
+            indice >= 0 && indice < Actual.diapositivas.Count && Actual.diapositivas[indice] != null ? Actual.diapositivas[indice].desplazamiento : Vector2Int.zero;
 
         private void EmpezarFlash(int fotogramas)
         {
@@ -486,6 +513,78 @@ namespace Fragmentum.UI
                 ranura.Texto.fontSize = visible.Cartel.titulo ? TamanoTitulo : TamanoTexto;
                 ranura.Grupo.alpha = visible.Alfa;
             }
+        }
+
+        /// <summary>
+        /// Pixel art sin fuente bitmap: el texto va en la interfaz, como en la cinemática inicial,
+        /// pero anclado en su píxel del plano y a la escala de la imagen: la letra mide
+        /// <see cref="CutsceneData.tamanoFuente"/> píxeles del plano (el doble, un título).
+        /// </summary>
+        private void EscribirSobreLaRejilla(List<LineaTiempoCinematica.TextoVisible> textos, Vector2Int encuadre)
+        {
+            var rejilla = CamaraCinematica.RectEnPantalla(Screen.width, Screen.height);
+            var lienzo = Lienzo;
+            var factor = lienzo != null && lienzo.scaleFactor > 0f ? lienzo.scaleFactor : 1f;
+            for (var i = 0; i < textos.Count; i++)
+            {
+                var (texto, grupo, sombra) = TextoSobreRejilla(i);
+                ColocarSobreRejilla(texto, sombra, textos[i].Cartel, Actual, rejilla, factor, encuadre);
+                grupo.alpha = textos[i].Alfa;
+            }
+
+            for (var i = textos.Count; i < _textosSobreRejilla.Count; i++)
+            {
+                _textosSobreRejilla[i].grupo.alpha = 0f;
+            }
+        }
+
+        /// <summary>
+        /// Coloca un texto de la interfaz sobre la rejilla: anclado en el píxel de su cartel (movido
+        /// con el <paramref name="encuadre"/> de su plano), con la letra de
+        /// <see cref="CutsceneData.tamanoFuente"/> píxeles del plano y la sombra de la cinemática
+        /// inicial (3 px a 1080p), a la misma escala. <paramref name="rejilla"/> es el rectángulo del
+        /// plano en píxeles de pantalla y <paramref name="factor"/>, la escala del lienzo. Lo usa
+        /// también la captura del editor.
+        /// </summary>
+        public static void ColocarSobreRejilla(Text texto, Shadow sombra, Cartel cartel, CutsceneData cinematica, RectInt rejilla, float factor,
+            Vector2Int encuadre = default)
+        {
+            var k = rejilla.width / CamaraCinematica.AnchoReferencia;
+            var (punto, alineacion) = CamaraCinematica.Anclaje(cartel, encuadre);
+            var (fx, fy) = TextoEnRejilla.Factores(alineacion);
+
+            texto.text = cartel.texto;
+            texto.alignment = alineacion;
+            texto.color = cinematica.colorTexto;
+            texto.fontSize = Mathf.Max(1, Mathf.RoundToInt(cinematica.tamanoFuente * (cartel.titulo ? 2 : 1) * k / factor));
+            var desfase = Mathf.Max(1, Mathf.RoundToInt(k * 3f / 8f));
+            sombra.effectDistance = new Vector2(desfase, -desfase) / factor;
+
+            var rect = texto.rectTransform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.zero;
+            rect.pivot = new Vector2(fx, 1f - fy);
+            rect.sizeDelta = new Vector2(rejilla.width, rejilla.height) / factor;
+            rect.anchoredPosition = new Vector2(rejilla.x + punto.x * k, rejilla.y + (CamaraCinematica.AltoReferencia - punto.y) * k) / factor;
+        }
+
+        private (Text, CanvasGroup, Shadow) TextoSobreRejilla(int indice)
+        {
+            while (_textosSobreRejilla.Count <= indice)
+            {
+                var texto = FabricaUI.Texto(transform, $"TextoSobreRejilla{_textosSobreRejilla.Count + 1}", string.Empty, TamanoTexto, ColorTexto);
+                texto.raycastTarget = false;
+                texto.horizontalOverflow = HorizontalWrapMode.Overflow;
+                texto.verticalOverflow = VerticalWrapMode.Overflow;
+                var rect = texto.rectTransform;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.zero;
+                var sombra = texto.gameObject.AddComponent<Shadow>();
+                sombra.effectColor = new Color(0f, 0f, 0f, 0.85f);
+                _textosSobreRejilla.Add((texto, Grupo(texto.gameObject), sombra));
+            }
+
+            return _textosSobreRejilla[indice];
         }
 
         private void Pintar(Image imagen, CanvasGroup grupo, LineaTiempoCinematica.Capa capa)

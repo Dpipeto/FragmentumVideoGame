@@ -794,8 +794,9 @@ namespace Fragmentum.Tests
             var presentacion = AssetDatabase.LoadAssetAtPath<Fragmentum.Narrative.CutsceneData>("Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset");
             Assert.IsTrue(presentacion.escalaEntera);
             Assert.IsFalse(presentacion.sobreElJuego, "Con los planos, opaca.");
-            Assert.AreEqual("CinematicaJefe1", presentacion.diapositivas[0].imagen.name, "Kael diminuto en la nave, la Centinela esperando.");
-            Assert.AreEqual("CinematicaJefe2", presentacion.diapositivas[1].imagen.name, "El ojo que se abre.");
+            // Por beats: negro, la sala, negro y el ojo (su guion lo comprueba CinematicaJefe1Tests).
+            Assert.AreEqual("CinematicaJefe1", presentacion.diapositivas[1].imagen.name, "Kael diminuto en la nave, la Centinela esperando.");
+            Assert.AreEqual("CinematicaJefe2", presentacion.diapositivas[3].imagen.name, "El ojo que se abre.");
 
             var derrota = AssetDatabase.LoadAssetAtPath<Fragmentum.Narrative.CutsceneData>("Assets/Data/Narrativa/Cinematica_Derrota_Ira.asset");
             Assert.IsNotNull(derrota, "Falta la cinemática de la derrota de la Centinela.");

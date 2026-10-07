@@ -240,7 +240,7 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator AntesDelJefe_ElArquitectoHablaEnSuPresentacion()
+        public IEnumerator AntesDelJefe_LaPresentacionLlevaElTextoDelGuion()
         {
             Gestor.Datos.cinematicasVistas.Add("Inicial");
             yield return EntrarEnNivel1();
@@ -249,11 +249,10 @@ namespace Fragmentum.Tests.PlayMode
 
             yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
             Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar en la arena, la presentación del jefe.");
-            yield return EsperarHasta(() => Interfaz.Cinematica.TextoActual.Contains("CENTINELA ARDIENTE"), 2f, "el nombre del jefe");
 
-            var dialogo = Nivel1.cinematicaJefe.diapositivas.Select(d => d.texto).FirstOrDefault(t => !string.IsNullOrEmpty(t));
-            StringAssert.StartsWith("Centinela Ardiente:", dialogo, "El diálogo antes del combate va en la presentación.");
-            StringAssert.Contains("ira", dialogo, "Y nombra la emoción del mundo.");
+            // El guion: Kael habla a los 4 s; el nombre del jefe es el rótulo del final (lo comprueba CinematicaJefe1Tests).
+            yield return EsperarHasta(() => Interfaz.Cinematica.TextoActual.Contains("No recuerdo esta sala."), 6f, "el texto de Kael");
+            StringAssert.Contains("El calor, sí.", Interfaz.Cinematica.TextoActual, "Las dos líneas juntas.");
 
             Assert.IsTrue(Juego.TerminarCinematica());
             yield return null;
