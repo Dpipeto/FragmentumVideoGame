@@ -73,7 +73,7 @@ adaptaciones:
   - Después la compara píxel a píxel con el PNG: cada píxel del plano tiene que ser un cuadrado de
     k × k píxeles idénticos al original, y lo que sobra, negro.
 
-#### Comprobado
+#### Comprobado (fase A)
 
 - **A 1920 × 1080** (`Docs/Cinematicas/CamaraCinematica_1920x1080.png`), cada píxel del plano es un
   cuadrado de 8 × 8 píxeles idénticos al original. La diferencia máxima es 0 y la captura tiene los
@@ -83,6 +83,62 @@ adaptaciones:
 - **A 1280 × 720**, cuadrados de 5 × 5, centrados, con un borde negro de 40 y 22 píxeles.
 - **A 960 × 540**, de 4 × 4.
 - Las tres capturas se comprobaron también aparte, con Python, contra el PNG.
+
+### Fase B: el sistema
+
+El sistema de cinemáticas que ya había (`CutsceneData`, `LineaTiempoCinematica`,
+`PantallaCinematica`) se amplía; no hay un segundo reproductor. Las 14 cinemáticas de antes siguen
+funcionando igual.
+
+- **El montaje por beats** (`CutsceneData.montaje = BEATS`). Cada diapositiva es un beat:
+  - sube desde negro, se mantiene y baja a negro con sus propios tiempos;
+  - un fundido de 0 es un corte seco;
+  - un beat sin imagen es negro a propósito: no avisa de que le falte arte;
+  - la cinemática dura la suma de los tres tiempos de cada beat;
+  - los textos, los temblores y los cues cuentan desde el inicio del beat, con la subida incluida.
+
+  Con fundidos cruzados (el montaje de antes) nada cambia. Los campos de la tabla del encargo
+  están así en el proyecto:
+
+| Encargo | En el proyecto | Notas |
+|---|---|---|
+| `sprite` | `imagen` | Vacía: negro |
+| `fundidoEntrada`, `duracion`, `fundidoSalida` | Igual | 0 = corte seco |
+| `desplazamiento` | Igual (`Vector2Int`) | En píxeles del plano: x a la derecha, y arriba |
+| `texto`, `textoPosicion`, `textoAlineacion`, `textoEntra`, `textoSale` | `carteles` | Cada cartel lleva su texto, `inicio`, `duracion`, `punto` (píxel del plano, desde arriba a la izquierda, como en el guion) y `alineacion`; un beat puede tener varios |
+| `cueAudio` | `cues` | Lista: nombre, clip, instante, bucle y `hasta` (corte seco) |
+| `temblores` | Igual | Segundos desde el inicio del beat |
+| `brasas` | Igual | La capa llega en la fase C |
+| `flashFinal` | Igual | Fotogramas, no segundos |
+
+- **La fuente y el temblor** son de la cinemática: `fuente`, `tamanoFuente`, `interlineado`,
+  `colorTexto`, `temblorPixeles` (1) y `temblorFotogramas` (4).
+- **En pixel art** (`escalaEntera`), el reproductor lo dibuja todo con la cámara de cinemáticas:
+  - **los planos,** con su opacidad y su encuadre en píxeles enteros. Para los fundidos cruzados
+    hay dos planos;
+  - **el texto** (`TextoEnRejilla`, nuevo). Cada glifo se coloca en píxeles enteros del plano, con
+    los píxeles de la fuente del tamaño de los del plano, así que se amplía con la imagen por el
+    mismo entero. Monta su propia malla, sin `TextMesh` ni interfaz. Sin fuente bitmap usa la de
+    por defecto y avisa (N21);
+  - **el temblor:** la cámara se desplaza un píxel entero por fotograma, recorriendo las cuatro
+    direcciones, y vuelve a su sitio;
+  - **el flash:** un rectángulo blanco sobre la rejilla. Los fotogramas se cuentan en el `Update`
+    del reproductor, no con `WaitForSeconds`: dos son dos, también a 30 fps.
+
+  La interfaz se queda transparente y solo deja el aviso para saltar. Las cinemáticas pintadas
+  siguen en la interfaz, como antes.
+- **Sonido:** cada cue suena en su instante y se corta en seco en `hasta`, aunque sea en otro beat.
+  Si falta su clip, avisa por consola con su nombre, su diapositiva y su segundo, y la cinemática
+  sigue sin él. No hay audio de relleno.
+- **Saltar:** pasado el bloqueo, cualquier tecla corta la cinemática y va directo al flash final,
+  entero. Sin flash, termina como antes.
+- **Input:** lo sigue bloqueando la FSM global mientras dura (estado CUTSCENE). Al terminar, lo
+  devuelve.
+- **La cámara la monta el `UIManager`,** con los sistemas persistentes. Usa el prefab, que
+  `Sistemas.prefab` referencia; si no está, la monta por código. La escala entera que hacía la
+  interfaz se quita: ahora la hace la cámara.
+- **Las dos cinemáticas del Nivel 1 que ya eran pixel art** (la presentación y la derrota) se ven
+  ya con la cámara. Sus textos van con la fuente por defecto hasta que llegue la bitmap.
 
 ### Verificación (fase A)
 
@@ -97,6 +153,35 @@ adaptaciones:
 
   La de los píxeles por unidad del Nivel 1 espera ahora 1 en los planos.
 - **Pruebas PlayMode: 135 correctas.** No cambian.
+
+### Verificación (fase B)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 310 correctas.** Hay 7 nuevas en `CinematicaBeatsTests`, con los tiempos del
+  guion:
+  - la cinemática dura 9,6 s, el corte seco cae a los 6,4 s y el flash no cuenta en la duración;
+  - un beat sube desde negro, se mantiene y, con fundido 0, corta en seco;
+  - un beat sin imagen es negro a propósito, sin el aviso de arte pendiente (con fundidos
+    cruzados sigue avisando);
+  - el texto entra a los 4,0 s, los temblores caen a los 2,4 y 3,6 s, y los cues empiezan y se
+    cortan donde dice el guion;
+  - el flash son 2 fotogramas al final del último beat, y saltar va a él;
+  - el texto en la rejilla cae en píxeles enteros del plano y se ancla donde dice el cartel;
+  - los bordes del plano coinciden con los de la rejilla.
+- **Pruebas PlayMode: 140 correctas.** Hay 5 nuevas en `CinematicaRejillaPlayModeTests`, con los
+  sistemas reales:
+  - una cinemática en pixel art la dibuja la cámara, a la escala entera de la pantalla, y la
+    interfaz no tapa nada;
+  - por beats: el plano sube desde negro, corta en seco a negro, tiembla un píxel entero, el
+    segundo plano va encuadrado (17, 19) y el flash dura exactamente 2 fotogramas. Mientras dura,
+    Kael no recibe input; al acabar, sí;
+  - al saltarla, va directo al flash final, de 2 fotogramas;
+  - un cue sin clip avisa con su nombre y la cinemática sigue;
+  - el texto se escribe en su píxel del plano.
+
+  Se corrige una prueba de la torreta de la fase D que a veces fallaba. Medía el tiempo sin quemar
+  desde que aparecía Kael, pero el ciclo de la torreta empieza al crearla; ahora espera a su
+  disparo.
 
 ---
 

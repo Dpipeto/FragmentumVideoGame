@@ -394,6 +394,8 @@ namespace Fragmentum.EditorTools
                 var interfaz = raiz.AddComponent<UIManager>();
                 Asignar(interfaz, "acciones", p => p.objectReferenceValue = AssetDatabase.LoadMainAssetAtPath(ConstructorJugador.RutaAccionesInput));
                 Asignar(interfaz, "registro", p => p.objectReferenceValue = GeneradorNarrativa.CargarConfiguracionRegistro());
+                var camara = ConstructorCamaraCinematica.Prefab != null ? ConstructorCamaraCinematica.Prefab : ConstructorCamaraCinematica.CrearPrefab();
+                Asignar(interfaz, "camaraCinematica", p => p.objectReferenceValue = camara != null ? camara.GetComponent<CamaraCinematica>() : null);
                 raiz.AddComponent<AtajosDepuracion>();
                 return PrefabUtility.SaveAsPrefabAsset(raiz, RutaSistemas);
             }

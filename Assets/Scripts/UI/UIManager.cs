@@ -42,12 +42,16 @@ namespace Fragmentum.UI
         [Tooltip("Textos del registro emocional del fin de nivel. Vacío = los valores por defecto.")]
         [SerializeField] private ConfiguracionRegistro registro;
 
+        [Tooltip("La cámara de las cinemáticas en pixel art (Assets/Prefabs/Cinematicas). Vacío = se monta por código.")]
+        [SerializeField] private CamaraCinematica camaraCinematica;
+
         private Hud _hud;
         private MenuPausa _pausa;
         private PantallaGameOver _gameOver;
         private PantallaFinNivel _finNivel;
         private PantallaYoReconstruido _yo;
         private PantallaCinematica _cinematica;
+        private CamaraCinematica _camaraCinematica;
         private GameObject _sistemaEventos;
         private InputAction _pausaAccion;
         private bool _accionPropia;
@@ -68,6 +72,9 @@ namespace Fragmentum.UI
         public PantallaYoReconstruido YoReconstruido => _yo;
 
         public PantallaCinematica Cinematica => _cinematica;
+
+        /// <summary>La cámara con la que la cinemática dibuja el pixel art.</summary>
+        public CamaraCinematica CamaraCinematica => _camaraCinematica;
 
         private void Awake()
         {
@@ -220,6 +227,13 @@ namespace Fragmentum.UI
             // La cinemática va encima de todo lo demás.
             _cinematica = FabricaUI.Objeto("Cinematica", lienzo.transform).gameObject.AddComponent<PantallaCinematica>();
             _cinematica.Construir();
+
+            // La cámara de las cinemáticas en pixel art vive con los sistemas, lejos de los niveles.
+            _camaraCinematica = camaraCinematica != null ? Instantiate(camaraCinematica, transform) : CamaraCinematica.Crear(transform);
+            _camaraCinematica.name = "CamaraCinematica";
+            _camaraCinematica.transform.position = CamaraCinematica.Posicion;
+            _camaraCinematica.Ocultar();
+            _cinematica.Camara = _camaraCinematica;
         }
 
         private static T Crear<T>(Transform padre, string nombre) where T : PantallaSuperpuesta

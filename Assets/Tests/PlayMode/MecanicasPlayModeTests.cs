@@ -257,7 +257,9 @@ namespace Fragmentum.Tests.PlayMode
             yield return CrearJugadorEnSuelo(new Vector2(1.7f, 0f));
             var vida = Jugador.Vida.Vida;
 
-            yield return ComprobarQueNunca(() => Jugador.Vida.Vida < vida, torreta.tiempoReposo + torreta.tiempoCarga - 0.1f, "En reposo y en carga no quema.");
+            // El ciclo empezó al crear la torreta, no al aparecer Kael: se espera a su disparo.
+            yield return EsperarHasta(() => torreta.Estado == ESTADOS_TORRETA.FIRE, torreta.tiempoReposo + torreta.tiempoCarga + 0.3f, "el disparo");
+            Assert.AreEqual(vida, Jugador.Vida.Vida, "En reposo y en carga no quema.");
             yield return EsperarHasta(() => Jugador.Vida.Vida < vida, 0.4f, "que la llama queme al salir");
         }
 

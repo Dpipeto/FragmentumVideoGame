@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.27 — Cinemáticas en pixel art: la cámara (fase A), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.28 — Cinemáticas en pixel art: el sistema (fase B), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -68,6 +68,14 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.28: qué cambió respecto de la v0.27
+
+- **Cinemáticas en pixel art, fase B:**
+  - el sistema de cinemáticas monta beats (fundidos desde y hacia negro, encuadre en píxeles,
+    temblores, flash en fotogramas y cues de sonido por nombre);
+  - el pixel art lo dibuja la cámara de cinemáticas, también el texto, en la rejilla.
+- **Paro antes de la fase C,** la cinemática del jefe: necesita la fuente bitmap (N21).
 
 ## Revisión 0.27: qué cambió respecto de la v0.26
 
@@ -724,6 +732,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.28 (2026-10-06)** — Cinemáticas en pixel art, fase B: el sistema por beats y el texto en la rejilla. La fase C espera la fuente (N21).
 - **0.27 (2026-10-06)** — Cinemáticas en pixel art, fase A: la cámara con la Pixel Perfect Camera, en la rama `cinematicas-pixel`. Nuevo N21 (fuente bitmap).
 - **0.26 (2026-10-06)** — Dash de Kael: su clip, estirado a la duración del dash, en la rama `kael-dash`.
 - **0.25 (2026-10-06)** — Golem de Ceniza y mecánicas, fase E: el menú de verificación. La integración está completa, a falta de tu prueba.

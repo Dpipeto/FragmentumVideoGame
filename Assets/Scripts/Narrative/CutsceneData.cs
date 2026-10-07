@@ -12,6 +12,46 @@ namespace Fragmentum.Narrative
         ABAJO
     }
 
+    /// <summary>Cómo se encadenan las diapositivas de una cinemática.</summary>
+    public enum MONTAJES_CINEMATICA
+    {
+        /// <summary>
+        /// Cada imagen se funde sobre la anterior, con <see cref="CutsceneData.fundidoImagen"/>, y
+        /// los fundidos van dentro de la duración de cada diapositiva (la cinemática inicial).
+        /// </summary>
+        FUNDIDOS_CRUZADOS,
+
+        /// <summary>
+        /// Cada diapositiva es un beat: sube desde negro, se mantiene y baja a negro con sus propios
+        /// tiempos, y 0 es un corte seco. Un beat sin imagen es negro a propósito.
+        /// </summary>
+        BEATS
+    }
+
+    /// <summary>
+    /// Un sonido de la cinemática, por su nombre en el guion. Si falta el clip, la cinemática sigue
+    /// sin él y avisa por consola con ese nombre.
+    /// </summary>
+    [Serializable]
+    public class CueAudio
+    {
+        [Tooltip("Nombre del cue en el guion (drone_sala, rugido_centinela…).")]
+        public string nombre;
+
+        [Tooltip("El clip. Vacío: la cinemática sigue sin él y avisa por consola.")]
+        public AudioClip clip;
+
+        [Tooltip("Segundos desde que empieza la diapositiva (fundido de entrada incluido).")]
+        [Min(0f)] public float instante;
+
+        [Tooltip("Se repite hasta que se corta.")]
+        public bool bucle;
+
+        [Tooltip("Segundos desde que empieza la diapositiva en que se corta en seco, aunque sea en otra diapositiva. " +
+                 "0 = sin corte: suena entero o, en bucle, hasta el final de la cinemática.")]
+        [Min(0f)] public float hasta;
+    }
+
     /// <summary>Un texto con sus tiempos dentro de una diapositiva.</summary>
     [Serializable]
     public class Cartel
@@ -30,6 +70,16 @@ namespace Fragmentum.Narrative
         [Tooltip("Tipografía de título, mayor que la normal.")]
         public bool titulo;
 
+        [Header("En la rejilla (cinemáticas en pixel art)")]
+        [Tooltip("Colocarlo en un píxel del plano. Sin marcar, va centrado en su tercio.")]
+        public bool enPunto;
+
+        [Tooltip("Píxel del plano donde se ancla el texto, contado desde arriba a la izquierda, como en el guion.")]
+        public Vector2Int punto;
+
+        [Tooltip("Qué punto del bloque de texto cae en ese píxel, y cómo se alinean sus líneas.")]
+        public TextAnchor alineacion = TextAnchor.UpperLeft;
+
         public float Fin => inicio + duracion;
     }
 
@@ -46,11 +96,37 @@ namespace Fragmentum.Narrative
         [Tooltip("Textos con tiempos y posición propios, además del de arriba.")]
         public List<Cartel> carteles = new List<Cartel>();
 
-        [Tooltip("Segundos en pantalla. El fundido hacia la siguiente ocurre dentro de este tiempo.")]
-        [Min(0.5f)] public float duracion = 4f;
+        [Tooltip("Segundos en pantalla. Con fundidos cruzados, el fundido hacia la siguiente ocurre dentro de este tiempo; " +
+                 "en un beat, es lo que se mantiene entre la subida y la bajada.")]
+        [Min(0f)] public float duracion = 4f;
 
         [Tooltip("Opcional: voz o sonido de la diapositiva.")]
         public AudioClip audio;
+
+        [Header("Beat (montaje por beats)")]
+        [Tooltip("Segundos de subida desde negro (0 = corte seco).")]
+        [Min(0f)] public float fundidoEntrada;
+
+        [Tooltip("Segundos de bajada a negro (0 = corte seco).")]
+        [Min(0f)] public float fundidoSalida;
+
+        [Tooltip("Píxeles del plano que se desplaza la imagen para encuadrarla: x a la derecha, y arriba. Lo que queda al descubierto es negro.")]
+        public Vector2Int desplazamiento;
+
+        [Tooltip("Instantes de un temblor de cámara de píxeles enteros, en segundos desde que empieza el beat.")]
+        public List<float> temblores = new List<float>();
+
+        [Tooltip("La capa de brasas, en la misma rejilla.")]
+        public bool brasas;
+
+        [Tooltip("Fotogramas de flash blanco al terminar el beat (0 = ninguno). Se cuentan fotogramas, no segundos.")]
+        [Min(0)] public int flashFinal;
+
+        [Tooltip("Sonidos del beat, cada uno con su instante. Funcionan también con fundidos cruzados.")]
+        public List<CueAudio> cues = new List<CueAudio>();
+
+        /// <summary>Lo que dura como beat: la subida, lo que se mantiene y la bajada.</summary>
+        public float DuracionBeat => fundidoEntrada + duracion + fundidoSalida;
 
         /// <summary>¿Tiene algo que mostrar además del fondo?</summary>
         public bool TieneContenido =>
@@ -80,6 +156,9 @@ namespace Fragmentum.Narrative
         [Tooltip("Solo se reproduce la primera vez (la cinemática inicial).")]
         public bool soloPrimeraVez;
 
+        [Tooltip("Fundidos cruzados entre imágenes (la cinemática inicial) o beats, cada uno con sus fundidos desde y hacia negro.")]
+        public MONTAJES_CINEMATICA montaje = MONTAJES_CINEMATICA.FUNDIDOS_CRUZADOS;
+
         [Header("Sobre el juego")]
         [Tooltip("Para cinemáticas cortas dentro del nivel (la del jefe): detrás se ve la escena congelada, oscurecida y " +
                  "con franjas de cine, en lugar de negro. Las diapositivas con imagen la tapan igualmente.")]
@@ -89,10 +168,30 @@ namespace Fragmentum.Narrative
         [Range(0f, 1f)] public float opacidadVelo = 0.55f;
 
         [Header("Imagen")]
-        [Tooltip("Pixel art: cada imagen a su tamaño por un número entero (el mayor que quepa), centrada y sin interpolar. " +
-                 "Un plano de 240 × 135 va a ×4 en 960 × 540 y a ×8 en 1920 × 1080; en 1280 × 720, a ×5 con un borde negro fino. " +
-                 "Sin marcar, la imagen se estira hasta llenar la pantalla.")]
+        [Tooltip("Pixel art de 240 × 135: se dibuja con la cámara de cinemáticas, en su rejilla y ampliada por un número " +
+                 "entero sin interpolar (×8 en 1920 × 1080; en 1280 × 720, ×5 con un borde negro fino). El texto, el " +
+                 "encuadre, los temblores y el flash van en la misma rejilla. Siempre opaca. Sin marcar, la imagen se " +
+                 "estira hasta llenar la pantalla.")]
         public bool escalaEntera;
+
+        [Header("En la rejilla (cinemáticas en pixel art)")]
+        [Tooltip("Fuente del texto: bitmap, con sus píxeles del tamaño de los del plano. Sin ella, la de por defecto, que no " +
+                 "es bitmap (se avisa).")]
+        public Font fuente;
+
+        [Tooltip("Alto de la fuente, en píxeles del plano.")]
+        [Min(1)] public int tamanoFuente = 8;
+
+        [Tooltip("Píxeles del plano entre el principio de una línea y el de la siguiente (0 = el de la fuente).")]
+        [Min(0)] public int interlineado;
+
+        public Color colorTexto = new Color(0.94f, 0.93f, 0.85f, 1f);
+
+        [Tooltip("Cuánto se desplaza la cámara en cada temblor, en píxeles del plano.")]
+        [Min(1)] public int temblorPixeles = 1;
+
+        [Tooltip("Cuántos fotogramas dura cada temblor.")]
+        [Min(1)] public int temblorFotogramas = 4;
 
         [Header("Tiempos (segundos)")]
         [Tooltip("Fundido cruzado entre imágenes, y desde y hacia negro al empezar y al terminar.")]
@@ -122,22 +221,43 @@ namespace Fragmentum.Narrative
 
         public string Id => string.IsNullOrEmpty(id) ? name : id;
 
+        /// <summary>¿Cada diapositiva es un beat con sus fundidos?</summary>
+        public bool PorBeats => montaje == MONTAJES_CINEMATICA.BEATS;
+
+        /// <summary>
+        /// Lo que dura la diapositiva <paramref name="indice"/> en la cinemática: su duración con
+        /// fundidos cruzados, o la subida, lo que se mantiene y la bajada si es un beat.
+        /// </summary>
+        public float DuracionDe(int indice)
+        {
+            var diapositiva = indice >= 0 && indice < diapositivas.Count ? diapositivas[indice] : null;
+            if (diapositiva == null)
+            {
+                return 0f;
+            }
+
+            return PorBeats ? diapositiva.DuracionBeat : diapositiva.duracion;
+        }
+
         public float DuracionTotal
         {
             get
             {
                 var total = 0f;
-                foreach (var diapositiva in diapositivas)
+                for (var i = 0; i < diapositivas.Count; i++)
                 {
-                    total += diapositiva != null ? diapositiva.duracion : 0f;
+                    total += DuracionDe(i);
                 }
 
                 return total;
             }
         }
 
-        /// <summary>¿Le falta arte? (Alguna diapositiva sin imagen.) Para avisar una vez por consola.</summary>
-        public bool FaltaArte => diapositivas.Exists(d => d != null && d.imagen == null);
+        /// <summary>
+        /// ¿Le falta arte? (Alguna diapositiva sin imagen.) Para avisar una vez por consola. En un
+        /// montaje por beats, un beat sin imagen es negro a propósito.
+        /// </summary>
+        public bool FaltaArte => !PorBeats && diapositivas.Exists(d => d != null && d.imagen == null);
 
         /// <summary>
         /// Texto principal de una diapositiva. Si no tiene imagen ni ningún texto, el aviso de lo
@@ -151,7 +271,8 @@ namespace Fragmentum.Narrative
                 return diapositiva.texto;
             }
 
-            return diapositiva != null && diapositiva.TieneContenido
+            // Un beat vacío es negro a propósito: no dice que falte nada.
+            return (diapositiva != null && diapositiva.TieneContenido) || (diapositiva != null && PorBeats)
                 ? string.Empty
                 : $"[CINEMÁTICA «{Id}» PENDIENTE · diapositiva {indice + 1} de {Mathf.Max(1, diapositivas.Count)}]";
         }
@@ -164,7 +285,7 @@ namespace Fragmentum.Narrative
         {
             var resultado = new List<Cartel>();
             var diapositiva = indice >= 0 && indice < diapositivas.Count ? diapositivas[indice] : null;
-            var duracion = diapositiva != null ? diapositiva.duracion : 0f;
+            var duracion = DuracionDe(indice);
 
             var principal = TextoDe(indice);
             if (!string.IsNullOrEmpty(principal))

@@ -8,13 +8,20 @@ namespace Fragmentum.Narrative
     /// si se puede saltar. Es lógica pura (no toca la escena): <c>PantallaCinematica</c> solo
     /// aplica lo que dice, y las pruebas recorren la cinemática entera sin esperarla.
     ///
-    /// Reglas:
+    /// Reglas con fundidos cruzados (<see cref="MONTAJES_CINEMATICA.FUNDIDOS_CRUZADOS"/>):
     /// - Los fundidos ocurren <b>dentro</b> de la duración de cada diapositiva, así que la
     ///   cinemática dura exactamente la suma de sus diapositivas.
     /// - La primera imagen sale de negro y la última vuelve a negro.
     /// - Entre dos imágenes hay fundido cruzado: la que entra aparece encima de la que sale, que
     ///   sigue opaca debajo. Así nunca hay un corte duro ni un oscurecimiento a mitad del cruce.
-    /// - Cada texto entra y sale con su propio fundido.
+    ///
+    /// Con beats (<see cref="MONTAJES_CINEMATICA.BEATS"/>), cada diapositiva sube desde negro,
+    /// se mantiene y baja a negro con sus propios tiempos (0 = corte seco), y la cinemática dura la
+    /// suma de los tres tiempos de cada beat. Los temblores, los cues y los carteles cuentan desde
+    /// que empieza el beat, con la subida incluida. El flash no cuenta en la duración: son
+    /// fotogramas, después de su beat.
+    ///
+    /// En los dos, cada texto entra y sale con su propio fundido.
     /// </summary>
     public sealed class LineaTiempoCinematica
     {
@@ -32,6 +39,25 @@ namespace Fragmentum.Narrative
             public bool Visible => Indice >= 0 && Alfa > 0f;
 
             public static readonly Capa Ninguna = new Capa(-1, 0f);
+        }
+
+        /// <summary>Un cue que empieza: cuándo empieza y cuándo se corta, en segundos desde el inicio de la cinemática.</summary>
+        public readonly struct CueEnCurso
+        {
+            public CueEnCurso(CueAudio cue, int diapositiva, float inicio, float fin)
+            {
+                Cue = cue;
+                Diapositiva = diapositiva;
+                Inicio = inicio;
+                Fin = fin;
+            }
+
+            public CueAudio Cue { get; }
+            public int Diapositiva { get; }
+            public float Inicio { get; }
+
+            /// <summary>Cuándo se corta en seco; infinito si no se corta (suena entero o hasta el final).</summary>
+            public float Fin { get; }
         }
 
         /// <summary>Un texto en pantalla con su opacidad.</summary>
@@ -59,13 +85,15 @@ namespace Fragmentum.Narrative
             _carteles = new List<Cartel>[n];
             for (var i = 0; i < n; i++)
             {
-                var diapositiva = datos.diapositivas[i];
-                _inicios[i + 1] = _inicios[i] + (diapositiva != null ? diapositiva.duracion : 0f);
+                _inicios[i + 1] = _inicios[i] + datos.DuracionDe(i);
                 _carteles[i] = datos.CartelesDe(i);
             }
         }
 
         public int Diapositivas => _carteles.Length;
+
+        /// <summary>¿Montaje por beats?</summary>
+        public bool PorBeats => _datos != null && _datos.PorBeats;
 
         public float Duracion => _inicios[_inicios.Length - 1];
 
@@ -108,6 +136,11 @@ namespace Fragmentum.Narrative
             }
 
             var local = t - _inicios[i];
+            if (PorBeats)
+            {
+                return (new Capa(i, AlfaBeat(_datos.diapositivas[i], local)), Capa.Ninguna);
+            }
+
             var duracion = _inicios[i + 1] - _inicios[i];
 
             // Primera diapositiva: sale de negro.
@@ -141,6 +174,113 @@ namespace Fragmentum.Narrative
         }
 
         private float FundidoEntre(int a, int b) => Mathf.Min(Fundido(a), Fundido(b));
+
+        /// <summary>
+        /// Opacidad de la imagen de un beat, <paramref name="local"/> segundos después de que empiece:
+        /// sube desde negro, se mantiene y baja. Con un fundido de 0, el corte es seco.
+        /// </summary>
+        public static float AlfaBeat(Diapositiva beat, float local)
+        {
+            if (beat == null)
+            {
+                return 0f;
+            }
+
+            if (beat.fundidoEntrada > 0f && local < beat.fundidoEntrada)
+            {
+                return Mathf.Clamp01(local / beat.fundidoEntrada);
+            }
+
+            var bajada = local - beat.fundidoEntrada - beat.duracion;
+            if (beat.fundidoSalida > 0f && bajada > 0f)
+            {
+                return Mathf.Clamp01(1f - bajada / beat.fundidoSalida);
+            }
+
+            return 1f;
+        }
+
+        // --- Temblores, sonido y flash ---
+
+        /// <summary>Cuántos temblores empiezan entre <paramref name="desde"/> (sin incluir) y <paramref name="hasta"/>.</summary>
+        public int TembloresEntre(float desde, float hasta)
+        {
+            var cuantos = 0;
+            for (var i = 0; i < Diapositivas; i++)
+            {
+                var diapositiva = _datos.diapositivas[i];
+                if (diapositiva == null || diapositiva.temblores == null)
+                {
+                    continue;
+                }
+
+                foreach (var instante in diapositiva.temblores)
+                {
+                    var t = _inicios[i] + instante;
+                    if (t > desde && t <= hasta)
+                    {
+                        cuantos++;
+                    }
+                }
+            }
+
+            return cuantos;
+        }
+
+        /// <summary>Los cues que empiezan entre <paramref name="desde"/> (sin incluir) y <paramref name="hasta"/>.</summary>
+        public List<CueEnCurso> CuesEntre(float desde, float hasta)
+        {
+            var cues = new List<CueEnCurso>();
+            for (var i = 0; i < Diapositivas; i++)
+            {
+                var diapositiva = _datos.diapositivas[i];
+                if (diapositiva == null || diapositiva.cues == null)
+                {
+                    continue;
+                }
+
+                foreach (var cue in diapositiva.cues)
+                {
+                    var inicio = _inicios[i] + (cue != null ? cue.instante : 0f);
+                    if (cue != null && inicio > desde && inicio <= hasta)
+                    {
+                        cues.Add(new CueEnCurso(cue, i, inicio, cue.hasta > 0f ? _inicios[i] + cue.hasta : float.PositiveInfinity));
+                    }
+                }
+            }
+
+            return cues;
+        }
+
+        /// <summary>
+        /// Fotogramas de flash de los beats que terminan entre <paramref name="desde"/> (sin incluir)
+        /// y <paramref name="hasta"/> (0 si ninguno lo tiene).
+        /// </summary>
+        public int FlashEntre(float desde, float hasta)
+        {
+            var fotogramas = 0;
+            for (var i = 0; i < Diapositivas; i++)
+            {
+                var fin = _inicios[i + 1];
+                var diapositiva = _datos.diapositivas[i];
+                if (diapositiva != null && fin > desde && fin <= hasta)
+                {
+                    fotogramas = Mathf.Max(fotogramas, diapositiva.flashFinal);
+                }
+            }
+
+            return fotogramas;
+        }
+
+        /// <summary>El flash del último beat: al saltar la cinemática se va directo a él.</summary>
+        public int FlashFinal
+        {
+            get
+            {
+                var ultima = Diapositivas > 0 ? _datos.diapositivas[Diapositivas - 1] : null;
+                return ultima != null ? ultima.flashFinal : 0;
+            }
+        }
 
         // --- Textos ---
 

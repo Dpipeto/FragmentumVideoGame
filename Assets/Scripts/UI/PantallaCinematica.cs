@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Fragmentum.Core;
 using Fragmentum.Narrative;
@@ -12,24 +13,29 @@ namespace Fragmentum.UI
 {
     /// <summary>
     /// Reproductor de cinemáticas (<c>CutscenePlayer</c> del plan): muestra un
-    /// <see cref="CutsceneData"/> a pantalla completa mientras la FSM global está en CUTSCENE.
+    /// <see cref="CutsceneData"/> a pantalla completa mientras la FSM global está en CUTSCENE. La
+    /// FSM es la que bloquea el input del jugador y detiene el juego mientras dura.
     ///
     /// - Qué se ve en cada instante lo decide <see cref="LineaTiempoCinematica"/>; esta pantalla
-    ///   solo lo aplica. Las imágenes y los textos entran y salen con <c>CanvasGroup.alpha</c>:
-    ///   fundido cruzado entre imágenes y fundido en cada texto, nunca un corte duro.
-    /// - Las imágenes conservan su proporción sobre fondo negro, y los textos se colocan por
-    ///   tercios de la <b>imagen</b>, no de la pantalla: en 16:10 un título «arriba» sigue cayendo
-    ///   sobre la imagen y no sobre la franja negra.
+    ///   solo lo aplica: fundidos cruzados entre imágenes o beats que suben desde negro y bajan a
+    ///   negro con sus propios tiempos (<see cref="CutsceneData.montaje"/>).
+    /// - <b>Pixel art</b> (<see cref="CutsceneData.escalaEntera"/>): las imágenes, los textos, el
+    ///   encuadre, los temblores y el flash se dibujan con la cámara de cinemáticas
+    ///   (<see cref="CamaraCinematica"/>), en la rejilla de 240 × 135 y ampliados por un entero sin
+    ///   interpolar. Siempre opaca.
+    /// - <b>Imágenes pintadas</b> (el resto): en la interfaz, con su proporción sobre fondo negro, y
+    ///   los textos por tercios de la <b>imagen</b>, no de la pantalla.
+    /// - <b>Sonido:</b> los cues de cada diapositiva suenan en su instante y se cortan en seco
+    ///   donde diga el guion. Si falta el clip de uno, avisa por consola con su nombre y sigue sin él.
+    /// - <b>El flash</b> del final de un beat dura los fotogramas que diga, contados uno a uno: a
+    ///   30 fps no se alarga al doble.
     /// - Pasados los primeros segundos (<see cref="CutsceneData.bloqueoSalto"/>), cualquier tecla,
-    ///   botón o clic la salta entera. Un aviso discreto lo dice.
+    ///   botón o clic la salta. Si termina con flash, va directo a él. Un aviso discreto lo dice.
     /// - <b>Funciona sin arte:</b> una diapositiva sin imagen se ve en negro con su texto, y sin
-    ///   texto dice qué falta (criterio de aceptación de la Fase 8).
+    ///   texto dice qué falta (criterio de aceptación de la Fase 8). En un montaje por beats, un
+    ///   beat sin imagen es negro a propósito.
     /// - <b>Sobre el juego</b> (<see cref="CutsceneData.sobreElJuego"/>): en vez de negro, un velo
-    ///   y dos franjas de cine sobre la escena congelada. Es la presentación del jefe: se ve la
-    ///   arena con el jefe mientras habla.
-    /// - <b>Escala entera</b> (<see cref="CutsceneData.escalaEntera"/>), para el pixel art: la imagen
-    ///   mide en pantalla su tamaño por el mayor número entero que quepa, centrada y alineada a
-    ///   píxeles enteros. Así no se interpola nada, aunque el Canvas de la interfaz escale libre.
+    ///   y dos franjas de cine sobre la escena congelada.
     /// - Cuenta el tiempo sin escala, porque la cinemática para el juego.
     /// - Al terminar se lo dice a la FSM global, que decide a dónde se va.
     /// </summary>
@@ -43,11 +49,18 @@ namespace Fragmentum.UI
         private static readonly Color ColorTexto = new Color(0.94f, 0.93f, 0.85f, 1f);
 
         private static readonly HashSet<string> AvisadasSinArte = new HashSet<string>();
+        private static readonly HashSet<string> AvisadasSinCamara = new HashSet<string>();
 
         private sealed class Ranura
         {
             public Text Texto;
             public CanvasGroup Grupo;
+        }
+
+        private sealed class CueSonando
+        {
+            public AudioSource Fuente;
+            public float Fin;
         }
 
         private AspectRatioFitter _marco;
@@ -64,10 +77,16 @@ namespace Fragmentum.UI
         private CanvasGroup _grupoAviso;
         private AudioSource _audio;
         private AudioSource _musica;
+        private readonly List<AudioSource> _fuentesCue = new List<AudioSource>();
+        private readonly List<CueSonando> _cuesSonando = new List<CueSonando>();
         private bool _construida;
         private float _inicio;
+        private float _tAnterior;
         private int _indiceAudio = -1;
         private int _frameSaltoPedido = -1;
+        private int _flashObjetivo;
+        private int _flashVistos = -1;
+        private bool _terminarTrasFlash;
         private IDisposable _escuchaBotones;
 
         public CutsceneData Actual { get; private set; }
@@ -76,17 +95,31 @@ namespace Fragmentum.UI
 
         public bool Reproduciendo { get; private set; }
 
+        /// <summary>La cámara de las cinemáticas en pixel art. La pone el UIManager.</summary>
+        public CamaraCinematica Camara { get; set; }
+
+        /// <summary>¿La cinemática en curso se dibuja con la cámara de cinemáticas, en su rejilla?</summary>
+        public bool EnRejilla { get; private set; }
+
         /// <summary>Segundos desde que empezó la cinemática en curso.</summary>
         public float Tiempo => Reproduciendo ? Time.unscaledTime - _inicio : 0f;
 
         /// <summary>Diapositiva en curso.</summary>
         public int Indice => Linea != null ? Mathf.Max(0, Linea.IndiceEn(Tiempo)) : 0;
 
+        /// <summary>¿Está en el flash final, ya sin avanzar la línea de tiempo?</summary>
+        public bool EnFlashFinal => Reproduciendo && _terminarTrasFlash;
+
         /// <summary>Los textos que se ven ahora, uno por línea.</summary>
         public string TextoActual
         {
             get
             {
+                if (EnRejilla && Camara != null)
+                {
+                    return Camara.TextoVisible;
+                }
+
                 var texto = new StringBuilder();
                 foreach (var ranura in _ranuras.Values)
                 {
@@ -106,16 +139,22 @@ namespace Fragmentum.UI
         public bool Visible => _construida && gameObject.activeSelf;
 
         /// <summary>
-        /// Con escala entera, por cuánto se multiplica la imagen (en píxeles de pantalla); 0 si la
+        /// En pixel art, por cuánto se multiplica cada píxel del plano en pantalla; 0 si la
         /// cinemática en curso escala libre.
         /// </summary>
-        public int EscalaEntera { get; private set; }
+        public int EscalaEntera => EnRejilla && Camara != null ? Camara.Escala : 0;
 
         /// <summary>El rectángulo de la imagen, en píxeles de pantalla.</summary>
         public Rect RectImagenEnPantalla
         {
             get
             {
+                if (EnRejilla)
+                {
+                    var rejilla = CamaraCinematica.RectEnPantalla(Screen.width, Screen.height);
+                    return new Rect(rejilla.x, rejilla.y, rejilla.width, rejilla.height);
+                }
+
                 var esquinas = new Vector3[4];
                 ((RectTransform)_marco.transform).GetWorldCorners(esquinas);
                 var lienzo = Lienzo;
@@ -141,7 +180,7 @@ namespace Fragmentum.UI
         }
 
         /// <summary>¿Se ve la escena detrás? (Cinemática sobre el juego.)</summary>
-        public bool SobreElJuego => Visible && _fondo != null && _fondo.color.a < 1f;
+        public bool SobreElJuego => Visible && !EnRejilla && _fondo != null && _fondo.color.a < 1f;
 
         public void Construir()
         {
@@ -179,13 +218,8 @@ namespace Fragmentum.UI
             _aviso.raycastTarget = false;
             _grupoAviso = Grupo(_aviso.gameObject);
 
-            _audio = gameObject.AddComponent<AudioSource>();
-            _audio.playOnAwake = false;
-            _audio.ignoreListenerPause = true;
-
-            _musica = gameObject.AddComponent<AudioSource>();
-            _musica.playOnAwake = false;
-            _musica.ignoreListenerPause = true;
+            _audio = NuevaFuente();
+            _musica = NuevaFuente();
         }
 
         /// <summary>Empieza a reproducir. Sin datos o sin diapositivas, termina en el acto.</summary>
@@ -209,15 +243,33 @@ namespace Fragmentum.UI
                     : $"[Cinemática] '{cinematica.Id}' tiene diapositivas sin imagen (PENDIENTES B1): se ven en negro con su texto.");
             }
 
-            _fondo.color = new Color(0f, 0f, 0f, cinematica.sobreElJuego ? cinematica.opacidadVelo : 1f);
-            EscalarLibre(!cinematica.escalaEntera);
-            _franjaArriba.enabled = cinematica.sobreElJuego;
-            _franjaAbajo.enabled = cinematica.sobreElJuego;
+            EnRejilla = cinematica.escalaEntera && Camara != null;
+            if (cinematica.escalaEntera && Camara == null && AvisadasSinCamara.Add(cinematica.Id))
+            {
+                Debug.LogWarning($"[Cinemática] '{cinematica.Id}' es pixel art, pero no hay cámara de cinemáticas: se ve estirada en la interfaz.");
+            }
+
+            // En la rejilla la imagen la pone la cámara, que es opaca: la interfaz solo deja el aviso.
+            _fondo.color = EnRejilla ? Color.clear : new Color(0f, 0f, 0f, cinematica.sobreElJuego ? cinematica.opacidadVelo : 1f);
+            _franjaArriba.enabled = cinematica.sobreElJuego && !EnRejilla;
+            _franjaAbajo.enabled = cinematica.sobreElJuego && !EnRejilla;
+            if (EnRejilla)
+            {
+                Camara.Empezar();
+            }
+            else if (Camara != null)
+            {
+                Camara.Ocultar();
+            }
 
             Linea = new LineaTiempoCinematica(cinematica);
             _inicio = Time.unscaledTime;
+            _tAnterior = -1f;
             _indiceAudio = -1;
             _frameSaltoPedido = -1;
+            _flashVistos = -1;
+            _terminarTrasFlash = false;
+            CortarCues();
             Reproduciendo = true;
             gameObject.SetActive(true);
             _aviso.text = cinematica.avisoSaltar;
@@ -243,7 +295,7 @@ namespace Fragmentum.UI
         /// </summary>
         public bool PedirSalto()
         {
-            if (!Reproduciendo || !Linea.PuedeSaltar(Tiempo))
+            if (!Reproduciendo || _terminarTrasFlash || !Linea.PuedeSaltar(Tiempo))
             {
                 return false;
             }
@@ -259,9 +311,9 @@ namespace Fragmentum.UI
         /// <summary>Esc o Start (desde el UIManager): salta en el acto si ya pasó el bloqueo inicial.</summary>
         public void Saltar()
         {
-            if (Reproduciendo && Linea.PuedeSaltar(Tiempo))
+            if (Reproduciendo && !_terminarTrasFlash && Linea.PuedeSaltar(Tiempo))
             {
-                Terminar();
+                Cortar();
             }
         }
 
@@ -269,12 +321,21 @@ namespace Fragmentum.UI
         public void Ocultar()
         {
             Reproduciendo = false;
+            EnRejilla = false;
+            _flashVistos = -1;
+            _terminarTrasFlash = false;
             DejarDeEscuchar();
+            CortarCues();
 
             if (_audio != null)
             {
                 _audio.Stop();
                 _musica.Stop();
+            }
+
+            if (Camara != null)
+            {
+                Camara.Ocultar();
             }
 
             if (_construida)
@@ -290,9 +351,39 @@ namespace Fragmentum.UI
                 return;
             }
 
-            var t = Tiempo;
-            if (Linea.Terminada(t) || (_frameSaltoPedido >= 0 && Time.frameCount > _frameSaltoPedido))
+            // El flash: se cuentan los fotogramas que ya se han visto con él.
+            if (_flashVistos >= 0 && ++_flashVistos >= _flashObjetivo)
             {
+                _flashVistos = -1;
+                Camara.Flash(false);
+                if (_terminarTrasFlash)
+                {
+                    Terminar();
+                    return;
+                }
+            }
+
+            if (_terminarTrasFlash)
+            {
+                return; // en el flash final: la línea de tiempo ya terminó
+            }
+
+            if (_frameSaltoPedido >= 0 && Time.frameCount > _frameSaltoPedido)
+            {
+                Cortar();
+                return;
+            }
+
+            var t = Tiempo;
+            if (Linea.Terminada(t))
+            {
+                Aplicar(t); // lo que ocurre justo al final, como el flash del último beat
+                if (_flashVistos >= 0)
+                {
+                    _terminarTrasFlash = true;
+                    return;
+                }
+
                 Terminar();
                 return;
             }
@@ -302,23 +393,88 @@ namespace Fragmentum.UI
 
         private void OnDisable() => DejarDeEscuchar();
 
+        // Saltar: directo al flash final si lo hay; si no, se termina.
+        private void Cortar()
+        {
+            var flash = EnRejilla ? Linea.FlashFinal : 0;
+            if (flash <= 0)
+            {
+                Terminar();
+                return;
+            }
+
+            CortarCues();
+            _audio.Stop();
+            Camara.Escribir(new List<LineaTiempoCinematica.TextoVisible>(), Actual);
+            EmpezarFlash(flash);
+            _terminarTrasFlash = true;
+        }
+
         private void Aplicar(float t)
         {
             var (abajo, encima) = Linea.ImagenesEn(t);
-            Pintar(_abajo, _grupoAbajo, abajo);
-            Pintar(_encima, _grupoEncima, encima);
-            if (Actual.escalaEntera)
+            var textos = Linea.TextosEn(t);
+            if (EnRejilla)
             {
-                AjustarEscalaEntera(_encima.sprite != null ? _encima.sprite : _abajo.sprite);
+                Camara.Pintar(Imagen(abajo), abajo.Alfa, Encuadre(abajo), Imagen(encima), encima.Alfa, Encuadre(encima));
+                Camara.Escribir(textos, Actual);
+                if (Linea.TembloresEntre(_tAnterior, t) > 0)
+                {
+                    Camara.Temblar(Actual.temblorPixeles, Actual.temblorFotogramas);
+                }
+
+                var flash = Linea.FlashEntre(_tAnterior, t);
+                if (flash > 0)
+                {
+                    EmpezarFlash(flash);
+                }
+
+                _grupoAbajo.alpha = 0f;
+                _grupoEncima.alpha = 0f;
+                foreach (var ranura in _ranuras.Values)
+                {
+                    ranura.Grupo.alpha = 0f;
+                }
+            }
+            else
+            {
+                Pintar(_abajo, _grupoAbajo, abajo);
+                Pintar(_encima, _grupoEncima, encima);
+                EscribirEnLaInterfaz(textos);
             }
 
+            foreach (var cue in Linea.CuesEntre(_tAnterior, t))
+            {
+                Sonar(cue);
+            }
+
+            CortarCuesHasta(t);
+            _grupoAviso.alpha = Linea.AlfaAviso(t);
+            SonarAudioDe(Linea.IndiceEn(t));
+            _tAnterior = t;
+        }
+
+        private Sprite Imagen(LineaTiempoCinematica.Capa capa) => capa.Indice >= 0 ? Actual.diapositivas[capa.Indice]?.imagen : null;
+
+        private Vector2Int Encuadre(LineaTiempoCinematica.Capa capa) =>
+            capa.Indice >= 0 && Actual.diapositivas[capa.Indice] != null ? Actual.diapositivas[capa.Indice].desplazamiento : Vector2Int.zero;
+
+        private void EmpezarFlash(int fotogramas)
+        {
+            _flashObjetivo = fotogramas;
+            _flashVistos = 0;
+            Camara.Flash(true);
+        }
+
+        private void EscribirEnLaInterfaz(List<LineaTiempoCinematica.TextoVisible> textos)
+        {
             foreach (var ranura in _ranuras.Values)
             {
                 ranura.Grupo.alpha = 0f;
             }
 
             // Si dos textos comparten tercio a la vez, se ve el más opaco.
-            foreach (var visible in Linea.TextosEn(t))
+            foreach (var visible in textos)
             {
                 var ranura = _ranuras[visible.Cartel.posicion];
                 if (visible.Alfa <= ranura.Grupo.alpha)
@@ -330,14 +486,11 @@ namespace Fragmentum.UI
                 ranura.Texto.fontSize = visible.Cartel.titulo ? TamanoTitulo : TamanoTexto;
                 ranura.Grupo.alpha = visible.Alfa;
             }
-
-            _grupoAviso.alpha = Linea.AlfaAviso(t);
-            SonarAudioDe(Linea.IndiceEn(t));
         }
 
         private void Pintar(Image imagen, CanvasGroup grupo, LineaTiempoCinematica.Capa capa)
         {
-            var sprite = capa.Indice >= 0 ? Actual.diapositivas[capa.Indice]?.imagen : null;
+            var sprite = Imagen(capa);
             if (imagen.sprite != sprite)
             {
                 imagen.sprite = sprite;
@@ -351,45 +504,70 @@ namespace Fragmentum.UI
             grupo.alpha = sprite != null ? capa.Alfa : 0f;
         }
 
-        // Escala libre: el marco cabe en la pantalla con la proporción de la imagen.
-        private void EscalarLibre(bool libre)
-        {
-            _marco.enabled = libre;
-            EscalaEntera = 0;
-            if (libre)
-            {
-                FabricaUI.Estirar((RectTransform)_marco.transform);
-            }
-        }
+        // --- Sonido ---
 
-        // Escala entera: el marco mide k veces la imagen en píxeles de pantalla, con k el mayor
-        // entero que cabe, y sus bordes caen en píxeles enteros. El tamaño se pasa a unidades del
-        // Canvas dividiendo por su escala: así da igual cómo escale el resto de la interfaz.
-        private void AjustarEscalaEntera(Sprite imagen)
+        private void Sonar(LineaTiempoCinematica.CueEnCurso enCurso)
         {
-            if (imagen == null)
+            var cue = enCurso.Cue;
+            if (cue.clip == null)
             {
+                Debug.LogWarning($"[Cinemática] '{Actual.Id}': falta el audio «{cue.nombre}» (diapositiva {enCurso.Diapositiva + 1}, " +
+                                 $"a los {enCurso.Inicio.ToString("0.##", CultureInfo.InvariantCulture)} s). Sigue sin él.");
                 return;
             }
 
-            var lienzo = Lienzo;
-            var factor = lienzo != null && lienzo.scaleFactor > 0f ? lienzo.scaleFactor : 1f;
-            var pantalla = lienzo != null ? lienzo.pixelRect.size : new Vector2(Screen.width, Screen.height);
-            var tamano = imagen.rect.size;
-            var k = Mathf.Max(1, Mathf.FloorToInt(Mathf.Min(pantalla.x / tamano.x, pantalla.y / tamano.y)));
-            var enPixeles = tamano * k;
+            var fuente = FuenteLibre();
+            fuente.clip = cue.clip;
+            fuente.loop = cue.bucle;
+            fuente.Play();
+            _cuesSonando.Add(new CueSonando { Fuente = fuente, Fin = enCurso.Fin });
+        }
 
-            // Si el borde negro que sobra es impar, medio píxel a la izquierda (o abajo) deja la
-            // imagen en píxeles enteros.
-            var medioPixel = new Vector2(Mathf.Repeat(pantalla.x - enPixeles.x, 2f), Mathf.Repeat(pantalla.y - enPixeles.y, 2f)) * 0.5f;
+        // Corte seco de los cues cuyo final ya llegó; los que no son en bucle se sueltan al acabar.
+        private void CortarCuesHasta(float t)
+        {
+            for (var i = _cuesSonando.Count - 1; i >= 0; i--)
+            {
+                var sonando = _cuesSonando[i];
+                if (t >= sonando.Fin || (!sonando.Fuente.loop && !sonando.Fuente.isPlaying))
+                {
+                    sonando.Fuente.Stop();
+                    _cuesSonando.RemoveAt(i);
+                }
+            }
+        }
 
-            var rect = (RectTransform)_marco.transform;
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = enPixeles / factor;
-            rect.anchoredPosition = -medioPixel / factor;
-            EscalaEntera = k;
+        private void CortarCues()
+        {
+            foreach (var sonando in _cuesSonando)
+            {
+                sonando.Fuente.Stop();
+            }
+
+            _cuesSonando.Clear();
+        }
+
+        private AudioSource FuenteLibre()
+        {
+            foreach (var fuente in _fuentesCue)
+            {
+                if (!_cuesSonando.Exists(c => c.Fuente == fuente))
+                {
+                    return fuente;
+                }
+            }
+
+            var nueva = NuevaFuente();
+            _fuentesCue.Add(nueva);
+            return nueva;
+        }
+
+        private AudioSource NuevaFuente()
+        {
+            var fuente = gameObject.AddComponent<AudioSource>();
+            fuente.playOnAwake = false;
+            fuente.ignoreListenerPause = true;
+            return fuente;
         }
 
         private void SonarAudioDe(int indice)

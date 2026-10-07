@@ -121,6 +121,7 @@ MonoBehaviour:
   accionPausa: Pause
   ordenLienzo: 100
   registro: {fileID: 11400000, guid: 8b867ac7402dfce4f8581a0e3c654df9, type: 2}
+  camaraCinematica: {fileID: 8913933477687120771, guid: e5818bbf004163d49a4e89e1dd6716a5, type: 3}
 --- !u!114 &8006525277215968823
 MonoBehaviour:
   m_ObjectHideFlags: 0
