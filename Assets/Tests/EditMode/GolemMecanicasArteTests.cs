@@ -86,7 +86,8 @@ namespace Fragmentum.Tests
             },
             new Grupo
             {
-                Carpeta = Cinematicas, Ancho = 240, Alto = 135, PixelesPorUnidad = 100f, Pivote = new Vector2(0.5f, 0.5f),
+                // A 1 píxel por unidad, como la cámara de cinemáticas (Pixel Perfect, Assets PPU 1).
+                Carpeta = Cinematicas, Ancho = 240, Alto = 135, PixelesPorUnidad = 1f, Pivote = new Vector2(0.5f, 0.5f),
                 Alineacion = SpriteAlignment.Center,
                 Archivos = new[] { "CinematicaJefe1", "CinematicaJefe2", "CinematicaFinalLvl1" },
             },

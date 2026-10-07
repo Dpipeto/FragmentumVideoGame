@@ -9,6 +9,97 @@
 
 ---
 
+## Cinemáticas en pixel art: la cámara y el reproductor (2026-10-06)
+
+Rama `cinematicas-pixel`, que sale de `kael-dash`. Llegó un encargo para montar el sistema de
+cinemáticas y, con él, la entrada del jefe del Nivel 1 («El que ya estaba aquí», 9,6 s). Trae su
+guion, `Tesis/Imagenes/limpios/GUION-cinematica-jefe1.md`, y cinco fases:
+
+- A: cámara y render;
+- B: el sistema;
+- C: la cinemática;
+- D: integración;
+- E: verificación.
+
+El encargo estaba escrito para otro proyecto. Antes de empezar, el autor aceptó estas
+adaptaciones:
+
+### Decisiones que ajustan el encargo
+
+1. **Un solo sistema de cinemáticas.** Ya había uno dirigido por datos: `CutsceneData` y
+   `PantallaCinematica`, con 14 cinemáticas, y la del jefe ya estaba montada en él. Se amplía con
+   el modelo de beats del encargo en vez de escribir un segundo reproductor. Los planos en pixel
+   art se dibujan con una cámara propia; los pintados (la cinemática inicial, de 1376 × 768) siguen
+   como estaban.
+2. **La Pixel Perfect Camera de URP.** El proyecto está en Unity 6 con URP 2D, que trae la suya; el
+   paquete `2d.pixel-perfect` del encargo no se usa. El recorte «16:9» es *Windowbox*.
+3. **El input lo sigue bloqueando la máquina de estados global**, como en todas las cinemáticas.
+   Para que Kael no se mueva durante el rugido, la arena mantendrá el bloqueo hasta que acabe
+   (fase D).
+4. **La marca de «ya vista» ya está en `GameManager`** y se guarda en la partida. La cinemática
+   será «solo la primera vez».
+5. **El texto del beat 2 entra a 3,5 s y sale a 5,5 s** desde el inicio del beat, con 0,4 s de
+   fundido. El encargo decía 2,5 y 4,5, pero los temblores y el rótulo cuentan desde el inicio del
+   beat con el fundido incluido; con ese criterio, 3,5 y 5,5 son los tiempos del guion.
+6. **Varios cues por beat**, cada uno con su instante y su bucle. Con uno solo no cabe el sonido
+   del guion.
+7. **Falta la fuente bitmap.** La fase C la necesita y espera a que llegue (PENDIENTES N21).
+8. **No se puede saltar el primer medio segundo** (el negro inicial). Así una tecla pulsada al
+   entrar en la sala no se lleva el rótulo, que es lo que importa para el estudio.
+9. **Rutas y menús de la v2:** *Fragmentum → …* y `Assets/Data/Narrativa`; los planos siguen en
+   `Assets/Sprites/Cinematicas/Nivel1`.
+
+### Fase A: cámara y render
+
+- **`CamaraCinematica`.** Es una cámara propia, aparte de la del juego, con la Pixel Perfect
+  Camera de URP:
+  - **resolución de referencia 240 × 135** y *Assets PPU* 1;
+  - ***Upscale Render Texture*:** dibuja en una textura de exactamente 240 × 135 y la amplía por
+    el mayor entero que cabe;
+  - **recorte *Windowbox*:** centra la imagen y pone negro lo que sobra;
+  - **filtro final Point.**
+
+  Vive lejos de los niveles y en su propia capa, `Cinematica` (nueva). La cámara del juego no la
+  ve y ella solo ve lo suyo. Se dibuja encima y limpia la pantalla a negro, así que no hace falta
+  apagar la cámara del juego ni pelearse con su seguimiento.
+- **Los planos del Nivel 1 van a 1 píxel por unidad** (`TablaArte`), como la cámara: un píxel del
+  plano es una unidad del mundo. Lo que se mueva en la cinemática (el encuadre, el temblor, las
+  brasas) se moverá en unidades enteras y no saldrá de la rejilla.
+- **El prefab** `Assets/Prefabs/Cinematicas/CamaraCinematica.prefab` se genera con el mismo código
+  que la monta en el juego (`ConstructorCamaraCinematica`, también en «Regenerar todo»).
+- **La captura:** *Fragmentum → Cinemáticas → Capturar la cámara de cinemáticas a 1920 × 1080*.
+  - Dibuja el plano con la cámara en una escena de vista previa (no toca la escena abierta) y
+    guarda la imagen en `Docs/Cinematicas`.
+  - Después la compara píxel a píxel con el PNG: cada píxel del plano tiene que ser un cuadrado de
+    k × k píxeles idénticos al original, y lo que sobra, negro.
+
+#### Comprobado
+
+- **A 1920 × 1080** (`Docs/Cinematicas/CamaraCinematica_1920x1080.png`), cada píxel del plano es un
+  cuadrado de 8 × 8 píxeles idénticos al original. La diferencia máxima es 0 y la captura tiene los
+  mismos 1528 colores que el PNG: ni uno nuevo, que es lo que dejaría una interpolación.
+  `CamaraCinematica_1920x1080_detalle.png` amplía la zona de Kael con una rejilla cada 8 píxeles:
+  cada celda es un solo color.
+- **A 1280 × 720**, cuadrados de 5 × 5, centrados, con un borde negro de 40 y 22 píxeles.
+- **A 960 × 540**, de 4 × 4.
+- Las tres capturas se comprobaron también aparte, con Python, contra el PNG.
+
+### Verificación (fase A)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 303 correctas.** Hay 7 nuevas en `CamaraCinematicaTests`:
+  - la cámara lleva la Pixel Perfect Camera configurada como arriba y solo ve su capa;
+  - los tres planos van a 1 píxel por unidad y miden 240 × 135 unidades;
+  - el rectángulo en pantalla es k veces la referencia, centrado (también en 16:10);
+  - se captura cada plano a 1920 × 1080, 1280 × 720 y 960 × 540: cada píxel es un cuadrado de
+    k × k idéntico al original;
+  - la comprobación detecta un plano ampliado con filtro bilineal.
+
+  La de los píxeles por unidad del Nivel 1 espera ahora 1 en los planos.
+- **Pruebas PlayMode: 135 correctas.** No cambian.
+
+---
+
 ## Dash de Kael (2026-10-06)
 
 Rama `kael-dash`, que sale de `golem-mecanicas`. Llegó el dash de Kael, dibujado en Pixelorama

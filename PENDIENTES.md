@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.26 — Dash de Kael, 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.27 — Cinemáticas en pixel art: la cámara (fase A), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -15,6 +15,7 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 | N15 | **Prueba el golpe del Eco de la Ira**, ahora más rápido. | El ataque va a 1,6×: a1 dura 0,22 s, el golpe 0,08 s y el ataque entero 0,46 s. Descansa 0,45 s entre golpes, antes 0,7. | Pelea con él en el Nivel 1 (x ≈ 12). Si sigue lento, sube `velocidadAtaque` en `EcoIra.prefab → Pivote/Sprite → EnemigoAnimacion` o baja `attackCooldown` en `Assets/Data/Enemigos/EcoIra.asset`. |
 | N18 | **¿Querías el Eco más grande?** En el Nivel 1, el Eco de x = 12,5 tiene escala 1,8 × 1,5. | Lo cambiaste en la escena y lo dejé tal cual. Con una escala distinta en X y en Y, los píxeles del dibujo quedan un 20 % más anchos que altos. Además, ese Eco mide el 90 % de Kael y los demás el 60 %. | Si lo quieres más grande en todo el juego, dime cuánto (por ejemplo, «al 80 % de Kael») y lo cambio en la importación, con la misma escala en X y en Y. Si fue una prueba, vuelve a poner la escala a 1 en la escena. |
 | N20 | **Juega el Nivel 1 con el Golem, las mecánicas y las cinemáticas.** | Ya tienen su arte y su comportamiento nuevo. Mira sobre todo:<br>• si el medio segundo de A1 del Golem se lee y su onda se salta bien;<br>• el ritmo de la torreta (reposo 1,6 s, carga 0,7 s, disparo 0,35 s) y el de la combustión (2 s, 0,8 s y 1 s);<br>• la plataforma inestable (0,6 s agrietada);<br>• los planos del jefe a escala entera;<br>• el dash de Kael. | Los tiempos son públicos: en el inspector de cada prefab de `Assets/Prefabs/Mecanicas`. Los del Golem, en `Assets/Data/Enemigos/GolemCeniza.asset`. Si algo no se lee, dime qué y en qué tiempo. |
+| N21 | **Pásame una fuente bitmap** para el texto de las cinemáticas en pixel art. | El guion pide el texto en la rejilla de los planos, y el proyecto solo tiene la fuente por defecto de Unity, que no es bitmap. Sin ella no puedo hacer la fase C (la cinemática del jefe). | Vale una TTF dibujada en rejilla (por ejemplo m5x7 o m6x11, de licencia libre) o una hoja de caracteres. Déjala en `Assets/Fonts` o pásame el archivo. |
 | N19 | **Corrige el Anexo A de `Tesis.docx`:** la plataforma de combustión ya no quema por estar encima. | Aceptaste el ciclo fijo del nuevo encargo: apagada → calienta → encendida, sin depender del jugador. El Anexo A dice que quema si te quedas encima más de 2 s. | Yo no toco `Tesis.docx`. Basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». |
 | N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después wall slide y agacharse (y, para la Fase 10, nado). El dash ✔ ya está. | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Solo el Eco de la Ira tiene arte. | Ver «Arte que más necesito», justo debajo. |
@@ -67,6 +68,13 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.27: qué cambió respecto de la v0.26
+
+- **Cinemáticas en pixel art, fase A** (rama `cinematicas-pixel`): la cámara de cinemáticas con la
+  Pixel Perfect Camera de URP, a 240 × 135, y los planos del Nivel 1 a 1 píxel por unidad. Las
+  capturas a 1920 × 1080, 1280 × 720 y 960 × 540 están en `Docs/Cinematicas`.
+- **Nuevo N21:** la fuente bitmap para el texto de las cinemáticas.
 
 ## Revisión 0.26: qué cambió respecto de la v0.25
 
@@ -716,6 +724,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.27 (2026-10-06)** — Cinemáticas en pixel art, fase A: la cámara con la Pixel Perfect Camera, en la rama `cinematicas-pixel`. Nuevo N21 (fuente bitmap).
 - **0.26 (2026-10-06)** — Dash de Kael: su clip, estirado a la duración del dash, en la rama `kael-dash`.
 - **0.25 (2026-10-06)** — Golem de Ceniza y mecánicas, fase E: el menú de verificación. La integración está completa, a falta de tu prueba.
 - **0.24 (2026-10-06)** — Golem de Ceniza y mecánicas, fase D: scripts, prefabs y cinemáticas en el juego.

@@ -115,8 +115,9 @@ namespace Fragmentum.EditorTools
                     "Plataforma inestable: 184×142, el pivote en la superficie (fila 21); 3,83 u de ancho.", LienzoPlataforma),
                 new Regla(CarpetaMecanicas + "/Combustion_", 48f, new Vector2(0.5f, 0.708f),
                     "Plataforma de combustión: 166×89, el pivote en la superficie (fila 26); 3,42 u de ancho.", LienzoCombustion),
-                new Regla(CarpetaCinematicasNivel1 + "/", null, null,
-                    "Planos del Nivel 1: 240×135 (16:9 exacto); se muestran a escala entera.", LienzoCinematica),
+                new Regla(CarpetaCinematicasNivel1 + "/", UI.CamaraCinematica.PixelesPorUnidad, null,
+                    "Planos del Nivel 1: 240×135 (16:9 exacto), a 1 píxel por unidad como la cámara de cinemáticas: " +
+                    "un píxel del plano es un píxel de su rejilla.", LienzoCinematica),
 
                 // Jefes: pixel art, y la Centinela con su escala y el pivote de los pies.
                 new Regla(CarpetaJefes + "/", null, null,
