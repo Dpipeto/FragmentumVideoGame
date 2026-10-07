@@ -9,6 +9,70 @@
 
 ---
 
+## Dash de Kael (2026-10-06)
+
+Rama `kael-dash`, que sale de `golem-mecanicas`. Llegó el dash de Kael, dibujado en Pixelorama
+(`Tesis/Imagenes Kael/Dash`): 4 fotogramas en un lienzo de 120×120.
+
+### 1. El dash se veía como un fotograma de correr
+
+- **Problema.** Kael hacía el dash con el clip de correr, que se quedaba casi fijo durante los
+  0,18 s del dash (PENDIENTES B3).
+- **Causa.** No había clip de dash.
+- **Solución.** Se sigue el procedimiento de «Arte de Kael» (*Pasos manuales en el Editor*):
+  - **La hoja.** `Dash.png` venía exportada a 5× (2400×600). `Herramientas/reducir_hoja.py` la
+    reduce sin pérdida a 1×, de 480×120, en `Assets/Sprites/Kael/Kael_Dash.png`. Cada bloque de
+    5×5 píxeles era idéntico, así que no se pierde nada. No se recorta ni se recoloca nada.
+  - **`ConstructorArteKael`** recorta la hoja en sus 4 fotogramas y crea el clip `Kael_Dash`.
+    El pivote está en la planta de los pies y en la x 42, donde cae el torso de los dos primeros
+    fotogramas, como en el idle. Así, pasar de correr al dash no desplaza a Kael. El tercer
+    fotograma se lanza hacia delante con la estela detrás, tal como está dibujado.
+  - **`PlayerAnimacion`** reproduce `Dash` en el estado DASH, desde su primer fotograma.
+
+### 2. Que el dash dure lo que dura el dash
+
+- **El clip dura 1 s y se estira a la duración del dash,** igual que el ataque. El parámetro
+  nuevo `VelocidadDash` vale 1 / `dashDuration`. Con los 0,18 s de ahora, cada fotograma se ve
+  0,045 s; si se cambia `dashDuration` en `ParametrosJugador`, la animación lo sigue sola.
+- **Los cuatro fotogramas duran lo mismo,** como en el proyecto de Pixelorama (a 6 fps, todos
+  con duración 1):
+  - el arranque agachado;
+  - el impulso;
+  - la estela;
+  - la frenada.
+
+  No me inventé otro reparto. Si quieres que la estela se vea más, dime cuánto y lo cambio en la
+  tabla (`ConstructorArteKael.Clips`).
+- Si el dash durara más que el clip, se queda en la frenada.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** importa la hoja, crea el clip y el estado `Dash` (con su parámetro de
+  velocidad) y rehace el prefab del jugador con la tabla nueva.
+- **Pruebas EditMode: 296 correctas.**
+  - Las de `ArteKaelTests` ya recorren la hoja nueva: se recorta a 64 PPU con filtro Point, Kael
+    mide lo que su collider (1,61 u agachado en el primer fotograma) y los pies caen en el
+    pivote.
+  - Hay 2 nuevas:
+    - el clip dura 1 s, sin bucle, con los cuatro fotogramas a 0,25 s, y el estado DASH lo usa;
+    - la hoja está a 1× (fotogramas de 120×120) y el pivote, en los pies y en la x 42.
+  - La del controlador comprueba también `VelocidadDash`.
+- **Pruebas PlayMode: 135 correctas.** La del dash se reescribe
+  (`Dash_ReproduceSuClip_EstiradoALaDuracionDelDash`):
+  - al hacer el dash suena su clip, con la velocidad de 1 / `dashDuration`;
+  - mientras dura solo se ven sus fotogramas, y al acabar va por la segunda mitad;
+  - después vuelve a correr.
+
+### Qué probar a mano (`Assets/Scenes/Pruebas/PruebaJugador.unity` o el Nivel 1)
+
+- Corre y pulsa Shift: el dash se ve agacharse, lanzarse con la estela y frenar. Kael no salta
+  de sitio al empezar ni al acabar.
+- Hacia la izquierda, el sprite se voltea igual que al correr.
+- En el aire, el dash usa el mismo clip.
+
+---
+
 ## Golem de Ceniza, mecánicas y cinemáticas del Nivel 1 (2026-10-06)
 
 Rama `golem-mecanicas`, que sale de `centinela-arte`. El autor entregó 30 PNG limpios en

@@ -41,6 +41,9 @@ namespace Fragmentum.Core
         // segundos; en los Ecos, la velocidadAtaque de su EnemigoAnimacion.
         public static readonly Parametro VelocidadAtaque = new Parametro("VelocidadAtaque");
 
+        // Multiplicador del estado Dash de Kael: 1 / duración del dash en segundos.
+        public static readonly Parametro VelocidadDash = new Parametro("VelocidadDash");
+
         // Multiplicador del estado Run de los Ecos: velocidad real / la del ciclo dibujado.
         public static readonly Parametro VelocidadCorrer = new Parametro("VelocidadCorrer");
 

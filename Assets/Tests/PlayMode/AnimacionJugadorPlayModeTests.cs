@@ -102,7 +102,7 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Dash_SinClipPropio_UsaElDeCorrerSinReiniciarlo()
+        public IEnumerator Dash_ReproduceSuClip_EstiradoALaDuracionDelDash()
         {
             Suelo(-10f, 20f);
             yield return CrearJugadorEnSuelo(Vector2.zero);
@@ -110,15 +110,29 @@ namespace Fragmentum.Tests.PlayMode
             Input.EjeHorizontal = 1f;
             yield return EsperarClip(ESTADOS_JUGADOR.RUN, 0.5f);
             yield return new WaitForSeconds(0.2f);
-            var antes = Animador.GetCurrentAnimatorStateInfo(0).normalizedTime;
 
             Input.PulsarDash();
             yield return EsperarClip(ESTADOS_JUGADOR.DASH, 0.5f);
-            var info = Animador.GetCurrentAnimatorStateInfo(0);
+            Assert.IsTrue(Suena(PlayerAnimacion.Dash), "El dash tiene su clip.");
+            Assert.AreEqual(1f / Jugador.Parametros.dashDuration, Animador.GetFloat(AnimatorParams.VelocidadDash.Hash), 0.01f,
+                "El clip de 1 s ocupa justo el dash.");
 
-            Assert.IsTrue(info.IsName(PlayerAnimacion.Correr), "El dash usa el clip de correr hasta que tenga el suyo.");
-            Assert.GreaterOrEqual(info.normalizedTime, antes, "Correr ya sonaba: sigue sin saltar al primer fotograma.");
-            Assert.AreEqual(PlayerAnimacion.Correr, Jugador.GetComponent<PlayerAnimacion>().Ultimo);
+            // Mientras dura, solo sus fotogramas; al acabar, el clip ha llegado a la frenada.
+            var sprite = Animador.GetComponent<SpriteRenderer>();
+            var vistos = new System.Collections.Generic.List<string>();
+            float avance = 0f;
+            while (Jugador.EstadoActual == ESTADOS_JUGADOR.DASH)
+            {
+                if (!vistos.Contains(sprite.sprite.name)) vistos.Add(sprite.sprite.name);
+                avance = Animador.GetCurrentAnimatorStateInfo(0).normalizedTime;
+                yield return null;
+            }
+
+            Assert.IsTrue(vistos.TrueForAll(n => n.StartsWith("Kael_Dash_")), string.Join(", ", vistos));
+            Assert.Greater(avance, 0.5f, "Al terminar el dash, su clip va por la segunda mitad: no se corta al empezar.");
+
+            yield return EsperarClip(ESTADOS_JUGADOR.RUN, 0.5f);
+            Assert.IsTrue(Suena(PlayerAnimacion.Correr), "Sigue corriendo: vuelve al clip de correr.");
         }
     }
 }

@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.25 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: verificación (fase E), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.26 — Dash de Kael, 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,9 +14,9 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 | N17 | **Mira la presentación del jefe** al entrar en la arena y **escribe su diálogo**. | Ya funciona: se cierra la puerta, la cámara va hacia la Centinela y aparecen su nombre y una línea sobre la arena oscurecida. Dura 7,5 s y se salta con cualquier tecla pasado 1 s. El texto es provisional. | Escribe el texto en `Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset`: cada diapositiva tiene texto, carteles con tiempos y, si se dibuja, imagen. Puedes añadir diapositivas. Si prefieres pasarme el texto, lo vuelco yo. Detalle en B1. |
 | N15 | **Prueba el golpe del Eco de la Ira**, ahora más rápido. | El ataque va a 1,6×: a1 dura 0,22 s, el golpe 0,08 s y el ataque entero 0,46 s. Descansa 0,45 s entre golpes, antes 0,7. | Pelea con él en el Nivel 1 (x ≈ 12). Si sigue lento, sube `velocidadAtaque` en `EcoIra.prefab → Pivote/Sprite → EnemigoAnimacion` o baja `attackCooldown` en `Assets/Data/Enemigos/EcoIra.asset`. |
 | N18 | **¿Querías el Eco más grande?** En el Nivel 1, el Eco de x = 12,5 tiene escala 1,8 × 1,5. | Lo cambiaste en la escena y lo dejé tal cual. Con una escala distinta en X y en Y, los píxeles del dibujo quedan un 20 % más anchos que altos. Además, ese Eco mide el 90 % de Kael y los demás el 60 %. | Si lo quieres más grande en todo el juego, dime cuánto (por ejemplo, «al 80 % de Kael») y lo cambio en la importación, con la misma escala en X y en Y. Si fue una prueba, vuelve a poner la escala a 1 en la escena. |
-| N20 | **Juega el Nivel 1 con el Golem, las mecánicas y las cinemáticas.** | Ya tienen su arte y su comportamiento nuevo. Mira sobre todo:<br>• si el medio segundo de A1 del Golem se lee y su onda se salta bien;<br>• el ritmo de la torreta (reposo 1,6 s, carga 0,7 s, disparo 0,35 s) y el de la combustión (2 s, 0,8 s y 1 s);<br>• la plataforma inestable (0,6 s agrietada);<br>• los planos del jefe a escala entera. | Los tiempos son públicos: en el inspector de cada prefab de `Assets/Prefabs/Mecanicas`. Los del Golem, en `Assets/Data/Enemigos/GolemCeniza.asset`. Si algo no se lee, dime qué y en qué tiempo. |
+| N20 | **Juega el Nivel 1 con el Golem, las mecánicas y las cinemáticas.** | Ya tienen su arte y su comportamiento nuevo. Mira sobre todo:<br>• si el medio segundo de A1 del Golem se lee y su onda se salta bien;<br>• el ritmo de la torreta (reposo 1,6 s, carga 0,7 s, disparo 0,35 s) y el de la combustión (2 s, 0,8 s y 1 s);<br>• la plataforma inestable (0,6 s agrietada);<br>• los planos del jefe a escala entera;<br>• el dash de Kael. | Los tiempos son públicos: en el inspector de cada prefab de `Assets/Prefabs/Mecanicas`. Los del Golem, en `Assets/Data/Enemigos/GolemCeniza.asset`. Si algo no se lee, dime qué y en qué tiempo. |
 | N19 | **Corrige el Anexo A de `Tesis.docx`:** la plataforma de combustión ya no quema por estar encima. | Aceptaste el ciclo fijo del nuevo encargo: apagada → calienta → encendida, sin depender del jugador. El Anexo A dice que quema si te quedas encima más de 2 s. | Yo no toco `Tesis.docx`. Basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». |
-| N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después dash, wall slide y agacharse (y, para la Fase 10, nado). | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
+| N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después wall slide y agacharse (y, para la Fase 10, nado). El dash ✔ ya está. | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Solo el Eco de la Ira tiene arte. | Ver «Arte que más necesito», justo debajo. |
 | N11 | *En curso.* **Guion:** el diálogo de la presentación de cada jefe (N17), los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | Siguen con textos marcados como «pendiente de guion». | Edita los assets `Cinematica_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2), o pásame el texto. Prioridad: el mundo de la Ira. |
 | N10 | *Para más adelante.* **Pinta el layout definitivo del Nivel 1** (~80 u, Anexo A). | El recorrido sigue siendo el provisional: suelo plano con dos fosos y una plataforma por sección. | Sigue los «Pasos manuales en el Editor» de las Fases 6 y 9 en `CHANGELOG.md`. No bloquea. |
@@ -67,6 +67,11 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.26: qué cambió respecto de la v0.25
+
+- **El dash de Kael** tiene su clip (rama `kael-dash`, que sale de `golem-mecanicas`): 4
+  fotogramas estirados a la duración del dash. N3 y B3, al día. Pruébalo con el resto (N20).
 
 ## Revisión 0.25: qué cambió respecto de la v0.24
 
@@ -405,7 +410,7 @@ nivel).
 
 **Estado en la v2 (arte de Kael, 2026-09-30).** El jugador está completo en lógica (prefab
 `Assets/Prefabs/Player.prefab`, FSM de 12 estados) y **ya tiene arte**: quieto, correr, salto con
-caída y ataque, dibujados en Pixelorama. El detalle está en el CHANGELOG, entrada «Arte de Kael».
+caída, ataque y dash, dibujados en Pixelorama. El detalle está en el CHANGELOG, entrada «Arte de Kael».
 
 - **Dónde está el arte:**
   - las hojas, en `Assets/Sprites/Kael`, a escala 1× y 64 PPU;
@@ -416,6 +421,7 @@ caída y ataque, dibujados en Pixelorama. El detalle está en el CHANGELOG, entr
 - **Parámetros que escribe el código:**
   - `Movement` (float, u/s) acelera el clip de correr;
   - `VelocidadAtaque` (float) estira el de ataque a la duración del golpe;
+  - `VelocidadDash` (float) estira el del dash a la duración del dash;
   - `Attack`, `Damage` y `Death` (bool) se conservan del prototipo, pero ningún clip depende de
     ellos.
 - **Cómo añadir un clip:** en el CHANGELOG, «Arte de Kael» → *Pasos manuales en el Editor*.
@@ -434,7 +440,7 @@ caída y ataque, dibujados en Pixelorama. El detalle está en el CHANGELOG, entr
 | Carga y ataque cargado (Ira) | modificador de `ATTACK` | P1 | ✔ El mismo clip, más lento, con el tinte rojizo de la carga |
 | Daño | `DAMAGED` | P1 | Sigue el clip anterior y parpadea. Falta un fotograma de golpe |
 | Muerte | `DEAD` | P1 | Usa Idle. Falta su clip |
-| Dash | `DASH` | P2 | Usa Correr, que se queda fijo en un fotograma. Falta su clip |
+| Dash | `DASH` | P2 | ✔ 4 fotogramas, estirados a la duración del dash (0,18 s) |
 | Wall slide / wall jump | `WALL_SLIDE`, `WALL_JUMP` | P2 | Usan Caida y Salto. Falta el de wall slide (pegado a la pared) |
 | Agacharse | `CROUCH` | P2 | Usa Idle, así que el sprite no se encoge con el collider. Falta su clip |
 | Nado (Tristeza) | modificador de movimiento `BajoElAgua` | P2 | Usa Correr, más lento en el agua |
@@ -710,6 +716,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.26 (2026-10-06)** — Dash de Kael: su clip, estirado a la duración del dash, en la rama `kael-dash`.
 - **0.25 (2026-10-06)** — Golem de Ceniza y mecánicas, fase E: el menú de verificación. La integración está completa, a falta de tu prueba.
 - **0.24 (2026-10-06)** — Golem de Ceniza y mecánicas, fase D: scripts, prefabs y cinemáticas en el juego.
 - **0.23 (2026-10-06)** — Golem de Ceniza y mecánicas, fase C: los Animators.

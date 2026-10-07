@@ -164,10 +164,13 @@ namespace Fragmentum.Tests
             Assert.AreEqual(AnimatorControllerParameterType.Bool, Parametro(AnimatorParams.Death.Nombre).type);
             Assert.AreEqual(1f, Parametro(AnimatorParams.VelocidadAtaque.Nombre).defaultFloat,
                 "Con 0 el ataque se quedaría congelado si nadie fijara la velocidad.");
+            Assert.AreEqual(1f, Parametro(AnimatorParams.VelocidadDash.Nombre).defaultFloat,
+                "Con 0 el dash se quedaría congelado si nadie fijara la velocidad.");
 
             Assert.AreEqual(AnimatorParams.Movement.Nombre, Estado(PlayerAnimacion.Correr).speedParameter,
                 "Las piernas siguen la velocidad real: no patinan bajo el agua ni sobre hielo.");
             Assert.AreEqual(AnimatorParams.VelocidadAtaque.Nombre, Estado(PlayerAnimacion.Ataque).speedParameter);
+            Assert.AreEqual(AnimatorParams.VelocidadDash.Nombre, Estado(PlayerAnimacion.Dash).speedParameter);
         }
 
         [Test]
@@ -205,6 +208,41 @@ namespace Fragmentum.Tests
                 Assert.That(claves[fotograma].time, Is.InRange(abre, cierra),
                     $"El fotograma {fotograma} del ataque debe verse con la hitbox abierta ({abre:0.00} a {cierra:0.00}).");
             }
+        }
+
+        [Test]
+        public void ElDash_TieneSusCuatroFotogramasPorIgual_YDuraUnSegundo()
+        {
+            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>($"{ConstructorArteKael.CarpetaAnimaciones}/Kael_{PlayerAnimacion.Dash}.anim");
+            Assert.IsNotNull(clip, "Falta el clip del dash.");
+            Assert.AreEqual(1f, clip.length, 0.001f, "El clip dura 1 s; PlayerAnimacion lo estira a la duración del dash.");
+            Assert.IsFalse(clip.isLooping, "Un dash, una vez: si durara más, se queda en la frenada.");
+
+            // Como en el proyecto de Pixelorama (Dash.pxo): los cuatro fotogramas duran lo mismo.
+            var claves = AnimationUtility.GetObjectReferenceCurve(clip, CurvaSprite);
+            for (var i = 0; i < 4; i++)
+            {
+                Assert.AreEqual(i * 0.25f, claves[i].time, 0.001f, $"Kael_Dash_{i}");
+                Assert.AreEqual($"Kael_Dash_{i}", claves[i].value.name);
+            }
+
+            Assert.AreEqual(PlayerAnimacion.Dash, PlayerAnimacion.TablaPorDefecto().Single(e => e.estado == ESTADOS_JUGADOR.DASH).estadoAnimator,
+                "El estado DASH ya tiene su clip: no usa el de correr.");
+        }
+
+        [Test]
+        public void ElDash_EstaA1x_ConElPivoteEnLosPies()
+        {
+            // Un fotograma del dash mide 120 px: la hoja de 2400 que exporta Pixelorama, a 5×, no.
+            var dash = ConstructorArteKael.Fotogramas(ConstructorArteKael.HojaDash);
+            Assert.AreEqual(4, dash.Length);
+            Assert.AreEqual(new Vector2(120f, 120f), dash[0].rect.size, "Lienzo de 120×120 a 1×.");
+
+            // Cambiar de idle o de correr al dash no desplaza a Kael: los pies, en la fila del
+            // pivote como en el idle, y la x en el torso de los dos primeros fotogramas (medido).
+            var idle = ConstructorArteKael.Fotogramas(ConstructorArteKael.HojaIdle)[0];
+            Assert.AreEqual(idle.pivot.y, dash[0].pivot.y, "Los pies, en la planta.");
+            Assert.AreEqual(42f, dash[0].pivot.x, 0.01f);
         }
 
         // --- Prefab ---
