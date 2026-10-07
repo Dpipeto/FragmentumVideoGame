@@ -9,6 +9,102 @@
 
 ---
 
+## Guía de mecánicas en los menús (2026-10-07)
+
+Rama `menu-mecanicas`, que sale de `cinematicas-pixel`. El autor pidió una sección en el menú que
+explique lo que sabe hacer Kael y que se vaya completando según se desbloquean las habilidades.
+
+### 1. Nada explicaba los controles ni las habilidades
+
+- **Problema.** Lo único que el juego decía de los controles era la ayuda al pie de la pausa
+  («↑↓ navegar · Enter seleccionar · Esc continuar»). Para saber que Shift es el dash, que se
+  puede saltar desde una pared o qué hace la habilidad recién integrada, había que leer el código
+  o el Anexo A.
+- **Causa.** Las habilidades tenían nombre y descripción (`HabilidadData`), pero solo las nombraba
+  «Yo reconstruido», sin decir cómo se usan. Los movimientos básicos no estaban descritos en
+  ningún dato.
+- **Solución.** Una pantalla nueva, **«Mecánicas»** (`PantallaMecanicas`), hecha con el mismo
+  marco que la pausa y «Yo reconstruido». Se abre desde el **menú principal** (botón nuevo entre
+  «Yo reconstruido» y «Salir») y desde la **pausa** (opción entre «Reiniciar» y «Menú
+  principal»). Tiene dos columnas:
+  - **Movimientos:** moverse, saltar, doble salto, pared, dash y atacar, cada uno con sus teclas
+    y una frase. **Agacharse** solo aparece cuando se desbloquea un mundo que lo permite (la
+    Culpa), porque en los demás la tecla no hace nada.
+  - **Habilidades:** las cuatro de los fragmentos, en el orden de los mundos. La integrada se
+    explica con el color de su emoción, sus teclas y el fragmento del que viene. La que falta se
+    ve bloqueada («? ? ?»), con el mundo donde se consigue y sin decir cuál es, igual que «Yo
+    reconstruido» no dice la habilidad de un fragmento que no tienes.
+
+  Arriba, la cuenta: «1 de 4 habilidades integradas». La pantalla se recalcula cada vez que se
+  abre, así que crece con la partida. Una habilidad cuenta como integrada si está en el progreso
+  guardado o si el jugador vivo ya la tiene: tras derrotar al jefe, la guía ya la explica antes
+  de salir del nivel.
+
+### 2. Las teclas salen del asset de input, no del texto
+
+- **Problema.** Si la guía escribiera «Shift» a mano, dejaría de ser verdad el día que cambie la
+  tecla en `InputSystem_Actions`.
+- **Solución.** Los textos nombran acciones entre llaves y `EtiquetasControles` escribe las
+  teclas que tengan asignadas: `{Jump}` → «ESPACIO», `{Attack}` → «CLIC / ENTER», «Mantén
+  {Attack}» → «Mantén CLIC / ENTER». En un compuesto se eligen las partes y sus teclas se
+  emparejan: `{Move/left,right}` → «A D / ← →». Solo se muestran teclado y ratón, como en la
+  ayuda de la pausa. Una prueba comprueba que cada acción nombrada existe y tiene tecla.
+
+### 3. Los textos son datos
+
+- **`GuiaMecanicas`** (`Assets/Data/Habilidades/GuiaMecanicas.asset`): los movimientos, con su
+  nombre, sus teclas, su frase y cuándo aparecen (`SIEMPRE` o `MUNDO_CON_AGACHARSE`). Si falta el
+  asset, la pantalla usa los mismos textos desde el código.
+- **`HabilidadData.controles`**, un campo nuevo en cada habilidad: «Mantén {Attack}», «{Sprint} en
+  el agua», «{Ability}» y «Pasiva».
+- El generador crea la guía y completa ese campo en las habilidades que ya existían, sin pisar lo
+  editado a mano. El prefab de sistemas lleva la guía (`UIManager.guiaMecanicas`), y la escena
+  `Menu_Inicial` se regeneró con el botón (es una escena generada, sin cambios a mano).
+
+### 4. Navegación
+
+- Desde la pausa, la guía **tapa** el menú de pausa en vez de sumarse a él. «Volver» o Esc
+  regresan a la pausa; otro Esc reanuda.
+- Desde el menú principal, «Volver» o Esc la cierran.
+- El juego sigue en PAUSED mientras está abierta: no hay estado nuevo en la FSM global.
+- No se tocan `PlayerController`, `EnemyController` ni `GameManager`.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** crea la guía, completa las teclas de las cuatro habilidades y monta el
+  prefab de sistemas con la guía. La escena del menú se regeneró una vez con
+  `GeneradorProgresion.RegenerarEscenasNavegacion`.
+- **Capturas a 1920 × 1080,** revisadas a ojo, sin progreso y en la pausa del Nivel 1 con tres
+  habilidades: las dos columnas caben dentro del marco y cada tecla cabe en una línea.
+- **Pruebas EditMode: 336 correctas.** Hay 17 nuevas en `GuiaMecanicasTests`:
+  - las teclas de cada acción, leídas del asset (9 casos, también una acción que no existe);
+  - cada texto de la guía y de las habilidades nombra acciones que existen y tienen tecla;
+  - sin progreso: los seis movimientos y las cuatro habilidades bloqueadas, con el mundo donde
+    se consiguen;
+  - con la Ira integrada, el Ataque Cargado con «Mantén CLIC / ENTER», su fragmento y su color;
+  - una habilidad del jugador vivo también cuenta;
+  - agacharse aparece al desbloquear el mundo de la Culpa, y dentro de él;
+  - el generador deja la guía, las teclas de cada habilidad y la guía en el prefab de sistemas;
+  - sin asset, los movimientos del diseño;
+  - el menú principal tiene el botón.
+- **Pruebas PlayMode: 145 correctas.** Hay 3 nuevas en `MenuMecanicasPlayModeTests`:
+  - desde el menú: 0 de 4 habilidades, y 2 de 4 al volver a abrirla con dos integradas;
+  - desde la pausa: tapa el menú, sigue en pausa con el color del mundo, «Volver» y Esc regresan a
+    la pausa, y otro Esc reanuda;
+  - al derrotar al jefe, la guía ya explica el Ataque Cargado.
+
+### Qué probar a mano
+
+- En `Menu_Inicial`, pulsa «Mecánicas»: con una partida nueva verás los seis movimientos y las
+  cuatro habilidades bloqueadas.
+- En el Nivel 1, pausa con Esc y entra en «Mecánicas». Derrota a la Centinela, vuelve a pausar y
+  mira cómo aparece el Ataque Cargado.
+- Los textos se cambian en `Assets/Data/Habilidades/GuiaMecanicas.asset` (movimientos) y en cada
+  habilidad de esa carpeta (campos `descripcion` y `controles`).
+
+---
+
 ## Cinemáticas en pixel art: la cámara y el reproductor (2026-10-06)
 
 Rama `cinematicas-pixel`, que sale de `kael-dash`. Llegó un encargo para montar el sistema de

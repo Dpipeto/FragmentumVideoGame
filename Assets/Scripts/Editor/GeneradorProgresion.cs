@@ -31,6 +31,7 @@ namespace Fragmentum.EditorTools
         public const string RutaEscenaSelector = "Assets/Scenes/Niveles.unity";
         public const string RutaEscenaNivel1 = "Assets/Scenes/Nivel1.unity";
         public const string RutaSistemas = "Assets/Resources/Sistemas.prefab";
+        public const string RutaGuiaMecanicas = "Assets/Data/Habilidades/GuiaMecanicas.asset";
 
         // --- Menús ---
 
@@ -132,6 +133,16 @@ namespace Fragmentum.EditorTools
                 "Durante 3 s, los enemigos que ven no te detectan (los que oyen, sí).", 3f, 8f));
             var defensa = Asset<HabilidadData>("Habilidades/DefensaReforzada", sobrescribir, h => Habilidad(h, HABILIDADES.DEFENSA_REFORZADA, "Defensa Reforzada",
                 "Un escudo absorbe un golpe cada 15 s.", 0f, 15f));
+
+            // Teclas de cada habilidad en la pantalla «Mecánicas». Es un campo posterior: en los
+            // assets que ya existían se completa sin pisar lo que se haya editado a mano.
+            Controles(cargado, "Mantén {Attack}", sobrescribir);
+            Controles(dash, "{Sprint} en el agua", sobrescribir);
+            Controles(invisibilidad, "{Ability}", sobrescribir);
+            Controles(defensa, "Pasiva", sobrescribir);
+
+            // Los movimientos de Kael que explica esa pantalla.
+            Asset<GuiaMecanicas>("Habilidades/GuiaMecanicas", sobrescribir, g => g.movimientos = GuiaMecanicas.MovimientosPorDefecto());
 
             var fIra = Asset<FragmentoData>("Fragmentos/Ira", sobrescribir, f => Fragmento(f, EMOCIONES.IRA, "Fragmento de la Ira", cargado));
             var fTristeza = Asset<FragmentoData>("Fragmentos/Tristeza", sobrescribir, f => Fragmento(f, EMOCIONES.TRISTEZA, "Fragmento de la Tristeza", dash));
@@ -254,6 +265,15 @@ namespace Fragmentum.EditorTools
             h.descripcion = descripcion;
             h.duracion = duracion;
             h.cooldown = cooldown;
+        }
+
+        private static void Controles(HabilidadData h, string controles, bool sobrescribir)
+        {
+            if (sobrescribir || string.IsNullOrEmpty(h.controles))
+            {
+                h.controles = controles;
+                EditorUtility.SetDirty(h);
+            }
         }
 
         // La descripción es neutra a propósito: los textos narrativos son del documento de diseño.
@@ -396,6 +416,7 @@ namespace Fragmentum.EditorTools
                 Asignar(interfaz, "registro", p => p.objectReferenceValue = GeneradorNarrativa.CargarConfiguracionRegistro());
                 var camara = ConstructorCamaraCinematica.Prefab != null ? ConstructorCamaraCinematica.Prefab : ConstructorCamaraCinematica.CrearPrefab();
                 Asignar(interfaz, "camaraCinematica", p => p.objectReferenceValue = camara != null ? camara.GetComponent<CamaraCinematica>() : null);
+                Asignar(interfaz, "guiaMecanicas", p => p.objectReferenceValue = AssetDatabase.LoadAssetAtPath<GuiaMecanicas>(RutaGuiaMecanicas));
                 raiz.AddComponent<AtajosDepuracion>();
                 return PrefabUtility.SaveAsPrefabAsset(raiz, RutaSistemas);
             }
@@ -419,12 +440,13 @@ namespace Fragmentum.EditorTools
             Colocar(subtitulo.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -270f), new Vector2(1200f, 60f));
 
             var columna = FabricaUI.Objeto("Botones", lienzo);
-            Colocar(columna, new Vector2(0.5f, 0.5f), new Vector2(0f, -100f), new Vector2(520f, 500f));
+            Colocar(columna, new Vector2(0.5f, 0.5f), new Vector2(0f, -140f), new Vector2(520f, 600f));
             FabricaUI.Columna(columna, 18f);
             var continuar = FabricaUI.Boton(columna, "Continuar", "Continuar", Hex("8B1A1A"), 78f);
             var nueva = FabricaUI.Boton(columna, "NuevaPartida", "Nueva partida", Hex("5C4033"), 78f);
             var selector = FabricaUI.Boton(columna, "Selector", "Seleccionar mundo", Hex("2C3E50"), 78f);
             var yo = FabricaUI.Boton(columna, "YoReconstruido", "Yo reconstruido", Hex("2D1B4E"), 78f);
+            var mecanicas = FabricaUI.Boton(columna, "Mecanicas", "Mecánicas", Hex("1F3D3A"), 78f);
             var salir = FabricaUI.Boton(columna, "Salir", "Salir", Hex("3A3A4A"), 78f);
 
             var progreso = FabricaUI.Texto(lienzo, "Progreso", string.Empty, 26, new Color(1f, 1f, 1f, 0.7f));
@@ -435,6 +457,7 @@ namespace Fragmentum.EditorTools
             Asignar(menu, "botonNuevaPartida", p => p.objectReferenceValue = nueva);
             Asignar(menu, "botonSelector", p => p.objectReferenceValue = selector);
             Asignar(menu, "botonYoReconstruido", p => p.objectReferenceValue = yo);
+            Asignar(menu, "botonMecanicas", p => p.objectReferenceValue = mecanicas);
             Asignar(menu, "botonSalir", p => p.objectReferenceValue = salir);
             Asignar(menu, "textoProgreso", p => p.objectReferenceValue = progreso);
 

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78fb8a1426076a64fa0aa90cb3014853, type: 3}
+  m_Name: GuiaMecanicas
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.GuiaMecanicas
+  movimientos:
+  - nombre: Moverse
+    controles: '{Move/left,right}'
+    descripcion: Corre a izquierda y derecha.
+    requisito: 0
+  - nombre: Saltar
+    controles: '{Jump}'
+    descripcion: "Mant\xE9n para saltar m\xE1s alto; suelta pronto para un salto corto."
+    requisito: 0
+  - nombre: Doble salto
+    controles: "{Jump} \xD72"
+    descripcion: Un segundo salto en el aire. Se recupera al tocar el suelo o una pared.
+    requisito: 0
+  - nombre: Pared
+    controles: '{Jump}'
+    descripcion: Cayendo junto a una pared, empuja hacia ella para deslizarte despacio. Salta para impulsarte hacia el otro lado.
+    requisito: 0
+  - nombre: Dash
+    controles: '{Sprint}'
+    descripcion: "Un impulso corto y r\xE1pido. En el aire, uno por salto; se recupera al tocar el suelo o una pared."
+    requisito: 0
+  - nombre: Atacar
+    controles: '{Attack}'
+    descripcion: Un tajo de espada hacia delante.
+    requisito: 0
+  - nombre: Agacharse
+    controles: '{Crouch}'
+    descripcion: "Mant\xE9n para cubrirte tras las coberturas y avanzar despacio. Solo en el mundo de la Culpa."
+    requisito: 1

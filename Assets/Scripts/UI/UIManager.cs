@@ -16,7 +16,7 @@ namespace Fragmentum.UI
     /// Interfaz persistente del juego (plan, §3.6: «qué canvas está activo» es un efecto de la
     /// FSM global). Escucha los cambios de estado de <see cref="GameStateMachine"/> y muestra:
     /// - PLAYING: el HUD (solo en los niveles del juego).
-    /// - PAUSED: el HUD y el <see cref="MenuPausa"/>.
+    /// - PAUSED: el HUD y el <see cref="MenuPausa"/>, que puede abrir la <see cref="PantallaMecanicas"/>.
     /// - GAME_OVER: la <see cref="PantallaGameOver"/>.
     /// - LEVEL_COMPLETE: la <see cref="PantallaFinNivel"/>.
     ///
@@ -45,11 +45,15 @@ namespace Fragmentum.UI
         [Tooltip("La cámara de las cinemáticas en pixel art (Assets/Prefabs/Cinematicas). Vacío = se monta por código.")]
         [SerializeField] private CamaraCinematica camaraCinematica;
 
+        [Tooltip("Textos de los movimientos en la pantalla «Mecánicas». Vacío = los del diseño.")]
+        [SerializeField] private GuiaMecanicas guiaMecanicas;
+
         private Hud _hud;
         private MenuPausa _pausa;
         private PantallaGameOver _gameOver;
         private PantallaFinNivel _finNivel;
         private PantallaYoReconstruido _yo;
+        private PantallaMecanicas _mecanicas;
         private PantallaCinematica _cinematica;
         private CamaraCinematica _camaraCinematica;
         private GameObject _sistemaEventos;
@@ -70,6 +74,8 @@ namespace Fragmentum.UI
         public PantallaFinNivel PantallaFinNivel => _finNivel;
 
         public PantallaYoReconstruido YoReconstruido => _yo;
+
+        public PantallaMecanicas Mecanicas => _mecanicas;
 
         public PantallaCinematica Cinematica => _cinematica;
 
@@ -127,6 +133,17 @@ namespace Fragmentum.UI
             _yo.Mostrar(_gestor != null ? _gestor.NivelActual : null);
         }
 
+        /// <summary>
+        /// Abre la guía de mecánicas (desde el menú principal o la pausa). En la pausa la tapa y,
+        /// al cerrarla, la pausa vuelve.
+        /// </summary>
+        public void MostrarMecanicas()
+        {
+            AjustarSistemaEventos();
+            _pausa.Ocultar();
+            _mecanicas.Mostrar(_gestor != null ? _gestor.NivelActual : null);
+        }
+
         private void OnEnable() => _pausaAccion?.Enable();
 
         private void OnDisable() => _pausaAccion?.Disable();
@@ -179,13 +196,19 @@ namespace Fragmentum.UI
 
         /// <summary>
         /// Esc o Start: pausa si se está jugando y reanuda si está en pausa. En una cinemática la
-        /// salta, y con «yo reconstruido» abierto lo cierra.
+        /// salta, y con «yo reconstruido» o las mecánicas abiertas las cierra.
         /// </summary>
         public void AlternarPausa()
         {
             if (_yo.Visible)
             {
                 _yo.Ocultar();
+                return;
+            }
+
+            if (_mecanicas.Visible)
+            {
+                _mecanicas.Cerrar();
                 return;
             }
 
@@ -223,6 +246,11 @@ namespace Fragmentum.UI
             _finNivel.Configuracion = registro;
             _finNivel.Construir();
             _yo = Crear<PantallaYoReconstruido>(lienzo.transform, "YoReconstruido");
+            _mecanicas = FabricaUI.Objeto("Mecanicas", lienzo.transform).gameObject.AddComponent<PantallaMecanicas>();
+            _mecanicas.Guia = guiaMecanicas;
+            _mecanicas.Acciones = acciones;
+            _mecanicas.Construir();
+            _mecanicas.Cerrada += AlCerrarMecanicas;
 
             // La cinemática va encima de todo lo demás.
             _cinematica = FabricaUI.Objeto("Cinematica", lienzo.transform).gameObject.AddComponent<PantallaCinematica>();
@@ -265,6 +293,7 @@ namespace Fragmentum.UI
             Alternar(_gameOver, estado == ESTADOS_JUEGO.GAME_OVER, nivel);
             Alternar(_finNivel, estado == ESTADOS_JUEGO.LEVEL_COMPLETE, nivel);
             _yo.Ocultar();
+            _mecanicas.Ocultar();
 
             if (estado == ESTADOS_JUEGO.CUTSCENE)
             {
@@ -276,6 +305,15 @@ namespace Fragmentum.UI
             else if (_cinematica.Visible)
             {
                 _cinematica.Ocultar();
+            }
+        }
+
+        // Abierta desde la pausa, al cerrarla se vuelve a la pausa.
+        private void AlCerrarMecanicas()
+        {
+            if (_juego != null && _juego.EstadoActual == ESTADOS_JUEGO.PAUSED)
+            {
+                _pausa.Mostrar(_gestor != null ? _gestor.NivelActual : null);
             }
         }
 

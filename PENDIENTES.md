@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.29 — Cinemáticas en pixel art: la presentación del jefe (fase C), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.30 — Guía de mecánicas en los menús, 2026-10-07.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -14,6 +14,8 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 | N15 | **Prueba el golpe del Eco de la Ira**, ahora más rápido. | El ataque va a 1,6×: a1 dura 0,22 s, el golpe 0,08 s y el ataque entero 0,46 s. Descansa 0,45 s entre golpes, antes 0,7. | Pelea con él en el Nivel 1 (x ≈ 12). Si sigue lento, sube `velocidadAtaque` en `EcoIra.prefab → Pivote/Sprite → EnemigoAnimacion` o baja `attackCooldown` en `Assets/Data/Enemigos/EcoIra.asset`. |
 | N18 | **¿Querías el Eco más grande?** En el Nivel 1, el Eco de x = 12,5 tiene escala 1,8 × 1,5. | Lo cambiaste en la escena y lo dejé tal cual. Con una escala distinta en X y en Y, los píxeles del dibujo quedan un 20 % más anchos que altos. Además, ese Eco mide el 90 % de Kael y los demás el 60 %. | Si lo quieres más grande en todo el juego, dime cuánto (por ejemplo, «al 80 % de Kael») y lo cambio en la importación, con la misma escala en X y en Y. Si fue una prueba, vuelve a poner la escala a 1 en la escena. |
 | N20 | **Juega el Nivel 1 con el Golem, las mecánicas y las cinemáticas.** | Ya tienen su arte y su comportamiento nuevo. Mira sobre todo:<br>• si el medio segundo de A1 del Golem se lee y su onda se salta bien;<br>• el ritmo de la torreta (reposo 1,6 s, carga 0,7 s, disparo 0,35 s) y el de la combustión (2 s, 0,8 s y 1 s);<br>• la plataforma inestable (0,6 s agrietada);<br>• los planos del jefe a escala entera;<br>• el dash de Kael. | Los tiempos son públicos: en el inspector de cada prefab de `Assets/Prefabs/Mecanicas`. Los del Golem, en `Assets/Data/Enemigos/GolemCeniza.asset`. Si algo no se lee, dime qué y en qué tiempo. |
+| N23 | **Lee la guía de mecánicas** (menú principal → «Mecánicas», o en la pausa) y corrige lo que no suene a ti. | Los textos son míos: una frase por movimiento y la descripción de cada habilidad. | Los movimientos, en `Assets/Data/Habilidades/GuiaMecanicas.asset`. Las habilidades, en cada asset de esa carpeta (`descripcion` y `controles`). Las teclas van entre llaves, `{Jump}`, y se escriben solas. |
+| N24 | *Para el mundo del Miedo.* **¿Cómo camina Kael despacio con teclado?** | El sigilo del Miedo cuenta como silencioso ir por debajo del 40 % de la velocidad máxima. Con teclado, A y D van siempre a fondo, y en 0,1 s Kael ya corre: solo se puede ir en silencio con mando o soltando la tecla a toques. | Opciones: una tecla para caminar (por ejemplo, Alt); que en ese mundo Kael camine por defecto y corra con otra tecla; o dejarlo así. No bloquea nada hasta la Fase 10. Cuando se decida, la guía tendrá su fila «Sigilo». |
 | N22 | **Mira el encuadre del ojo** en la presentación del jefe: (17, 19) o (0, 0). | El guion dice que el hueco que deja el desplazamiento no se ve, porque el plano ya es negro. Pero el fondo del plano del ojo es RGB (16, 17, 22), no negro, y se ven dos franjas negras: 17 px a la izquierda y 19 abajo. Compara `Docs/Cinematicas/Presentacion_8.5s.png` con `Presentacion_8.5s_sin_encuadre.png`. | Dime cuál prefieres; es el campo `desplazamiento` del último beat de `Cinematica_Jefe_Ira`. No relleno el hueco: sería pintar sobre el arte. |
 | N21 | *Opcional.* **Una fuente bitmap** para el texto de las cinemáticas en pixel art. | Ahora el texto va como en la cinemática inicial, con la fuente del juego, a la escala de la imagen. El guion lo prefería en la rejilla de los planos. | Si quieres el texto en pixel art, pásame una TTF dibujada en rejilla (m5x7 o m6x11, de licencia libre) o una hoja de caracteres y la pongo en el campo `fuente`: el texto pasa solo a la rejilla. |
 | N19 | **Corrige el Anexo A de `Tesis.docx`:** la plataforma de combustión ya no quema por estar encima. | Aceptaste el ciclo fijo del nuevo encargo: apagada → calienta → encendida, sin depender del jugador. El Anexo A dice que quema si te quedas encima más de 2 s. | Yo no toco `Tesis.docx`. Basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». |
@@ -73,6 +75,14 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.30: qué cambió respecto de la v0.29
+
+- **Guía de mecánicas** (rama `menu-mecanicas`): una pantalla «Mecánicas» en el menú principal y en
+  la pausa. Explica los movimientos de Kael con las teclas del asset de input y las cuatro
+  habilidades, que aparecen según se integran.
+- **Nuevos N23** (revisar los textos) **y N24** (cómo ir en sigilo con teclado, para la Fase 10).
+- **B9:** filas nuevas para los íconos de las habilidades y las teclas del mando en la guía.
 
 ## Revisión 0.29: qué cambió respecto de la v0.28
 
@@ -706,6 +716,8 @@ ningún clip importado en la v2.
 | Arte de la pantalla «yo reconstruido» (Kael en el centro) | `PantallaYoReconstruido` | ✗ Hoy es una silueta clara | P2 |
 | UI del registro emocional (escala y campo de texto) | `PantallaFinNivel` | ✔ Montada con uGUI, sin arte (Fase 8) | — |
 | Pantalla de carga / fade | `SceneLoader` | ✗ (negro sólido basta) | P3 |
+| Íconos de las 4 habilidades | `PantallaMecanicas` → `HabilidadData.icono` | ✗ La guía funciona sin ellos: cada habilidad lleva el color de su emoción. | P3 |
+| Teclas del mando en la guía de mecánicas | `EtiquetasControles` | ✗ Hoy solo teclado y ratón, como la ayuda de la pausa. Para el mando harían falta sus íconos (A, B, X, Y). | P3 |
 | Panel de opciones | `MainMenu` | ✗ **No existe**: el botón «Configuration» no hace nada | P3 |
 | Corazones y monedas | HUD | ✔ `Elementos/Corazones.png`, `coins.png`, `Animaciones/hearths.anim`, `Coin.anim` | — |
 | Logo | Menú | ✔ `Images/tituloxd.png` en la v1; falta importarlo en la v2 (hoy el título es texto) | P3 |
@@ -749,6 +761,7 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.30 (2026-10-07)** — Guía de mecánicas en el menú principal y en la pausa, en la rama `menu-mecanicas`. Nuevos N23 (textos de la guía) y N24 (sigilo con teclado).
 - **0.29 (2026-10-06)** — Cinemáticas en pixel art, fase C: la presentación del jefe según su guion. N17 resuelto, N21 opcional, nuevo N22 (encuadre del ojo).
 - **0.28 (2026-10-06)** — Cinemáticas en pixel art, fase B: el sistema por beats y el texto en la rejilla. La fase C espera la fuente (N21).
 - **0.27 (2026-10-06)** — Cinemáticas en pixel art, fase A: la cámara con la Pixel Perfect Camera, en la rama `cinematicas-pixel`. Nuevo N21 (fuente bitmap).
