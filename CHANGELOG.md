@@ -9,6 +9,29 @@
 
 ---
 
+## El build de Windows fallaba por las luces globales (2026-10-07)
+
+- **Problema.** *Build* y *Build and Run* fallaban en medio segundo con cuatro errores «More than
+  one global light on layer Default for light blend style index 0» y «Error building Player: 4
+  errors».
+- **Causa.** Es un fallo de URP 6000.6. Con la opción *Strip 2D Unused Variants* activada, URP
+  abre cada escena del build para ver qué luces 2D usa. La abre **junto** a la escena que está
+  abierta en el Editor. Las tres escenas (`Menu_Inicial`, `Niveles` y `Nivel1`) traen su propia
+  Global Light 2D, como deben. Al juntarse dos, URP registra un error por cada escena, y esto
+  ocurre dos veces. El botón de build del Editor compila en modo estricto, así que cualquier
+  error lo aborta. Desde un script sin modo estricto, el build terminaba con los mismos 4
+  errores.
+- **Solución.** Desactivar *Strip 2D Unused Variants*: `m_Strip2DUnusedVariants: 0` en
+  `Assets/Settings/UniversalRenderPipelineGlobalSettings.asset` (*Project Settings → Graphics →
+  URP → Shader Stripping*). URP deja de analizar las escenas y el build incluye las 64 variantes
+  del shader de luces 2D: cuesta 1 MB (de 254 a 255 MB). No se tocan las escenas: cada una
+  necesita su luz global, porque se cargan de una en una.
+- **Verificación.** Build de Windows en modo estricto con `Menu_Inicial` abierta, como lo hace
+  el Editor: antes, los 4 errores; después, 0 errores, 255 MB y 54 s. El ejecutable arranca sin
+  excepciones.
+
+---
+
 ## Guía de mecánicas en los menús (2026-10-07)
 
 Rama `menu-mecanicas`, que sale de `cinematicas-pixel`. El autor pidió una sección en el menú que
