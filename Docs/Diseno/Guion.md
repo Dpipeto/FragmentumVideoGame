@@ -1,9 +1,14 @@
-# Guion de los mundos — propuesta
+# Guion de los mundos
 
-> **Estado:** propuesta para PENDIENTES N11. Todavía no está en los assets. Si te parece bien (o
-> después de que lo corrijas), lo cargo en `Assets/Data/Narrativa`, en los assets `Dialogos_*` y
-> `Cinematica_Cierre_*`. Ninguna línea toca lo que ya está escrito: la cinemática inicial y la
-> presentación de la Centinela («El que ya estaba aquí») se quedan como están.
+> **Estado:** cargado en el juego (2026-10-07). Los textos viven en
+> `Assets/Scripts/Editor/GuionMundos.cs`, y el generador de narrativa los pone en
+> `Assets/Data/Narrativa`: `Dialogos_*`, `Cinematica_Cierre_*`, `Cinematica_Entrada_Final`,
+> `Cinematica_Final` y las presentaciones de los jefes 2, 3 y 4. La cinemática inicial y la
+> presentación de la Centinela («El que ya estaba aquí») tienen su propio guion y no cambian.
+>
+> **Para corregir una línea**, cámbiala en el asset desde el inspector: el generador solo sustituye
+> los textos provisionales («pendiente de guion») y respeta lo escrito a mano. Si prefieres que
+> la cambie yo, dímelo y la cambio en `GuionMundos.cs` y en este documento.
 
 ## Cómo está escrito
 
@@ -139,9 +144,10 @@ sola y al final:
 
 ## Lo que queda abierto
 
-- **Las presentaciones de los jefes 2, 3 y 4** usarían su línea de «Antes del jefe», como la de la
-  Centinela antes de tener guion propio. Cuando tengan planos, cada una puede tener su guion
+- **Las presentaciones de los jefes 2, 3 y 4** llevan su línea de «Antes del jefe», con el nombre
+  del jefe como título y el de su mundo debajo. Cuando tengan planos, cada una puede tener su guion
   aparte, como «El que ya estaba aquí».
+- **La pregunta final** se queda 6 s en pantalla (los demás textos, 4): no tiene respuesta.
 - **Los ecos de memoria** no suenan todavía: llegan con las memorias interactuables de la Fase 10
   (4 en la Culpa y 4 en el Jardín). Esas memorias necesitarán su propio texto, de unos 5 s cada
   una; lo escribo cuando lleguemos.

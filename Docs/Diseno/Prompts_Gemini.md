@@ -42,8 +42,87 @@ NO transparency checkerboard: the background is plain #FF00FF and nothing else.
 No text, no border, no shadow on the floor.
 ```
 
-**Cuando lleguen:** déjalas en `Tesis/Imagenes/Onda` como `Onda1.jpg`, `Onda2.jpg` y `Onda3.jpg`.
-Las limpio, las meto en el proyecto y sustituyo el rectángulo por la onda animada.
+**Llegaron (2026-10-07) y ya están en el juego.** Las tres venían en orden inverso (la que rompe,
+la que se curva y la que sube) y las ordené así: `Onda1` sube, `Onda2` se curva y `Onda3` rompe.
+La limpieza está en `Imagenes/limpios/script/limpiar_onda.py`, y el prefab
+`Assets/Prefabs/Efectos/OndaDeFuego` viste la onda de suelo, la doble y las del salto.
+
+Dos cosas que no salieron como se pidió:
+- **El tamaño.** Gemini la dibujó con unos 225 píxeles de ancho, no 60. A la escala de la Centinela
+  (49 px/u) mediría 4,7 × 2,4 u, más alta que el salto de Kael. Entra a 98 px/u, con píxeles de la
+  mitad de tamaño que los de la Centinela. Así mide 2,4 × 1,2 u, y la roca de su cresta, lo que su
+  zona de daño (0,9 u).
+- **La posición.** Cada imagen tenía el suelo y el frente en un sitio distinto, y una de ellas era
+  de 1024 px. Se alinearon por la línea de suelo y por el frente de la roca, sin reescalar nada.
+
+---
+
+## Las erupciones de la Centinela
+
+**Qué es en el juego:** en la fase 2 la Centinela clava la espada y brotan tres columnas de lava,
+una bajo el jugador y dos alrededor. Cada columna mide 1,6 u de ancho y 5 u de alto. Primero
+avisa unos 0,3 s sin hacer daño y después quema 0,9 s. Hoy se ve como un rectángulo naranja que
+late. Brota del suelo o de la plataforma donde esté Kael, así que su base no puede llevar un
+trozo de suelo pegado.
+
+### Primera tanda (2026-10-07): no entró
+
+Llegaron cinco imágenes, solo por el chat, y no cuadraban entre sí:
+- **Dos rejillas distintas.** El aviso (1) y el colapso (5) tienen píxeles de unos 40 px; la 2, la
+  3 y la 4, de unos 20 px. Ninguna siguió los 8 px pedidos.
+- **Suelo en la 2.** Trae un montículo de roca debajo, y además es una explosión ancha, no una
+  columna. La erupción brota también en las plataformas: no puede llevar suelo.
+- **Una columna corta.** La de la 3 y la 4 mide unas 38 × 70 de esos píxeles. Para llenar su zona
+  de daño (1,6 × 5 u) habría que verla con píxeles 3,5 veces los de la Centinela.
+
+Lo bueno: la columna de la 3 tiene el estilo que queremos. Si la guardaste, adjúntala como
+referencia de estilo en la segunda tanda.
+
+### Segunda tanda: prompt corregido
+
+Gemini dibuja solo con bloques de unos 16-20 px, así que el prompt se adapta a eso: **128
+píxeles de arte a lo ancho del lienzo** (bloques de 16 px). La erupción entra entonces a 24 px/u,
+el mismo tamaño de píxel que el Golem, la torreta y la bola de fuego. A esa escala, 38 píxeles son
+sus 1,6 u de ancho y 120 píxeles, sus 5 u de alto.
+
+**Pídelas de una en una, en el mismo chat.** Empieza con el prompt de abajo para la imagen 3; para
+las demás escribe «Same canvas, same 16-pixel blocks, same column position as the previous image.
+Now draw image N: …» con el texto de esa imagen. Así no cambia la rejilla entre una y otra.
+
+**Adjunta:** la onda nueva, `Tesis/Imagenes/Onda/Onda2.jpg`, para la paleta; y la columna de la
+primera tanda, si la guardaste.
+
+```text
+Pixel art game sprite, side view, 2048×2048 canvas, flat solid #FF00FF magenta background.
+The canvas is EXACTLY 128 art pixels across: every art pixel is a 16×16 block, in EVERY image.
+Same palette as the attached lava wave: dark basalt, deep red, orange, and only a few
+yellow-white hot pixels.
+
+Draw a VERTICAL ERUPTION OF LAVA bursting up from the floor: a narrow pillar 38 art pixels wide
+and up to 120 art pixels tall, centered horizontally on the canvas. Its bottom row is flat and
+sits on row 124 of 128, centered at column 64. NOTHING below that row and NOTHING around its base:
+no ground, no mound, no rocks lying on the floor. It must work on any floor or thin platform.
+
+Image 3, FULL: the pillar at full height (120 art pixels), molten core brighter at the bottom,
+ragged flame edges, the top breaking into a few droplets. Width 38 art pixels from bottom to top.
+
+The other images, one at a time, same canvas, same blocks, same base row and column:
+1. WARNING: only a glowing crack on the bottom row, 38 art pixels wide, and three or four ember
+   pixels rising. No column, at most 8 art pixels tall.
+2. BURST: the pillar at half height (60 art pixels), 38 wide, a few droplets flying up.
+4. FULL, second variant: same size and silhouette as image 3, flames and droplets shifted, so 3
+   and 4 can flicker in a loop.
+5. COLLAPSE: the pillar falling apart, about 40 art pixels tall, droplets raining down.
+
+Hard-edged opaque pixels only. NO blur, NO glow halo, NO soft magenta edge, NO semi-transparent
+smoke, NO gradient. NO transparency checkerboard: the background is plain #FF00FF and nothing
+else. No text, no border, no shadow on the floor.
+```
+
+**Cuando lleguen:** guárdalas en `Tesis/Imagenes/Erupcion` como `Erupcion1.jpg` …
+`Erupcion5.jpg`, en ese orden, y avísame. Hace falta tenerlas en disco: las del chat no se pueden
+procesar. El aviso usará la 1; luego vienen la 2, la 3 y la 4 en bucle mientras quema, y la 5 al
+apagarse.
 
 ---
 

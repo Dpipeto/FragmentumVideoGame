@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.DialogueData
   lineas:
   - hablante: Kael
-    texto: "[Apertura \xB7 Esperanza \xB7 pendiente de guion] Kael nombra la esperanza al entrar en Jard\xEDn Et\xE9reo."
+    texto: "Por primera vez nada quiere herirme. Me cuesta creerlo. Quiz\xE1 as\xED empieza la Esperanza."
     momento: 0
     duracion: 4.5
   - hablante: Kael
-    texto: "[Eco de memoria \xB7 Esperanza \xB7 pendiente de guion]"
+    texto: "Una casa con flores en la ventana. Antes de la guerra, \xE9l tambi\xE9n re\xEDa."
     momento: 1
     duracion: 4.5
   - hablante: Kael
-    texto: "[Cierre \xB7 Esperanza \xB7 pendiente de guion] Kael reconoce la esperanza como parte de s\xED."
+    texto: "Cada fragmento encontr\xF3 su sitio. La Esperanza no borra lo que pas\xF3: lo deja crecer en otro lugar."
     momento: 3
     duracion: 4.5

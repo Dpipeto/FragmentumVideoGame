@@ -54,6 +54,8 @@ namespace Fragmentum.EditorTools
             // El arte de la Centinela va antes que los prefabs de jefes, que lo usan (y usan el
             // material de destello del Eco).
             ok &= ConstructorCentinela.Construir();
+            // Los efectos de sus ataques (la onda), antes que los patrones, que los llevan.
+            ok &= ConstructorEfectos.Construir();
             ok &= GeneradorJefes.Construir();
             // Si algo del arte de la Centinela no cuadra (un sprite reimportado sin sus ajustes,
             // un clip o el prefab tocados a mano), la regeneración falla con su nombre.

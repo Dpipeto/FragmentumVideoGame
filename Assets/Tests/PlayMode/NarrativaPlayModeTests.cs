@@ -202,7 +202,8 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual("Ira", registro.Entradas[0].emocion);
             Assert.AreEqual(1, registro.Entradas[0].nivel);
             StringAssert.Contains(";Ira;4;", File.ReadAllText(registro.RutaCsv), "Se exporta también a CSV.");
-            StringAssert.Contains("Cierre", fin.LineaCierre, "La línea de cierre de Kael acompaña al fragmento.");
+            StringAssert.Contains(Nivel1.dialogos.Del(MOMENTOS_DIALOGO.CIERRE)[0].texto, fin.LineaCierre, "La línea de cierre de Kael acompaña al fragmento.");
+            StringAssert.Contains("Ira", fin.LineaCierre, "Y nombra la emoción del mundo.");
         }
 
         [UnityTest]
@@ -234,7 +235,7 @@ namespace Fragmentum.Tests.PlayMode
             Interfaz.AlternarPausa(); // Esc: saltar la cinemática
             yield return EsperarHasta(() => Interfaz.Hud.LineaActual.Length > 0, 2f, "la línea de apertura");
 
-            StringAssert.Contains("Apertura", Interfaz.Hud.LineaActual);
+            StringAssert.Contains("Este calor no es mío", Interfaz.Hud.LineaActual, "La apertura del guion.");
             StringAssert.Contains("Ira", Interfaz.Hud.LineaActual, "La línea nombra la emoción del mundo.");
             Assert.AreEqual("KAEL", Interfaz.Hud.HablanteActual);
         }
@@ -247,7 +248,7 @@ namespace Fragmentum.Tests.PlayMode
             DialogueManager.Instancia.Limpiar();
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
 
-            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            yield return LlevarJugadorA(EnElSuelo(arena.transform.position));
             Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar en la arena, la presentación del jefe.");
 
             // El guion: Kael habla a los 4 s; el nombre del jefe es el rótulo del final (lo comprueba CinematicaJefe1Tests).

@@ -45,16 +45,16 @@ MonoBehaviour:
   - nombre: "Secci\xF3n 1"
     desdeX: 0
     hastaX: 25
-    contenido: Terreno abierto. Plataformas inestables. 3 Soldados de lava y 1 torreta de fuego fija.
+    contenido: Terreno abierto. Plataformas inestables. 3 Ecos de la Ira y 1 torreta de fuego fija.
   - nombre: "Secci\xF3n 2"
     desdeX: 25
     hastaX: 55
-    contenido: "Plataformeo sobre lava y plataformas de combusti\xF3n. 4 Soldados de lava y el Golem de Ceniza. Checkpoint en x = 40."
+    contenido: "Plataformeo sobre lava y plataformas de combusti\xF3n. 4 Ecos de la Ira y el Golem de Ceniza. Checkpoint en x = 43."
   - nombre: Arena del jefe
     desdeX: 55
     hastaX: 80
-    contenido: "Sala cerrada de 60 \xD7 15 u, plataformas a 3 alturas y lava en el suelo."
+    contenido: "Sala cerrada de 25 \xD7 15 u con plataformas a 3 alturas. La lava brota en las erupciones; el suelo es firme."
   puntosDeControl:
-  - 40
+  - 43
   acento: {r: 1, g: 0.41960785, b: 0.20784314, a: 1}
   cita: la rabia consume al que la niega

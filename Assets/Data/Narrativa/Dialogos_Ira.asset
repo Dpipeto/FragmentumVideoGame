@@ -14,18 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.DialogueData
   lineas:
   - hablante: Kael
-    texto: "[Apertura \xB7 Ira \xB7 pendiente de guion] Kael nombra la ira al entrar en Fortaleza Volc\xE1nica."
+    texto: "Este calor no es m\xEDo\u2026 y aun as\xED me empuja a correr. Si esto es la Ira, alguien la dej\xF3 encendida."
     momento: 0
     duracion: 4.5
   - hablante: Kael
-    texto: "[Eco de memoria \xB7 Ira \xB7 pendiente de guion]"
+    texto: "Una voz grita \xF3rdenes que no entiendo. Mis manos s\xED las entienden: se cierran solas."
     momento: 1
     duracion: 4.5
   - hablante: Centinela Ardiente
-    texto: "[Antes del jefe \xB7 Ira \xB7 pendiente de guion] Centinela Ardiente encarna la ira."
+    texto: "\xC9l me dej\xF3 aqu\xED para que nadie tocara su rabia. T\xFA tampoco la tocar\xE1s."
     momento: 2
     duracion: 4.5
   - hablante: Kael
-    texto: "[Cierre \xB7 Ira \xB7 pendiente de guion] Kael reconoce la ira como parte de s\xED."
+    texto: "La Ira no era el fuego. Era lo que \xE9l nunca dijo. La llevo conmigo, pero ya no me lleva ella."
     momento: 3
     duracion: 4.5

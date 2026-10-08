@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using Fragmentum.Core;
 using Fragmentum.Core.Juego;
 using Fragmentum.Core.Save;
@@ -46,7 +47,7 @@ namespace Fragmentum.Tests.PlayMode
             yield return EntrarEnNivel1();
             var checkpoint = PrimerCheckpoint;
             Assert.AreEqual("L1_CP1", checkpoint.Id);
-            Assert.AreEqual(40f, checkpoint.transform.position.x, 0.01f, "Anexo A: checkpoint en x = 40.");
+            Assert.AreEqual(Nivel1.puntosDeControl[0], checkpoint.transform.position.x, 0.01f, "El checkpoint del diseño, tras la subida.");
 
             yield return LlevarJugadorA(checkpoint.PuntoReaparicion);
 
@@ -64,7 +65,7 @@ namespace Fragmentum.Tests.PlayMode
         {
             yield return EntrarEnNivel1();
             yield return LlevarJugadorA(PrimerCheckpoint.PuntoReaparicion);
-            yield return LlevarJugadorA(new Vector2(55f, 0.05f));
+            yield return LlevarJugadorA((Vector2)PrimerCheckpoint.PuntoReaparicion + new Vector2(4f, 0f));
 
             Jugador.Vida.Matar();
             yield return EsperarEstado(ESTADOS_JUEGO.GAME_OVER, 3f);
@@ -79,7 +80,7 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual);
             Assert.IsFalse(Interfaz.PantallaGameOver.Visible);
             Assert.IsTrue(Jugador.EstaVivo);
-            Assert.AreEqual(40f, Jugador.transform.position.x, 0.5f, "Reaparece en el checkpoint, no al principio.");
+            Assert.AreEqual(Nivel1.puntosDeControl[0], Jugador.transform.position.x, 0.5f, "Reaparece en el checkpoint, no al principio.");
             Assert.AreEqual(ESTADOS_JUGADOR.IDLE, Jugador.EstadoActual);
         }
 
@@ -88,7 +89,7 @@ namespace Fragmentum.Tests.PlayMode
         {
             yield return EntrarEnNivel1();
             var inicio = Nivel.Checkpoints.PuntoInicio;
-            yield return LlevarJugadorA(new Vector2(20f, 0.05f));
+            yield return LlevarJugadorA(new Vector2(8f, 0.05f));
 
             Jugador.Vida.Matar();
             yield return EsperarEstado(ESTADOS_JUEGO.GAME_OVER, 3f);
@@ -151,7 +152,7 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 6f);
 
             Assert.AreEqual("L1_CP1", Nivel.Checkpoints.Activo != null ? Nivel.Checkpoints.Activo.Id : null);
-            Assert.AreEqual(40f, Jugador.transform.position.x, 0.5f, "Se continúa desde el checkpoint, no desde el principio.");
+            Assert.AreEqual(Nivel1.puntosDeControl[0], Jugador.transform.position.x, 0.5f, "Se continúa desde el checkpoint, no desde el principio.");
         }
 
         [UnityTest]
@@ -164,7 +165,7 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsFalse(salida.Abierta, "Con el jefe vivo, la salida está cerrada: no se puede esquivar el combate.");
             Assert.IsFalse(arena.PuertasCerradas);
 
-            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            yield return LlevarJugadorA(EnElSuelo(arena.transform.position));
 
             // Primero, la presentación: los planos del jefe y el diálogo antes del combate.
             Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar, la cinemática del jefe.");
@@ -186,6 +187,11 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsTrue(arena.PuertasCerradas, "La puerta se cierra detrás del jugador.");
             Assert.IsTrue(Interfaz.Hud.JefeVisible, "El HUD muestra la vida del jefe.");
             StringAssert.Contains("CENTINELA ARDIENTE", Interfaz.Hud.NombreJefe);
+
+            var cuerpoJefe = arena.Jefe.GetComponent<Collider2D>();
+            Assert.IsNotEmpty(arena.Plataformas);
+            Assert.IsTrue(arena.Plataformas.All(p => Physics2D.GetIgnoreCollision(cuerpoJefe, p)),
+                "La Centinela (3,4 u) atraviesa las plataformas de la arena: no se queda atascada debajo.");
         }
 
         [UnityTest]
@@ -194,7 +200,7 @@ namespace Fragmentum.Tests.PlayMode
             yield return EntrarEnNivel1();
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
             var salida = Object.FindAnyObjectByType<SalidaNivel>();
-            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            yield return LlevarJugadorA(EnElSuelo(arena.transform.position));
             yield return SaltarCinematicaSiHay();
             Assert.IsFalse(Jugador.Habilidades.Tiene(HABILIDADES.ATAQUE_CARGADO));
 
@@ -219,7 +225,7 @@ namespace Fragmentum.Tests.PlayMode
             CollectionAssert.DoesNotContain(Gestor.Datos.fragmentos, "IRA");
 
             // Tarea C: al recoger el fragmento se otorgan el fragmento y la habilidad, en el acto.
-            yield return LlevarJugadorA(new Vector2(arena.Jefe.Fragmento.Centro.x, 0.05f));
+            yield return LlevarJugadorA(new Vector2(arena.Jefe.Fragmento.Centro.x, arena.transform.position.y + 0.05f));
             CollectionAssert.Contains(Gestor.Datos.fragmentos, "IRA");
             Assert.IsTrue(Jugador.Habilidades.Tiene(HABILIDADES.ATAQUE_CARGADO), "El Ataque Cargado se puede usar ya, antes de salir.");
             CollectionAssert.Contains(new SaveSystem(CarpetaGuardado).Cargar().fragmentos, "IRA", "Y queda guardado.");
@@ -231,7 +237,7 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsFalse(arena.PuertasCerradas);
             Assert.IsTrue(salida.Abierta, "Tras la derrota aparece la salida.");
 
-            yield return LlevarJugadorA(new Vector2(salida.transform.position.x, 0.05f));
+            yield return LlevarJugadorA(EnElSuelo(salida.transform.position));
 
             Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Primero, la cinemática de cierre del mundo.");
             yield return SaltarCinematicaSiHay();
@@ -254,7 +260,7 @@ namespace Fragmentum.Tests.PlayMode
         {
             yield return EntrarEnNivel1();
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
-            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            yield return LlevarJugadorA(EnElSuelo(arena.transform.position));
             Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "La primera vez, la presentación del jefe.");
             yield return SaltarCinematicaSiHay();
             arena.Jefe.Vida.RecibirGolpe(new Fragmentum.Core.Combate.Golpe(10, arena.Jefe.Centro));
@@ -277,7 +283,7 @@ namespace Fragmentum.Tests.PlayMode
                 yield return new WaitForFixedUpdate();
             }
 
-            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            yield return LlevarJugadorA(EnElSuelo(arena.transform.position));
             Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual, "Al reintentar, la presentación no se repite.");
             Assert.IsTrue(arena.EnCombate, "Se puede volver a entrar, y el combate empieza en el acto.");
         }

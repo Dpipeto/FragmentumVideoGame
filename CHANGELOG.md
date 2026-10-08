@@ -9,6 +9,135 @@
 
 ---
 
+## Nivel 1 montado, guion cargado y la onda de la Centinela (2026-10-07)
+
+Rama `nivel1-montado`, que sale de `ajustes-pendientes`. El autor aprobó el diseño del Nivel 1 y
+el guion («móntalo y carga el guion») con las tres decisiones del Anexo A que se le propusieron, y
+mandó las tres imágenes de la onda. Pidió también el prompt de las erupciones; su primera tanda
+llegó, pero no entró (punto 4).
+
+### 1. El Nivel 1, con su recorrido de diseño
+
+- **Problema.** El Nivel 1 se jugaba sobre el recorrido provisional de la Fase 6: un suelo plano
+  con dos fosos, un Eco y el Golem. No enseñaba nada ni decía nada de la Ira.
+- **Causa.** El diseño del nivel faltaba (PENDIENTES N10). Ya estaba escrito y aprobado
+  (`Docs/Diseno/Nivel1_Diseno.md`): la Ira empuja a correr y el nivel enseña a contenerla; cada
+  peligro sale primero sin riesgo, luego sobre lava y luego junto a enemigos.
+- **Solución.**
+  - **El diseño como datos:** `DisenoNivel1` (suelos, muros, plataformas de la arena, lava,
+    mecánicas, enemigos con su ruta, checkpoint, arena y salida). Lo montan `PreparadorNivel` y
+    lo comprueban las pruebas. Un paso nuevo del preparador sustituye el provisional, y lo que se
+    colocó para él, por el recorrido; solo la primera vez, así que sigue siendo idempotente.
+  - **Las piezas reales no cabían en el esquema.** La plataforma de combustión mide 3,42 u y la
+    inestable, 3,83; el esquema las dibujaba de 1,8 y 1,6. El lago pasa de 6 a 9 u, la subida
+    lleva una inestable y no dos, y el checkpoint queda en x 43 (en la propuesta, 41).
+  - **Todos los bordes, en unidades enteras.** El tileset pinta celdas enteras: un bloque que
+    acababa a media unidad se dibujaba medio tile fuera de su colisión, como un saliente que no
+    se puede pisar.
+  - **La lava, detrás del suelo y apoyada en su cuenca.** Sus franjas miden 3,15 u y los huecos,
+    lo que pide el recorrido; por detrás de las orillas, lo que sobra no se ve. Las plataformas de
+    combustión quedan en pie dentro de ella.
+  - **Los Ecos, a la escala que les dio el autor** (1,8 × 1,5) y de pie en su suelo.
+  - **La torreta, espejada:** dispara hacia el jugador que llega. Las dos de combustión van
+    desfasadas medio ciclo: cuando una se calienta, la otra se apaga.
+  - **El pintor** reconoce el recorrido, decora sobre cualquier suelo grueso y deja la arena sin
+    decoración. La primera regeneración dejó el nivel sin decoración, por dos motivos:
+    - **el paso fijo:** buscaba sitio cada 9 u y, entre tantos enemigos, caía siempre en uno;
+    - **una malla vieja:** contaba como ocupado el plano de malla que quedó del proyecto original
+      junto al inicio.
+
+    Ahora busca unidad a unidad y solo esquiva sprites.
+
+### 2. La Centinela, en una arena con plataformas
+
+- **Problema.** La arena nueva tiene plataformas a tres alturas (Anexo A), la más baja a 3 u del
+  suelo. La Centinela mide 3,4 u: chocando con ellas se habría quedado atascada debajo. Y su salto
+  apuntaba a la superficie bajo el jugador, así que habría saltado encima de las plataformas.
+  Además las erupciones buscaban el suelo desde 2 u por encima del jugador: con el jugador debajo
+  de una plataforma, brotaban encima de ella.
+- **Causa.** El jefe se probó en arenas planas: la provisional tenía una sola plataforma.
+- **Solución.**
+  - **`ArenaJefe.plataformas`:** el jefe ignora su colisión (`Physics2D.IgnoreCollision`).
+  - **`BossController.SueloPisableEn`:** el salto cae en el suelo que el jefe pisa, y por eso
+    subirse a una plataforma es esquivarlo. Es lo que el diseño quería que enseñaran.
+  - **`SueloEn` busca desde el centro del jugador:** las erupciones brotan bajo sus pies, también
+    en una plataforma, y obligan a bajar.
+  - **Las ondas se rompen contra la pared** en lugar de atravesarla (`PatronAtaque.RecorridoEnArena`).
+
+### 3. La onda de la Centinela, con su arte
+
+- **Problema.** La onda de suelo y las del salto se veían como rectángulos naranjas.
+- **Causa.** Faltaba su dibujo. Llegó con dos problemas:
+  - **Escala:** cuatro veces más grande de lo pedido (unos 225 píxeles de arte de ancho, no 60).
+  - **Encuadre:** cada imagen con el suelo y el frente en un sitio distinto. Una era de 1024 px,
+    con otra rejilla.
+- **Solución.**
+  - **Una limpieza nueva,** `Tesis/Imagenes/limpios/script/limpiar_onda.py`, sin scipy. Cada
+    imagen se baja a su rejilla nativa (270 o 256 píxeles a lo ancho, medidos). Luego se alinean
+    por la línea de suelo y por el frente de la roca en un lienzo común de 232 × 119, sin
+    reescalar nada.
+  - **A 98 px/u,** el doble que la Centinela. A 49 la onda mediría 4,7 × 2,4 u, más alta que el
+    salto de Kael. A 98 mide 2,4 × 1,2 u, y la roca de su cresta coincide con su zona de daño
+    (0,9 u), que no cambia: la pelea ya estaba aprobada.
+  - **`ConstructorEfectos`** hace su clip en bucle (sube, se curva, rompe), su controlador y el
+    prefab `OndaDeFuego`. **`ZonaDeDanio.Vestir`** lo pone en la zona con el pivote en su borde
+    delantero, espejado si va a la izquierda.
+  - **Los patrones de la onda** (`efecto`) y del salto (`efectoOndas`) lo llevan. El generador de
+    jefes rellena el campo si está vacío.
+
+### 4. Las erupciones: la primera tanda no entró
+
+- **Problema.** Llegaron cinco imágenes de la erupción, solo por el chat, y no cuadraban:
+  - **dos tamaños de píxel:** el aviso y el colapso, el doble de grandes que las demás;
+  - **suelo en la imagen de la explosión,** y la erupción brota también en las plataformas;
+  - **una columna corta:** para llenar su zona de daño (1,6 × 5 u), sus píxeles tendrían que ser
+    3,5 veces los de la Centinela.
+- **Causa.** El prompt pedía 256 píxeles de arte a lo ancho, y Gemini dibuja con bloques de unos
+  16-20 px.
+- **Solución.** No se integran. Hay un prompt corregido en `Docs/Diseno/Prompts_Gemini.md`:
+  - **128 píxeles a lo ancho,** para entrar a 24 px/u como el Golem y la torreta;
+  - **sin suelo;**
+  - **una imagen cada vez** en el mismo chat (PENDIENTES N27).
+
+### 5. El guion, cargado
+
+- **Problema.** Las cinemáticas de cierre y los diálogos decían «pendiente de guion».
+- **Causa.** El guion faltaba (N11). Ya estaba escrito y aprobado (`Docs/Diseno/Guion.md`).
+- **Solución.**
+  - **`GuionMundos` tiene los textos.**
+  - **El generador de narrativa los pone** en los diálogos, los cierres, la entrada al final, el
+    final y las presentaciones de los jefes 2, 3 y 4. Solo sustituye lo provisional: lo escrito a
+    mano en un asset, o una cinemática con imágenes, se respeta.
+  - **La pregunta final se queda 6 s,** sola y al final.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»:**
+  - monta el Nivel 1 y lo pinta;
+  - importa la onda y crea su clip y su prefab;
+  - carga el guion.
+
+  Volver a ejecutarlo no cambia nada.
+- **Pruebas EditMode: 360 correctas de 360.**
+  - **Nuevas:**
+    - `DisenoNivel1Tests`, con las medidas reales de Kael: que cada pisada se alcanza desde la
+      anterior, el hueco más largo, las plataformas de la arena, los bordes enteros, la lava sobre
+      su cuenca y los recuentos del Anexo A;
+    - `OndaArteTests`: el lienzo, el pivote sobre el frente de la roca, el clip, el prefab y los
+      patrones;
+    - cuatro del guion: ningún placeholder, las líneas de cada mundo, las cinemáticas y las
+      presentaciones.
+  - **Reescritas:** las de la escena del Nivel 1, para el recorrido, los enemigos, las mecánicas y
+    la arena.
+- **Pruebas PlayMode: 147 correctas de 147.**
+  - **Nuevas:** la onda vestida, espejada y rota contra la pared, y el suelo del salto frente al de
+    las erupciones con una plataforma.
+  - **Al día:** las del flujo del nivel, ahora con el suelo a varias alturas, y que la Centinela
+    atraviesa las plataformas de la arena.
+
+---
+
 ## Respuestas a la prueba del Nivel 1 (2026-10-07)
 
 Rama `ajustes-pendientes`, que sale de `menu-mecanicas`. El autor jugó el Nivel 1 y respondió

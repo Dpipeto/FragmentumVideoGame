@@ -14,18 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.DialogueData
   lineas:
   - hablante: Kael
-    texto: "[Apertura \xB7 Miedo \xB7 pendiente de guion] Kael nombra el miedo al entrar en Bosque Tenebroso."
+    texto: "No veo mis propios pasos. Algo respira entre los \xE1rboles\u2026 o soy yo. Esto es el Miedo."
     momento: 0
     duracion: 4.5
   - hablante: Kael
-    texto: "[Eco de memoria \xB7 Miedo \xB7 pendiente de guion]"
+    texto: "Una trinchera. Un silencio demasiado largo. \xC9l se qued\xF3 quieto para que no lo encontraran."
     momento: 1
     duracion: 4.5
   - hablante: Espectro del Pavor
-    texto: "[Antes del jefe \xB7 Miedo \xB7 pendiente de guion] Espectro del Pavor encarna el miedo."
+    texto: "\xC9l aprendi\xF3 a desaparecer para seguir vivo. Yo soy todo lo que dej\xF3 escondido."
     momento: 2
     duracion: 4.5
   - hablante: Kael
-    texto: "[Cierre \xB7 Miedo \xB7 pendiente de guion] Kael reconoce el miedo como parte de s\xED."
+    texto: "El Miedo no se fue: dej\xF3 de decidir por m\xED. Puedo andar en la sombra sin perderme en ella."
     momento: 3
     duracion: 4.5

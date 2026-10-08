@@ -11,8 +11,9 @@ namespace Fragmentum.Core.Combate
     /// - <b>Desaparece sola</b> al acabar su duración.
     ///
     /// El daño lo reparte un <see cref="Hitbox"/>, así que respeta las capas, los i-frames y los
-    /// escudos como cualquier otro golpe. Sin VFX todavía: se dibuja como un rectángulo de color
-    /// (PENDIENTES B5), salvo que se cree sin dibujo porque el golpe ya lo enseña una animación.
+    /// escudos como cualquier otro golpe. Se dibuja como un rectángulo de color, salvo que se
+    /// cree sin dibujo porque el golpe ya lo enseña una animación (el espadazo) o porque lleva
+    /// su propio dibujo dentro (<see cref="Vestir"/>, la onda).
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D), typeof(Hitbox))]
     public class ZonaDeDanio : MonoBehaviour
@@ -75,6 +76,29 @@ namespace Fragmentum.Core.Combate
             efecto.Configurar(aviso, duracion, velocidad, color);
             objeto.SetActive(true);
             return efecto;
+        }
+
+        /// <summary>
+        /// Pone dentro de la zona el dibujo de su ataque (un prefab con su animación, como la
+        /// onda de la Centinela) en lugar del rectángulo. El pivote del dibujo es su frente en el
+        /// suelo: cae en el borde de la zona que va por delante y en su base. Mirando a la
+        /// izquierda (<paramref name="direccion"/> &lt; 0) se espeja. Sin prefab no hace nada.
+        /// </summary>
+        public GameObject Vestir(GameObject dibujo, int direccion)
+        {
+            if (dibujo == null)
+            {
+                return null;
+            }
+
+            var lado = direccion < 0 ? -1f : 1f;
+            var tamano = Tamano;
+            var objeto = Instantiate(dibujo, transform);
+            objeto.name = dibujo.name;
+            objeto.transform.localPosition = new Vector3(lado * tamano.x * 0.5f, -tamano.y * 0.5f, 0f);
+            var escala = objeto.transform.localScale;
+            objeto.transform.localScale = new Vector3(Mathf.Abs(escala.x) * lado, escala.y, escala.z);
+            return objeto;
         }
 
         private void Configurar(float aviso, float duracion, Vector2 velocidad, Color color)

@@ -17,9 +17,11 @@ MonoBehaviour:
   aviso: 0.6
   danio: 1
   color: {r: 0.8, g: 0.26666668, b: 0, a: 1}
+  dibujarZona: 1
   velocidadOnda: 9
   alcance: 16
   tamanoOnda: {x: 0.8, y: 0.9}
+  efecto: {fileID: 7750765647306390002, guid: 0c32d1d154024434c80ce5ad06f52805, type: 3}
   haciaAmbosLados: 1
   repeticiones: 1
   intervalo: 0.55

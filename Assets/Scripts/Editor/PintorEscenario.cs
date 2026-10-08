@@ -40,6 +40,7 @@ namespace Fragmentum.EditorTools
         private const float FinoMaximo = 0.6f; // por debajo de este alto, un bloque es una plataforma fina
         private const int OrdenTiles = 0;      // Kael va en el 10
         private const int OrdenDecoracion = -1;
+        private const float SeparacionDecoracion = 4f; // aire entre dos piezas de decoración
 
         // Piezas del tileset: (columna, fila contando desde arriba), en celdas de 32 px.
         private static readonly Vector2Int Ladrillo = new Vector2Int(3, 6);       // 3×3
@@ -165,11 +166,15 @@ namespace Fragmentum.EditorTools
         /// <summary>¿Ya tiene la escena su escenario pintado?</summary>
         public static bool EstaPintada(Scene escena) => escena.GetRootGameObjects().Any(o => o.name == NombreRaiz);
 
-        /// <summary>El objeto que agrupa los bloques: «Provisional…» en un nivel, «Nivel» en una escena de prueba.</summary>
+        /// <summary>
+        /// El objeto que agrupa los bloques: «Recorrido» en un nivel con su diseño montado,
+        /// «Provisional…» en uno sin él, «Nivel» en una escena de prueba.
+        /// </summary>
         public static Transform RaizDeBloques(Scene escena)
         {
             var raices = escena.GetRootGameObjects();
-            var raiz = raices.FirstOrDefault(o => o.name == PreparadorNivel.NombreProvisional);
+            var raiz = raices.FirstOrDefault(o => o.name == PreparadorNivel.NombreRecorrido)
+                       ?? raices.FirstOrDefault(o => o.name == PreparadorNivel.NombreProvisional);
             if (raiz == null)
             {
                 raiz = raices.FirstOrDefault(o => o.name == "Nivel" && o.GetComponent<Grid>() == null);
@@ -299,23 +304,28 @@ namespace Fragmentum.EditorTools
         private static void Decorar(Scene escena, Tilemap mapa, Dictionary<Vector2Int, TileBase> tiles, List<Bloque> bloques, Transform raizBloques)
         {
             var ocupado = ZonasOcupadas(escena, raizBloques);
-            var suelos = bloques.Where(b => b.EsSueloARas).OrderBy(b => b.Rect.xMin).ToList();
-
-            // Ni debajo de una plataforma ni contra una pared: la decoración no debe parecer que choca.
-            var obstaculos = bloques.Where(b => !b.EsSueloARas).Select(b => b.Rect).ToList();
+            var suelos = bloques.Where(b => b.EsSueloGrueso).OrderBy(b => b.Rect.xMin).ToList();
             var estatuaPuesta = false;
             var turno = 0;
 
             foreach (var suelo in suelos)
             {
-                for (var x = Mathf.Ceil(suelo.Rect.xMin) + 3f; x + 6f <= suelo.Rect.xMax; x += 9f)
+                // Ni debajo de una plataforma, ni contra una pared, ni encima de un escalón: la
+                // decoración no debe parecer que choca. Todo bloque que no sea este suelo estorba.
+                var obstaculos = bloques.Where(b => b != suelo).Select(b => b.Rect).ToList();
+
+                // Se busca hueco unidad a unidad y, tras cada pieza, se deja aire: entre enemigos y
+                // mecánicas, un paso fijo se saltaba los pocos sitios libres.
+                var x = Mathf.Ceil(suelo.Rect.xMin) + 1f;
+                while (x + 2f <= suelo.Rect.xMax)
                 {
                     var sello = !estatuaPuesta ? Estatua : Turnos[turno % Turnos.Length];
                     var desde = Mathf.RoundToInt(x);
                     var hasta = desde + sello.Tamano.x;
                     var hueco = new Rect(desde - 0.5f, suelo.Rect.yMax, sello.Tamano.x + 1f, sello.Tamano.y + 0.5f);
-                    if (ocupado.Any(o => o.x < hasta + 1f && o.y > desde - 1f) || obstaculos.Any(r => r.Overlaps(hueco)))
+                    if (hasta > suelo.Rect.xMax - 1f || ocupado.Any(o => o.x < hasta + 1f && o.y > desde - 1f) || obstaculos.Any(r => r.Overlaps(hueco)))
                     {
+                        x += 1f;
                         continue;
                     }
 
@@ -328,6 +338,8 @@ namespace Fragmentum.EditorTools
                     {
                         turno++;
                     }
+
+                    x = hasta + SeparacionDecoracion;
                 }
             }
         }
@@ -343,7 +355,9 @@ namespace Fragmentum.EditorTools
                     continue;
                 }
 
-                foreach (var renderer2d in raiz.GetComponentsInChildren<Renderer>(true))
+                // Solo sprites: lo del juego lo es. Una malla suelta (el plano que quedó del proyecto
+                // original junto al inicio) no es nada que tapar.
+                foreach (var renderer2d in raiz.GetComponentsInChildren<SpriteRenderer>(true))
                 {
                     if (renderer2d.transform.IsChildOf(raizBloques) && renderer2d.GetComponent<BoxCollider2D>() != null &&
                         PrefabUtility.GetOutermostPrefabInstanceRoot(renderer2d.gameObject) == null)
@@ -364,6 +378,12 @@ namespace Fragmentum.EditorTools
                     {
                         ocupado.Add(new Vector2(colision.bounds.min.x, colision.bounds.max.x));
                     }
+                }
+
+                // La arena del jefe, entera: el combate se lee mejor sin nada detrás.
+                foreach (var arena in raiz.GetComponentsInChildren<Levels.ArenaJefe>(true))
+                {
+                    ocupado.Add(arena.Limites);
                 }
             }
 
@@ -391,8 +411,14 @@ namespace Fragmentum.EditorTools
             public SpriteRenderer Renderer;
             public bool EsSuelo;
 
-            /// <summary>Un suelo cuya cara de arriba está a ras de 0: lleva cimiento debajo.</summary>
-            public bool EsSueloARas => EsSuelo && Mathf.Abs(Rect.yMax) < 0.01f && Rect.height > FinoMaximo;
+            /// <summary>
+            /// Una losa de suelo cuya cara de arriba está a ras de 0 (el recorrido provisional): lleva
+            /// cimiento debajo. Los bloques que ya bajan hasta el fondo no lo necesitan.
+            /// </summary>
+            public bool EsSueloARas => EsSuelo && Mathf.Abs(Rect.yMax) < 0.01f && Rect.height > FinoMaximo && Rect.yMin > -1.01f;
+
+            /// <summary>Un suelo que no es una plataforma fina: se puede decorar encima.</summary>
+            public bool EsSueloGrueso => EsSuelo && Rect.height > FinoMaximo;
         }
 
         /// <summary>

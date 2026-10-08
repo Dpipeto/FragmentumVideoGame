@@ -25,7 +25,10 @@ namespace Fragmentum.EditorTools
     ///   y algunos enemigos del mundo, dentro de un objeto que se borra al pintar el nivel;
     /// - si el nivel tiene jefe, la <b>arena</b> (Fase 7): entrada, puerta y el prefab del jefe;
     /// - en el mundo de la Ira, el <b>fondo con parallax</b> con sus hitos repartidos;
-    /// - el Golem de Ceniza con su arte en lugar del provisional.
+    /// - el Golem de Ceniza con su arte en lugar del provisional;
+    /// - en el Nivel 1, el <b>recorrido de diseño</b> (<see cref="DisenoNivel1"/>) en lugar del
+    ///   provisional: es lo único que borra, y solo la primera vez (lo provisional y lo que se colocó
+    ///   para él: su escenario pintado, el checkpoint, la salida y la arena).
     ///
     /// Es idempotente: ejecutarla otra vez sobre una escena preparada no cambia nada, y la
     /// escena solo se guarda si cambió.
@@ -34,6 +37,9 @@ namespace Fragmentum.EditorTools
     {
         public const string NombreRaiz = "Nivel";
         public const string NombreProvisional = "Provisional (bórralo al pintar el nivel)";
+
+        /// <summary>El recorrido de diseño de un nivel: sus bloques, mecánicas y enemigos.</summary>
+        public const string NombreRecorrido = "Recorrido";
 
         private const float AlturaSuelo = 0f;
         private const float AlturaPies = 0.05f;
@@ -136,6 +142,14 @@ namespace Fragmentum.EditorTools
 
             var cambios = false;
             var raiz = RaizNivel(escena, ref cambios);
+
+            // 0. El recorrido de diseño (DisenoNivel1), en lugar del provisional. Pone también el
+            //    checkpoint, la salida y la arena en su sitio: los pasos de abajo ya no los crean.
+            if (DisenoNivel1.EsDe(nivel) && RaizRecorrido(escena) == null)
+            {
+                MontarRecorridoNivel1(escena, nivel, raiz);
+                cambios = true;
+            }
 
             // 1. LevelManager, con el prefab del jugador y el punto de inicio.
             var gestor = Buscar<LevelManager>(escena);
@@ -285,6 +299,247 @@ namespace Fragmentum.EditorTools
             return 1;
         }
 
+        // --- El recorrido de diseño del Nivel 1 ---
+
+        /// <summary>La lava de los huecos va detrás del suelo, la decoración y las mecánicas: así puede
+        /// meterse bajo las orillas sin taparlas, y las plataformas de combustión se ven en pie dentro de ella.</summary>
+        public const int OrdenLavaEnHueco = -3;
+
+        /// <summary>El recorrido de diseño de la escena (<see cref="NombreRecorrido"/>), o null.</summary>
+        public static Transform RaizRecorrido(Scene escena)
+        {
+            foreach (var objeto in escena.GetRootGameObjects())
+            {
+                if (objeto.name == NombreRecorrido)
+                {
+                    return objeto.transform;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Monta el recorrido de <see cref="DisenoNivel1"/>. Borra lo provisional y lo que se colocó
+        /// para él (su escenario pintado, el checkpoint, la salida y la arena); levanta los bloques,
+        /// la lava, las mecánicas y los enemigos; pone el inicio, el checkpoint, la salida y la arena
+        /// del diseño, y lo viste con el tileset.
+        /// </summary>
+        private static void MontarRecorridoNivel1(Scene escena, LevelData nivel, Transform raiz)
+        {
+            foreach (var objeto in escena.GetRootGameObjects())
+            {
+                if (objeto.name == NombreProvisional || objeto.name == PintorEscenario.NombreRaiz)
+                {
+                    Object.DestroyImmediate(objeto);
+                }
+            }
+
+            foreach (var nombre in new[] { "Checkpoints", "Salida", "Arena" })
+            {
+                var viejo = raiz.Find(nombre);
+                if (viejo != null)
+                {
+                    Object.DestroyImmediate(viejo.gameObject);
+                }
+            }
+
+            var recorrido = new GameObject(NombreRecorrido).transform;
+            SceneManager.MoveGameObjectToScene(recorrido.gameObject, escena);
+
+            var colorSuelo = nivel.paleta != null && nivel.paleta.Length > 3 ? nivel.paleta[3] : new Color(0.36f, 0.25f, 0.2f);
+            var colorPared = FabricaColor(colorSuelo, 0.6f);
+            var bloques = Hijo(recorrido, "Bloques");
+            foreach (var b in DisenoNivel1.Suelos)
+            {
+                Suelo(bloques, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorSuelo);
+            }
+
+            foreach (var b in DisenoNivel1.Paredes)
+            {
+                Bloque(bloques, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, Capa(Capas.Wall), colorPared, SpriteCuadrado);
+            }
+
+            var plataformas = new List<Collider2D>();
+            var contenedorPlataformas = Hijo(recorrido, "PlataformasArena");
+            foreach (var b in DisenoNivel1.PlataformasArena)
+            {
+                plataformas.Add(Suelo(contenedorPlataformas, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorSuelo).GetComponent<Collider2D>());
+            }
+
+            var mecanicas = Hijo(recorrido, "Mecanicas");
+            foreach (var lago in DisenoNivel1.Lavas)
+            {
+                ColocarLava(escena, mecanicas, lago);
+            }
+
+            foreach (var pieza in DisenoNivel1.Mecanicas)
+            {
+                ColocarPieza(escena, mecanicas, pieza);
+            }
+
+            ColocarEnemigos(escena, recorrido);
+
+            var gestor = Buscar<LevelManager>(escena);
+            if (gestor != null && new SerializedObject(gestor).FindProperty("puntoInicio").objectReferenceValue is Transform inicio)
+            {
+                inicio.position = new Vector3(DisenoNivel1.Inicio, DisenoNivel1.SueloEn(DisenoNivel1.Inicio) + AlturaPies, 0f);
+            }
+
+            var checkpoints = Hijo(raiz, "Checkpoints");
+            var posiciones = PosicionesCheckpoint(nivel);
+            for (var i = 0; i < posiciones.Count; i++)
+            {
+                CrearCheckpoint(checkpoints, $"L{nivel.id}_CP{i + 1}", posiciones[i], nivel, DisenoNivel1.SueloEn(posiciones[i]));
+            }
+
+            CrearSalida(raiz, DisenoNivel1.Salida, nivel, DisenoNivel1.SueloArena);
+            CrearArenaNivel1(escena, raiz, nivel, plataformas);
+            PintorEscenario.Pintar(escena, recorrido, true);
+        }
+
+        private static GameObject Instanciar(Scene escena, Transform padre, string prefab, string nombre, float x, float y)
+        {
+            var origen = GeneradorMecanicas.Cargar(prefab);
+            if (origen == null)
+            {
+                Debug.LogWarning($"[Fragmentum] Falta el prefab {prefab}: ejecuta Fragmentum → Niveles → Crear prefabs de mecánicas.");
+                return null;
+            }
+
+            var instancia = (GameObject)PrefabUtility.InstantiatePrefab(origen, escena);
+            instancia.name = nombre;
+            instancia.transform.SetParent(padre, true);
+            instancia.transform.position = new Vector3(x, y, 0f);
+            return instancia;
+        }
+
+        // La lava cubre su hueco con franjas enteras, centradas: lo que sobra queda detrás de las orillas.
+        private static void ColocarLava(Scene escena, Transform padre, DisenoNivel1.Lago lago)
+        {
+            var objeto = Instanciar(escena, padre, GeneradorMecanicas.Lava, lago.Nombre, lago.Centro, lago.Costra);
+            var lava = objeto != null ? objeto.GetComponent<Lava>() : null;
+            if (lava == null)
+            {
+                return;
+            }
+
+            Asignar(lava, "tramos", p => p.intValue = lago.Franjas);
+            Asignar(lava, "ordenDibujo", p => p.intValue = OrdenLavaEnHueco);
+            lava.FijarTramos(lago.Franjas);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(lava.GetComponent<BoxCollider2D>());
+        }
+
+        private static void ColocarPieza(Scene escena, Transform padre, DisenoNivel1.Pieza pieza)
+        {
+            var objeto = Instanciar(escena, padre, pieza.Prefab, pieza.Nombre, pieza.X, pieza.Y);
+            if (objeto == null)
+            {
+                return;
+            }
+
+            // La torreta dispara hacia donde mira su dibujo: espejada, hacia el jugador que llega.
+            if (pieza.MiraIzquierda)
+            {
+                objeto.transform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+
+            if (pieza.Desfase > 0f)
+            {
+                Asignar(objeto.GetComponent<PlataformaCombustion>(), "desfase", p => p.floatValue = pieza.Desfase);
+            }
+        }
+
+        // Los Ecos a la escala que les dio el diseñador; cada enemigo con su propia ruta de patrulla.
+        private static void ColocarEnemigos(Scene escena, Transform recorrido)
+        {
+            var enemigos = Hijo(recorrido, "Enemigos");
+            var rutas = Hijo(recorrido, "Rutas");
+            foreach (var guardia in DisenoNivel1.Enemigos)
+            {
+                var ruta = guardia.Golem ? ConstructorGolem.RutaPrefab : ConstructorEcoIra.RutaPrefab;
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ruta);
+                if (prefab == null)
+                {
+                    Debug.LogWarning($"[Fragmentum] Falta {ruta}: {guardia.Nombre} no se coloca.");
+                    continue;
+                }
+
+                var enemigo = (GameObject)PrefabUtility.InstantiatePrefab(prefab, escena);
+                enemigo.name = guardia.Nombre;
+                enemigo.transform.SetParent(enemigos, true);
+                enemigo.transform.position = new Vector3(guardia.X, guardia.Y + AlturaPies, 0f);
+                if (!guardia.Golem)
+                {
+                    enemigo.transform.localScale = new Vector3(DisenoNivel1.EscalaEco.x, DisenoNivel1.EscalaEco.y, 1f);
+                }
+
+                var a = Hijo(rutas, $"{guardia.Nombre}_A");
+                var b = Hijo(rutas, $"{guardia.Nombre}_B");
+                a.position = new Vector3(guardia.Desde, guardia.Y, 0f);
+                b.position = new Vector3(guardia.Hasta, guardia.Y, 0f);
+                Asignar(enemigo.GetComponent<EnemyController>(), "waypoints", p =>
+                {
+                    p.arraySize = 2;
+                    p.GetArrayElementAtIndex(0).objectReferenceValue = a;
+                    p.GetArrayElementAtIndex(1).objectReferenceValue = b;
+                });
+            }
+        }
+
+        /// <summary>
+        /// La arena del diseño: la entrada justo después de la puerta, la puerta en el borde de la sala
+        /// (se cierra detrás del jugador), la Centinela en x 70 y las plataformas que ella atraviesa.
+        /// </summary>
+        private static void CrearArenaNivel1(Scene escena, Transform raiz, LevelData nivel, List<Collider2D> plataformas)
+        {
+            var arena = new GameObject("Arena").transform;
+            arena.SetParent(raiz, false);
+            arena.position = new Vector3(DisenoNivel1.Entrada, DisenoNivel1.SueloArena, 0f);
+
+            var alto = DisenoNivel1.TechoArena - DisenoNivel1.SueloArena;
+            var entrada = arena.gameObject.AddComponent<BoxCollider2D>();
+            entrada.isTrigger = true;
+            entrada.size = new Vector2(1.2f, alto);
+            entrada.offset = new Vector2(0f, alto * 0.5f);
+
+            var colorPuerta = nivel.paleta != null && nivel.paleta.Length > 1 ? nivel.paleta[1] : Color.gray;
+            var puerta = Bloque(arena, "Puerta", DisenoNivel1.PuertaDesde, DisenoNivel1.PuertaHasta, DisenoNivel1.SueloArena, DisenoNivel1.TechoArena,
+                Capa(Capas.Wall), colorPuerta, SpriteCuadrado);
+            puerta.SetActive(false);
+
+            GameObject jefe = null;
+            var prefab = nivel.jefe != null ? GeneradorJefes.CargarPrefab(nivel.jefe) : null;
+            if (prefab != null)
+            {
+                jefe = (GameObject)PrefabUtility.InstantiatePrefab(prefab, escena);
+                jefe.name = System.IO.Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(prefab));
+                jefe.transform.SetParent(arena, true);
+                jefe.transform.position = new Vector3(DisenoNivel1.Jefe, DisenoNivel1.SueloArena + AlturaPies, 0f);
+            }
+            else
+            {
+                Debug.LogWarning("[Fragmentum] No existe el prefab del jefe del Nivel 1: la arena se crea sin jefe. Ejecuta Fragmentum → Jefes → Generar datos y prefabs de jefes.");
+            }
+
+            var componente = arena.gameObject.AddComponent<ArenaJefe>();
+            Asignar(componente, "jefe", p => p.objectReferenceValue = jefe != null ? jefe.GetComponent<BossController>() : null);
+            Asignar(componente, "puertas", p =>
+            {
+                p.arraySize = 1;
+                p.GetArrayElementAtIndex(0).objectReferenceValue = puerta;
+            });
+            Asignar(componente, "limites", p => p.vector2Value = DisenoNivel1.LimitesArena);
+            Asignar(componente, "plataformas", p =>
+            {
+                p.arraySize = plataformas.Count;
+                for (var i = 0; i < plataformas.Count; i++)
+                {
+                    p.GetArrayElementAtIndex(i).objectReferenceValue = plataformas[i];
+                }
+            });
+        }
+
         private static Transform RaizProvisional(Scene escena)
         {
             foreach (var objeto in escena.GetRootGameObjects())
@@ -375,11 +630,11 @@ namespace Fragmentum.EditorTools
 
         // --- Piezas ---
 
-        private static void CrearCheckpoint(Transform padre, string id, float x, LevelData nivel)
+        private static void CrearCheckpoint(Transform padre, string id, float x, LevelData nivel, float suelo = AlturaSuelo)
         {
             var objeto = new GameObject(id) { tag = GameTags.Checkpoint };
             objeto.transform.SetParent(padre, false);
-            objeto.transform.position = new Vector3(x, AlturaPies, 0f);
+            objeto.transform.position = new Vector3(x, suelo + AlturaPies, 0f);
 
             var zona = objeto.AddComponent<BoxCollider2D>();
             zona.isTrigger = true;
@@ -396,11 +651,11 @@ namespace Fragmentum.EditorTools
             Asignar(checkpoint, "colorActivo", p => p.colorValue = nivel.ColorAcento);
         }
 
-        private static void CrearSalida(Transform padre, float x, LevelData nivel)
+        private static void CrearSalida(Transform padre, float x, LevelData nivel, float suelo = AlturaSuelo)
         {
             var objeto = new GameObject("Salida");
             objeto.transform.SetParent(padre, false);
-            objeto.transform.position = new Vector3(x, AlturaSuelo, 0f);
+            objeto.transform.position = new Vector3(x, suelo, 0f);
 
             var zona = objeto.AddComponent<BoxCollider2D>();
             zona.isTrigger = true;

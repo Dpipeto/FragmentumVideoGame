@@ -22,22 +22,52 @@ MonoBehaviour:
       duracion: 2.8
       posicion: 1
       titulo: 1
-    - texto: "[Presentaci\xF3n \xB7 Tristeza \xB7 pendiente de guion]"
+      sinFundido: 0
+      enPunto: 0
+      punto: {x: 0, y: 0}
+      alineacion: 0
+    - texto: Ciudad Sumergida
       inicio: 0.6
       duracion: 2.4
       posicion: 2
       titulo: 0
+      sinFundido: 0
+      enPunto: 0
+      punto: {x: 0, y: 0}
+      alineacion: 0
     duracion: 3
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 0}
-    texto: "Doncella del Lamento: [Antes del combate \xB7 Tristeza \xB7 pendiente de guion] Doncella del Lamento encarna la tristeza."
+    texto: "Doncella del Lamento: \xC9l cerr\xF3 los ojos para no llorar, y la ciudad se hundi\xF3. \xBFVienes a cerrarlos t\xFA tambi\xE9n?"
     carteles: []
     duracion: 4.5
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   saltable: 1
   soloPrimeraVez: 0
+  montaje: 0
   sobreElJuego: 1
   opacidadVelo: 0.55
+  escalaEntera: 0
+  fuente: {fileID: 0}
+  tamanoFuente: 8
+  interlineado: 0
+  colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
+  temblorPixeles: 1
+  temblorFotogramas: 4
   fundidoImagen: 0.4
   fundidoTexto: 0.4
   margenTexto: 0.8

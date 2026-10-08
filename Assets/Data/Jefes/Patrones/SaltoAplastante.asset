@@ -22,6 +22,8 @@ MonoBehaviour:
   tamanoImpacto: {x: 3, y: 1.4}
   duracionImpacto: 0.15
   ondas: 1
+  dibujarOndas: 1
+  efectoOndas: {fileID: 7750765647306390002, guid: 0c32d1d154024434c80ce5ad06f52805, type: 3}
   danioOnda: 1
   velocidadOnda: 8
   alcanceOnda: 7

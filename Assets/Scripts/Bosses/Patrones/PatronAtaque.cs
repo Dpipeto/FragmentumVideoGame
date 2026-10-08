@@ -34,5 +34,18 @@ namespace Fragmentum.Bosses.Patrones
 
         /// <summary>Ejecuta el ataque sobre el jefe. Termina cuando el ataque acaba.</summary>
         public abstract IEnumerator Ejecutar(BossController jefe);
+
+        /// <summary>
+        /// Lo que puede recorrer, como mucho <paramref name="alcance"/>, una zona que sale con su
+        /// centro en <paramref name="desdeX"/> hacia <paramref name="direccion"/>, hasta que su
+        /// borde delantero llega a la pared de la arena. Las ondas se rompen contra la pared: no la
+        /// atraviesan.
+        /// </summary>
+        protected static float RecorridoEnArena(BossController jefe, float desdeX, int direccion, float medioAncho, float alcance)
+        {
+            var limites = jefe.Limites;
+            var pared = direccion > 0 ? limites.y : limites.x;
+            return Mathf.Clamp((pared - desdeX) * direccion - medioAncho, 0f, alcance);
+        }
     }
 }

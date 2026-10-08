@@ -162,9 +162,10 @@ namespace Fragmentum.EditorTools
                 Asset<LevelData>("Niveles/L1_Ira", sobrescribir, n => Nivel(n, 1, RutaEscenaNivel1, "Fortaleza Volcánica", ira, 2,
                     "Impulsividad, rabia reprimida. El jugador siente urgencia y presión constante.",
                     new[] { "8B1A1A", "CC4400", "1A0800", "5C4033" }, centinela, fIra, cargado, new ReglasNivel(),
-                    Seccion("Sección 1", 0, 25, "Terreno abierto. Plataformas inestables. 3 Soldados de lava y 1 torreta de fuego fija."),
-                    Seccion("Sección 2", 25, 55, "Plataformeo sobre lava y plataformas de combustión. 4 Soldados de lava y el Golem de Ceniza. Checkpoint en x = 40."),
-                    Seccion("Arena del jefe", 55, 80, "Sala cerrada de 60 × 15 u, plataformas a 3 alturas y lava en el suelo."))),
+                    // El recorrido montado está en DisenoNivel1 (Docs/Diseno/Nivel1_Diseno.md).
+                    Seccion("Sección 1", 0, 25, "Terreno abierto. Plataformas inestables. 3 Ecos de la Ira y 1 torreta de fuego fija."),
+                    Seccion("Sección 2", 25, 55, "Plataformeo sobre lava y plataformas de combustión. 4 Ecos de la Ira y el Golem de Ceniza. Checkpoint en x = 43."),
+                    Seccion("Arena del jefe", 55, 80, "Sala cerrada de 25 × 15 u con plataformas a 3 alturas. La lava brota en las erupciones; el suelo es firme."))),
 
                 Asset<LevelData>("Niveles/L2_Tristeza", sobrescribir, n => Nivel(n, 2, null, "Ciudad Sumergida", tristeza, 3,
                     "Pérdida, melancolía. El nivel es deliberadamente lento y pesado.",
@@ -204,7 +205,7 @@ namespace Fragmentum.EditorTools
             // Interfaz de cada mundo según la maqueta de los menús (Referencias/Menus) y
             // checkpoints previstos por el Anexo A. Son campos de la Fase 6: en los assets que ya
             // existían se completan sin pisar lo que se haya editado a mano.
-            Completar(niveles[0], "FF6B35", "la rabia consume al que la niega", 40f);
+            Completar(niveles[0], "FF6B35", "la rabia consume al que la niega", DisenoNivel1.Checkpoint);
             Completar(niveles[1], "00D4FF", "el dolor también es parte del yo");
             Completar(niveles[2], "7FE0B0", "lo que ocultas en la sombra crece");
             Completar(niveles[3], "C9A567", "el peso del ayer no define el mañana");

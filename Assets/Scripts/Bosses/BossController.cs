@@ -569,7 +569,7 @@ namespace Fragmentum.Bosses
 
             // Tiro parabólico: llega a la x y a la altura del suelo de destino justo en tiempoVuelo.
             var gravedad = Physics2D.gravity.y * _cuerpo.gravityScale;
-            var subida = SueloEn(destinoX) - SueloY;
+            var subida = SueloPisableEn(destinoX) - SueloY;
             var velocidad = new Vector2((destinoX - Centro.x) / tiempoVuelo, subida / tiempoVuelo - 0.5f * gravedad * tiempoVuelo);
             Mirar(velocidad.x > 0f ? 1 : velocidad.x < 0f ? -1 : 0);
             _cuerpo.linearVelocity = velocidad;
@@ -590,12 +590,36 @@ namespace Fragmentum.Bosses
         /// <summary>Punto delante del jefe, a una distancia del centro y a una altura sobre sus pies.</summary>
         public Vector2 PuntoDelante(float distancia, float altura) => new Vector2(Centro.x + Mirando * distancia, SueloY + altura);
 
-        /// <summary>Altura del suelo en una x (para colocar erupciones bajo el jugador); sin suelo, la del jefe.</summary>
+        /// <summary>
+        /// Altura del suelo en una x a la altura del jugador (para colocar erupciones bajo él): lo
+        /// primero que se pisa por debajo de su centro. Desde más arriba, con el jugador en el suelo
+        /// bajo una plataforma, la erupción saldría encima de la plataforma y no bajo sus pies.
+        /// Sin suelo, la del jefe.
+        /// </summary>
         public float SueloEn(float x)
         {
-            var desde = new Vector2(x, Mathf.Max(CentroJugador.y, Centro.y) + 2f);
-            var impacto = Physics2D.Raycast(desde, Vector2.down, 12f, Capas.MascaraSuelo);
+            var desde = new Vector2(x, CentroJugador.y + 0.75f);
+            var impacto = Physics2D.Raycast(desde, Vector2.down, 14f, Capas.MascaraSuelo);
             return impacto.collider != null ? impacto.point.y : SueloY;
+        }
+
+        /// <summary>
+        /// Altura del suelo que pisa el propio jefe en una x: como <see cref="SueloEn"/>, pero sin las
+        /// superficies con las que no choca (las plataformas de la arena, que son del jugador; ver
+        /// <c>ArenaJefe</c>). Es donde cae su salto.
+        /// </summary>
+        public float SueloPisableEn(float x)
+        {
+            var desde = new Vector2(x, Mathf.Max(CentroJugador.y, Centro.y) + 2f);
+            foreach (var impacto in Physics2D.RaycastAll(desde, Vector2.down, 30f, Capas.MascaraSuelo))
+            {
+                if (_colisionador == null || !Physics2D.GetIgnoreCollision(_colisionador, impacto.collider))
+                {
+                    return impacto.point.y;
+                }
+            }
+
+            return SueloY;
         }
 
         /// <summary>
