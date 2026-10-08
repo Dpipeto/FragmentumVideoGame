@@ -13,7 +13,7 @@ namespace Fragmentum.Core.Combate
     /// El daño lo reparte un <see cref="Hitbox"/>, así que respeta las capas, los i-frames y los
     /// escudos como cualquier otro golpe. Se dibuja como un rectángulo de color, salvo que se
     /// cree sin dibujo porque el golpe ya lo enseña una animación (el espadazo) o porque lleva
-    /// su propio dibujo dentro (<see cref="Vestir"/>: la onda, y la erupción al quemar).
+    /// su propio dibujo dentro (<see cref="Vestir"/>: la onda y la erupción).
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D), typeof(Hitbox))]
     public class ZonaDeDanio : MonoBehaviour
@@ -22,7 +22,7 @@ namespace Fragmentum.Core.Combate
         private Rigidbody2D _cuerpo;
         private Hitbox _hitbox;
         private SpriteRenderer _visual;
-        private GameObject _dibujoTrasAviso;
+        private DibujoDeZona _dibujo;
         private Color _color;
         private Vector2 _velocidad;
         private float _inicio;
@@ -86,10 +86,10 @@ namespace Fragmentum.Core.Combate
         /// izquierda (<paramref name="direccion"/> &lt; 0) se espeja. Con dirección 0 va centrado:
         /// su pivote es el centro de la base (la erupción). Sin prefab no hace nada.
         ///
-        /// Con <paramref name="trasElAviso"/>, el dibujo espera a que la zona queme: mientras
-        /// avisa se sigue viendo el rectángulo que late, y al activarse el dibujo lo sustituye.
+        /// Si el dibujo lleva un <see cref="DibujoDeZona"/>, sigue las fases de la zona: avisa,
+        /// quema y, cuando la zona acaba, se apaga por su cuenta.
         /// </summary>
-        public GameObject Vestir(GameObject dibujo, int direccion, bool trasElAviso = false)
+        public GameObject Vestir(GameObject dibujo, int direccion)
         {
             if (dibujo == null)
             {
@@ -104,30 +104,13 @@ namespace Fragmentum.Core.Combate
             var escala = objeto.transform.localScale;
             objeto.transform.localScale = new Vector3(Mathf.Abs(escala.x) * (lado < 0f ? -1f : 1f), escala.y, escala.z);
 
-            if (trasElAviso)
+            _dibujo = objeto.GetComponent<DibujoDeZona>();
+            if (_dibujo != null && Activa)
             {
-                objeto.SetActive(false);
-                _dibujoTrasAviso = objeto;
-                if (Activa)
-                {
-                    Descubrir();
-                }
+                _dibujo.Quemar();
             }
 
             return objeto;
-        }
-
-        // El dibujo que esperaba al aviso sustituye al rectángulo en cuanto la zona quema.
-        private void Descubrir()
-        {
-            if (_dibujoTrasAviso == null)
-            {
-                return;
-            }
-
-            _dibujoTrasAviso.SetActive(true);
-            _visual.enabled = false;
-            _dibujoTrasAviso = null;
         }
 
         private void Configurar(float aviso, float duracion, Vector2 velocidad, Color color)
@@ -156,7 +139,10 @@ namespace Fragmentum.Core.Combate
                 Activa = true;
                 _hitbox.ReiniciarObjetivos();
                 _zona.enabled = true;
-                Descubrir();
+                if (_dibujo != null)
+                {
+                    _dibujo.Quemar();
+                }
             }
 
             if (Activa && _velocidad != Vector2.zero)
@@ -166,6 +152,11 @@ namespace Fragmentum.Core.Combate
 
             if (transcurrido >= _aviso + _duracion)
             {
+                if (_dibujo != null)
+                {
+                    _dibujo.Apagar();
+                }
+
                 Destroy(gameObject);
             }
         }

@@ -301,7 +301,7 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator LaErupcion_AvisaConElRectangulo_YQuemaConSuColumnaDibujada()
+        public IEnumerator LaErupcion_SeVeDibujada_DeLaGrietaAlDerrumbe()
         {
             var jefe = CrearJefe("CentinelaArdiente");
             SoloPatron(jefe, "PlataformasEnErupcion");
@@ -310,21 +310,30 @@ namespace Fragmentum.Tests.PlayMode
 
             ZonaDeDanio primera = null;
             yield return EsperarHasta(() => (primera = Object.FindObjectsByType<ZonaDeDanio>().FirstOrDefault(z => z.name.EndsWith("Erupcion"))) != null, 3f, "la primera erupción");
-            var rectangulo = primera.GetComponent<SpriteRenderer>();
-            var columna = primera.transform.Find("ErupcionDeLava");
-            Assert.IsNotNull(columna, "La zona lleva dentro la columna animada.");
+            var dibujo = primera.transform.Find("ErupcionDeLava");
+            Assert.IsNotNull(dibujo, "La zona lleva dentro la erupción animada.");
+            Assert.IsFalse(primera.GetComponent<SpriteRenderer>().enabled, "Con dibujo, sin rectángulo, también mientras avisa.");
+            Assert.AreEqual(0f, dibujo.localPosition.x, 1e-4f, "Centrada en su zona.");
+            Assert.AreEqual(-primera.Tamano.y * 0.5f, dibujo.localPosition.y, 1e-4f, "Brota de la base de la zona.");
+            Assert.Greater(dibujo.localScale.x, 0f, "Sin espejar.");
+
+            var animator = dibujo.GetComponent<Animator>();
+            yield return null;
             Assert.IsFalse(primera.Activa);
-            Assert.IsTrue(rectangulo.enabled, "Mientras avisa se ve el rectángulo que late.");
-            Assert.IsFalse(columna.gameObject.activeSelf, "La columna espera a que queme.");
+            Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Aviso"), "Mientras avisa, la grieta.");
 
             yield return EsperarHasta(() => primera.Activa, 2f, "que la erupción queme");
-            yield return new WaitForFixedUpdate();
-            Assert.IsFalse(rectangulo.enabled, "Al quemar, la columna sustituye al rectángulo.");
-            Assert.IsTrue(columna.gameObject.activeSelf);
-            Assert.IsNotNull(columna.GetComponent<Animator>().runtimeAnimatorController);
-            Assert.AreEqual(0f, columna.localPosition.x, 1e-4f, "Centrada en su zona.");
-            Assert.AreEqual(-primera.Tamano.y * 0.5f, columna.localPosition.y, 1e-4f, "Brota de la base de la zona.");
-            Assert.Greater(columna.localScale.x, 0f, "Sin espejar.");
+            yield return new WaitForSeconds(0.25f);
+            Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Arde"), "Al quemar brota y arde.");
+
+            // Al acabar la zona, el dibujo se queda un momento, ya sin daño, y se derrumba.
+            yield return EsperarHasta(() => primera == null, 2f, "que la zona acabe");
+            yield return null;
+            Assert.IsTrue(dibujo != null, "Sobrevive a su zona para derrumbarse.");
+            Assert.IsNull(dibujo.parent);
+            Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Apaga"), "Se derrumba.");
+            yield return new WaitForSeconds(0.4f);
+            Assert.IsTrue(dibujo == null, "Y desaparece solo.");
         }
 
         // --- Derrota y reinicio ---

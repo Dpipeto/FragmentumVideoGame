@@ -131,8 +131,9 @@ namespace Fragmentum.EditorTools
                     "alto, más que el salto de Kael. Así la roca de la cresta mide lo que su zona de daño (0,9 u).",
                     ConstructorEfectos.LienzoOnda),
                 new Regla(CarpetaEfectos + "/Erupcion_", ConstructorEfectos.PixelesPorUnidadErupcion, ConstructorEfectos.PivoteErupcion,
-                    "Erupción de la Centinela: 44×150 (Imagenes/limpios/script/limpiar_erupcion.py), el pivote en el centro de su base. " +
-                    "A 24 px/u, como el Golem y la torreta: 1,83 × 5,7 u, un poco más que su zona de daño (1,6 × 5).",
+                    "Erupción de la Centinela: 74×150 (Imagenes/limpios/script/limpiar_erupcion.py), los cinco fotogramas en la " +
+                    "misma rejilla, el pivote en el centro de la base de la columna. A 24 px/u, como el Golem y la torreta: la " +
+                    "columna mide 1,83 × 5,7 u, un poco más que su zona de daño (1,6 × 5); el aviso y el derrumbe, unas 3 u de ancho.",
                     ConstructorEfectos.LienzoErupcion),
 
                 // Jefes: pixel art, y la Centinela con su escala y el pivote de los pies.

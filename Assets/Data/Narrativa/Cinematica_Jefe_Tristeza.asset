@@ -58,6 +58,7 @@ MonoBehaviour:
     cues: []
   saltable: 1
   soloPrimeraVez: 0
+  llevaDialogoDelJefe: 1
   montaje: 0
   sobreElJuego: 1
   opacidadVelo: 0.55

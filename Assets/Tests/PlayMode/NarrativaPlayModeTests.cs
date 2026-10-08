@@ -241,7 +241,7 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator AntesDelJefe_LaPresentacionLlevaElTextoDelGuion()
+        public IEnumerator AntesDelJefe_LaPresentacionDiceLoDeKael_YLuegoHablaLaCentinelaEnElHud()
         {
             Gestor.Datos.cinematicasVistas.Add("Inicial");
             yield return EntrarEnNivel1();
@@ -255,10 +255,12 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarHasta(() => Interfaz.Cinematica.TextoActual.Contains("No recuerdo esta sala."), 6f, "el texto de Kael");
             StringAssert.Contains("El calor, sí.", Interfaz.Cinematica.TextoActual, "Las dos líneas juntas.");
 
+            // Es lo que pasa en partida nueva (la presentación sin ver). La presentación de la Ira
+            // solo lleva a Kael: la línea de la Centinela va después, en el HUD, y lo de Kael no se repite.
             Assert.IsTrue(Juego.TerminarCinematica());
-            yield return null;
-            yield return null;
-            Assert.IsEmpty(Interfaz.Hud.LineaActual, "No se repite en el HUD: ya se dijo en la cinemática.");
+            yield return EsperarHasta(() => Interfaz.Hud.LineaActual.Length > 0, 2f, "la línea de la Centinela");
+            Assert.AreEqual("CENTINELA ARDIENTE", Interfaz.Hud.HablanteActual);
+            StringAssert.DoesNotContain("No recuerdo esta sala", Interfaz.Hud.LineaActual);
         }
 
         [UnityTest]

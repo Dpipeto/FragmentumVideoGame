@@ -162,7 +162,19 @@ namespace Fragmentum.Tests
                 CollectionAssert.Contains(textos, $"{nivel.jefe.nombreCanonico}: {guion.AntesDelJefe}", nivel.name);
                 Assert.IsTrue(nivel.cinematicaJefe.diapositivas.SelectMany(d => d.carteles).Any(c => c.texto == nivel.nombreMundo),
                     $"{nivel.name}: bajo el nombre del jefe, su mundo.");
+                Assert.IsTrue(nivel.cinematicaJefe.llevaDialogoDelJefe, $"{nivel.name}: ya dice la línea del jefe; el HUD no la repite.");
             }
+        }
+
+        [Test]
+        public void LaPresentacionDeLaIra_NoDiceLaLineaDelJefe_AsiQueLaDiceElHud()
+        {
+            // Su texto es de Kael («No recuerdo esta sala…»): la línea de la Centinela va en el HUD
+            // al empezar el combate, también en partida nueva, cuando la presentación se ve.
+            var ira = BaseDeDatos().niveles.Single(n => n.emocion != null && n.emocion.id == EMOCIONES.IRA);
+            Assert.IsNotNull(ira.cinematicaJefe);
+            Assert.IsFalse(ira.cinematicaJefe.llevaDialogoDelJefe);
+            Assert.IsTrue(ira.dialogos.Del(MOMENTOS_DIALOGO.PRE_JEFE).Any(), "La Centinela tiene su línea antes del combate.");
         }
 
         [Test]

@@ -287,6 +287,24 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void ElColliderAgachado_MideLoQueElDibujoAgachado()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ConstructorJugador.RutaPrefab);
+            Assert.IsNotNull(prefab);
+            var cuerpo = prefab.GetComponent<CapsuleCollider2D>();
+            var parametros = prefab.GetComponent<PlayerController>().Parametros;
+            var agachado = cuerpo.size.y * parametros.alturaAgachado;
+
+            foreach (var fotograma in new[] { 3, 4 })
+            {
+                var (abajo, arriba) = FilasOpacas(ConstructorArteKael.HojaAgachado, fotograma);
+                var dibujo = (arriba - abajo + 1) / (float)ConstructorArteKael.PixelesPorUnidad;
+                Assert.AreEqual(dibujo, agachado, 0.03f,
+                    $"Kael_Agachado_{fotograma}: el collider agachado ({agachado:0.00} u) debe medir lo que el dibujo ({dibujo:0.00} u).");
+            }
+        }
+
+        [Test]
         public void Morir_TieneSusTresFotogramasA5fps_YSeQuedaDeRodillas()
         {
             Assert.AreEqual(PlayerAnimacion.Morir, PlayerAnimacion.TablaPorDefecto().Single(e => e.estado == ESTADOS_JUGADOR.DEAD).estadoAnimator,

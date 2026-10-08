@@ -61,6 +61,11 @@ namespace Fragmentum.Core
         // pone su script con los valores de su enum (ESTADOS_TORRETA, …).
         public static readonly Parametro EstadoMecanica = new Parametro("Estado");
 
+        // Los dibujos de las zonas de daño que siguen sus fases (la erupción): la zona ya quema
+        // y la zona ya acabó (Combate.DibujoDeZona).
+        public static readonly Parametro Quema = new Parametro("Quema");
+        public static readonly Parametro Apagada = new Parametro("Apagada");
+
         /// <summary>¿El Animator tiene este parámetro? Avisa una sola vez por parámetro ausente.</summary>
         public static bool Existe(Animator animator, in Parametro parametro)
         {

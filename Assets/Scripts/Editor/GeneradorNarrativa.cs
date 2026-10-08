@@ -165,6 +165,7 @@ namespace Fragmentum.EditorTools
                 c.bloqueoSalto = 1f;
                 c.finAviso = 4f;
                 c.fundidoImagen = 0.4f;
+                c.llevaDialogoDelJefe = true;
                 c.diapositivas = new List<Diapositiva>
                 {
                     new Diapositiva
@@ -195,6 +196,13 @@ namespace Fragmentum.EditorTools
                     cartel.texto = nivel.nombreMundo;
                     cambio = true;
                 }
+            }
+
+            // Dice la línea del jefe: el HUD no la repite al empezar el combate.
+            if (!presentacion.llevaDialogoDelJefe && presentacion.diapositivas.Any(d => d.texto == $"{jefe}: {guion.AntesDelJefe}"))
+            {
+                presentacion.llevaDialogoDelJefe = true;
+                cambio = true;
             }
 
             if (cambio)

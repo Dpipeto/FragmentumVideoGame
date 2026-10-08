@@ -9,6 +9,81 @@
 
 ---
 
+## Respuestas a la prueba del Nivel 1 montado (2026-10-08)
+
+Rama `nivel1-montado`. El autor jugó el nivel (N26) y encontró un solo fallo: el diálogo del jefe
+solo salía al entrar con «Continuar partida». Además aprobó subir la altura de Kael agachado (N28),
+descartó retocar la muerte (N29) y dejó en sus carpetas la tercera tanda de las erupciones (N27) y
+el retoque de `CinematicaFinalLvl2` (N25).
+
+### 1. La línea de la Centinela, también en partida nueva
+
+- **Problema.** En partida nueva, al entrar en la arena se veía la presentación del jefe, pero la
+  Centinela no decía su línea del guion («Él me dejó aquí para que nadie tocara su rabia…»). Con
+  «Continuar partida» sí la decía.
+- **Causa.** La presentación del Nivel 1 se ve solo la primera vez: queda anotada como vista en la
+  partida guardada. Cuando se veía, `ArenaJefe` no ponía las líneas «antes del jefe» en el HUD,
+  porque daba por hecho que iban dentro de la presentación. Eso vale para las de los jefes 2 a 4,
+  que las generan con «{jefe}: {línea}». La de la Ira, en cambio, está montada desde el guion de su
+  cinemática y su único texto es de Kael («No recuerdo esta sala. El calor, sí.»). Al continuar, la
+  presentación ya estaba vista y la línea sí salía.
+- **Solución.** `CutsceneData.llevaDialogoDelJefe` dice si una presentación ya lleva las líneas del
+  jefe. `ArenaJefe` solo las calla en ese caso. `GeneradorNarrativa` la marca en las presentaciones
+  que genera; la de la Ira queda sin marcar, así que su línea suena al empezar el combate.
+
+### 2. La erupción, de la grieta al derrumbe
+
+- **Problema.** La erupción solo tenía arte mientras quemaba (E3 y E4). El aviso seguía siendo el
+  rectángulo naranja que late.
+- **Causa.** De la segunda tanda no entraron el aviso, el brote ni el colapso (entrada anterior).
+- **Solución.**
+  - **La tercera tanda cuadra:** Gemini editó E3, como se le pidió, y las cinco imágenes comparten
+    rejilla (10,24 px), fase y fila de base. `limpiar_erupcion.py` ya no alinea nada a mano: las
+    muestrea sobre una rejilla común en un lienzo de 74 × 150, con el pivote en el centro de la
+    base de la columna. El aviso y el derrumbe se extienden por el suelo (unas 3 u). E3 y E4 salen
+    idénticas a las de antes, solo en un lienzo más ancho.
+  - **`DibujoDeZona`**, un componente nuevo del prefab, sigue las fases de su zona de daño: la
+    zona le avisa al quemar (`Quema`) y al acabar (`Apagada`). Al acabar, el dibujo se suelta de
+    la zona, se derrumba 0,25 s ya sin daño y se destruye solo. Sustituye a `trasElAviso` de la
+    entrada anterior, que mostraba el rectángulo mientras avisaba.
+  - **El Animator de la erupción:** `Aviso` en bucle; con `Quema`, `Brota` 0,1 s y pasa sola a
+    `Arde` en bucle; con `Apagada`, desde cualquiera de ellos, `Apaga`.
+  - **Sin rectángulo:** con dibujo, las erupciones ya no pintan su zona, ni al avisar.
+
+### 3. Kael agachado, a la altura de su dibujo
+
+- **Problema.** Agachado, Kael se dibuja con 1,08 u de alto, pero su collider medía 0,9 u: el pelo
+  asomaba por encima de lo que golpean los ataques.
+- **Causa.** `alturaAgachado` (0,5) era anterior al dibujo.
+- **Solución.** `alturaAgachado` = 0,6: 1,8 × 0,6 = 1,08 u. Sigue cabiendo bajo el techo bajo de la
+  escena de prueba (1,2 u). Una prueba compara el collider del prefab con el dibujo.
+
+### 4. `CinematicaFinalLvl2` retocada
+
+Dos retoques del autor. El primero llegó a 2752 × 1536 sin el fragmento que flotaba sobre la
+espada, pero con cinco huecos en vez de cuatro. El segundo, que es el que entra, llegó a 1024 × 572
+con los cuatro huecos y el fragmento solo en el hombro. `cine.py` saca el periodo del ancho
+(4,27 px) y lo baja a 240 × 135 como los demás planos. Al venir más pequeño y en JPEG, el fondo
+oscuro sale algo más ruidoso; se lee bien. N25 queda resuelto.
+
+### Verificación
+
+- **Pruebas EditMode: 370 correctas de 370.**
+  - **Nuevas:** que la presentación de la Ira no lleve la línea del jefe y la de los demás sí; que
+    el collider agachado mida lo que el dibujo; y en `ErupcionArteTests`, los cinco fotogramas, los
+    cuatro clips y el Animator que sigue las fases de la zona.
+- **Pruebas PlayMode: 150 correctas de 150.**
+  - **Reescritas:**
+    - la de la presentación de la Centinela, que exigía que el HUD callara después: ahora exige
+      la línea de la Centinela, y que lo de Kael no se repita;
+    - la de la erupción, que se ve dibujada de la grieta al derrumbe; el derrumbe sobrevive un
+      momento a su zona y desaparece solo.
+  - **Dos pruebas de tiempos fallaron en una primera pasada y pasaron en la segunda, sin cambiar
+    nada:** el coyote time y el ciclo de la torreta. Las dos miden fracciones de segundo y el PC
+    estaba ocupado.
+
+---
+
 ## La erupción quema con su columna y Kael se agacha y muere (2026-10-07)
 
 Rama `nivel1-montado`, tras el commit del Nivel 1. El autor dejó en disco la segunda tanda de las

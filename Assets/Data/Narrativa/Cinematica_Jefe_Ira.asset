@@ -128,6 +128,7 @@ MonoBehaviour:
       hasta: 0
   saltable: 1
   soloPrimeraVez: 1
+  llevaDialogoDelJefe: 0
   montaje: 1
   sobreElJuego: 0
   opacidadVelo: 0.55

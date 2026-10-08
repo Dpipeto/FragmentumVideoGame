@@ -378,7 +378,7 @@ MonoBehaviour:
     duracionAtaqueCargado: 0.5
     damagedDuration: 0.3
     impulsoRetroceso: {x: 5, y: 6}
-    alturaAgachado: 0.5
+    alturaAgachado: 0.6
     velocidadAgachado: 2
   motor: {fileID: 0}
   sensores: {fileID: 0}

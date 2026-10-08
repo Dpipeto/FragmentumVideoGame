@@ -19,7 +19,9 @@ namespace Fragmentum.Levels
     ///   antes del combate se cierran las puertas, la cámara se desliza hasta el jefe y se
     ///   reproduce la cinemática, que lleva el diálogo. Al terminar (o al saltarla) empieza el
     ///   combate. Se ve una sola vez cada vez que se carga el nivel: al reintentar, no se repite.
-    ///   Con cinemática, las líneas «antes del jefe» del HUD no se muestran: el diálogo va en ella.
+    ///   Las líneas «antes del jefe» suenan en el HUD al empezar el combate, salvo que la
+    ///   presentación ya las diga (<c>CutsceneData.llevaDialogoDelJefe</c>, las de los jefes 2 a
+    ///   4). La de la Ira no las dice: su texto es de Kael.
     ///
     /// - <b>Derrota del jefe:</b> el <see cref="LevelManager"/> otorga el fragmento y la
     ///   habilidad; tras una breve pausa se abren las puertas y aparece la salida del nivel. Si
@@ -58,6 +60,7 @@ namespace Fragmentum.Levels
 
         private LevelManager _nivel;
         private bool _presentado;
+        private CutsceneData _presentacion;
         private PlayerController _jugadorEnEspera;
 
         /// <summary>Empezó la cinemática de presentación del jefe.</summary>
@@ -191,6 +194,7 @@ namespace Fragmentum.Levels
             }
 
             _presentado = true;
+            _presentacion = cinematica;
             Presentando = true;
             _jugadorEnEspera = jugador;
             FijarPuertas(true);
@@ -223,8 +227,9 @@ namespace Fragmentum.Levels
             }
 
             EventosJuego.NotificarJefeEnCombate(jefe.Datos != null ? jefe.Datos.nombreCanonico : jefe.name, jefe.Vida);
-            // Con presentación, el diálogo ya fue en la cinemática.
-            if (!_presentado && _nivel != null && _nivel.Nivel != null && DialogueManager.Instancia != null)
+            // Si la presentación ya dijo el diálogo del jefe, el HUD no lo repite.
+            var dialogoDicho = _presentacion != null && _presentacion.llevaDialogoDelJefe;
+            if (!dialogoDicho && _nivel != null && _nivel.Nivel != null && DialogueManager.Instancia != null)
             {
                 DialogueManager.Instancia.Reproducir(_nivel.Nivel.dialogos, MOMENTOS_DIALOGO.PRE_JEFE);
             }

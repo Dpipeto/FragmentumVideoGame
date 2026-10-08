@@ -61,10 +61,9 @@ Dos cosas que no salieron como se pidió:
 
 **Qué es en el juego:** en la fase 2 la Centinela clava la espada y brotan tres columnas de lava,
 una bajo el jugador y dos alrededor. Cada columna mide 1,6 u de ancho y 5 u de alto. Primero
-avisa unos 0,3 s sin hacer daño y después quema 0,9 s. Desde la v0.33 quema con la columna de la
-segunda tanda (E3 y E4 en bucle), pero el aviso sigue siendo un rectángulo naranja que late. Brota
-del suelo o de la plataforma donde esté Kael, así que su base no puede llevar un trozo de suelo
-pegado.
+avisa unos 0,3 s sin hacer daño y después quema 0,9 s. Brota del suelo o de la plataforma donde
+esté Kael, así que su base no puede llevar un trozo de suelo pegado. **Desde la v0.34 está completa:**
+la grieta avisa (E1), brota (E2), arde (E3 y E4 en bucle) y, al acabar, se derrumba (E5).
 
 ### Primera tanda (2026-10-07): no entró
 
@@ -175,31 +174,35 @@ encima de las de ahora, y avísame. Compruebo que tengan la rejilla de E3 y la b
 fila y del mismo ancho; si cuadran, el aviso sustituye al rectángulo, el brote abre la columna y
 el colapso la cierra.
 
+### Tercera tanda (2026-10-08): entraron las tres
+
+Editar E3 funcionó: las cinco imágenes tienen la misma rejilla (10,24 px), la misma fase y la base
+en la misma fila, y ninguna lleva suelo. `limpiar_erupcion.py` las muestrea sobre esa rejilla común,
+sin alinear ni recentrar nada, en un lienzo de 74 × 150 con el pivote en el centro de la base de la
+columna. El aviso (66 px de ancho) y el derrumbe (73 px) se extienden más que la columna (44 px):
+son llama baja sobre el suelo, unas 3 u.
+
 ---
 
-## CinematicaFinalLvl2: retoque opcional
+## CinematicaFinalLvl2: retoque ✔ hecho (2026-10-08)
 
-La versión que entró funciona: a 240 × 135 se leen los huecos de Kael y el hombro que brilla. Tiene
-dos detalles que contradicen la historia:
+**Resultado (2026-10-08), ya en el juego.** Hicieron falta dos retoques. El primero llegó a
+2752 × 1536 y sin el fragmento que flotaba sobre la espada, pero con cinco huecos: el de la espalda
+pasó al muslo. El segundo, a 1024 × 572, tiene los cuatro huecos y el fragmento solo en el hombro.
+A 240 × 135 se lee bien; por ser más pequeño y JPEG, el fondo oscuro sale algo más ruidoso. Debajo
+queda, como referencia, el prompt que se dio para los huecos.
 
-- **Sigue flotando un fragmento sobre la espada,** aunque Kael ya lo lleva en el hombro.
-- **Hay cinco huecos vacíos.** Con cinco fragmentos en el juego y el primero ya integrado, deberían
-  quedar cuatro.
+Si quieres corregirlo, pídele a Gemini que **edite** la versión nueva.
 
-Si quieres corregirlo, pídele a Gemini que **edite** la imagen. No hace falta generarla de nuevo.
-
-**Adjunta:** `Imagenes/Cinematica Muerte Jefe/CinematicaFinalLvl2.jpg`.
+**Adjunta:** `Imagenes/Cinematica Muerte Jefe/CinematicaFinalLvl2.jpg` (la de ahora).
 
 ```text
 Edit the attached image. Keep everything exactly as it is — same framing, same pixel art, same
-palette, same character — with two changes only:
-1. Remove the small glowing shard floating above the sword in the rubble. The sword stays; the
-   air above it is as dark as the rest of the hall.
-2. Kael must have exactly FOUR empty holes in his body (right forearm, lower back, back of the
-   right thigh, left calf). Fill the fifth one with the same dark worn cloth as around it.
+palette, same character — with one change only: Kael must have exactly FOUR empty holes in his
+body. Fill the hole on the back of his left thigh with the same dark worn cloth as around it, so
+that only these four remain: left forearm, right elbow, left calf and right calf.
 The glowing shard on his left shoulder stays as it is.
 ```
 
-**Cuando la tengas:** guárdala encima de `CinematicaFinalLvl2.jpg`, mejor a su tamaño original
-(2752 × 1536) y no a la copia de 2000 px que entró ahora, y avísame. Se reprocesa con
+**Cuando la tengas:** guárdala encima de `CinematicaFinalLvl2.jpg` y avísame. Se reprocesa con
 `python cine.py CinematicaFinalLvl2` y entra sola.

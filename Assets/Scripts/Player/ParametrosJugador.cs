@@ -94,8 +94,9 @@ namespace Fragmentum.Player
         public Vector2 impulsoRetroceso = new Vector2(5f, 6f);
 
         [Header("Agacharse (cobertura del mundo de la Culpa)")]
-        [Tooltip("Altura del cuerpo agachado respecto de la altura normal.")]
-        [Range(0.3f, 1f)] public float alturaAgachado = 0.5f;
+        [Tooltip("Altura del cuerpo agachado respecto de la altura normal. Con 0,6, el collider mide 1,08 u: lo que el " +
+                 "dibujo de Kael agachado (69 px a 64 px/u). Así los golpes le dan donde se le ve.")]
+        [Range(0.3f, 1f)] public float alturaAgachado = 0.6f;
 
         [Tooltip("Velocidad al avanzar agachado. 0 = cobertura estática.")]
         public float velocidadAgachado = 2f;

@@ -9,8 +9,8 @@ namespace Fragmentum.Bosses.Patrones
     /// suelo, la primera justo bajo el jugador y las demás alrededor. Cada una se anuncia antes
     /// (zona translúcida que no hace daño) y obliga a moverse. Nunca salen fuera de la arena.
     ///
-    /// Con <see cref="efecto"/>, al quemar se ve la columna dibujada en vez del rectángulo; el
-    /// aviso sigue siendo el rectángulo que late hasta que llegue su dibujo.
+    /// Con <see cref="efecto"/>, cada erupción se ve dibujada de principio a fin en vez del
+    /// rectángulo: la grieta que avisa, la columna que brota y arde, y el derrumbe al apagarse.
     /// </summary>
     [CreateAssetMenu(menuName = "Fragmentum/Jefes/Patrón: plataformas en erupción", fileName = "PatronPlataformasErupcion")]
     public class PatronPlataformasErupcion : PatronAtaque
@@ -31,8 +31,8 @@ namespace Fragmentum.Bosses.Patrones
 
         [Min(0f)] public float recuperacion = 0.8f;
 
-        [Tooltip("Dibujo de la columna mientras quema: un prefab animado con el pivote en el centro de su base. " +
-                 "Durante el aviso se sigue viendo el rectángulo. Vacío = el rectángulo también al quemar.")]
+        [Tooltip("Dibujo de la erupción: un prefab con DibujoDeZona y su Animator (avisa, brota y arde, se apaga), " +
+                 "con el pivote en el centro de su base. Vacío = el rectángulo.")]
         public GameObject efecto;
 
         public override IEnumerator Ejecutar(BossController jefe)
@@ -48,8 +48,8 @@ namespace Fragmentum.Bosses.Patrones
                 var x = jefe.CentroJugador.x + (i == 0 ? 0f : Random.Range(-dispersion, dispersion));
                 x = Mathf.Clamp(x, limites.x + tamano.x * 0.5f, limites.y - tamano.x * 0.5f);
                 var centro = new Vector2(x, jefe.SueloEn(x) + tamano.y * 0.5f);
-                var zona = jefe.CrearZona("Erupcion", centro, tamano, danio, aviso, duracion, Vector2.zero, color, dibujarZona);
-                zona.Vestir(efecto, 0, trasElAviso: true);
+                var zona = jefe.CrearZona("Erupcion", centro, tamano, danio, aviso, duracion, Vector2.zero, color, dibujarZona && efecto == null);
+                zona.Vestir(efecto, 0);
                 yield return new WaitForSeconds(intervalo);
             }
 
