@@ -300,6 +300,33 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarHasta(() => Jugador.Vida.Vida < vidaJugador, 2f, "que la erupción queme al jugador quieto");
         }
 
+        [UnityTest]
+        public IEnumerator LaErupcion_AvisaConElRectangulo_YQuemaConSuColumnaDibujada()
+        {
+            var jefe = CrearJefe("CentinelaArdiente");
+            SoloPatron(jefe, "PlataformasEnErupcion");
+            yield return CrearJugadorEnSuelo(new Vector2(-6f, 0f));
+            jefe.Activar(Jugador.transform, LimitesArena);
+
+            ZonaDeDanio primera = null;
+            yield return EsperarHasta(() => (primera = Object.FindObjectsByType<ZonaDeDanio>().FirstOrDefault(z => z.name.EndsWith("Erupcion"))) != null, 3f, "la primera erupción");
+            var rectangulo = primera.GetComponent<SpriteRenderer>();
+            var columna = primera.transform.Find("ErupcionDeLava");
+            Assert.IsNotNull(columna, "La zona lleva dentro la columna animada.");
+            Assert.IsFalse(primera.Activa);
+            Assert.IsTrue(rectangulo.enabled, "Mientras avisa se ve el rectángulo que late.");
+            Assert.IsFalse(columna.gameObject.activeSelf, "La columna espera a que queme.");
+
+            yield return EsperarHasta(() => primera.Activa, 2f, "que la erupción queme");
+            yield return new WaitForFixedUpdate();
+            Assert.IsFalse(rectangulo.enabled, "Al quemar, la columna sustituye al rectángulo.");
+            Assert.IsTrue(columna.gameObject.activeSelf);
+            Assert.IsNotNull(columna.GetComponent<Animator>().runtimeAnimatorController);
+            Assert.AreEqual(0f, columna.localPosition.x, 1e-4f, "Centrada en su zona.");
+            Assert.AreEqual(-primera.Tamano.y * 0.5f, columna.localPosition.y, 1e-4f, "Brota de la base de la zona.");
+            Assert.Greater(columna.localScale.x, 0f, "Sin espejar.");
+        }
+
         // --- Derrota y reinicio ---
 
         // Un jefe sin arte (la Doncella, de momento cápsula) se desvanece. La Centinela, con arte,

@@ -452,7 +452,7 @@ MonoBehaviour:
     estadoAnimator: Correr
     reiniciar: 0
   - estado: 2
-    estadoAnimator: Idle
+    estadoAnimator: Agacharse
     reiniciar: 0
   - estado: 3
     estadoAnimator: Salto
@@ -479,8 +479,8 @@ MonoBehaviour:
     estadoAnimator: 
     reiniciar: 0
   - estado: 11
-    estadoAnimator: Idle
-    reiniciar: 0
+    estadoAnimator: Morir
+    reiniciar: 1
 --- !u!1 &9157643236468704148
 GameObject:
   m_ObjectHideFlags: 0

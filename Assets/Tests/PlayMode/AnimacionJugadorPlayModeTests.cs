@@ -134,5 +134,46 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarClip(ESTADOS_JUGADOR.RUN, 0.5f);
             Assert.IsTrue(Suena(PlayerAnimacion.Correr), "Sigue corriendo: vuelve al clip de correr.");
         }
+
+        [UnityTest]
+        public IEnumerator Agacharse_BajaSeQuedaAgachado_YAlSoltarSeLevantaAntesDelIdle()
+        {
+            Suelo(-10f, 10f);
+            yield return CrearJugadorEnSuelo(Vector2.zero);
+
+            Input.AgacharseMantenido = true;
+            yield return EsperarClip(ESTADOS_JUGADOR.CROUCH, 0.5f);
+            Assert.IsTrue(Suena(PlayerAnimacion.Agacharse), "Al agacharse: Agacharse.");
+            var sprite = Animador.GetComponent<SpriteRenderer>();
+            Assert.AreEqual(PiesJugador.y, sprite.bounds.min.y, 0.02f, "Agachado, los pies siguen donde pisa el cuerpo.");
+
+            yield return new WaitForSeconds(0.3f);
+            Assert.IsTrue(Suena(PlayerAnimacion.AgachadoBucle), "Ya abajo, se queda agachado.");
+
+            Input.AgacharseMantenido = false;
+            yield return EsperarClip(ESTADOS_JUGADOR.IDLE, 0.5f);
+            Assert.IsTrue(Suena(PlayerAnimacion.Levantarse), "Al soltar se incorpora antes del idle.");
+
+            yield return new WaitForSeconds(0.3f);
+            Assert.IsTrue(Suena(PlayerAnimacion.Idle), "Y vuelve al idle él solo.");
+        }
+
+        [UnityTest]
+        public IEnumerator Morir_CaeDeRodillas_YSeQuedaHastaReaparecer()
+        {
+            Suelo(-10f, 10f);
+            yield return CrearJugadorEnSuelo(Vector2.zero);
+
+            Jugador.Vida.Matar();
+            yield return EsperarClip(ESTADOS_JUGADOR.DEAD, 0.5f);
+            Assert.IsTrue(Suena(PlayerAnimacion.Morir), "Muerto: Morir, no el idle.");
+
+            yield return new WaitForSeconds(0.8f);
+            Assert.AreEqual("Kael_Morir_2", Animador.GetComponent<SpriteRenderer>().sprite.name, "Acaba de rodillas y ahí se queda.");
+
+            Jugador.Revivir(new Vector2(0f, 0.05f));
+            yield return EsperarClip(ESTADOS_JUGADOR.IDLE, 0.5f);
+            Assert.IsTrue(Suena(PlayerAnimacion.Idle), "Al reaparecer, de pie otra vez.");
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace Fragmentum.Core.Combate
     /// El daño lo reparte un <see cref="Hitbox"/>, así que respeta las capas, los i-frames y los
     /// escudos como cualquier otro golpe. Se dibuja como un rectángulo de color, salvo que se
     /// cree sin dibujo porque el golpe ya lo enseña una animación (el espadazo) o porque lleva
-    /// su propio dibujo dentro (<see cref="Vestir"/>, la onda).
+    /// su propio dibujo dentro (<see cref="Vestir"/>: la onda, y la erupción al quemar).
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D), typeof(Hitbox))]
     public class ZonaDeDanio : MonoBehaviour
@@ -22,6 +22,7 @@ namespace Fragmentum.Core.Combate
         private Rigidbody2D _cuerpo;
         private Hitbox _hitbox;
         private SpriteRenderer _visual;
+        private GameObject _dibujoTrasAviso;
         private Color _color;
         private Vector2 _velocidad;
         private float _inicio;
@@ -82,23 +83,51 @@ namespace Fragmentum.Core.Combate
         /// Pone dentro de la zona el dibujo de su ataque (un prefab con su animación, como la
         /// onda de la Centinela) en lugar del rectángulo. El pivote del dibujo es su frente en el
         /// suelo: cae en el borde de la zona que va por delante y en su base. Mirando a la
-        /// izquierda (<paramref name="direccion"/> &lt; 0) se espeja. Sin prefab no hace nada.
+        /// izquierda (<paramref name="direccion"/> &lt; 0) se espeja. Con dirección 0 va centrado:
+        /// su pivote es el centro de la base (la erupción). Sin prefab no hace nada.
+        ///
+        /// Con <paramref name="trasElAviso"/>, el dibujo espera a que la zona queme: mientras
+        /// avisa se sigue viendo el rectángulo que late, y al activarse el dibujo lo sustituye.
         /// </summary>
-        public GameObject Vestir(GameObject dibujo, int direccion)
+        public GameObject Vestir(GameObject dibujo, int direccion, bool trasElAviso = false)
         {
             if (dibujo == null)
             {
                 return null;
             }
 
-            var lado = direccion < 0 ? -1f : 1f;
+            var lado = direccion < 0 ? -1f : direccion > 0 ? 1f : 0f;
             var tamano = Tamano;
             var objeto = Instantiate(dibujo, transform);
             objeto.name = dibujo.name;
             objeto.transform.localPosition = new Vector3(lado * tamano.x * 0.5f, -tamano.y * 0.5f, 0f);
             var escala = objeto.transform.localScale;
-            objeto.transform.localScale = new Vector3(Mathf.Abs(escala.x) * lado, escala.y, escala.z);
+            objeto.transform.localScale = new Vector3(Mathf.Abs(escala.x) * (lado < 0f ? -1f : 1f), escala.y, escala.z);
+
+            if (trasElAviso)
+            {
+                objeto.SetActive(false);
+                _dibujoTrasAviso = objeto;
+                if (Activa)
+                {
+                    Descubrir();
+                }
+            }
+
             return objeto;
+        }
+
+        // El dibujo que esperaba al aviso sustituye al rectángulo en cuanto la zona quema.
+        private void Descubrir()
+        {
+            if (_dibujoTrasAviso == null)
+            {
+                return;
+            }
+
+            _dibujoTrasAviso.SetActive(true);
+            _visual.enabled = false;
+            _dibujoTrasAviso = null;
         }
 
         private void Configurar(float aviso, float duracion, Vector2 velocidad, Color color)
@@ -127,6 +156,7 @@ namespace Fragmentum.Core.Combate
                 Activa = true;
                 _hitbox.ReiniciarObjetivos();
                 _zona.enabled = true;
+                Descubrir();
             }
 
             if (Activa && _velocidad != Vector2.zero)

@@ -9,6 +9,84 @@
 
 ---
 
+## La erupción quema con su columna y Kael se agacha y muere (2026-10-07)
+
+Rama `nivel1-montado`, tras el commit del Nivel 1. El autor dejó en disco la segunda tanda de las
+erupciones (`Tesis/Imagenes/Erupcion`, E1 a E5) y dos hojas nuevas de Kael en Pixelorama:
+agacharse y morir (`Tesis/Imagenes Kael`).
+
+### 1. La erupción, con su columna
+
+- **Problema.** Las erupciones de la fase 2 de la Centinela eran rectángulos naranjas: latían
+  durante el aviso y se volvían opacos al quemar.
+- **Causa.** Faltaba su arte. La primera tanda no entró (entrada anterior) y la segunda solo en
+  parte: Gemini dibujó con bloques de 8 px (E1, E2) y de 10,24 px (E3 a E5), no de 16. Medidas a
+  su rejilla nativa:
+  - **E3 y E4 cuadran:** la columna llena en dos variantes, la misma silueta y la misma base,
+    sin suelo;
+  - **E1 (aviso) y E5 (colapso) no:** traen un montículo de roca en la base, y la erupción brota
+    también sobre las plataformas. E5 además sale cortada por arriba;
+  - **E2 (brote) tampoco:** con su otra rejilla mide 54 px de ancho frente a 44, y casi lo mismo
+    de alto que la llena.
+
+  Ninguna se recortó ni se reescaló para arreglarla. Se pide una tercera tanda editando E3
+  (`Docs/Diseno/Prompts_Gemini.md`).
+- **Solución.**
+  - **`limpiar_erupcion.py`** (en `Tesis/Imagenes/limpios/script`) baja E3 y E4 a su rejilla y
+    las alinea por la base y por su centro: un lienzo común de 44 × 150 con el pivote en el
+    centro de la base.
+  - **A 24 px/u**, el tamaño de píxel del Golem, la torreta y la bola: 1,83 × 5,7 u (6,25 con las
+    gotas), un poco más que su zona de daño (1,6 × 5), así que no quema donde no se ve. Regla
+    nueva en `TablaArte`.
+  - **`ConstructorEfectos`** construye ya los dos efectos por el mismo camino: el clip
+    `Erupcion_Arde` (las dos variantes cada 0,1 s, en bucle), su controlador y el prefab
+    `ErupcionDeLava`. Sin el arte de uno, el otro se construye igual.
+  - **`ZonaDeDanio.Vestir`** admite dos casos nuevos: con dirección 0 el dibujo va centrado y sin
+    espejar, y con `trasElAviso` espera a que la zona queme. Mientras avisa se ve el rectángulo
+    que late; al activarse, la columna lo sustituye.
+  - **`PatronPlataformasErupcion.efecto`**, que `GeneradorJefes` rellena en las dos erupciones de
+    la Centinela solo si está vacío, como con las ondas.
+
+### 2. Kael se agacha y muere
+
+- **Problema.** Agachado, Kael se veía de pie (CROUCH reproducía el idle) aunque su collider se
+  encogía a la mitad. Al morir, también seguía de pie (DEAD reproducía el idle).
+- **Causa.** Faltaban sus clips (PENDIENTES N3, B3).
+- **Solución.**
+  - **Las hojas, a 1×:** `Herramientas/reducir_hoja.py` detecta la exportación a 10× de las dos y
+    las reduce sin pérdida: agacharse, 7 fotogramas de 64 × 128 (el lienzo de correr); morir, 3
+    de 66 × 121. Kael mide lo mismo que en las demás hojas (120 px de pie).
+  - **Los pivotes, en la planta de los pies y en el torso:** x 39 en agacharse (el torso de pie
+    cae en la 40, como en el idle) y x 33 en morir, que se echa hacia atrás.
+  - **Agacharse:** `Agacharse` baja en 0,15 s (fotogramas 1 a 3) y encadena con `AgachadoBucle`
+    (3 y 4, al ritmo del idle). Al soltar, `PlayerAnimacion.ClipDePaso` pone `Levantarse` (5 y 6),
+    que encadena solo con el idle; si Kael corre, salta o cae, pasa directamente a su clip.
+  - **Morir:** los tres fotogramas a 5 fps, como en `Morir.pxo` (0,6 s). Se queda de rodillas
+    hasta que `Revivir` lo devuelve al idle.
+  - **Dos detalles para el autor**, sin cambiar nada:
+    - el dibujo agachado mide 1,08 u y el collider agachado 0,9 u (`alturaAgachado` = 0,5).
+      Cabe igual bajo el techo bajo de la prueba (1,2 u). Se recomienda 0,6 (N28);
+    - la bota de atrás de `Morir` toca el borde izquierdo del lienzo en los tres fotogramas y
+      queda cortada (N29, opcional).
+
+### Verificación
+
+- **Pruebas EditMode: 367 correctas de 367.**
+  - **Nuevas:**
+    - `ErupcionArteTests`: el lienzo y los 24 px/u, la base apoyada en la fila de abajo, que el
+      dibujo cubra su zona de daño, el clip, el prefab y los dos patrones;
+    - en `ArteKaelTests`, agacharse (su tabla, el clip de paso y que agachado cabe bajo 1,2 u) y
+      morir (5 fps, sin bucle, de rodillas).
+  - **Generalizada:** la de las transiciones propias, que ahora son tres cadenas (caer, agacharse
+    y levantarse).
+- **Pruebas PlayMode: 150 correctas de 150.**
+  - **Nuevas:**
+    - la erupción avisa con el rectángulo y quema con su columna, centrada y sin espejar;
+    - Kael se agacha, se queda abajo y se levanta antes del idle;
+    - Kael cae de rodillas, se queda y vuelve de pie al reaparecer.
+
+---
+
 ## Nivel 1 montado, guion cargado y la onda de la Centinela (2026-10-07)
 
 Rama `nivel1-montado`, que sale de `ajustes-pendientes`. El autor aprobó el diseño del Nivel 1 y

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Fragmentum.Core;
@@ -36,8 +37,8 @@ namespace Fragmentum.Tests
             return estado;
         }
 
-        /// <summary>Filas opacas (de abajo arriba) del primer fotograma de una hoja, leídas del PNG.</summary>
-        private static (int abajo, int arriba) FilasOpacasDelPrimerFotograma(ConstructorArteKael.Hoja hoja)
+        /// <summary>Filas opacas (de abajo arriba) de un fotograma de una hoja, leídas del PNG.</summary>
+        private static (int abajo, int arriba) FilasOpacas(ConstructorArteKael.Hoja hoja, int fotograma = 0)
         {
             var textura = new Texture2D(2, 2);
             try
@@ -48,7 +49,7 @@ namespace Fragmentum.Tests
                 int abajo = int.MaxValue, arriba = -1;
                 for (var y = 0; y < textura.height; y++)
                 {
-                    for (var x = 0; x < ancho; x++)
+                    for (var x = fotograma * ancho; x < (fotograma + 1) * ancho; x++)
                     {
                         if (pixeles[y * textura.width + x].a > 0)
                         {
@@ -87,7 +88,7 @@ namespace Fragmentum.Tests
         {
             foreach (var hoja in ConstructorArteKael.Hojas)
             {
-                var (abajo, arriba) = FilasOpacasDelPrimerFotograma(hoja);
+                var (abajo, arriba) = FilasOpacas(hoja);
                 var alto = (arriba - abajo + 1) / (float)ConstructorArteKael.PixelesPorUnidad;
 
                 // El collider mide 1,8 u. Una hoja exportada a 5× daría unos 9 u.
@@ -101,7 +102,7 @@ namespace Fragmentum.Tests
         {
             foreach (var hoja in ConstructorArteKael.Hojas)
             {
-                var (abajo, _) = FilasOpacasDelPrimerFotograma(hoja);
+                var (abajo, _) = FilasOpacas(hoja);
                 Assert.AreEqual(hoja.Pivote.y, abajo,
                     $"{hoja.Ruta}: los pies están en la fila {abajo} y el pivote en la {hoja.Pivote.y}. " +
                     "Si cambiaste el lienzo, ajusta el pivote en ConstructorArteKael.");
@@ -174,18 +175,30 @@ namespace Fragmentum.Tests
         }
 
         [Test]
-        public void LaCaida_EncadenaSuBucle_YNadaMasTieneTransicionesPropias()
+        public void SoloSeEncadenanLaCaidaAgacharseYLevantarse_YNadaMasTieneTransicionesPropias()
         {
-            var caida = Estado(PlayerAnimacion.Caida);
-            Assert.AreEqual(1, caida.transitions.Length);
-            Assert.AreEqual(PlayerAnimacion.CaidaBucle, caida.transitions[0].destinationState.name);
+            var cadenas = new Dictionary<string, string>
+            {
+                { PlayerAnimacion.Caida, PlayerAnimacion.CaidaBucle },
+                { PlayerAnimacion.Agacharse, PlayerAnimacion.AgachadoBucle },
+                { PlayerAnimacion.Levantarse, PlayerAnimacion.Idle },
+            };
 
             var maquina = Controlador().layers[0].stateMachine;
             Assert.AreEqual(PlayerAnimacion.Idle, maquina.defaultState.name);
             Assert.IsEmpty(maquina.anyStateTransitions, "La FSM del código decide: el Animator no tiene transiciones desde Any State.");
-            foreach (var hijo in maquina.states.Where(s => s.state != caida))
+            foreach (var hijo in maquina.states)
             {
-                Assert.IsEmpty(hijo.state.transitions, $"{hijo.state.name} no debe tener transiciones propias.");
+                if (cadenas.TryGetValue(hijo.state.name, out var siguiente))
+                {
+                    Assert.AreEqual(1, hijo.state.transitions.Length, hijo.state.name);
+                    Assert.AreEqual(siguiente, hijo.state.transitions[0].destinationState.name, $"{hijo.state.name} encadena con {siguiente}.");
+                    Assert.AreEqual(1f, hijo.state.transitions[0].exitTime, $"{hijo.state.name}: al terminar el clip.");
+                }
+                else
+                {
+                    Assert.IsEmpty(hijo.state.transitions, $"{hijo.state.name} no debe tener transiciones propias.");
+                }
             }
         }
 
@@ -243,6 +256,54 @@ namespace Fragmentum.Tests
             var idle = ConstructorArteKael.Fotogramas(ConstructorArteKael.HojaIdle)[0];
             Assert.AreEqual(idle.pivot.y, dash[0].pivot.y, "Los pies, en la planta.");
             Assert.AreEqual(42f, dash[0].pivot.x, 0.01f);
+        }
+
+        [Test]
+        public void Agacharse_BajaSeQuedaAgachado_YAlSoltarSeLevanta()
+        {
+            var tabla = PlayerAnimacion.TablaPorDefecto();
+            Assert.AreEqual(PlayerAnimacion.Agacharse, tabla.Single(e => e.estado == ESTADOS_JUGADOR.CROUCH).estadoAnimator,
+                "CROUCH ya tiene su clip: no usa el idle.");
+            Assert.AreEqual(PlayerAnimacion.Levantarse, PlayerAnimacion.ClipDePaso(ESTADOS_JUGADOR.CROUCH, ESTADOS_JUGADOR.IDLE));
+            Assert.IsNull(PlayerAnimacion.ClipDePaso(ESTADOS_JUGADOR.CROUCH, ESTADOS_JUGADOR.FALL), "Si cae, cae: sin levantarse.");
+            Assert.IsNull(PlayerAnimacion.ClipDePaso(ESTADOS_JUGADOR.RUN, ESTADOS_JUGADOR.IDLE));
+
+            var baja = AssetDatabase.LoadAssetAtPath<AnimationClip>($"{ConstructorArteKael.CarpetaAnimaciones}/Kael_{PlayerAnimacion.Agacharse}.anim");
+            Assert.IsNotNull(baja);
+            Assert.LessOrEqual(baja.length, 0.2f, "Agacharse responde enseguida: el collider ya se encogió.");
+            Assert.IsTrue(AssetDatabase.LoadAssetAtPath<AnimationClip>($"{ConstructorArteKael.CarpetaAnimaciones}/Kael_{PlayerAnimacion.AgachadoBucle}.anim").isLooping);
+
+            // Agachado (fotogramas 3 y 4) cabe bajo el techo bajo de PruebaJugador, a 1,2 u del suelo.
+            foreach (var fotograma in new[] { 3, 4 })
+            {
+                var (abajo, arriba) = FilasOpacas(ConstructorArteKael.HojaAgachado, fotograma);
+                Assert.AreEqual(0, abajo, $"Kael_Agachado_{fotograma}: los pies, en la planta.");
+                Assert.Less((arriba - abajo + 1) / (float)ConstructorArteKael.PixelesPorUnidad, 1.2f,
+                    $"Kael_Agachado_{fotograma}: agachado debe caber bajo un techo bajo.");
+            }
+
+            Assert.AreEqual(39f, ConstructorArteKael.Fotogramas(ConstructorArteKael.HojaAgachado)[0].pivot.x, 0.01f,
+                "El torso de pie, donde el del idle: agacharse no desplaza a Kael.");
+        }
+
+        [Test]
+        public void Morir_TieneSusTresFotogramasA5fps_YSeQuedaDeRodillas()
+        {
+            Assert.AreEqual(PlayerAnimacion.Morir, PlayerAnimacion.TablaPorDefecto().Single(e => e.estado == ESTADOS_JUGADOR.DEAD).estadoAnimator,
+                "DEAD ya tiene su clip: no usa el idle.");
+
+            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>($"{ConstructorArteKael.CarpetaAnimaciones}/Kael_{PlayerAnimacion.Morir}.anim");
+            Assert.IsNotNull(clip, "Falta el clip de morir.");
+            Assert.AreEqual(0.6f, clip.length, 0.001f, "Como en Morir.pxo: tres fotogramas a 5 fps.");
+            Assert.IsFalse(clip.isLooping, "Cae una vez y se queda de rodillas hasta reaparecer.");
+            Assert.IsEmpty(Estado(PlayerAnimacion.Morir).transitions);
+
+            var claves = AnimationUtility.GetObjectReferenceCurve(clip, CurvaSprite);
+            for (var i = 0; i < 3; i++)
+            {
+                Assert.AreEqual(i * 0.2f, claves[i].time, 0.001f, $"Kael_Morir_{i}");
+                Assert.AreEqual($"Kael_Morir_{i}", claves[i].value.name);
+            }
         }
 
         // --- Prefab ---

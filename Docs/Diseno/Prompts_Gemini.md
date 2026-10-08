@@ -61,9 +61,10 @@ Dos cosas que no salieron como se pidió:
 
 **Qué es en el juego:** en la fase 2 la Centinela clava la espada y brotan tres columnas de lava,
 una bajo el jugador y dos alrededor. Cada columna mide 1,6 u de ancho y 5 u de alto. Primero
-avisa unos 0,3 s sin hacer daño y después quema 0,9 s. Hoy se ve como un rectángulo naranja que
-late. Brota del suelo o de la plataforma donde esté Kael, así que su base no puede llevar un
-trozo de suelo pegado.
+avisa unos 0,3 s sin hacer daño y después quema 0,9 s. Desde la v0.33 quema con la columna de la
+segunda tanda (E3 y E4 en bucle), pero el aviso sigue siendo un rectángulo naranja que late. Brota
+del suelo o de la plataforma donde esté Kael, así que su base no puede llevar un trozo de suelo
+pegado.
 
 ### Primera tanda (2026-10-07): no entró
 
@@ -123,6 +124,56 @@ else. No text, no border, no shadow on the floor.
 `Erupcion5.jpg`, en ese orden, y avísame. Hace falta tenerlas en disco: las del chat no se pueden
 procesar. El aviso usará la 1; luego vienen la 2, la 3 y la 4 en bucle mientras quema, y la 5 al
 apagarse.
+
+### Segunda tanda (2026-10-07): entraron dos de cinco
+
+Llegaron en disco como `E1.jpg` … `E5.jpg`. Gemini no dibujó los bloques de 16 px pedidos, sino
+de 8 (E1 y E2) y de 10,24 (E3, E4 y E5). Medidas a su rejilla nativa (`limpiar_erupcion.py`):
+
+| Imagen | Qué es | Rejilla | Veredicto |
+|---|---|---|---|
+| E1 | aviso | 8 px | **No entra:** el aviso es un montículo de roca de 211 píxeles de ancho (8,8 u a 24 px/u), no una grieta en la base de la columna. |
+| E2 | brote | 8 px | **No entra:** a su rejilla mide 54 px de ancho frente a los 44 de E3, y casi lo mismo de alto (165 frente a 150). El brote sería más ancho que la columna llena y no la mitad de alto. |
+| E3 | llena | 10,24 px | **Entra.** 44 × 136 píxeles (150 con las gotas), sin suelo. |
+| E4 | llena, variante | 10,24 px | **Entra.** La misma silueta y la misma base que E3: alternan en bucle. |
+| E5 | colapso | 10,24 px | **No entra:** lleva roca amontonada en la base (88 píxeles de ancho) y las gotas salen cortadas por el borde de arriba. |
+
+E3 y E4 están en el juego a **24 px/u** (el píxel del Golem, la torreta y la bola): la columna mide
+1,83 × 5,7 u y cubre su zona de daño (1,6 × 5) con un poco de margen. No se recortó ni se reescaló
+ninguna de las otras para arreglarla.
+
+### Tercera tanda: el aviso, el brote y el colapso, editando E3
+
+Pedirlas de cero vuelve a cambiar la rejilla. Esta vez, **adjunta `Tesis/Imagenes/Erupcion/E3.jpg`
+y pide a Gemini que la edite**: así conserva el lienzo, el tamaño de los bloques y la posición de
+la base. Una imagen por mensaje, en el mismo chat; cada vez, vuelve a adjuntar E3.
+
+```text
+Edit the attached image. Keep EXACTLY the same 2048×2048 canvas, the same flat #FF00FF magenta
+background, the same art-pixel size (the same blocks), the same palette, and the same position
+of the lava column: its bottom row stays on the same line, centered at the same place, the same
+width at the base.
+
+Redraw ONLY the column, as described below. Hard-edged opaque pixels only. NO blur, NO glow
+halo, NO soft magenta edge, NO semi-transparent smoke. NO ground, NO mound, NO rocks lying
+around the base: it must work on any floor or thin platform. Everything stays inside the canvas:
+nothing touches its edges. No text, no border, no shadow.
+```
+
+Y añade, según la imagen:
+
+- **1, aviso (`E1.jpg`):** «WARNING: no column yet. Only a glowing crack lying on the bottom row,
+   exactly as wide as the column's base, and three or four ember pixels rising above it. At most
+   8 blocks tall. Nothing else.»
+- **2, brote (`E2.jpg`):** «BURST: the same column cut to HALF its height, same width and same base,
+   ragged flames at the top and a few droplets flying up.»
+- **5, colapso (`E5.jpg`):** «COLLAPSE: the column falling apart, about a third of its height, same
+   base, droplets falling down. No rocks on the floor.»
+
+**Cuando lleguen:** guárdalas en `Tesis/Imagenes/Erupcion` como `E1.jpg`, `E2.jpg` y `E5.jpg`,
+encima de las de ahora, y avísame. Compruebo que tengan la rejilla de E3 y la base en la misma
+fila y del mismo ancho; si cuadran, el aviso sustituye al rectángulo, el brote abre la columna y
+el colapso la cierra.
 
 ---
 

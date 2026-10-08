@@ -152,6 +152,7 @@ namespace Fragmentum.EditorTools
             });
 
             VestirOndas(ConstructorEfectos.PrefabOnda, salto, onda, ondaDoble);
+            VestirErupciones(ConstructorEfectos.PrefabErupcion, erupcion, erupcionRafaga);
 
             Completar("CentinelaArdiente", sobrescribir, j =>
             {
@@ -232,6 +233,27 @@ namespace Fragmentum.EditorTools
             {
                 salto.efectoOndas = dibujo;
                 EditorUtility.SetDirty(salto);
+            }
+        }
+
+        /// <summary>
+        /// Las erupciones llevan la columna dibujada mientras queman; el aviso sigue siendo el
+        /// rectángulo. Como con las ondas, solo se rellena el campo vacío.
+        /// </summary>
+        private static void VestirErupciones(GameObject dibujo, params PatronPlataformasErupcion[] erupciones)
+        {
+            if (dibujo == null)
+            {
+                return;
+            }
+
+            foreach (var erupcion in erupciones)
+            {
+                if (erupcion.efecto == null)
+                {
+                    erupcion.efecto = dibujo;
+                    EditorUtility.SetDirty(erupcion);
+                }
             }
         }
 
