@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ca9f2ac87721824d8681c7cf9a12cb0, type: 3}
+  m_Name: Congelar
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronCongelar
+  nombre: Congelar
+  descripcion: "El agua de la inundaci\xF3n se pone blanca y se congela: p\xFAas en lo que estaba inundado y, arriba, una capa de hielo que se pisa 6 s."
+  aviso: 0.8
+  danio: 1
+  color: {r: 0.9098039, g: 0.93333334, b: 0.95686275, a: 1}
+  dibujarZona: 1
+  duracionPuas: 0.6
+  duracionCapa: 6
+  recuperacion: 0.4

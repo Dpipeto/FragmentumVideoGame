@@ -174,8 +174,9 @@ namespace Fragmentum.EditorTools
                 };
             });
 
+            GenerarDoncella(sobrescribir);
+
             // Esqueletos: vida y fases del Anexo A, sin patrones todavía (Fase 10).
-            Completar("DoncellaLamento", sobrescribir, j => Esqueleto(j, 26, "4A7FA5", Fase("Olas e inundación", 1f), Fase("Congelamiento (50 %)", 0.5f)));
             Completar("EspectroDelPavor", sobrescribir, j => Esqueleto(j, 22, "6B4FA0", Fase("Ataques con destello", 1f), Fase("Tres clones (50 %)", 0.5f)));
             Completar("JuezSilente", sobrescribir, j =>
             {
@@ -187,6 +188,99 @@ namespace Fragmentum.EditorTools
                 Esqueleto(j, 40, "5A5A5A", Fase("Combate espejo", 1f), Fase("Secciones de cada mundo (60 %)", 0.6f), Fase("Integración (30 %)", 0.3f)));
 
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>
+        /// Doncella del Lamento (<c>Docs/Diseno/Nivel2_Diseno.md</c>, sección 6): solo se la hiere
+        /// mientras llora, así que cada fase termina su ronda con un llanto. Sus datos nacieron como
+        /// esqueleto (dos fases sin patrones): se completan aquí la primera vez, y después se respeta
+        /// lo que se haya ajustado a mano.
+        /// </summary>
+        private static void GenerarDoncella(bool sobrescribir)
+        {
+            var azulHielo = Hex("4A7FA5");
+
+            var ola = Patron<PatronOla>("Ola", sobrescribir, p =>
+            {
+                p.nombre = "Ola";
+                p.descripcion = "Una ola a ras del hielo cruza la arena desde la pared que tiene a la espalda. Se salta o se espera sobre una placa.";
+                p.aviso = 0.7f;
+                p.danio = 1;
+                p.color = azulHielo;
+            });
+
+            var olaDoble = Patron<PatronOla>("OlaDoble", sobrescribir, p =>
+            {
+                p.nombre = "Ola doble";
+                p.descripcion = "Dos olas seguidas: dos saltos con ritmo.";
+                p.aviso = 0.6f;
+                p.danio = 1;
+                p.olas = 2;
+                p.intervalo = 0.8f;
+                p.recuperacion = 0.5f;
+                p.color = azulHielo;
+            });
+
+            var inundacion = Patron<PatronInundacion>("Inundacion", sobrescribir, p =>
+            {
+                p.nombre = "Inundación";
+                p.descripcion = "Sale agua por las grietas de la franja de Kael y después sube y se queda 5 s. No hace daño: es agua.";
+                p.aviso = 1f;
+                p.danio = 0;
+                p.franjas = 1;
+                p.duracion = 5f;
+                p.color = azulHielo;
+            });
+
+            var congelar = Patron<PatronCongelar>("Congelar", sobrescribir, p =>
+            {
+                p.nombre = "Congelar";
+                p.descripcion = "El agua de la inundación se pone blanca y se congela: púas en lo que estaba inundado y, arriba, una capa de hielo que se pisa 6 s.";
+                p.aviso = 0.8f;
+                p.danio = 1;
+                p.duracionPuas = 0.6f;
+                p.duracionCapa = 6f;
+                p.color = Hex("E8EEF4");
+            });
+
+            var llanto = Patron<PatronLlanto>("Llanto", sobrescribir, p =>
+            {
+                p.nombre = "Llanto";
+                p.descripcion = "Baja al hielo, cerca de Kael, y llora 1,5 s. Es la única ventana para herirla.";
+                p.aviso = 0f;
+                p.danio = 0;
+                p.duracion = 1.5f;
+                p.color = Hex("00D4FF");
+            });
+
+            var llantoSobreElAgua = Patron<PatronLlanto>("LlantoSobreElAgua", sobrescribir, p =>
+            {
+                p.nombre = "Llanto sobre el agua";
+                p.descripcion = "Llora 1,2 s flotando bajo sobre la franja que acaba de congelar o de inundar: hay que subirse a su hielo o meterse en su agua.";
+                p.aviso = 0f;
+                p.danio = 0;
+                p.duracion = 1.2f;
+                p.color = Hex("00D4FF");
+            });
+
+            Completar("DoncellaLamento", sobrescribir, j =>
+            {
+                j.vidaMaxima = 26;
+                j.velocidad = 2.5f;
+                // Tocarla no hace daño: las placas de la arena, que ella atraviesa, son refugio.
+                j.danioContacto = 0;
+                j.duracionVulnerable = 1.5f;
+                j.multiplicadorVulnerable = 2f;
+                j.inmuneFueraDeVulnerable = true;
+                j.tinte = azulHielo;
+                j.tamano = new Vector2(2f, 3.2f);
+                j.fases = new List<FaseJefe>
+                {
+                    Fase("Olas e inundación", 1f, 0.8f, 1f, ola, inundacion, ola, llanto),
+                    // El llanto va justo después de congelar: la capa de hielo sigue ahí para subirse.
+                    Fase("Congelamiento (50 %)", 0.5f, 0.6f, 1.2f, olaDoble, inundacion, congelar, llantoSobreElAgua),
+                };
+            }, completarEsqueleto: true);
         }
 
         private static T Patron<T>(string nombre, bool sobrescribir, Action<T> rellenar) where T : PatronAtaque
@@ -257,7 +351,9 @@ namespace Fragmentum.EditorTools
             }
         }
 
-        private static void Completar(string asset, bool sobrescribir, Action<JefeData> rellenar)
+        // Con completarEsqueleto, también rellena al jefe que todavía es un esqueleto (fases sin
+        // ningún patrón): así pasa de esqueleto a completo sin restablecer a los demás.
+        private static void Completar(string asset, bool sobrescribir, Action<JefeData> rellenar, bool completarEsqueleto = false)
         {
             var jefe = CargarDatos(asset);
             if (jefe == null)
@@ -266,11 +362,30 @@ namespace Fragmentum.EditorTools
                 return;
             }
 
-            if (sobrescribir || jefe.fases == null || jefe.fases.Count == 0)
+            if (sobrescribir || jefe.fases == null || jefe.fases.Count == 0 || (completarEsqueleto && EsEsqueleto(jefe)))
             {
                 rellenar(jefe);
                 EditorUtility.SetDirty(jefe);
             }
+        }
+
+        /// <summary>¿Tiene fases pero ningún patrón? Entonces espera sin atacar.</summary>
+        public static bool EsEsqueleto(JefeData jefe)
+        {
+            if (jefe == null || jefe.fases == null)
+            {
+                return true;
+            }
+
+            foreach (var fase in jefe.fases)
+            {
+                if (fase != null && fase.patrones != null && fase.patrones.Count > 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static void Esqueleto(JefeData j, int vida, string tinte, params FaseJefe[] fases)

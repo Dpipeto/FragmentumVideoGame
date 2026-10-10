@@ -387,3 +387,10 @@ MonoBehaviour:
   fragmento: {fileID: 0}
   currentState: 0
   registrarTransiciones: 0
+  alturaDeVuelo: 3
+  velocidadDeVuelo: 5
+  margenPared: 2.5
+  distanciaAKael: 2
+  hundimientoAlLlorar: 1
+  alturaSobreLaCapa: 0.2
+  franjas: []

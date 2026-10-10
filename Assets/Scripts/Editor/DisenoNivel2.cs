@@ -36,15 +36,19 @@ namespace Fragmentum.EditorTools
     /// torre bajaron y subieron medio metro respecto de la fase A: a su altura de entonces rozaban
     /// la cabeza de Kael (1,8 u) mientras esperaba en los rellanos. La Plañidera, el mini-jefe,
     /// ocupa el sitio de la segunda Escultura (PENDIENTES N32): la plaza este, entre el puente y el
-    /// tapón de hielo, la única salida de la superficie. Lo que todavía no se coloca: los patrones
-    /// de la Doncella (D).
+    /// tapón de hielo, la única salida de la superficie.
+    ///
+    /// Fase D (jefe): la Doncella flota, y el suelo de su arena se parte en tres franjas que ella
+    /// inunda y congela (<see cref="Franjas"/>). El agua sube hasta <see cref="CapaHelada"/> (el
+    /// diseño decía 4): a esa altura, la capa de hielo que deja al congelarse se alcanza desde el
+    /// hielo seco con el doble salto, que a 4 u se quedaba en el límite exacto.
     /// </summary>
     public static class DisenoNivel2
     {
         public const int IdNivel = 2;
 
         /// <summary>Sube al cambiar el recorrido: <see cref="PreparadorNivel"/> lo vuelve a montar entero.</summary>
-        public const int Version = 5;
+        public const int Version = 6;
 
         /// <summary>Base de todos los bloques: por debajo de lo que enseña la cámara (−13).</summary>
         public const float Fondo = -14f;
@@ -344,6 +348,35 @@ namespace Fragmentum.EditorTools
 
         /// <summary>Por dentro de la puerta y de la pared de la derecha.</summary>
         public static Vector2 LimitesArena => new Vector2(PuertaHasta, Paredes.Single(p => p.Nombre == "ParedArena").Desde);
+
+        /// <summary>
+        /// Lo que se pisa cuando una franja inundada se congela: la capa de hielo. Se sube desde el
+        /// hielo seco con el doble salto (con uno solo, no) y desde el agua de al lado.
+        /// </summary>
+        public const float CapaHelada = 3.5f;
+
+        public const float GrosorCapaHelada = 0.5f;
+
+        /// <summary>Hasta dónde sube el agua de la inundación: casi a ras de la capa, como las demás aguas.</summary>
+        public const float AguaDeLaInundacion = CapaHelada - BajoLaSuperficie;
+
+        /// <summary>
+        /// Altura de los pies de la Doncella mientras flota. Por encima de la cabeza de Kael y de su
+        /// espada, y con su cuerpo entero por debajo del balcón y dentro de lo que enseña la cámara
+        /// cuando Kael está en el suelo.
+        /// </summary>
+        public const float VueloDoncella = 3f;
+
+        /// <summary>
+        /// Las tres franjas del suelo de la arena que la Doncella inunda y congela, con el agua
+        /// llena: A y C llevan dentro una placa, y B queda bajo el balcón, que nunca se inunda.
+        /// </summary>
+        public static readonly Zona[] Franjas =
+        {
+            new Zona("FranjaA", 70f, 78f, SueloArena, SueloArena + AguaDeLaInundacion),
+            new Zona("FranjaB", 78f, 87f, SueloArena, SueloArena + AguaDeLaInundacion),
+            new Zona("FranjaC", 87f, 95f, SueloArena, SueloArena + AguaDeLaInundacion),
+        };
 
         /// <summary>
         /// Los saltos del recorrido, en orden, con el medio en que se dan. La caída por el agujero

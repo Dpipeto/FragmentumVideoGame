@@ -292,6 +292,39 @@ namespace Fragmentum.Tests
             Assert.IsFalse(_nivel2.isDirty);
         }
 
+        [Test]
+        public void LaArena_TieneLasTresFranjas_YLaDoncellaLasLleva()
+        {
+            var franjas = Todos<FranjaInundable>(_nivel2).OrderBy(f => f.transform.position.x).ToList();
+            Assert.AreEqual(DisenoNivel2.Franjas.Length, franjas.Count);
+            for (var i = 0; i < franjas.Count; i++)
+            {
+                var zona = DisenoNivel2.Franjas[i];
+                var franja = franjas[i];
+                Assert.AreEqual(zona.Nombre, franja.name);
+                Assert.AreEqual(zona.Desde, franja.Desde, 1e-3f, zona.Nombre);
+                Assert.AreEqual(zona.Hasta, franja.Hasta, 1e-3f, zona.Nombre);
+                Assert.AreEqual(zona.Abajo, franja.Suelo, 1e-3f, $"{zona.Nombre}: sale del suelo de la arena.");
+                Assert.AreEqual(zona.Arriba, franja.Superficie, 1e-3f, $"{zona.Nombre}: hasta dónde sube el agua.");
+                Assert.AreEqual(DisenoNivel2.SueloArena + DisenoNivel2.CapaHelada, franja.Techo, 1e-3f, $"{zona.Nombre}: la capa de hielo.");
+                Assert.AreEqual(DisenoNivel2.GrosorCapaHelada, franja.grosorCapa, 1e-3f, zona.Nombre);
+            }
+
+            var arena = Todos<ArenaJefe>(_nivel2).Single();
+            var doncella = (DoncellaLamento)arena.Jefe;
+            CollectionAssert.AreEqual(franjas, doncella.Franjas.ToList(), "La Doncella lleva las tres, de izquierda a derecha.");
+            Assert.AreEqual(DisenoNivel2.VueloDoncella, doncella.AlturaDeVuelo, 1e-4f);
+            Assert.IsTrue(doncella.Datos.inmuneFueraDeVulnerable, "Solo se la hiere mientras llora.");
+            Assert.IsFalse(GeneradorJefes.EsEsqueleto(doncella.Datos), "Ya tiene sus patrones.");
+
+            // Con Kael en el suelo de la arena, se la ve entera mientras flota.
+            var camara = Todos<Camera>(_nivel2).Single();
+            var desplazamiento = new SerializedObject(camara.GetComponent<CameraMovement>()).FindProperty("desplazamiento").vector3Value;
+            var loMasAltoQueSeVe = DisenoNivel2.SueloArena + desplazamiento.y + camara.orthographicSize;
+            Assert.LessOrEqual(DisenoNivel2.SueloArena + DisenoNivel2.VueloDoncella + doncella.Datos.tamano.y, loMasAltoQueSeVe,
+                "Flota dentro de lo que enseña la cámara cuando Kael está en el suelo.");
+        }
+
         private static List<T> Todos<T>(Scene escena) where T : Component =>
             escena.GetRootGameObjects().SelectMany(raiz => raiz.GetComponentsInChildren<T>(true)).ToList();
 

@@ -146,13 +146,13 @@ def flotante(x, y, ancho=2.5, amplitud=0.6):
 for x, y in PLACAS:
     flotante(x, y, amplitud=0.5)
 
-# Inundación de la arena (fase D): tres franjas, sube hasta y 4
-for i, (x0, x1) in enumerate(((70, 78.33), (78.33, 86.67), (86.67, 95))):
-    discontinuo(d, x0, 0, x1, 4, (120, 180, 230), paso=4)
-    a, b = px(x0 + 0.4, 3.8)
+# Inundación de la arena (fase D): tres franjas (DisenoNivel2.Franjas), sube hasta y 3,5
+for i, (x0, x1) in enumerate(((70, 78), (78, 87), (87, 95))):
+    discontinuo(d, x0, 0, x1, 3.5, (120, 180, 230), paso=4)
+    a, b = px(x0 + 0.4, 3.3)
     d.text((a, b), 'ABC'[i], font=fb, fill=(120, 180, 230))
 a, b = px(70.5, -1.2)
-d.text((a, b), 'franjas de inundación A, B y C: el agua sube hasta y 4 (rayado)', font=fp, fill=(120, 180, 230))
+d.text((a, b), 'franjas A, B y C: agua hasta y 3,5 (rayado); congelada, se pisa', font=fp, fill=(120, 180, 230))
 
 
 def punto(x, y, color, letra, r=7):
@@ -171,9 +171,10 @@ for x, y, flecha in ((40.5, -8.5, '↕'), (43.5, -6.5, '↕'), (57, -4.75, '↔'
     punto(x, y, MEDUSA, 'M')
     a, b = px(x + 0.7, y + 0.9)
     d.text((a, b), flecha, font=fb, fill=TEXTO)
-punto(82.5, 9, JEFE, 'D', r=16)
-a, b = px(82.5, 13.4)
-d.text((a - 46, b), 'flota; baja a llorar', font=fp, fill=TEXTO)
+# Flota con los pies a y 3: entera bajo el balcón y dentro de lo que enseña la cámara.
+punto(82.5, 3, JEFE, 'D', r=16)
+a, b = px(82.5, 10.4)
+d.text((a - 76, b), 'flota a y 3; baja a llorar', font=fp, fill=TEXTO)
 
 # Inicio, checkpoints, salida, puerta
 a, b = px(2, 0)

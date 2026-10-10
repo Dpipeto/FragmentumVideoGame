@@ -257,8 +257,8 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// La arena: la entrada pasada la puerta, la puerta en el borde de la sala (se cierra detrás
-        /// del jugador) y la Doncella en el centro, con las placas y el balcón que ella atraviesa.
-        /// Mientras sea un esqueleto (fase D), espera sin atacar y se la puede derrotar a golpes.
+        /// del jugador) y la Doncella en el centro, con las placas y el balcón que ella atraviesa y
+        /// las tres franjas del suelo que inunda y congela.
         /// </summary>
         private static void CrearArenaNivel2(Scene escena, Transform raiz, LevelData nivel, List<Collider2D> plataformas)
         {
@@ -289,6 +289,36 @@ namespace Fragmentum.EditorTools
             else
             {
                 Debug.LogWarning("[Fragmentum] No existe el prefab del jefe del Nivel 2: la arena se crea sin jefe. Ejecuta Fragmentum → Jefes → Generar datos y prefabs de jefes.");
+            }
+
+            // Las tres franjas del suelo que la Doncella inunda y congela. Se dibujan solas al jugar.
+            var franjas = new List<FranjaInundable>();
+            foreach (var zona in DisenoNivel2.Franjas)
+            {
+                var franja = new GameObject(zona.Nombre).AddComponent<FranjaInundable>();
+                franja.transform.SetParent(arena, true);
+                franja.transform.position = new Vector3((zona.Desde + zona.Hasta) * 0.5f, zona.Abajo, 0f);
+                franja.ancho = zona.Hasta - zona.Desde;
+                franja.alturaAgua = zona.Arriba - zona.Abajo;
+                franja.alturaCapa = DisenoNivel2.CapaHelada;
+                franja.grosorCapa = DisenoNivel2.GrosorCapaHelada;
+                franja.colorAgua = new Color(colorPuerta.r, colorPuerta.g, colorPuerta.b, 0.45f);
+                franja.colorHielo = DePaleta(nivel, 3, franja.colorHielo);
+                franjas.Add(franja);
+            }
+
+            var doncella = jefe != null ? jefe.GetComponent<DoncellaLamento>() : null;
+            if (doncella != null)
+            {
+                Asignar(doncella, "alturaDeVuelo", p => p.floatValue = DisenoNivel2.VueloDoncella);
+                Asignar(doncella, "franjas", p =>
+                {
+                    p.arraySize = franjas.Count;
+                    for (var i = 0; i < franjas.Count; i++)
+                    {
+                        p.GetArrayElementAtIndex(i).objectReferenceValue = franjas[i];
+                    }
+                });
             }
 
             var componente = arena.gameObject.AddComponent<ArenaJefe>();

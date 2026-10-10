@@ -1,11 +1,12 @@
 # Nivel 2 · Tristeza · Ciudad Sumergida: el recorrido
 
-> **Estado:** aprobado el 2026-10-08, con todas las decisiones de la sección 9. **Fases A, B y C
-> montadas** en `Assets/Scenes/Nivel2.unity`: el recorrido con sus bloques, el agua y el hielo, los
-> Lamentos, los dos checkpoints, la salida y la arena con la Doncella todavía sin patrones (A); el
-> tapón de hielo rompible, las placas que flotan, el oxígeno, los ecos de intentos, el eco de
-> memoria y el velo submarino (B); el pesar del Lamento, la Escultura dormida, las Medusas y la
-> Plañidera, el mini-jefe, en el sitio de la segunda Escultura (C). Los números de
+> **Estado:** aprobado el 2026-10-08, con todas las decisiones de la sección 9. **Fases A, B, C y D
+> montadas** en `Assets/Scenes/Nivel2.unity`, todavía sin arte: el recorrido con sus bloques, el
+> agua y el hielo, los Lamentos, los dos checkpoints, la salida y la arena (A); el tapón de hielo
+> rompible, las placas que flotan, el oxígeno, los ecos de intentos, el eco de memoria y el velo
+> submarino (B); el pesar del Lamento, la Escultura dormida, las Medusas y la Plañidera, el
+> mini-jefe, en el sitio de la segunda Escultura (C); y la Doncella del Lamento con sus olas, su
+> inundación, su hielo y su llanto (D). Los números de
 > abajo son los de `Assets/Scripts/Editor/DisenoNivel2.cs`, que monta `PreparadorNivel` y
 > comprueban las pruebas (`DisenoNivel2Tests`, `EscenaNivel2Tests`, `Nivel2PlayModeTests`). Si
 > cambias el recorrido, cámbialo allí y sube su `Version`: la escena se vuelve a montar entera.
@@ -14,8 +15,8 @@
 ![Esquema del recorrido](Nivel2_Diseno.png)
 
 *El esquema se regenera con `python Herramientas/esquema_nivel2.py`. Es un dibujo de diseño, a
-escala (1 u = 1 tile), no una captura del juego. Dibuja también lo que llega en la fase D: la
-inundación de la Doncella.*
+escala (1 u = 1 tile), no una captura del juego. Dibuja también lo que solo aparece durante el
+combate: las tres franjas que inunda la Doncella.*
 
 ---
 
@@ -91,7 +92,7 @@ esa décima hace que, de pie en el borde, Kael ya esté en seco.
 | **La torre del reloj** | 53 a 61 | agua hasta y 1,25 | Se entra por debajo de su pared (abierta hasta y −4). Tres rellanos: y −6,75, y −2,5 e y 1,25, a ras del agua. Dos Medusas cruzan de lado a lado cada 5 s, a la contra (y −4 e y 0,1). | **El agua sostiene:** los dos primeros escalones (4,25 u) no se suben en seco (4,1) y bajo el agua sí (5,0). El último (3,75 u) sale del agua. |
 | **El campanario** | 54 a 60, y 1,25 a 7,5 | aire | Las campanas y una ventana a la derecha (y 1,25 a 4,5). | Salir del agua andando. |
 | **La antesala** | 61 a 69 | piedra, y 0 | **CP2** en x 65. | Respiro antes del jefe. |
-| **La arena** | 69 a 96 | hielo, y 0 | Sala de 25 × 15 u (interior de x 70 a 95), como la del Nivel 1. Placas en x 76 y x 89 (y 3,5) y balcón fijo (x 80 a 85, y 7), que nunca se inunda. La Doncella en x 82,5. Entrada en x 72; salida en x 93. | La **presentación** al cruzar la entrada. El suelo resbala. El agua de la inundación frena, pero deja saltar hasta ella. |
+| **La arena** | 69 a 96 | hielo, y 0 | Sala de 25 × 15 u (interior de x 70 a 95), como la del Nivel 1. Placas en x 76 y x 89 (y 3,5) y balcón fijo (x 80 a 85, y 7), que nunca se inunda. La Doncella en x 82,5. Entrada en x 72; salida en x 93. El suelo se parte en tres franjas que ella inunda: A (x 70 a 78), B (78 a 87) y C (87 a 95). | La **presentación** al cruzar la entrada. El suelo resbala. Su agua frena, y su hielo es adonde hay que subirse para herirla. |
 
 **Recuento frente al Anexo A:**
 
@@ -168,10 +169,31 @@ Fotos de la escena montada (fase A, bloques de color, sin Kael):
   dormida. Solo las alza cuando lleva 2,5 s persiguiendo a Kael, nunca en mitad de un barrido.
   Si muere así, el controlador se enciende a tiempo de oír la muerte y muere por su camino.
 
+### Lo que cambió en la fase D
+
+- **El agua de la inundación sube hasta y 3,4, no hasta y 4,** y la capa de hielo que deja al
+  congelarse se pisa a y 3,5. Con el agua a 4, la capa quedaba a 0,15 u del límite del doble
+  salto de Kael (4,15 u): desde el hielo seco no se podía subir de forma fiable, y desde el agua
+  de al lado tampoco, porque una inundación de 4 u de fondo solo deja saltar unas 0,08 u más que
+  en seco. A 3,5 se sube con el doble salto y con margen (con un salto solo, no), y saliendo del
+  agua de la franja vecina. Lo comprueba `DisenoNivel2Tests`.
+- **Las franjas miden 8, 9 y 8 u,** no un tercio exacto de la arena: sus bordes caen en unidades
+  enteras, como los de los bloques. La A y la C llevan dentro una placa, y la B queda bajo el
+  balcón.
+- **La Doncella flota con los pies a y 3.** Más arriba no se la vería: con Kael en el suelo, la
+  cámara enseña hasta y 6,35, y ella mide 3,2 u. A esa altura pasa entera por debajo del balcón.
+- **Las olas nacen en la pared que ella tiene a la espalda** y cruzan la arena entera, pasando
+  bajo ella. Si salieran de debajo de ella, como la onda de la Centinela, podrían aparecer
+  encima de Kael.
+- **Tocarla no hace daño.** Flota a la altura de las placas, que son el refugio contra las olas;
+  si su cuerpo hiriera, dejarían de serlo. Hieren sus olas y sus púas.
+- **En la fase 2 la ronda es: ola doble, inundación, congelar y llanto.** El llanto va justo
+  después de congelar para que la capa de hielo (6 s) siga ahí mientras llora.
+
 ### Lo que falta, por fases
 
-- **D · Jefe:** la Doncella flota, inunda, congela y llora. Hoy espera quieta, y la arena se cierra
-  y se abre como la del Nivel 1.
+- **E · Arte:** vestir todo lo anterior con las imágenes, que ya están limpias.
+- **F · Narrativa y sonido:** la presentación y la derrota de la Doncella, y la música.
 
 ## 4. Medidas de Kael, para que todo se pueda cruzar
 
@@ -206,27 +228,42 @@ Fotos de la escena montada (fase A, bloques de color, sin Kael):
 encapuchada azul con esquirlas. Confirmaste que es ella, aunque quizá se rediseñe con un aspecto
 más llamativo: el prompt para Google AI Studio está en `Prompts_Mundo2.md`, apartado D.
 
-**Datos que ya existen:** 26 de vida y dos fases, la segunda al 50 %.
+**Sus datos** (`Assets/Data/Jefes/DoncellaLamento.asset`): 26 de vida y dos fases, la segunda al
+50 %. Tocarla no hace daño.
 
-**Cómo pelea:** flota en lo alto de la arena, de lado a lado. **Solo es vulnerable mientras
-llora** (aprobado): fuera de esa ventana, los golpes suenan a hielo y no le hacen nada
-(`inmuneFueraDeVulnerable`, que ya existe en los datos del jefe). Dónde llora cambia con la fase:
+**Cómo pelea** (montado el 2026-10-10, sin arte: una cápsula azul): espera en el hielo y, al
+empezar el combate, sube y va de lado a lado con los pies a y 3. **Solo es vulnerable mientras
+llora** (aprobado): fuera de esa ventana, los golpes no le hacen nada y destella en blanco
+(`inmuneFueraDeVulnerable`). Llorando late en cian y cada golpe vale el doble. Dónde llora cambia
+con la fase:
 
-1. **Fase 1:** baja al hielo y se arrodilla. Se la alcanza a pie.
-2. **Fase 2:** llora flotando bajo, sobre una franja inundada o recién congelada. Desde el hielo
-   seco no se llega; desde el agua (que deja saltar más alto) o desde la capa congelada, sí. Así,
-   su agua es lo que permite herirla. La altura exacta se ajusta al montarlo, con las pruebas.
+1. **Fase 1:** baja al hielo seco, a 2 u de Kael, por el lado en el que ella estaba. Se la
+   alcanza a pie. No baja a una franja con agua.
+2. **Fase 2:** llora flotando bajo sobre la franja que acaba de congelar, con los pies 0,2 u por
+   encima de la capa de hielo: hay que subirse a la capa, y de pie en ella la espada llega. Si no
+   hay nada congelado, llora metida en la franja inundada, con los pies 1 u bajo la superficie:
+   de pie en el fondo no se llega, y con un salto bajo el agua, sí. Si tampoco hay agua, baja al
+   hielo como en la fase 1.
+
+Cada ronda repite los patrones de su fase en orden y acaba llorando:
 
 | Fase | Patrón | Qué pasa | Cómo se responde |
 |---|---|---|---|
-| 1 · Olas e inundación | **Ola** | Barre el brazo y lanza una ola a ras del hielo que cruza la arena. | Saltarla, o esperarla sobre una placa. Reutiliza la onda de suelo de la Centinela con otro dibujo. |
-| | **Inundación** | Avisa en una o dos de las tres franjas del suelo (A, B y C): sale agua por las grietas durante ~1 s. Después el agua sube hasta y 4 durante 5 s. No hace daño: es agua (lenta, con salto alto y gasto de oxígeno). | Elegir: salir de la franja o meterse para saltar hasta ella. Reutiliza la zona de agua y el aviso de las erupciones. |
-| | **Llanto** | Al cerrar cada ronda baja al hielo, se arrodilla y llora 1,5 s. | Es la ventana, y la única: daño doble, como la espada clavada de la Centinela. Las lágrimas son la señal. |
-| 2 · Congelamiento (50 %) | **Rugido** | Grita y la arena tiembla. | Lo mismo que el rugido de la Centinela al cambiar de fase. |
-| | **Congelar** | Tras una inundación, el agua de esa franja se congela. La superficie se vuelve blanca 0,8 s y brotan púas de hielo en lo que estaba inundado. La capa de arriba queda 6 s como plataforma de hielo en y 4. | Salir del agua a tiempo, y luego subirse a lo congelado para llegar a ella. |
-| | **Ola doble** | Dos olas seguidas. | Dos saltos con ritmo. |
-| | **Llanto sobre el agua** | Llora 1,2 s flotando bajo, sobre la franja que acaba de inundar o congelar. | Meterse en el agua o subirse a la capa congelada para llegar. |
-| Muerte | — | El hielo se derrite y la ciudad emerge un instante (cinemática de derrota). El fragmento cae y Kael lo recoge, como el de la Centinela. | **Cierre.** |
+| 1 · Olas e inundación: ola, inundación, ola y llanto | **Ola** | Avisa 0,7 s y una ola a ras del hielo (1,2 × 1 u, a 8 u/s) cruza la arena entera desde la pared que ella tiene a la espalda. Quita 1. | Saltarla, o esperarla sobre una placa, el balcón o la capa de hielo. |
+| | **Inundación** | Avisa 1 s en la franja donde está Kael (el volumen que va a ocupar el agua late, translúcido). Después el agua sube en 0,5 s hasta y 3,4 y se queda 5 s. No hace daño: es agua (lenta, con salto alto y gasto de oxígeno). | Salir de la franja o quedarse: el agua frena, pero no hiere. |
+| | **Llanto** | Baja al hielo (la bajada es el aviso: tarda 1,6 s como mucho) y llora 1,5 s. | Es la ventana, y la única: daño doble, como la espada clavada de la Centinela. |
+| 2 · Congelamiento (50 %): ola doble, inundación, congelar y llanto | **Grito** | Al empezar la fase se queda quieta 0,9 s, avisando. | La señal de que el combate cambia, como el rugido de la Centinela. |
+| | **Ola doble** | Dos olas seguidas, con 0,8 s entre una y otra. | Dos saltos con ritmo. |
+| | **Congelar** | El agua de la inundación se pone blanca 0,8 s y se congela: brotan púas de hielo en todo lo que estaba inundado (quitan 1 durante 0,6 s) y arriba queda 6 s una capa de hielo de 0,5 u, que se pisa a y 3,5 y resbala. | Salir del agua antes de que se congele, y luego subirse a la capa con el doble salto. |
+| | **Llanto sobre el agua** | Llora 1,2 s sobre la capa de hielo (o metida en el agua, si no llegó a congelarse). | Subirse a su hielo, o meterse en su agua y saltar. |
+| Muerte | — | El agua se va y el hielo se deshace. La cinemática de la derrota (la ciudad emerge un instante) y el fragmento que se recoge llegan con el arte y la narrativa. | **Cierre.** |
+
+**En el código:** `DoncellaLamento` lleva lo que es suyo (volar, saber dónde llorar y las franjas
+de su arena). Los ataques son datos, en `Assets/Data/Jefes/Patrones`: `PatronOla`,
+`PatronInundacion`, `PatronCongelar` y `PatronLlanto`. Cada franja es una `FranjaInundable`, que
+vive por su cuenta: el agua sigue ahí cuando la Doncella corta su ataque para llorar.
+`VerificadorDoncella` comprueba, al regenerar, que cada fase tiene su llanto: sin él no habría
+ventana y no se la podría vencer.
 
 **Por qué así:** su línea dice «Él cerró los ojos para no llorar, y la ciudad se hundió». Por eso
 solo se la vence cuando llora: la tristeza se resuelve sintiéndola. Y en la segunda fase, su
@@ -304,7 +341,7 @@ del recorrido provisional, como el Nivel 1 antes de vestirlo, sin sprites invent
 | 20 | **Ciudad hundida** (repetible) | Fachadas con ventanas oscuras y farolas. |
 | 21 | **Primer plano** (repetible, opcional) | Arriba, carámbanos; abajo, algas y burbujas. |
 
-### P2 · Las cinemáticas (240 × 135 px, como las del Nivel 1)
+### P2 · Las cinemáticas (se pidieron a 240 × 135 px; salieron a 480 × 268 y así se quedan)
 
 | # | Imagen | Planos | Qué muestran |
 |---|---|---|---|
@@ -364,6 +401,16 @@ mini-jefe del Mundo 2, la Plañidera**, como el Golem en el Mundo 1 (sección 5)
 Escultura** (x 32), y pelea como dice la sección 5. Era la propuesta de PENDIENTES N32; el autor
 pidió cerrar la fase C con ella. La Doncella conserva el diseño de `jefe2.jpeg`: sus 28
 fotogramas ya están generados.
+
+**Decidido el 2026-10-10, con las imágenes ya completas:**
+- **La placa flotante** se importa más pequeña (PPU 66) para que mida las 2,5 u del recorrido.
+- **Las cinemáticas del Mundo 2 van a 480 × 268 píxeles de arte**, el doble que las del Nivel 1:
+  así salieron las cuatro. La cámara de cinemáticas se ajusta en la fase de narrativa.
+- **La cola de la Doncella**, que el lienzo corta por abajo en sus 28 fotogramas, se conserva:
+  el juego fundirá en transparente sus últimas filas al integrar el arte.
+- **El agua de la inundación sube hasta y 3,4**, no hasta y 4 (sección 3, «Lo que cambió en la
+  fase D»). Fue un ajuste al montarlo, no una decisión del autor: está en PENDIENTES N31 para
+  que lo pruebe.
 
 Lo que difiere del Anexo A irá a N19, para corregirlo en la tesis: el hielo rompible, los dos
 checkpoints, el oxígeno que quita vida en lugar del fundido a blanco, la Doncella que solo es

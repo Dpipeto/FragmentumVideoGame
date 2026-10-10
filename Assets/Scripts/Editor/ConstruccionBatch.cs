@@ -60,6 +60,9 @@ namespace Fragmentum.EditorTools
             // Si algo del arte de la Centinela no cuadra (un sprite reimportado sin sus ajustes,
             // un clip o el prefab tocados a mano), la regeneración falla con su nombre.
             ok &= VerificadorCentinela.Verificar();
+            // La Doncella solo se hiere mientras llora: si una fase se queda sin llanto, no se la
+            // podría vencer. La regeneración falla antes de que eso llegue al juego.
+            ok &= VerificadorDoncella.Verificar();
             ok &= GeneradorMecanicas.CrearPrefabs();
             // Lo mismo con el arte del Nivel 1 (el Golem, las mecánicas y los planos del jefe), ya
             // con los prefabs de las mecánicas hechos.

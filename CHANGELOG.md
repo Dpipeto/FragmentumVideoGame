@@ -9,6 +9,117 @@
 
 ---
 
+## Mundo 2, fase D: la Doncella del Lamento (2026-10-10)
+
+Misma rama, `nivel2-recorrido`. El autor respondió a lo que quedaba abierto de las imágenes
+(N30, N33, N34 y N35) y pidió empezar la fase D antes de probar el nivel. Todavía sin arte.
+`EnemyController`, `PlayerController`, `GameManager` y `BossController` no se tocan.
+
+### 1. La Doncella pelea
+
+- **Problema.** La Doncella era un esqueleto: tenía vida y dos fases, pero ningún patrón.
+  Esperaba quieta y se la vencía a golpes.
+- **Causa.** Faltaba la fase D del diseño (`Docs/Diseno/Nivel2_Diseno.md`, sección 6).
+- **Solución.**
+  - **Flota.** `DoncellaLamento` vuelve cinemático su cuerpo: ni cae ni choca. Espera en el
+    hielo, sube al empezar el combate y va de lado a lado con los pies a y 3. Sus patrones la
+    mandan a un punto (`FlotarA`) y, al acabar, vuelve a flotar a su aire.
+  - **Solo se la hiere mientras llora** (`inmuneFueraDeVulnerable`, que ya existía para el Juez
+    Silente). Fuera de la ventana, los golpes no le hacen nada y destella en blanco; llorando late
+    en cian y cada golpe vale el doble. Tocarla no hace daño.
+  - **Cuatro patrones nuevos**, como datos: `PatronOla` (una ola a ras del hielo cruza la arena
+    desde la pared que ella tiene a la espalda), `PatronInundacion` (avisa y sube el agua en la
+    franja de Kael), `PatronCongelar` (el agua se pone blanca, brotan púas y queda una capa de
+    hielo) y `PatronLlanto` (baja adonde le toca llorar y abre la ventana).
+  - **Fase 1:** ola, inundación, ola y llanto en el hielo seco, a 2 u de Kael.
+  - **Fase 2** (50 % de vida): grita, y la ronda es ola doble, inundación, congelar y llanto
+    sobre la capa de hielo. Si no llegó a congelar, llora metida en su agua.
+  - **Al caer o al reiniciarse el combate**, el agua se va y el hielo se deshace.
+
+### 2. El agua que sigue ahí cuando ella llora
+
+- **Problema.** Las zonas que crean los patrones de un jefe se borran cuando el jefe corta su
+  ataque, y abrir la ventana vulnerable lo corta. El agua desaparecería justo al llorar.
+- **Causa.** Esa limpieza está pensada para golpes y erupciones, que duran lo que el ataque.
+- **Solución.** Cada franja del suelo es una `FranjaInundable` (en `Levels/Mecanicas`) que vive
+  por su cuenta: seca, aviso, inundada, bajando, poniéndose blanca y congelada. El patrón solo
+  la pone en marcha. Su agua es la del recorrido (`ZonaModificadorMovimiento`, que ahora puede
+  cambiar de tipo por código) y sus púas, una `ZonaDeDanio`. La arena tiene tres: A (x 70 a 78),
+  B (78 a 87) y C (87 a 95).
+
+### 3. La capa de hielo, a una altura que se alcanza
+
+- **Problema.** El diseño decía que el agua sube hasta y 4. A esa altura, la capa de hielo que
+  deja al congelarse quedaba a 0,15 u del límite del doble salto de Kael (4,15 u).
+- **Causa.** El diseño contaba con que el agua deja saltar más alto. Es verdad en la torre, que
+  tiene agua de sobra, pero una inundación de 4 u de fondo solo da unas 0,08 u más que en seco:
+  al cruzar la superficie, la gravedad vuelve a ser la de fuera.
+- **Solución.** El agua sube hasta y 3,4 y la capa se pisa a y 3,5: se sube con el doble salto
+  y con margen (con un salto solo, no), y saliendo del agua de la franja de al lado. Lo
+  comprueba `DisenoNivel2Tests`, con los mismos márgenes que el resto del recorrido.
+
+### 4. Nadie se queda encajado en el hielo
+
+- **Problema.** La capa de hielo aparece de golpe. Si Kael está saltando dentro del agua justo a
+  esa altura, quedaría metido en un bloque sólido.
+- **Solución.** Quien esté dentro de la capa al formarse la atraviesa hasta que sale de ella; a
+  partir de ahí es sólida también para él.
+
+### 5. Un jefe inmune tiene que poder llorar
+
+- **Problema.** Como solo se la hiere llorando, un cambio en sus datos (quitar el llanto de una
+  fase, dejar una fase vacía) la dejaría invencible sin que nada fallara a la vista.
+- **Solución.** `VerificadorDoncella` lo comprueba al final de «Regenerar todo», que falla si
+  no cuadra: es inmune fuera de la ventana, cada fase tiene patrones y un llanto, los ataques
+  avisan al menos 0,3 s y no congela sin haber inundado. También revisa su prefab.
+
+### 6. Sus datos se completan solos
+
+- **Problema.** Los generadores no pisan los datos que ya existen, para respetar lo ajustado a
+  mano. La Doncella ya tenía datos (el esqueleto), así que no habría recibido sus patrones.
+- **Solución.** `GeneradorJefes` completa también al jefe que todavía es un esqueleto (fases sin
+  ningún patrón). Una vez completa, lo ajustado a mano se respeta.
+
+### 7. El agua sube igual a cualquier número de imágenes por segundo
+
+- **Problema.** En las capturas del combate, la franja «inundada» no tenía agua: no empezaba a
+  subir hasta que alguna imagen del juego tardaba más de la cuenta.
+- **Causa.** `FranjaInundable` ponía el nivel a cero mientras no pasara de 0,01 u («todavía no
+  moja»). El agua sube a 6,8 u/s: a más de 680 imágenes por segundo, cada paso es menor que ese
+  umbral y se perdía entero, una imagen tras otra. Unity sin ventana va mucho más rápido que eso
+  (unas 2.700 imágenes por segundo en este PC), y a un PC rápido sin sincronía vertical le pasaría lo mismo. Las pruebas no lo
+  veían porque cualquier imagen lenta (crear a Kael, lanzar una ola) arrancaba la subida.
+- **Solución.** El nivel se guarda aunque todavía no moje; solo se oculta el agua. Prueba nueva
+  con el reloj fijo a una milésima de segundo por imagen (`Time.captureDeltaTime`).
+
+### 8. Una prueba de la Plañidera que dependía de lo rápido que fuera el PC
+
+- **Problema.** `LaPlanidera_DeCerca_AvisaYBarreConElBrazo` falló en la batería final: medía
+  0,44 s de aviso donde hay 0,55.
+- **Causa.** La prueba apuntaba el inicio del ataque la primera vez que la miraba, después de
+  colocar a Kael a su lado (seis pasos de física, 0,12 s). Si ella atacaba en cuanto Kael
+  aparecía, ese tiempo se restaba del aviso: la medida quedaba entre 0,43 y 0,47 s contra un
+  mínimo de 0,45, y pasaba o no según cayera el reloj.
+- **Solución.** El inicio lo apunta el cambio de estado (`OnStateChanged`). El juego no cambia.
+
+### 9. Las últimas imágenes y las decisiones
+
+- Limpios `Doncella/L2` (ya son sus 28 fotogramas, en el mismo lienzo) y la
+  `PresentacionDoncella2` nueva, que salió a 480 × 268 como las otras tres.
+- Decidido por el autor: la placa se importará a PPU 66 (N33), las cinemáticas van a 480 (N34)
+  y la cola cortada de la Doncella se funde en el juego (N35). Se aplican al integrar el arte.
+
+### Pruebas
+
+434 EditMode y 185 PlayMode en verde. Nuevas: `DoncellaLamentoTests` (sus datos, dónde
+llora y el verificador), `DoncellaPlayModeTests` (flota, la ventana, cada patrón, la fase 2, el
+reinicio y la derrota, con el prefab y el jugador reales) e `InundacionPlayModeTests` (el agua,
+las púas y la capa de hielo). `DisenoNivel2Tests` y `EscenaNivel2Tests` comprueban las franjas,
+la altura de la capa y que la escena las lleva, y `Nivel2PlayModeTests` pelea una ronda entera
+en la arena real. `DisenoNivel2.Version` sube a 6.
+
+---
+
 ## Mundo 2, fase C cerrada: la Plañidera y las imágenes limpias (2026-10-10)
 
 Misma rama, `nivel2-recorrido`. El autor terminó de generar las imágenes y pidió limpiarlas,

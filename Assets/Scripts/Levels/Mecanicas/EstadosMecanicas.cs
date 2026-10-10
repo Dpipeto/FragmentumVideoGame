@@ -64,4 +64,30 @@ namespace Fragmentum.Levels.Mecanicas
         /// <summary>Roto: el Ataque Cargado lo parte y deja el hueco abierto.</summary>
         BROKEN
     }
+
+    /// <summary>
+    /// Una franja del suelo de la arena de la Doncella del Lamento (<see cref="FranjaInundable"/>):
+    /// se inunda y, en la segunda fase, el agua se congela. Cada valor será el del parámetro
+    /// <c>Estado</c> de su Animator cuando tenga arte.
+    /// </summary>
+    public enum ESTADOS_FRANJA
+    {
+        /// <summary>Seca: el hielo de la arena, sin más.</summary>
+        DRY,
+
+        /// <summary>Aviso: sale agua por las grietas. Todavía no moja.</summary>
+        WARNING,
+
+        /// <summary>Inundada: el agua sube y se queda. No hace daño: es agua.</summary>
+        FLOODED,
+
+        /// <summary>El agua baja. Sigue mojando hasta que se va.</summary>
+        DRAINING,
+
+        /// <summary>La superficie se pone blanca: el aviso de que se congela. Sigue siendo agua.</summary>
+        FREEZING,
+
+        /// <summary>Congelada: brotan las púas en lo que estaba inundado y arriba queda la capa de hielo, que se pisa.</summary>
+        FROZEN
+    }
 }

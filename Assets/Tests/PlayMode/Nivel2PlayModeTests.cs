@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Fragmentum.Bosses;
 using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Core.Juego;
@@ -511,18 +512,23 @@ namespace Fragmentum.Tests.PlayMode
             planidera.esperaEntreRafagas = 999f; // solo el barrido
             var controlador = planidera.GetComponent<EnemyController>();
             var x = planidera.transform.position.x;
-            yield return Mover(new Vector2(x - 1.2f, 0.05f));
 
+            // El ataque puede empezar en cuanto Kael aparece a su lado, antes de que Mover termine:
+            // el momento lo da el cambio de estado, no la primera vez que se la mira.
             var vida = Jugador.Vida.Vida;
-            var limite = Time.time + 5f;
             var inicioDelAtaque = -1f;
-            while (Jugador.Vida.Vida == vida && Time.time < limite)
+            controlador.OnStateChanged += (_, nuevo) =>
             {
-                if (inicioDelAtaque < 0f && controlador.EstadoActual == ESTADOS_ENEMIGO.ATTACK)
+                if (inicioDelAtaque < 0f && nuevo == ESTADOS_ENEMIGO.ATTACK)
                 {
                     inicioDelAtaque = Time.time;
                 }
+            };
+            yield return Mover(new Vector2(x - 1.2f, 0.05f));
 
+            var limite = Time.time + 5f;
+            while (Jugador.Vida.Vida == vida && Time.time < limite)
+            {
                 yield return null;
             }
 
@@ -572,6 +578,63 @@ namespace Fragmentum.Tests.PlayMode
 
             yield return new WaitForSeconds(controlador.Datos.deathDelay + 0.3f);
             Assert.IsTrue(planidera == null, "Desaparece.");
+        }
+
+        // --- La arena: la Doncella del Lamento ---
+
+        [UnityTest]
+        public IEnumerator EnLaArena_LaDoncellaFlota_InundaLaFranjaDeKael_YSoloSeLaHiereCuandoBajaALlorar()
+        {
+            yield return EntrarEnNivel2();
+            ApagarEnemigos();
+            var arena = Object.FindAnyObjectByType<ArenaJefe>();
+            var doncella = (DoncellaLamento)arena.Jefe;
+            Assert.AreEqual(3, doncella.Franjas.Count, "Lleva las tres franjas de su arena.");
+            var franja = doncella.Franjas[0];
+            var limites = arena.Limites;
+            Assert.AreEqual(limites.x, franja.Desde, 0.01f, "La primera empieza en la puerta.");
+            Assert.AreEqual(limites.y, doncella.Franjas[2].Hasta, 0.01f, "Y la última acaba en la pared.");
+
+            // Kael, dentro de la sala, en la primera franja. El combate empieza sin la presentación.
+            yield return LlevarJugadorA(new Vector2(franja.CentroX, franja.Suelo + 0.05f));
+            arena.IniciarCombate(Jugador);
+            Assert.IsTrue(arena.PuertasCerradas);
+
+            yield return Hasta(() => Mathf.Abs(doncella.Pies.y - (doncella.Suelo + doncella.AlturaDeVuelo)) < 0.05f, 3f, "que suba a flotar");
+            var cuerpo = doncella.GetComponent<Collider2D>();
+            Assert.IsTrue(arena.Plataformas.All(p => Physics2D.GetIgnoreCollision(cuerpo, p)), "Atraviesa las placas y el balcón.");
+            doncella.Vida.RecibirGolpe(new Golpe(3, doncella.Centro));
+            Assert.AreEqual(doncella.Vida.VidaMaxima, doncella.Vida.Vida, "Flotando, los golpes no le hacen nada.");
+
+            // La ronda de la fase 1: ola, inundación, ola y llanto.
+            yield return Hasta(() => Object.FindObjectsByType<ZonaDeDanio>().Any(z => z.name.EndsWith("Ola")), 4f, "la primera ola");
+            yield return Hasta(() => franja.Inundada && Jugador.Motor.BajoElAgua, 8f, "que inunde la franja de Kael");
+            Assert.AreEqual(ESTADOS_FRANJA.DRY, doncella.Franjas[1].Estado, "Solo la de Kael.");
+            Assert.AreEqual(ESTADOS_FRANJA.DRY, doncella.Franjas[2].Estado);
+            Assert.Greater(limites.y, doncella.Pies.x, "No se sale de la arena.");
+            Assert.Less(limites.x, doncella.Pies.x);
+
+            yield return Hasta(() => doncella.Llorando && doncella.EsVulnerable, 10f, "que baje a llorar");
+            Assert.AreEqual(doncella.Suelo, doncella.Pies.y, 0.1f, "Llora en el hielo.");
+            Assert.IsFalse(franja.TieneAgua && franja.Contiene(doncella.Pies.x), "Y fuera del agua.");
+            Assert.IsEmpty(Object.FindObjectsByType<ZonaDeDanio>().Where(z => z.name.EndsWith("Ola")), "Mientras llora no quedan olas.");
+            var antes = doncella.Vida.Vida;
+            doncella.Vida.RecibirGolpe(new Golpe(1, doncella.Centro));
+            Assert.AreEqual(antes - 2, doncella.Vida.Vida, "Llorando, cada golpe vale el doble.");
+        }
+
+        private static IEnumerator Hasta(System.Func<bool> condicion, float maximo, string descripcion)
+        {
+            var limite = Time.time + maximo;
+            while (!condicion())
+            {
+                if (Time.time > limite)
+                {
+                    Assert.Fail($"Tiempo agotado ({maximo:0.0} s) esperando {descripcion}.");
+                }
+
+                yield return null;
+            }
         }
     }
 }

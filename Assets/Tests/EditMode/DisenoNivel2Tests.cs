@@ -413,6 +413,70 @@ namespace Fragmentum.Tests
             }
         }
 
+        // --- La arena de la Doncella (fase D) ---
+
+        [Test]
+        public void LasFranjasDeLaArena_LaPartenEnTres_SinHuecosNiSolapes()
+        {
+            var franjas = DisenoNivel2.Franjas;
+            var limites = DisenoNivel2.LimitesArena;
+            Assert.AreEqual(3, franjas.Length);
+            Assert.AreEqual(limites.x, franjas[0].Desde, 1e-4f, "Empiezan en la puerta.");
+            Assert.AreEqual(limites.y, franjas[franjas.Length - 1].Hasta, 1e-4f, "Y acaban en la pared.");
+            for (var i = 0; i < franjas.Length; i++)
+            {
+                var franja = franjas[i];
+                if (i > 0)
+                {
+                    Assert.AreEqual(franjas[i - 1].Hasta, franja.Desde, 1e-4f, $"{franja.Nombre} empieza donde acaba la anterior.");
+                }
+
+                Assert.AreEqual(Mathf.Round(franja.Desde), franja.Desde, 1e-4f, $"{franja.Nombre}: bordes en unidades enteras.");
+                Assert.AreEqual(Mathf.Round(franja.Hasta), franja.Hasta, 1e-4f, franja.Nombre);
+                Assert.AreEqual(DisenoNivel2.SueloArena, franja.Abajo, 1e-4f, $"{franja.Nombre}: el agua sale del suelo de la arena.");
+                Assert.AreEqual(DisenoNivel2.SueloArena + DisenoNivel2.AguaDeLaInundacion, franja.Arriba, 1e-4f, franja.Nombre);
+            }
+
+            // A y C llevan una placa dentro; B queda bajo el balcón, que nunca se inunda.
+            var placa1 = DisenoNivel2.PisadaDe("PlacaArena1");
+            var placa2 = DisenoNivel2.PisadaDe("PlacaArena2");
+            var balcon = DisenoNivel2.PlataformasArena.Single(p => p.Nombre == "Balcon");
+            Assert.IsTrue(placa1.Desde >= franjas[0].Desde && placa1.Hasta <= franjas[0].Hasta, "La primera placa, en la franja A.");
+            Assert.IsTrue(placa2.Desde >= franjas[2].Desde && placa2.Hasta <= franjas[2].Hasta, "La segunda, en la C.");
+            Assert.IsTrue(balcon.Desde >= franjas[1].Desde && balcon.Hasta <= franjas[1].Hasta, "El balcón, sobre la B.");
+            Assert.Greater(balcon.Abajo, DisenoNivel2.SueloArena + DisenoNivel2.CapaHelada, "El balcón queda por encima del agua y de su hielo.");
+        }
+
+        [Test]
+        public void LaCapaHelada_SeSubeConElDobleSalto_YSaliendoDelAguaDeAlLado()
+        {
+            var capa = DisenoNivel2.CapaHelada;
+            Assert.AreEqual(capa - DisenoNivel2.BajoLaSuperficie, DisenoNivel2.AguaDeLaInundacion, 1e-4f,
+                "El agua llega casi a ras de lo que deja al congelarse, como las demás aguas.");
+            Assert.Greater(capa, AlturaSalto(MEDIOS.SECO), "Con un salto solo no se sube: hay que querer subirse.");
+            Assert.LessOrEqual(capa, AlturaDobleSalto(MEDIOS.SECO) * MargenAltura, "Desde el hielo seco, con el doble salto y margen.");
+
+            // Desde otra franja inundada: lo que sobra del salto al cruzar la superficie.
+            var sobre = Gravedad(MEDIOS.AGUA) / Gravedad(MEDIOS.SECO);
+            var sobrante = (AlturaDobleSalto(MEDIOS.AGUA) - DisenoNivel2.AguaDeLaInundacion) * sobre - DisenoNivel2.BajoLaSuperficie;
+            Assert.GreaterOrEqual(sobrante, MargenAlSalirDelAgua, "Y saliendo del agua de la franja de al lado.");
+
+            var balcon = DisenoNivel2.PlataformasArena.Single(p => p.Nombre == "Balcon");
+            Assert.GreaterOrEqual(balcon.Abajo - (DisenoNivel2.SueloArena + capa), AltoKael + 0.25f, "De pie en la capa, Kael cabe bajo el balcón.");
+            Assert.Less(DisenoNivel2.GrosorCapaHelada, capa - AltoKael, "Y bajo la capa, de pie en el suelo.");
+        }
+
+        [Test]
+        public void LaDoncella_FlotaPorEncimaDeKael_YPorDebajoDelBalcon()
+        {
+            var jefe = GeneradorJefes.CargarDatos(VerificadorDoncella.NombreDatos);
+            Assert.IsNotNull(jefe);
+            var pies = DisenoNivel2.SueloArena + DisenoNivel2.VueloDoncella;
+            Assert.Greater(DisenoNivel2.VueloDoncella, AltoKael, "Flota por encima de la cabeza de Kael.");
+            var balcon = DisenoNivel2.PlataformasArena.Single(p => p.Nombre == "Balcon");
+            Assert.LessOrEqual(pies + jefe.tamano.y, balcon.Abajo, "Y entera por debajo del balcón.");
+        }
+
         private static DisenoNivel2.Zona Agua(string nombre) => DisenoNivel2.Aguas.Single(a => a.Nombre == nombre);
 
         // El agua en la que despega el salto: en el punto de la pisada de salida más cercano a la de
