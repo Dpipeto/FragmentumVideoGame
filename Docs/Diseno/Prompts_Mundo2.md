@@ -792,3 +792,244 @@ los brazos abiertos. Basta con un fotograma, dibujado en Pixelorama.
 
 Cuando tengas un paquete completo, avísame. Lo reviso antes de integrarlo: el mismo tamaño de
 píxel, la misma base y nada de damero. Si algo no cuadra, te digo qué repetir.
+
+---
+
+## I. Segunda tanda (2026-10-10): lo que falta y lo que hay que repetir
+
+Llegaron las 121 imágenes y están limpias (`Tesis/Imagenes/limpios/Mundo2/LEEME.md`). Estos son
+los prompts de lo que falta y de lo que salió mal, **ya corregidos con lo que falló**. Guarda cada
+una con el nombre que se indica, encima de la anterior si la había.
+
+> **Estado, 2026-10-10 por la tarde:** llegó y está limpia toda la tanda de I1 e I2 **menos
+> `Doncella/L2`**. El fotograma nuevo del llanto se guardó como `L3.jpg` (y es bueno), así que
+> ahora `L2` se pide adjuntando ese `L3.jpg` nuevo, con el prompt de `L2` de abajo, y se guarda
+> como `L2.jpg`. El ataque del Lamento vale, pero cada fotograma salió con su tamaño de píxel
+> (Gemini devolvió lienzos de 2390 × 1760 en lugar de cuadrados).
+
+### I1. Falta
+
+#### Las esquirlas de la Plañidera (3) → `Mundo2/Planidera/Esquirla1.jpg` … `Esquirla3.jpg`
+
+**Esquirla1.** Adjunta `Planidera/F1.jpg`.
+
+```text
+Edit the attached image. Keep the same canvas size, the same art-pixel size (the same blocks)
+and the same palette. Remove the woman completely: keep only ONE of the dark ice shards from
+the arc behind her head, at the same size it has there, alone in the center of the canvas,
+turned so its sharp tip points LEFT, with a short trail of three or four cyan #00D4FF pixels
+behind it (on its right). Everything else is flat solid #FF00FF magenta.
+Hard-edged fully opaque pixels. NO blur, NO glow halo, NO soft edges, NO transparency
+checkerboard, NO text, NO border.
+```
+
+**Esquirla2 y Esquirla3.** Adjunta `Esquirla1` y usa la plantilla de edición (apartado 0) con:
+- **Esquirla2:** «the same shard in the same place, the trail one or two pixels longer and the
+  highlights on the shard moved, so this image and the original can flicker in a loop».
+- **Esquirla3:** «the shard SHATTERING: five or six small fragments of the same dark ice flying
+  apart from the center, no trail».
+
+#### El ataque del Lamento (4) → `Mundo2/Lamento/Attack/a1.jpg` … `a4.jpg`
+
+**Por qué salió mal:** la base que se adjuntó fue la de `Tesis/Enemigo/Ataque/`, que trae el
+damero de transparencia pintado, y Gemini lo copió. Las bases buenas están sobre magenta en
+`Mundo2/Lamento/Bases/` (`a1.png` … `a4.png`).
+
+Cada uno en su mensaje, con dos adjuntos y en este orden: **`Bases/a1.png`** (la pose) y
+**`Lamento/Idle/I1.jpg`** (el diseño). El prompt es el mismo para los cuatro:
+
+```text
+Edit the FIRST attached image. Keep EXACTLY its canvas, its art-pixel size, its pose, its size
+and its position: the feet stay on the same row and in the same place. Its background is flat
+magenta: keep it flat solid #FF00FF.
+Redraw the character with the design of the SECOND attached image: the same PALE grey-blue
+mask, the same skin, clothes, colours and water. Do not make him smaller or bigger. Before
+answering, check these four things. They MUST be in the result even if the body is turned,
+leaning or lunging:
+1. the mask stays pale grey-blue, as in the second image. Never a dark or black mask;
+2. the two dark eye holes with the cyan tears. In the first image the eyes may glow orange:
+   replace that glow with the dark holes. Never remove the eyes;
+3. the dark hole in the middle of the chest, as in the second image, always visible;
+4. the drops falling from the hands, the hem and the chin.
+No orange anywhere: if the first image has glowing orange eyes or cracks, they become blue.
+Hard-edged fully opaque pixels. NO blur, NO glow halo, NO transparency checkerboard, NO grey
+and white squares, NO text.
+```
+
+#### El hielo rompible (5) → `Mundo2/Hielo/Hielo1.jpg` … `Hielo3.jpg`, `Esquirlas1.jpg`, `Esquirlas2.jpg`
+
+Los que hay son la losa plana del primer prompt. El juego usa un tapón que asoma (apartado A5).
+
+**Hielo1.** Adjunta `Tesis/Imagenes/Golem/Idle/Golem I1.jpg`, solo para el tamaño del píxel.
+
+```text
+Pixel art game sprite, side view, flat solid #FF00FF magenta background, the same art-pixel size
+and hard outline style as the attached golem.
+A BLOCK OF THICK CLOUDY ICE plugging a hole in a frozen floor: about 48 art pixels wide and 54
+art pixels tall, on a canvas about 70 art pixels across. Its bottom 24 rows are sunk in the hole
+(darker, slate #2C3E50 and deep blue #1E3A5F), the top 30 rows stick out above the floor line as
+a rough rounded chunk of ice: snow white #E8EEF4 top, ice blue #4A7FA5 body, white inner cracks.
+Across the exposed part runs ONE jagged crack that glows bright ORANGE (#FF7A33 with a few
+yellow pixels): it is the only warm color in the whole world, and it must stand out.
+It is taller than it is wide: a plug, NOT a flat slab and NOT a platform. Do not draw the floor.
+The bottom row is flat. Hard-edged fully opaque pixels. NO blur, NO glow halo, NO transparency
+checkerboard, NO text, NO border.
+```
+
+**Los otros cuatro.** Adjunta siempre `Hielo1` y usa la plantilla de edición con:
+- **Hielo2:** «the block is badly cracked after a hit: the orange crack branches into five or six
+  white cracks, two small chips missing from the top».
+- **Hielo3:** «the block has shattered: only a few broken ice chunks remain at the left and right
+  edges of where it was, the middle is empty, no orange left».
+- **Esquirlas1:** «no block: only eight to ten ice shards flying up and outwards from where it
+  was».
+- **Esquirlas2:** «no block: the same eight to ten shards, lower and further apart, falling».
+
+### I2. Hay que repetir
+
+#### La torre del fondo → `Mundo2/fondos/Torre.jpg`
+
+Llegó reescalada (3898 × 1088), borrosa y con la punta cortada. **Adjunta** `fondos/CiudadLejana.jpg`,
+que es de su misma tanda, para el tamaño del píxel. Descárgala tal como sale: no la pases por
+ningún reescalador.
+
+```text
+Pixel art background prop, 16:9, the same art-pixel size and style as the attached image.
+A huge CLOCK TOWER of a drowned city, half sunk in the ice: stone walls #2C3E50, a round frozen
+clock face with stopped hands, a belfry with two bells and a pointed roof at the top, icicles
+on every ledge, snow white #E8EEF4 snow on the edges. It leans slightly. A landmark seen from
+far away.
+The WHOLE tower must be inside the image, in the center: leave empty magenta ABOVE the tip of
+the roof (at least a tenth of the image height) and on both sides. Its base ends at the bottom
+edge of the image, with a few cracks of ice around it. NO ice floor across the image, NO ground
+strip, NO sky.
+Everything that is not the tower is flat solid #FF00FF magenta. Hard-edged fully opaque pixels.
+NO blur, NO glow, NO soft edges, NO text, NO border.
+```
+
+#### Las púas que alternan → `Mundo2/PUAS/P4.jpg`
+
+Salió con un halo azulado. **Adjunta** `PUAS/P3.jpg`.
+
+```text
+Edit the attached image. Keep EXACTLY the same canvas size, the same flat #FF00FF magenta
+background, the same art-pixel size (the same blocks), the same palette, the same spikes in the
+same place and the same flat bottom row.
+Change ONLY this: move the white highlights and the cyan tips 2 or 3 art pixels along each
+spike, so this image and the original can alternate as a shimmer loop. The silhouette of the
+spikes does NOT change.
+NO glow, NO halo, NO aura, NO light around the spikes: the flat magenta touches their outline
+directly. Hard-edged fully opaque pixels only. NO blur, NO soft edges, NO transparency
+checkerboard, NO text, NO border.
+```
+
+#### La Doncella (4) → `Mundo2/Doncella/F2.jpg`, `F3.jpg`, `L2.jpg`, `M5.jpg`
+
+En **AI Studio**, en un chat con las instrucciones del sistema del apartado D. El diseño que
+quedó no tiene pelo ni velo: tiene capucha. Por eso los prompts del apartado D3 que hablaban del
+pelo salieron raros.
+
+**F2 y F3 (flotar).** En `F3` se corrió 0,3 lienzos a la derecha, y en `F2` la cola dio un
+latigazo que se sale del lienzo. **Adjunta** `Doncella/F1.jpg` en los dos.
+
+```text
+Edit the attached image. Keep EXACTLY the same canvas, the same art-pixel size, the same
+palette and the same design. Her hood, her body, her arms and the halo of shards do NOT move at
+all: they stay on exactly the same pixels.
+Change ONLY the water tail: it sways gently to the RIGHT, its lower half moving at most 8 art
+pixels. The tail keeps the same thickness and the same length. No big wave, no splash, no
+swirl, and it does not touch the left or right edge of the canvas.
+Flat solid #FF00FF magenta background. Hard-edged fully opaque pixels. NO blur, NO glow halo.
+```
+
+Para **F3**, el mismo con «to the LEFT» en lugar de «to the RIGHT».
+
+**L2 (llanto).** `L2` y `L3` alternan en bucle, y el `L3` nuevo salió bien (arrodillada, con la
+cara descubierta y sin suelo pintado). Así que **adjunta ese `Doncella/L3.jpg`**, no la maestra.
+
+```text
+Edit the attached image. Keep EXACTLY the same canvas, the same art-pixel size, the same
+palette, the same drawing style, the same pose and the same position: she stays in the same
+place, her face uncovered, crying.
+Change ONLY this: her shoulders are 2 or 3 art pixels higher and her head 2 or 3 art pixels
+lower, and the cyan tears are a little shorter. This image and the original will alternate as a
+loop, so everything else is identical.
+NO floor, NO ground, NO shadow under her: flat solid #FF00FF magenta all the way to the bottom
+edge. Hard-edged fully opaque pixels. NO blur, NO glow halo.
+```
+
+**M5 (lo que queda).** Salió con un halo alrededor de la gema. **Adjunta `Doncella/M4.jpg`**,
+para que el charco quede en el mismo sitio.
+
+```text
+Edit the attached image. Keep EXACTLY the same canvas, the same art-pixel size and the same
+palette. Remove her body completely. Keep only the puddle of water, in the same place, calm and
+flat. Above it, floating where her chest was, draw the light blue SORROW GEM: a small faceted
+diamond shape about 14 art pixels tall, with a dark outline.
+The gem is drawn with SOLID pixels only: NO glow, NO halo, NO aura, NO light rays, NO soft
+light around it. The flat magenta touches the outline of the gem directly.
+Everything else is flat solid #FF00FF magenta. Hard-edged fully opaque pixels. NO blur, NO
+gradients.
+```
+
+### I3. Opcional
+
+Valen como están; estos prompts son por si quieres dejarlas mejor.
+
+**Plañidera `A2` (el barrido)** → `Planidera/A2.jpg`. Salió redibujada con el píxel un 23 % más
+fino. **Adjunta** `Planidera/F1.jpg`.
+
+```text
+Edit the attached image. Keep EXACTLY the same canvas size, the same flat #FF00FF magenta
+background, the same art-pixel size (the same blocks), the same palette and the same design.
+She keeps facing LEFT. These MUST stay visible: the white blindfold over her eyes with the cyan
+tears under it, the glowing cyan heart in her chest, and the dark hood.
+Do NOT zoom in and do NOT redraw her bigger or with finer pixels: her head, her hood and her
+heart keep exactly the size they have in the attached image.
+Change ONLY her pose: the SWEEP. She leans forward to the left, her front arm stretched to the
+left as far as it goes, fingers spread like a claw, a short arc of white frost trailing behind
+the hand. Her body moves at most 10 art pixels to the left. The tail and the arc of shards
+stay where they are.
+Hard-edged fully opaque pixels only. NO blur, NO glow halo, NO soft edges, NO transparency
+checkerboard, NO text, NO border.
+```
+
+**Lamento `I2`** → `Lamento/Idle/I2.jpg`. Las piernas salieron deshechas. Dos adjuntos:
+`Bases/I2.png` y `Lamento/Idle/I1.jpg`. El prompt del ataque (I1), añadiendo al final: «His legs
+are whole and solid, exactly like in the second image: he is NOT dying and NOT crumbling.»
+
+**Aviso de la inundación 2** → `AVISO/AVISO2.jpg`. Se salió del lienzo por arriba. **Adjunta**
+`AVISO/AVISO1.jpg` y usa la plantilla de edición con: «more water: the same crack, a little
+wider, a thin sheet of water spreading on both sides of it, and the bubbles rising a little
+higher. The highest bubble stays at least 20 art pixels below the top edge of the canvas. No
+whirlpool, no hole».
+
+**Capa congelada 3** → `CAPA/Capa3.jpg`. Cambió de perspectiva. **Adjunta** `CAPA/Capa2.jpg` y
+usa la plantilla de edición con: «MELTING: the same sheet seen from the same side view, with the
+same flat top row and the same width, but thinner, with three or four holes through it and
+water drops falling from the underside. Do NOT change the viewing angle: no rounded top face».
+
+**Doncella `F4`** → `Doncella/F4.jpg`. Le pintó una masa de agua en la cabeza. **Adjunta**
+`Doncella/F1.jpg`, con el prompt de `F2` cambiando la línea de la cola por: «Change ONLY the
+water tail: its tip curls a little tighter, moving at most 6 art pixels. Nothing on or around
+her head changes».
+
+### I4. Depende de una decisión
+
+- **`PresentacionDoncella2`** (PENDIENTES N34). Si las cinemáticas se quedan a 480 píxeles de
+  ancho, es la única que no cuadra (salió a 394). **Adjunta** `Cinematicas/PresentacionDoncella1.jpg`
+  (para el tamaño del píxel) y `Doncella/F1.jpg` (para ella), en ese orden.
+
+  ```text
+  Pixel art cinematic still, 16:9, with EXACTLY the same art-pixel size as the FIRST attached
+  image: every art pixel is a solid square block of that same size. Same palette: deep blue
+  #1E3A5F, ice blue #4A7FA5, slate #2C3E50, snow white #E8EEF4, cyan #00D4FF accents.
+  Close-up of the Maiden of the Lament (the character in the SECOND attached image), framed from
+  the chest up: her dark hood hiding her eyes, her gloved hands rising to its edge, a single
+  cyan tear falling on her cheek, the broken halo of ice shards around her head, the gem
+  glowing in her chest. Dark blue background.
+  Hard-edged pixels, NO blur, NO soft gradients, NO text, NO border.
+  ```
+
+- **La maestra de la Doncella** (PENDIENTES N35). Solo si decides repetirla por la cola cortada.
+  Entonces habría que repetir los 28 fotogramas, y el prompt D2 pediría más margen abajo.
