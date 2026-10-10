@@ -9,6 +9,346 @@
 
 ---
 
+## Mundo 2, fase C cerrada: la Plañidera y las imágenes limpias (2026-10-10)
+
+Misma rama, `nivel2-recorrido`. El autor terminó de generar las imágenes y pidió limpiarlas,
+apuntar lo que falta y cerrar la fase C. De la fase C quedaba el mini-jefe. `EnemyController`,
+`PlayerController` y `GameManager` no se tocan.
+
+### 1. La Plañidera, el mini-jefe del Mundo 2
+
+- **Problema.** El Mundo 2 no tenía mini-jefe. El Mundo 1 tiene al Golem de Ceniza.
+- **Causa.** La figura que dio AI Studio para la Doncella pasó a ser el mini-jefe el 2026-10-09,
+  con una propuesta de combate. Faltaba decidir dónde iba (PENDIENTES N32) y montarla.
+- **Solución.**
+  - **De cerca es un `EnemyController` más**, con sus datos (`Planidera.asset`): 10 de vida e
+    hiperarmadura, como el Golem. Flota hacia Kael a 1,6 u/s y, a tiro, echa el brazo atrás
+    0,55 s y barre (quita 2). Tocarla no hace daño.
+  - **Las esquirlas las lleva `Planidera`**, un componente a su lado. Cuando lleva 2,5 s
+    persiguiendo a Kael, alza las esquirlas (0,5 s), las apunta (0,8 s: el aviso) y lanza tres,
+    una cada 0,35 s, hacia donde esté Kael. Son el `Proyectil` de la torreta: quitan 1 y se
+    deshacen contra el suelo y las paredes.
+  - **Después llora 2 s desarmada**, sin atacar ni moverse, y las esquirlas vuelven (0,6 s). Es
+    la ventana para castigarla, y lo que pedirá la Doncella: esperar a que baje la guardia.
+  - **Mientras maneja las esquirlas, su `EnemyController` está apagado**, como el de la
+    Escultura dormida: así no anda ni barre sin tocar el controlador. Solo empieza la ráfaga
+    desde la persecución, nunca en mitad de un barrido.
+  - **Si muere con el controlador apagado**, nadie oiría la muerte. `Health` avisa del golpe
+    antes que de la muerte, así que `Planidera` enciende el controlador al recibir el golpe
+    mortal: llega a tiempo de oírla y muere por el camino de siempre.
+  - **Sin arte**, el aviso y el llanto se leen en el color del bloque: cian al apuntar y gris
+    al llorar.
+
+### 2. Dónde va
+
+- **Problema.** Un mini-jefe con proyectiles necesita sitio para esquivarlos y algo que guardar.
+- **Causa.** El recorrido ya estaba medido y probado: no convenía moverlo.
+- **Solución.**
+  - **En la plaza helada, en el sitio de la segunda Escultura** (x 32, flota de x 31 a x 33).
+    Es la propuesta de N32. Son 6 u de hielo entre el puente y el tapón rompible, que es la
+    única salida de la superficie: lo guarda ella.
+  - **Ve con línea de visión.** El puente mide 2 u y tapa a Kael mientras está al otro lado:
+    no le lanza esquirlas a quien aún pelea con la Escultura.
+  - El nivel queda con **una Escultura**, no con las dos del Anexo A. `DisenoNivel2` va por la
+    versión 5.
+  - El tercer Lamento sigue en la plaza este, a su lado. Si la prueba dice que es demasiado, se
+    mueve (N31).
+
+### 3. Fuera del proyecto: las 121 imágenes del Mundo 2
+
+- **Problema.** Llegaron todas las imágenes, cada grupo con su lienzo y su tamaño de píxel:
+  bloques de 20,48, 15, 11,38, 10,24, 9,47, 8, 6,83 y 5,73 px.
+- **Causa.** Gemini y AI Studio ya no dibujan siempre 100 o 200 píxeles de arte a lo ancho. La
+  medida automática de ayer fallaba con los bloques finos: la Plañidera salía a 4,7 px.
+- **Solución.** `limpiar_mundo2.py` lleva el periodo escrito en cada grupo, medido al revisar la
+  tanda (por autocorrelación de los bordes, comprobado a ojo), y aprende cuatro cosas:
+  - salta solo los fotogramas que traen el damero de transparencia pintado;
+  - conserva los morados de la capa de la Doncella, que la limpieza normal dejaba verdosos;
+  - baja los fondos y las cinemáticas enteros, sin recortar, y mide si casan al repetirse;
+  - ancla en vertical sin dar la vuelta (a `d3` le reaparecía por arriba lo que salía por abajo).
+  Los grupos de ayer salen idénticos, byte a byte.
+- **Lo que se encontró** (todo en el LEEME de `Tesis/Imagenes/limpios/Mundo2/` y en N30):
+  - **faltan** las tres esquirlas de la Plañidera, el ataque del Lamento (tres fotogramas
+    traen el damero pintado) y el tapón de hielo, que sigue siendo la losa del prompt viejo;
+  - **hay que repetir** la torre del fondo, `Puas/P4` y tres fotogramas de la Doncella;
+  - **dos decisiones nuevas:** las cinemáticas salieron a 480 píxeles de ancho, no a 240 (N34),
+    y la cola de la Doncella se sale del lienzo por abajo en los 28 fotogramas (N35).
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** crea los datos y el prefab de la Plañidera y vuelve a montar el Nivel 2
+  (versión 5 del diseño).
+- **Pruebas EditMode: 420 correctas de 420.** Nuevas:
+  - en `EnemigosTristezaTests`: los datos de la Plañidera y su prefab (las esquirlas, el
+    aviso, la ventana y el barrido, que empieza en su cuerpo);
+  - en `DisenoNivel2Tests`: guarda el tapón, entre el puente y el agujero;
+  - en `EscenaNivel2Tests`: está en la escena con su ruta, y la segunda Escultura ya no.
+- **Pruebas PlayMode: 168 correctas de 168.** Nuevas, en la escena real del Nivel 2:
+  - alza, apunta y lanza sus tres esquirlas, y se queda desarmada: no ataca ni se mueve, y la
+    espada la castiga;
+  - de cerca, avisa y barre con el brazo;
+  - tras acechar a Kael, alza las esquirlas ella sola;
+  - si muere con las esquirlas en alto, muere de verdad.
+
+---
+
+## Mundo 2, fase C: los enemigos de la Tristeza (2026-10-09)
+
+Misma rama, `nivel2-recorrido`. Mientras Gemini estaba caído, el autor pidió limpiar las imágenes
+y avanzar en lo que se pudiera. Todo va sin arte. `EnemyController`, `PlayerController` y
+`GameManager` no se tocan.
+
+### 1. El pesar del Lamento
+
+- **Problema.** El Lamento era la cápsula de la Fase 4: lento, pero su golpe no tenía nada de
+  la Tristeza.
+- **Causa.** El «reducen velocidad al contacto» del Anexo A estaba previsto para esta fase.
+- **Solución.**
+  - **`Pesar`**, en el Lamento, escucha el `OnImpacto` de su arma y de su cuerpo: solo pesa el
+    golpe que entra (con i-frames o escudo, nada).
+  - **`Pesadumbre`**, en Kael, le pone un modificador de movimiento de media velocidad durante
+    2 s. Se multiplica con el agua y el hielo, otro golpe renueva el tiempo y no lo suma, y
+    reaparecer lo quita. Vive en Kael para que se le pase aunque el Lamento muera.
+
+### 2. La Escultura Viviente
+
+- **Problema.** Faltaba la Escultura: una estatua del decorado que despierta, no anda, avisa su
+  golpe y se queda clavada después.
+- **Causa.** Era de esta fase. Lo difícil era hacerla dormir sin tocar `EnemyController`.
+- **Solución.**
+  - **Datos** (`Escultura.asset`): velocidades 0, hiperarmadura como el Golem, sin daño por
+    contacto, 1 s de aviso, 2 de daño y 2,25 s clavada después del golpe.
+  - **`EsculturaDormida`** tiene el `EnemyController` apagado hasta que Kael pasa a 3,5 u.
+    Tarda 1 s en despertar y entonces lo enciende.
+  - **Si la golpean dormida, despierta en el acto.** El controlador deja la vida al máximo al
+    arrancar, así que lo que le quitaron se le vuelve a quitar justo después: el golpe a la
+    estatua cuenta.
+  - **El prefab** (`Enemigo_Escultura`) mide 2,4 u y golpea delante y abajo con las dos manos.
+
+### 3. La Medusa de Hielo
+
+- **Problema.** Faltaban las cuatro Medusas: flotan sobre una línea, queman y no mueren.
+- **Causa.** Era de esta fase. No es un `EnemyController`: no anda, no persigue y no tiene vida.
+- **Solución.** `MedusaHielo` es un cuerpo cinemático en la capa Enemy: la espada la nota y Kael
+  la atraviesa. Lleva un contacto que quema. Un golpe la aparta 1,5 u y la encoge 1 s, y su
+  contacto encoge con ella: ahí está el hueco. Las de la calle suben y bajan cada 4 s; las de la
+  torre cruzan cada 5 s. Van a la contra dos a dos.
+- **Un fallo del diseño que salió al colocarlas.** A la altura de la fase A, las dos Medusas de
+  la torre (y −4,75 e y −0,4) rozaban la cabeza de Kael, que mide 1,8 u, mientras esperaba en
+  los rellanos: esperar el hueco no era seguro. Ahora pasan a y −4 y a y 0,1, con 0,2 u de margen
+  y sin atravesar las losas. `DisenoNivel2` va por la versión 4.
+
+### 4. Fuera del proyecto: las imágenes y los prompts
+
+- **Las imágenes del Mundo 2 que había, limpias**, en `Tesis/Imagenes/limpios/Mundo2/` con su
+  LEEME y su script (`limpiar_mundo2.py`). Usa el mismo motor que el Golem, con dos cambios: abre
+  lienzos que no son de 2048 sin deformarlos, y mide el bloque de arte (un número redondo de
+  píxeles a lo ancho del lienzo). Dos avisos: el hielo rompible salió con el prompt viejo (una
+  losa) y hay que repetirlo, y el arte de la placa mide 3,46 u frente a las 2,5 del juego
+  (PENDIENTES N33).
+- **Los prompts de los enemigos** (`Prompts_Mundo2.md`):
+  - El del Lamento pedía «sin ojos», y la referencia los tiene. Ahora va en dos pasos: una
+    maestra, y cada fotograma con dos adjuntos (la pose y el diseño) y una lista de lo que no
+    puede faltar.
+  - La Escultura atacaba editando la estatua dormida, que no tiene ojos. Ahora tiene una segunda
+    maestra despierta.
+  - **La Plañidera**, la figura de AI Studio, será el mini-jefe del Mundo 2. Tiene propuesta de
+    combate y sus 19 prompts.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** crea los datos y los prefabs nuevos y vuelve a montar el Nivel 2 (versión 4
+  del diseño). Volver a ejecutarlo no cambia nada.
+- **Pruebas EditMode: 416 correctas de 416.**
+  - **Nuevas:**
+    - `EnemigosTristezaTests`: el pesar, los datos y el prefab de la Escultura, el seno y el
+      golpe de la Medusa, y los prefabs del Lamento, de la Medusa y de Kael;
+    - en `DisenoNivel2Tests`: el ritmo de las Medusas, y que en los rellanos no rozan a Kael;
+    - en `EscenaNivel2Tests`: las Esculturas dormidas y las Medusas, con el recorrido del diseño.
+- **Pruebas PlayMode: 164 correctas de 164.** Nuevas, en la escena real del Nivel 2:
+  - el zarpazo del Lamento frena a Kael 2 s;
+  - la Escultura duerme hasta que Kael se acerca y despierta sin moverse;
+  - la Escultura descarga su golpe si Kael se queda delante;
+  - a golpes, la Escultura despierta en el acto y el golpe cuenta;
+  - la Medusa no muere (tampoco con el golpe cargado), la espada la aparta y la encoge;
+  - la Medusa quema al tocarla.
+
+---
+
+## Mundo 2, fase B: las mecánicas de la Tristeza (2026-10-08)
+
+Misma rama, `nivel2-recorrido`. El autor pidió seguir con la fase B mientras genera las imágenes.
+Todo va sin arte: rectángulos del tamaño de cada pieza y la interfaz generada por código.
+
+### 1. El hielo rompible: la única salida de la superficie
+
+- **Problema.** El agujero de la plaza estaba abierto: nada obligaba a usar lo aprendido en la Ira.
+- **Causa.** Faltaba la pieza (era de esta fase).
+- **Solución.** `HieloRompible`: un golpe normal lo agrieta y uno cargado (`Golpe.Cargado`) lo
+  rompe y deja el hueco abierto. Dos detalles:
+  - **Un tapón que asoma, no una losa.** La espada de Kael golpea de frente, entre 0,25 y 1,55 u
+    sobre sus pies: una losa a ras del suelo no se podía golpear. El tapón llena el hueco y asoma
+    1,25 u, lo justo para subirse encima.
+  - **La espada solo golpea la capa Enemy.** El tapón se pisa en la capa del suelo y lleva una
+    zona de golpe en la capa Enemy, que la matriz de colisión no deja chocar con Kael ni con los
+    enemigos.
+
+### 2. Las placas que flotan
+
+- **Problema.** Las placas eran bloques quietos.
+- **Causa.** Kael no sabía ir encima de algo que se mueve.
+- **Solución.** `PlataformaFlotante`, un cuerpo cinemático que sube y baja en un seno con
+  `MovePosition`: al subir empuja a Kael, y al bajar (como mucho a 1 u/s) Kael la sigue por su
+  peso. Su franja de hielo es un hijo y se mueve con ella. Las del agua suben de y 0 a y 1, a la
+  contra: en lo más bajo siguen fuera del agua (encima no se está mojado) y se cruzan sin esperar el
+  momento. Las de la arena sí piden esperarlo.
+
+### 3. El aire, y ahogarse sin que nadie empuje
+
+- **Problema.** Bajo el agua no había oxígeno.
+- **Causa.** Era de esta fase. El autor decidió que al acabarse no se muriera de golpe, sino que se
+  perdiera un corazón cada 2 s.
+- **Solución.**
+  - **`OxigenoJugador`** en el prefab de Kael, con la cuenta en `ReservaOxigeno` (sin Unity, para
+    probarla): 15 s de aire, lleno en 1 s fuera del agua, y sin aire un corazón cada 2 s.
+  - **`Health.PerderVida`:** quitar vida sin que sea un golpe. Con `RecibirGolpe`, el ahogo habría
+    hecho pasar a Kael por DAMAGED, con su retroceso, cada 2 s: lo habría sacado de su trayectoria
+    bajo el agua. Tampoco respeta los i-frames ni el escudo, que son contra golpes. No toca
+    `PlayerController`.
+  - **El HUD (`IndicadorAgua`):** una barra de aire bajo la de vida, que aparece en el agua y
+    parpadea en rojo sin aire; y un velo azul en los bordes de la pantalla bajo el agua. Es la
+    «visibilidad reducida» del Anexo A, hecha con la viñeta de la interfaz en lugar de con un
+    volumen de post-procesado: mismo efecto, sin un perfil más que mantener.
+  - **Un fallo que encontró la prueba PlayMode:** el oxígeno solo avisaba al HUD si el aire
+    cambiaba más de 0,001, y el último paso hasta 0 puede cambiar menos. Entonces Kael perdía
+    corazones con la barra sin ponerse roja. Ahora el paso a asfixia avisa siempre.
+
+### 4. Los ecos de intentos y el eco de memoria
+
+- **Problema.** El Anexo A pide que, tras cada muerte, una sombra repita el último recorrido. Y las
+  líneas de «eco de memoria» del guion no sonaban en ningún nivel.
+- **Causa.** Las dos cosas estaban previstas para la Fase 10.
+- **Solución.**
+  - **`EcoDeIntentos`** graba los últimos 8 s de Kael (posición, fotograma y hacia dónde mira) en un
+    búfer circular (`GrabacionIntento`). Al morir guarda el intento; al reaparecer lo repite con una
+    sombra translúcida, sin colisiones, que después se desvanece. Usa los fotogramas de Kael: no
+    necesita arte.
+  - **El eco de memoria:** `Checkpoint.ecoDeMemoria` marca el checkpoint donde suena, y el
+    `LevelManager` dice la línea la primera vez que se toca en esa carga del nivel (restaurar una
+    partida no cuenta). El preparador lo marca en el primer checkpoint de cada nivel: en el Nivel 2,
+    junto a la silla vacía; y en el Nivel 1 ahora también suena («Una voz grita órdenes…»).
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** crea los dos prefabs nuevos y vuelve a montar el Nivel 2 (versión 3 del
+  diseño). Volver a ejecutarlo no cambia nada.
+- **Pruebas EditMode: 405 correctas de 405.**
+  - **Nuevas:**
+    - `MecanicasTristezaTests`: el aire y la asfixia, perder vida sin golpe, la grabación circular,
+      el seno de las placas, el tapón y los tres prefabs;
+    - en `DisenoNivel2Tests`: cada salto en el mejor momento de las placas, las placas del agua en
+      el peor y el tapón que tapa y asoma;
+    - en las de las escenas: las placas, el tapón, los ecos y el eco de memoria del Nivel 1 y del 2.
+- **Pruebas PlayMode: 158 correctas de 158.** Nuevas, en la escena real del Nivel 2:
+  - la espada agrieta el tapón y la cargada lo rompe, y Kael cae al agua;
+  - la placa sube y baja llevando a Kael;
+  - sin aire se pierde un corazón cada 2 s sin retroceso, y en la campana se respira;
+  - tras morir, la sombra repite el intento y se va;
+  - en la campana suena el eco de memoria.
+
+---
+
+## Mundo 2, fase A: el recorrido del Nivel 2 (2026-10-08)
+
+Rama `nivel2-recorrido`, que sale de `nivel1-montado`. Empieza la Fase 10 con el mundo de la
+Tristeza. El autor aprobó el diseño (`Docs/Diseno/Nivel2_Diseno.md`) con sus ocho decisiones y pidió
+arrancar. Esta fase monta el recorrido en bloques de color, sin arte y sin las mecánicas nuevas, que
+llegan en las fases B a D.
+
+### 1. El diseño del Mundo 2
+
+- **Problema.** El Nivel 2 solo existía como dato (`L2_Tristeza`): sin escena, sin recorrido y con
+  un jefe esqueleto. El Anexo A daba la emoción, las mecánicas y los recuentos, pero no cómo enseñar
+  la Tristeza con ellos; la Escultura Viviente ni siquiera tenía comportamiento.
+- **Causa.** Hasta ahora se trabajó el Nivel 1 como referencia (Fase 9), como pedía el encargo.
+- **Solución.** Un diseño en tres tiempos que sale de la emoción: arriba el hielo suprime (todo
+  resbala y la superficie no lleva a ninguna parte), la única salida es hundirse (el Ataque Cargado
+  rompe el hielo), y bajo el agua todo pesa pero Kael salta más alto: la torre solo se sube así, y la
+  Doncella solo se hiere cuando llora. Las decisiones del autor: hielo rompible con el Ataque
+  Cargado, Medusas que no mueren, Escultura que despierta pero no anda, oxígeno de 15 s que después
+  quita un corazón cada 2 s, dos checkpoints y la Doncella vulnerable solo al llorar. Los prompts de
+  sus 26 imágenes están en `Docs/Diseno/Prompts_Mundo2.md` (la Doncella, por Google AI Studio).
+
+### 2. El recorrido como datos y su montaje
+
+- **Problema.** Había que llevar el diseño a una escena que se pueda rehacer, como el Nivel 1, pero
+  sabiendo que el nivel va a crecer en varias fases.
+- **Causa.** El montaje del Nivel 1 solo se ejecuta la primera vez: rehacerlo obliga a borrar la
+  escena a mano.
+- **Solución.**
+  - **`DisenoNivel2`**: suelos, muros, placas, agua, bolsas de aire, hielo, enemigos, checkpoints,
+    arena y los saltos del recorrido con el medio en que se dan (en seco o bajo el agua).
+  - **El montaje** (`PreparadorNivel`, ahora `partial`, con `PreparadorNivelTristeza.cs`) se
+    vuelve a ejecutar entero cuando sube `DisenoNivel2.Version`: así cada fase entra sola en la
+    escena. Con la misma versión, preparar otra vez no cambia nada.
+  - **La escena `Nivel2`** se crea desde la plantilla URP 2D al regenerar, se asigna a su
+    `LevelData` con sus checkpoints (x 50 y x 65) y entra en Build Settings. Ya se juega desde el
+    selector y con «Continuar» tras superar la Ira.
+  - **El agua y el hielo son los de verdad:** triggers con `ZonaModificadorMovimiento` (agua:
+    velocidad × 0,6, gravedad × 0,3 y salto × 0,6; hielo: aceleración × 0,15). El agua es un velo
+    translúcido por delante de Kael; el hielo, un remate blanco sobre los suelos que resbalan.
+  - **La cámara** baja hasta y −13 (la calle está a −11) con el encuadre del Nivel 1, y la zona
+    mortal queda en y −16.
+  - **La arena** es la del Nivel 1 con las medidas del 2: 25 × 15 u, la puerta, la entrada y la
+    Doncella, que atraviesa las placas y el balcón.
+
+### 3. Saltar bajo el agua: lo que el esquema no tenía en cuenta
+
+- **Problema.** En el esquema de la propuesta, la repisa de la casa y el último escalón de la torre
+  se alcanzaban sobre el papel, pero por muy poco.
+- **Causa.** Al cruzar la superficie la gravedad vuelve a ser la de fuera, y lo que queda del salto
+  sube 0,3 veces lo que subiría dentro. Una subida de 4 u que sale del agua dejaba a Kael 0,3 u por
+  encima del borde. Además, una superficie a ras de lo que se pisa toca a Kael de pie en el borde: la
+  física cuenta como solapados dos cuerpos que solo se rozan, y lo habría dejado frenado.
+- **Solución.**
+  - **La casa es una campana** colgada del techo de hielo, que guarda el aire debajo; no tiene suelo
+    y se entra por debajo.
+  - **Las subidas que salen del agua son más bajas:** 3,5 u a la repisa y 3,75 al último rellano.
+    Los dos primeros escalones de la torre miden 4,25 u (4,5 no cabía en el margen del 90 %) y
+    siguen sin poder subirse en seco (4,1).
+  - **Cada superficie queda 0,1 u por debajo** de lo que se pisa al salir.
+  - **Las pruebas lo calculan:** cada salto en su medio, con los mismos márgenes que el Nivel 1, y
+    al salir del agua al menos 0,25 u por encima del borde.
+
+### Lo que falta, por fases
+
+- **B · Mecánicas:** el hielo rompible (hoy el agujero está abierto), las placas que suben y bajan
+  (hoy quietas), el oxígeno, los ecos de intentos, el eco de memoria y el volumen submarino.
+- **C · Enemigos:** el pesar del Lamento, las Esculturas y las Medusas.
+- **D · Jefe:** los patrones de la Doncella. Hoy espera quieta.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** crea la escena, la monta, la asigna y la añade a Build Settings. Volver a
+  ejecutarlo no cambia nada.
+- **Pruebas EditMode: 391 correctas de 391.**
+  - **Nuevas:** `DisenoNivel2Tests` (cada salto en su medio, que la torre solo se sube bajo el
+    agua, el impulso al salir, el agua sin solapes y casi a ras, las bolsas de aire, los pasos
+    estrechos, los recuentos del Anexo A, los bordes enteros y el hielo solo sobre el hielo) y
+    `EscenaNivel2Tests` (la escena sigue al diseño, y prepararla otra vez no cambia nada).
+  - **Al día:** `DatosProgresionTests`, con el Nivel 2 jugable.
+- **Pruebas PlayMode: 153 correctas de 153.**
+  - **Nuevas:** `Nivel2PlayModeTests`: en la escena real, el hielo resbala, el agua frena y la
+    repisa de la campana es un checkpoint seco.
+  - **Al día:** las del flujo y la progresión. Tras superar la Ira se entra en la Tristeza, y el
+    «en construcción» del selector lo enseña ahora el tercer mundo.
+
+---
+
 ## Respuestas a la prueba del Nivel 1 montado (2026-10-08)
 
 Rama `nivel1-montado`. El autor jugó el nivel (N26) y encontró un solo fallo: el diálogo del jefe

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.LevelData
   id: 2
   escena:
-    escena: {fileID: 0}
-    ruta: 
+    escena: {fileID: 102900000, guid: 32f57bc6a4f95464392faebc13de40b0, type: 3}
+    ruta: Assets/Scenes/Nivel2.unity
   nombreMundo: Ciudad Sumergida
   emocion: {fileID: 11400000, guid: 27591dd8993db0d4b9467e5071fdbcab, type: 2}
   sinopsis: "P\xE9rdida, melancol\xEDa. El nivel es deliberadamente lento y pesado."
@@ -34,6 +34,7 @@ MonoBehaviour:
   cinematicaEntrada: {fileID: 0}
   cinematicaCierre: {fileID: 11400000, guid: dab1a0691e758aa48bbf6a626abe67c1, type: 2}
   cinematicaJefe: {fileID: 11400000, guid: 1733680fa3636b84295fc2d61683d4ca, type: 2}
+  cinematicaJefeDerrotado: {fileID: 0}
   dialogos: {fileID: 11400000, guid: 7ada1a0327ceaab4a81600eb1ceeaf41, type: 2}
   reglas:
     agacharse: 0
@@ -53,6 +54,8 @@ MonoBehaviour:
     desdeX: 60
     hastaX: 90
     contenido: Superficie helada sobre agua.
-  puntosDeControl: []
+  puntosDeControl:
+  - 50
+  - 65
   acento: {r: 0, g: 0.83137256, b: 1, a: 1}
   cita: "el dolor tambi\xE9n es parte del yo"

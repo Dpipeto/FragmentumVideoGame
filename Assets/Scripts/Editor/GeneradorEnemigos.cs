@@ -31,7 +31,21 @@ namespace Fragmentum.EditorTools
         public const string RutaEscena = "Assets/Scenes/Pruebas/PruebaEnemigos.unity";
 
         /// <summary>Variantes con prefab propio (la genérica usa el prefab base).</summary>
-        public static readonly string[] Variantes = { "SoldadoLava", "GolemCeniza", "Lamento", "Espectro", "CentinelaCiego" };
+        public static readonly string[] Variantes = { "SoldadoLava", "GolemCeniza", "Lamento", "Escultura", "Planidera", "Espectro", "CentinelaCiego" };
+
+        /// <summary>La Medusa de Hielo no es un <see cref="EnemyController"/>: tiene su propio prefab.</summary>
+        public const string Medusa = "MedusaHielo";
+
+        public const string RutaPrefabMedusa = CarpetaPrefabs + "/" + Medusa + ".prefab";
+
+        /// <summary>El cuerpo de la Plañidera: del capuchón al borde de la túnica (la cola de agua no cuenta).</summary>
+        public static readonly Vector2 TamanoPlanidera = new Vector2(1.2f, 2.8f);
+
+        /// <summary>Radio de la Medusa (su campana mide ~1 u).</summary>
+        public const float RadioMedusa = 0.45f;
+
+        /// <summary>Lo que quema: un poco menos que el dibujo, para que rozarla no duela.</summary>
+        public const float RadioContactoMedusa = RadioMedusa * 0.9f;
 
         // --- Menús ---
 
@@ -163,6 +177,45 @@ namespace Fragmentum.EditorTools
                 d.tinte = Hex("4A7FA5");
             });
 
+            // Mundo 2 (Nivel2_Diseno.md, sección 5): parece decorado hasta que Kael pasa cerca
+            // (EsculturaDormida). No anda. Su golpe avisa 1 s y, tras darlo, se queda clavada:
+            // ahí se la castiga. Hiperarmadura, como el Golem.
+            Datos("Escultura", sobrescribir, d =>
+            {
+                d.nombreCanonico = "Escultura Viviente";
+                d.descripcion = "Tristeza: parece una estatua más. Despierta cuando Kael pasa cerca (1 s) y no anda: se gira, " +
+                                "alza los puños 1 s (el aviso) y los descarga delante. Después tarda en soltarlos: ahí se la " +
+                                "castiga. Los golpes no la interrumpen. Tocarla no hace daño.";
+                d.vidaMaxima = 5; d.danio = 2; d.danioContacto = 0;
+                d.velocidadPatrulla = 0f; d.velocidadPersecucion = 0f; d.esperaEnWaypoint = 0f;
+                d.deteccion = distancia; d.detectionRadius = 4f;
+                d.attackRadius = 1.9f; d.alturaAtaque = 2f; d.attackCooldown = 1.6f;
+                d.duracionAtaque = 1.8f; d.inicioVentanaGolpe = 1f; d.finVentanaGolpe = 1.15f;
+                d.hiperarmadura = true;
+                d.damagedDuration = 0.2f; d.resistenciaRetroceso = 1f; d.deathDelay = 1.5f;
+                d.tinte = Hex("9FB8CF");
+            });
+
+            // Mundo 2 (Nivel2_Diseno.md, sección 5): el mini-jefe. De cerca es un EnemyController más
+            // (flota despacio y barre con el brazo); las esquirlas las lleva Planidera, que lo apaga
+            // mientras las maneja. Ve con línea de visión: el puente de la plaza tapa a Kael.
+            Datos("Planidera", sobrescribir, d =>
+            {
+                d.nombreCanonico = "La Plañidera";
+                d.descripcion = "Tristeza (mini-jefe, vida 10): flota despacio hacia Kael y, de cerca, echa el brazo atrás (0,55 s) " +
+                                "y barre. Cada pocos segundos alza sus esquirlas, las apunta y las lanza una tras otra; " +
+                                "después llora 2 s sin atacar: ahí se la castiga. Los golpes no la interrumpen. " +
+                                "Tocarla no hace daño.";
+                d.vidaMaxima = 10; d.danio = 2; d.danioContacto = 0;
+                d.velocidadPatrulla = 0.8f; d.velocidadPersecucion = 1.6f; d.esperaEnWaypoint = 2f;
+                d.deteccion = vision; d.detectionRadius = 7f;
+                d.attackRadius = 1.9f; d.alturaAtaque = 2.2f; d.attackCooldown = 2.2f;
+                d.duracionAtaque = 1.1f; d.inicioVentanaGolpe = 0.55f; d.finVentanaGolpe = 0.7f;
+                d.hiperarmadura = true;
+                d.damagedDuration = 0.2f; d.resistenciaRetroceso = 1f; d.deathDelay = 1.5f;
+                d.tinte = Hex("3D5A8A");
+            });
+
             Datos("Espectro", sobrescribir, d =>
             {
                 d.nombreCanonico = "Espectro";
@@ -256,7 +309,8 @@ namespace Fragmentum.EditorTools
                 CrearVariante(base_, variante);
             }
 
-            Debug.Log($"[Fragmentum] Prefabs de enemigos creados en {CarpetaPrefabs} (base + {Variantes.Length} variantes).");
+            CrearMedusa();
+            Debug.Log($"[Fragmentum] Prefabs de enemigos creados en {CarpetaPrefabs} (base + {Variantes.Length} variantes y la Medusa).");
             return base_;
         }
 
@@ -370,6 +424,18 @@ namespace Fragmentum.EditorTools
                 {
                     AgrandarGolem(instancia, controlador);
                 }
+                else if (nombre == "Lamento")
+                {
+                    AgregarPesar(instancia, controlador);
+                }
+                else if (nombre == "Escultura")
+                {
+                    PrepararEscultura(instancia, controlador);
+                }
+                else if (nombre == "Planidera")
+                {
+                    PrepararPlanidera(instancia, controlador);
+                }
 
                 PrefabUtility.SaveAsPrefabAsset(instancia, $"{CarpetaPrefabs}/Enemigo_{nombre}.prefab");
             }
@@ -408,6 +474,158 @@ namespace Fragmentum.EditorTools
                 var zona = contacto.GetComponent<CapsuleCollider2D>();
                 zona.size = new Vector2(1.3f, 2.3f);
                 zona.offset = new Vector2(0f, 1.2f);
+            }
+        }
+
+        // El Lamento pesa: su zarpazo y su cuerpo frenan a Kael (Pesar).
+        private static void AgregarPesar(GameObject instancia, EnemyController controlador)
+        {
+            var serializado = new SerializedObject(controlador);
+            var arma = serializado.FindProperty("arma").objectReferenceValue as Hitbox;
+            var contacto = serializado.FindProperty("contacto").objectReferenceValue as Hitbox;
+            var pesar = instancia.AddComponent<Pesar>();
+            Asignar(pesar, "golpes", p =>
+            {
+                p.arraySize = 2;
+                p.GetArrayElementAtIndex(0).objectReferenceValue = arma;
+                p.GetArrayElementAtIndex(1).objectReferenceValue = contacto;
+            });
+        }
+
+        /// <summary>
+        /// La Escultura: del tamaño de un ciudadano de piedra (~2,4 u), con el golpe de las dos
+        /// manos delante y abajo, sin daño por contacto y dormida (el controlador apagado).
+        /// </summary>
+        private static void PrepararEscultura(GameObject instancia, EnemyController controlador)
+        {
+            var serializado = new SerializedObject(controlador);
+            var sprite = serializado.FindProperty("sprite").objectReferenceValue as SpriteRenderer;
+            var arma = serializado.FindProperty("arma").objectReferenceValue as Hitbox;
+            var contacto = serializado.FindProperty("contacto").objectReferenceValue as Hitbox;
+
+            var cuerpo = instancia.GetComponent<CapsuleCollider2D>();
+            cuerpo.size = new Vector2(1.1f, 2.4f);
+            cuerpo.offset = new Vector2(0f, 1.2f);
+
+            if (sprite != null)
+            {
+                sprite.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+                sprite.transform.localScale = new Vector3(1.1f, 1.2f, 1f);
+            }
+
+            if (arma != null)
+            {
+                arma.transform.localPosition = new Vector3(1.25f, 0.6f, 0f);
+                arma.GetComponent<BoxCollider2D>().size = new Vector2(1.5f, 1.2f);
+            }
+
+            if (contacto != null)
+            {
+                contacto.gameObject.SetActive(false);
+            }
+
+            controlador.enabled = false;
+            var dormida = instancia.AddComponent<EsculturaDormida>();
+            Asignar(dormida, "sprite", p => p.objectReferenceValue = sprite);
+        }
+
+        /// <summary>
+        /// La Plañidera: alta (2,8 u) y sin daño por contacto. Su barrido cubre desde su cuerpo
+        /// hasta 2 u por delante; las esquirlas salen de encima de su cabeza (el arco).
+        /// </summary>
+        private static void PrepararPlanidera(GameObject instancia, EnemyController controlador)
+        {
+            var serializado = new SerializedObject(controlador);
+            var sprite = serializado.FindProperty("sprite").objectReferenceValue as SpriteRenderer;
+            var arma = serializado.FindProperty("arma").objectReferenceValue as Hitbox;
+            var contacto = serializado.FindProperty("contacto").objectReferenceValue as Hitbox;
+            var pivote = serializado.FindProperty("pivote").objectReferenceValue as Transform;
+
+            var cuerpo = instancia.GetComponent<CapsuleCollider2D>();
+            cuerpo.size = TamanoPlanidera;
+            cuerpo.offset = new Vector2(0f, TamanoPlanidera.y * 0.5f);
+
+            if (sprite != null)
+            {
+                sprite.transform.localPosition = new Vector3(0f, TamanoPlanidera.y * 0.5f, 0f);
+                sprite.transform.localScale = new Vector3(TamanoPlanidera.x, TamanoPlanidera.y * 0.5f, 1f);
+            }
+
+            if (arma != null)
+            {
+                arma.transform.localPosition = new Vector3(1f, 1.3f, 0f);
+                arma.GetComponent<BoxCollider2D>().size = new Vector2(2.2f, 2.2f);
+            }
+
+            if (contacto != null)
+            {
+                contacto.gameObject.SetActive(false);
+            }
+
+            var arco = new GameObject("Arco").transform;
+            arco.SetParent(pivote != null ? pivote : instancia.transform, false);
+            arco.localPosition = new Vector3(0f, TamanoPlanidera.y + 0.2f, 0f);
+
+            var planidera = instancia.AddComponent<Planidera>();
+            Asignar(planidera, "arco", p => p.objectReferenceValue = arco);
+            Asignar(planidera, "pivote", p => p.objectReferenceValue = pivote);
+            Asignar(planidera, "sprite", p => p.objectReferenceValue = sprite);
+        }
+
+        /// <summary>
+        /// La Medusa: un cuerpo cinemático en la capa Enemy (la espada la nota; Kael la atraviesa)
+        /// con la zona de contacto hija que quema. Todo cuelga de «Cuerpo», que es lo que encoge.
+        /// </summary>
+        public static GameObject CrearMedusa()
+        {
+            var raiz = new GameObject(Medusa) { layer = Capa(Capas.Enemy), tag = GameTags.Enemy };
+            try
+            {
+                var rigido = raiz.AddComponent<Rigidbody2D>();
+                rigido.bodyType = RigidbodyType2D.Kinematic;
+                rigido.interpolation = RigidbodyInterpolation2D.Interpolate;
+
+                var cuerpo = new GameObject("Cuerpo") { layer = raiz.layer };
+                cuerpo.transform.SetParent(raiz.transform, false);
+                var zonaGolpe = cuerpo.AddComponent<CircleCollider2D>();
+                zonaGolpe.radius = RadioMedusa;
+
+                var objetoSprite = new GameObject("Sprite") { layer = raiz.layer };
+                objetoSprite.transform.SetParent(cuerpo.transform, false);
+                objetoSprite.transform.localScale = new Vector3(RadioMedusa * 2f, RadioMedusa * 2f, 1f);
+                var sprite = objetoSprite.AddComponent<SpriteRenderer>();
+                sprite.sprite = SpriteCirculo;
+                sprite.color = new Color(0.55f, 0.85f, 1f, 0.85f);
+                sprite.sortingOrder = 5;
+                var provisional = objetoSprite.AddComponent<SpriteProvisional>();
+                Asignar(provisional, "assetPendiente", p => p.stringValue = "Medusa de Hielo (Prompts_Mundo2.md, B3)");
+                Asignar(provisional, "tamano", p => p.vector2Value = new Vector2(RadioMedusa * 2f, RadioMedusa * 2f));
+
+                var objetoContacto = new GameObject("Contacto") { layer = Capa(Capas.EnemyWeapon) };
+                objetoContacto.transform.SetParent(cuerpo.transform, false);
+                var zonaContacto = objetoContacto.AddComponent<CircleCollider2D>();
+                zonaContacto.isTrigger = true;
+                zonaContacto.radius = RadioContactoMedusa;
+                var contacto = objetoContacto.AddComponent<Hitbox>();
+                Asignar(contacto, "danio", p => p.intValue = 1);
+                Asignar(contacto, "objetivos", p => p.intValue = Capas.Mascara(Capas.Player));
+                Asignar(contacto, "golpearUnaVezPorActivacion", p => p.boolValue = false);
+
+                var medusa = raiz.AddComponent<MedusaHielo>();
+                Asignar(medusa, "cuerpo", p => p.objectReferenceValue = cuerpo.transform);
+
+                var prefab = PrefabUtility.SaveAsPrefabAsset(raiz, RutaPrefabMedusa, out var guardado);
+                if (!guardado)
+                {
+                    Debug.LogError($"[Fragmentum] No se pudo guardar {RutaPrefabMedusa}.");
+                    return null;
+                }
+
+                return prefab;
+            }
+            finally
+            {
+                Object.DestroyImmediate(raiz);
             }
         }
 

@@ -2,6 +2,8 @@
 
 Prompts del arte que falta, listos para pegar. Adjunta siempre la referencia que indica cada uno.
 
+Los del **Mundo 2** (Tristeza) están aparte, en `Prompts_Mundo2.md`.
+
 **Una regla para todos:** pide **fondo magenta plano (#FF00FF)**. La limpieza recorta ese color.
 La bola de fuego llegó sobre el damero gris que imita la transparencia, pintado dentro del JPG, y
 hubo que escribir una limpieza aparte (`Imagenes/limpios/script/limpiar_bola.py`).

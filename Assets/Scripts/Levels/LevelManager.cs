@@ -68,6 +68,7 @@ namespace Fragmentum.Levels
         private PlayerController _jugador;
         private CameraMovement _camara;
         private bool _completado;
+        private bool _ecoDeMemoriaDicho;
 
         /// <summary>El jugador reapareció (tras un Game Over o, fuera de los niveles, tras morir).</summary>
         public event Action<PlayerController> OnJugadorReaparecio;
@@ -105,9 +106,36 @@ namespace Fragmentum.Levels
             PrepararMusica();
         }
 
-        private void OnEnable() => EventosJuego.ReintentoSolicitado += Reaparecer;
+        private void OnEnable()
+        {
+            EventosJuego.ReintentoSolicitado += Reaparecer;
+            if (_checkpoints != null)
+            {
+                _checkpoints.OnCheckpointActivado += AlActivarCheckpoint;
+            }
+        }
 
-        private void OnDisable() => EventosJuego.ReintentoSolicitado -= Reaparecer;
+        private void OnDisable()
+        {
+            EventosJuego.ReintentoSolicitado -= Reaparecer;
+            if (_checkpoints != null)
+            {
+                _checkpoints.OnCheckpointActivado -= AlActivarCheckpoint;
+            }
+        }
+
+        // El eco de memoria del guion suena la primera vez que se toca su checkpoint en esta
+        // carga del nivel. Restaurar un checkpoint guardado no lo dispara: no es tocarlo.
+        private void AlActivarCheckpoint(Checkpoint checkpoint)
+        {
+            if (_ecoDeMemoriaDicho || checkpoint == null || !checkpoint.EcoDeMemoria || nivel == null || DialogueManager.Instancia == null)
+            {
+                return;
+            }
+
+            _ecoDeMemoriaDicho = true;
+            DialogueManager.Instancia.Reproducir(nivel.dialogos, MOMENTOS_DIALOGO.ECO_MEMORIA);
+        }
 
         // En Start todas las cámaras ya pasaron por su Awake: se encuadra sin suavizado.
         private void Start()

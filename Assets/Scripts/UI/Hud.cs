@@ -29,8 +29,12 @@ namespace Fragmentum.UI
         private Text _linea;
         private float _ocultarAvisoEn;
         private bool _construido;
+        private IndicadorAgua _agua;
 
         public LifeBar Barra => _barra;
+
+        /// <summary>La barra de aire y el velo submarino (mundo de la Tristeza).</summary>
+        public IndicadorAgua Agua => _agua;
 
         /// <summary>¿Se ve la barra del jefe? (Solo durante un combate de jefe.)</summary>
         public bool JefeVisible => _panelJefe != null && _panelJefe.activeSelf;
@@ -58,6 +62,10 @@ namespace Fragmentum.UI
             gameObject.SetActive(false);
             var raiz = (RectTransform)transform;
             FabricaUI.Estirar(raiz);
+
+            // Lo primero: su velo submarino queda por detrás de todo lo demás.
+            _agua = gameObject.AddComponent<IndicadorAgua>();
+            _agua.Construir(raiz);
 
             var fondo = FabricaUI.Objeto("BarraVida", raiz).gameObject.AddComponent<Image>();
             fondo.color = new Color(0f, 0f, 0f, 0.6f);
@@ -188,11 +196,12 @@ namespace Fragmentum.UI
             _panelJefe.SetActive(false);
         }
 
-        /// <summary>Engancha la barra de vida al jugador (null la deja vacía).</summary>
+        /// <summary>Engancha la barra de vida y la de aire al jugador (null las deja vacías).</summary>
         public void Vincular(PlayerController jugador)
         {
             Construir();
             _barra.Vincular(jugador != null ? jugador.Vida : null);
+            _agua.Vincular(jugador != null ? jugador.GetComponent<OxigenoJugador>() : null);
         }
 
         /// <summary>Pone el nombre del mundo en una esquina (vacío fuera de los niveles).</summary>

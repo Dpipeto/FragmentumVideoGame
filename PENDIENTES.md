@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.34 — Respuestas a la prueba del Nivel 1 montado, 2026-10-08.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.39 — Mundo 2, fase C cerrada: la Plañidera y las imágenes limpias, 2026-10-10.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -10,7 +10,12 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
-| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. |
+| N31 | **Juega el Nivel 2 montado** (rama `nivel2-recorrido`): desde el selector o con «Continuar» tras superar el Nivel 1. | Son las fases A, B y C del Mundo 2: el recorrido en bloques de color, con el agua, el hielo, sus mecánicas y sus enemigos, ya con el mini-jefe. Lo que más importa: si el hielo resbala lo justo; si el agua se siente pesada pero no lenta de más; si 15 s de aire dan para la calle hundida sin agobiar ni sobrar, con las Medusas; si el tapón se entiende (un golpe lo agrieta, el cargado lo rompe); si las placas se cruzan bien; si el golpe de la Escultura se ve venir (1 s de aviso) y se castiga después; si la torre se sube eligiendo el hueco entre las Medusas sin frustrar; y **la Plañidera** (el bloque alto azul de la plaza, x 32): si sus esquirlas se ven venir (se pone cian 0,8 s antes), si los 2 s que llora desarmada dan para castigarla, y si la plaza este, con ella y el Lamento a la vez, queda demasiado cargada. | Ten en cuenta lo que aún no está: el arte y la Doncella, que espera quieta (fase D). Al morir, una sombra azul repite tu intento: es el eco de intentos. Si un Lamento te alcanza, vas a media velocidad 2 s. El puente tapa las esquirlas. Dime lo que notes; los números están en `Docs/Diseno/Nivel2_Diseno.md`, secciones 3 y 5. Si la plaza este se hace pesada, muevo el Lamento: es una línea de `DisenoNivel2`. |
+| N30 | *En curso.* **Mundo 2: lo que falta de las imágenes.** Llegaron las 121 y están limpias en `Tesis/Imagenes/limpios/Mundo2/`; su LEEME dice cómo quedó cada una. | Sin lo que falta no se pueden vestir el ataque del Lamento, las esquirlas de la Plañidera ni el tapón. Lo demás son defectos que se verían en el juego. | **Falta:** (1) las tres esquirlas de la Plañidera (`Esquirla1` a `Esquirla3`, prompt B4); (2) el ataque del Lamento: `a1`, `a3` y `a4` llegaron con el damero de transparencia pintado, y `a2`, con la máscara casi negra y más pequeño: repite los cuatro con el paso 2 de B1, adjuntando las bases de `Mundo2/Lamento/Bases/` (`a1.png` a `a4.png`, que he vuelto a dejar sobre magenta) y no las de `Tesis/Enemigo/Ataque/`, que traen el damero pintado: de ahí salió; (3) el hielo rompible, los cinco: siguen siendo la losa del 2026-10-08, y el juego usa un tapón (A5 actual). **Repite:** (4) `Fondos/Torre`: llegó reescalada y con la punta cortada; (5) `Puas/P4`: lleva halo; (6) de la Doncella, `M5` (halo), `L2` (otro estilo y suelo pintado) y `F3` (se corre a un lado). **Opcional:** `Lamento/I2` (piernas deshechas), `Planidera/A2` (píxel más fino), `Inundacion/Aviso2` (cortado por arriba), `Capa/Capa3` (otra perspectiva), `Doncella/F4` y Kael nadando (Pixelorama). Los prompts, en `Docs/Diseno/Prompts_Mundo2.md`. |
+| N33 | **¿Qué tamaño tiene la placa flotante?** | Su arte (`Placa1`) mide 3,46 u de ancho a la escala del Nivel 1, y en el juego la placa mide 2,5 u. | Dos salidas: importarla más pequeña (PPU 66: la placa se queda en 2,5 u, con el píxel de arte algo menor que el del resto) o hacer las placas de 3,5 u (hay que volver a comprobar los saltos del diseño). Yo me quedaría con la primera: no toca el recorrido, que ya está probado. |
+| N34 | **¿A qué resolución van las cinemáticas del Mundo 2?** | Las del Nivel 1 miden 240 × 135 píxeles de arte. Las cuatro de la Doncella salieron más finas, aunque el prompt pedía 240: tres a 480 × 268 y `PresentacionDoncella2` a 394 × 220. | Tres salidas: (a) usarlas a 480, con el píxel la mitad de grande que en las del Nivel 1 (hay que ajustar la cámara de cinemáticas y repetir solo `PresentacionDoncella2`); (b) repetir las cuatro insistiendo en 240; (c) bajarlas yo a 240 promediando cada 2 × 2, que emborrona algo el dibujo. Yo iría por la (a): son las más bonitas así, y cada mundo puede tener su resolución. Se decide en la fase de narrativa. |
+| N35 | **La cola de la Doncella sale cortada: ¿se repite la maestra o se tapa?** | En `F1`, la cola de agua se sale del lienzo por abajo, y los 28 fotogramas lo heredan: acaba en un corte recto. Como flota en lo alto de la arena, el corte se vería. | Dos salidas: repetir la maestra `F1` con más margen abajo (y con ella los otros 27), o conservarlas y que el juego funda en transparente las últimas filas de la cola. Yo probaría primero lo segundo al integrarla, que no cuesta imágenes, y repetiría solo si no convence. |
+| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. **Del Mundo 2** hay seis diferencias más, listadas al final de `Docs/Diseno/Nivel2_Diseno.md` (sección 9). La última es del 2026-10-10: la Plañidera no está en el Anexo, y el nivel queda con una Escultura Viviente en vez de dos. |
 | N3 | *En curso.* **Clips de Kael que faltan:** daño primero; después wall slide (y, para la Fase 10, nado). El dash ✔, la muerte ✔ y agacharse ✔ ya están. | El daño se ve en cada partida: hoy sigue el clip anterior y parpadea. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Solo el Eco de la Ira tiene arte. | Ver «Arte que más necesito», justo debajo. |
 
@@ -29,6 +34,61 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 6. **Efectos de la Centinela:** ✔ *completos.* **La onda** (v0.32) y **la erupción** entera
    (v0.34): la grieta que avisa, el brote, la columna que arde y el derrumbe. Solo la caída del
    salto sigue sin VFX propio (la enseñan J4 y J5 de la Centinela).
+
+### Resuelto en la v0.39
+
+- **N32: la Plañidera está en el nivel.** Va donde propuse, en la plaza helada y en el sitio de la
+  segunda Escultura (x 32), y pelea como estaba escrito:
+  - flota despacio hacia Kael y, de cerca, echa el brazo atrás y barre (quita 2);
+  - cuando lleva 2,5 s persiguiéndolo, alza las esquirlas, las apunta 0,8 s (el aviso) y lanza
+    tres, una tras otra, hacia donde esté;
+  - después llora 2 s desarmada, sin atacar ni moverse: ahí se la castiga;
+  - tiene 10 de vida e hiperarmadura, como el Golem, y tocarla no hace daño.
+  El puente la tapa: mientras Kael está al otro lado, no lo ve. Con esto la fase C está cerrada.
+  Pruébalo en N31.
+- **Todas las imágenes del Mundo 2, limpias:** las 121, en `Tesis/Imagenes/limpios/Mundo2/`. Lo
+  que falta y lo que hay que repetir está en N30; las dos decisiones nuevas, en N34 y N35.
+
+### Resuelto en la v0.38
+
+- **Fase C: los enemigos de la Tristeza**, todavía sin arte:
+  - **el pesar del Lamento:** si su zarpazo o su cuerpo alcanzan a Kael, este va a media
+    velocidad 2 s;
+  - **las Esculturas Vivientes:** duermen como estatuas hasta que Kael pasa cerca, despiertan en
+    1 s, no andan, avisan su golpe 1 s y se quedan clavadas después; los golpes no las
+    interrumpen;
+  - **las Medusas de Hielo:** cuatro, con su ritmo (4 s en la calle y 5 s en la torre, a la
+    contra dos a dos); queman al tocarlas y no mueren: la espada las aparta y las encoge 1 s.
+  - Las dos Medusas de la torre se movieron medio metro, porque rozaban la cabeza de Kael en los
+    rellanos.
+  Pruébalo en N31.
+- **Las imágenes del Mundo 2 que había, limpias** (`Tesis/Imagenes/limpios/Mundo2/`, con su
+  LEEME), y los prompts del Lamento, la Escultura y la Medusa arreglados (pedían «sin ojos» o
+  editaban la estatua dormida). La Plañidera tiene los suyos.
+
+### Resuelto en la v0.37
+
+- **Fase B: las mecánicas de la Tristeza**, todavía sin arte:
+  - **el tapón de hielo** que cierra el agujero de la plaza: un golpe lo agrieta y el cargado lo
+    rompe;
+  - **las placas que flotan**, subiendo y bajando con Kael encima, y resbalan;
+  - **el oxígeno:** 15 s bajo el agua y, sin aire, un corazón cada 2 s sin retroceso, con una
+    barra de aire en el HUD que parpadea en rojo;
+  - **el velo submarino**, que oscurece los bordes de la pantalla bajo el agua;
+  - **los ecos de intentos:** al reaparecer, una sombra repite el intento anterior;
+  - **el eco de memoria**, que suena en el primer checkpoint de cada nivel, también en el Nivel 1.
+  Pruébalo en N31.
+
+### Resuelto en la v0.36
+
+- **El Mundo 2 tiene diseño** (`Docs/Diseno/Nivel2_Diseno.md`), con tus ocho decisiones: el hielo
+  se rompe con el Ataque Cargado, las Medusas no mueren, la Escultura despierta pero no anda, el
+  oxígeno dura 15 s y después quita un corazón cada 2 s, dos checkpoints, la Doncella solo es
+  vulnerable cuando llora, `jefe2.jpeg` es ella (D9) y la lista de imágenes con sus prompts
+  (`Prompts_Mundo2.md`).
+- **Fase A: el Nivel 2 está montado** en `Assets/Scenes/Nivel2.unity`, ya en Build Settings y en
+  el selector: el recorrido de `DisenoNivel2` con el agua y el hielo de verdad, los tres Lamentos,
+  los dos checkpoints, la salida y la arena de la Doncella. Pruébalo en N31.
 
 ### Resuelto en la v0.34
 
@@ -479,7 +539,7 @@ Las decisiones abiertas están arriba, en «Lo que necesito de ti».
 | D6 | **Jefe de Culpa: Juez Silente / Juez Silencioso.** | Ninguno aparece en el proyecto. | **Juez Silente**, como en el GDD. |
 | D7 | **Nivel 5: Esperanza / Aceptación.** | Ninguno aparece en el proyecto. | Emoción **Esperanza**, con «aceptación» como descriptor del `LevelData`. |
 | D8 | **Nombre de la escena del menú.** Build Settings y código usan `Menu_Inicial`; el Anexo A dice `MainMenu`. | `EditorBuildSettings.asset`, `GameManager.cs`, `Pause.cs`. | Se usa `Menu_Inicial`, y el nombre vive solo en `LevelDatabase` (Fase 5). En la v2 las escenas se crean de cero. |
-| D9 | **Correspondencia de conceptos de jefe.** | `Jefe2 (2).png` es una figura encapuchada azul/cian con esquirlas. `Jefe3 (2).png` es una figura oscura con espada y brillo verde azulado. | Suposición: Jefe2 = Doncella del Lamento (Tristeza), Jefe3 = Espectro del Pavor (Miedo). **Confirmar.** |
+| D9 | **Correspondencia de conceptos de jefe.** | `Jefe2 (2).png` es una figura encapuchada azul/cian con esquirlas. `Jefe3 (2).png` es una figura oscura con espada y brillo verde azulado. | Jefe2 = Doncella del Lamento ✔ (confirmado el 2026-10-08; puede rediseñarse, ver N30). Jefe3 = Espectro del Pavor (Miedo): **sin confirmar.** |
 | D10 | **Tecla E.** En la v1 era el dash. El Anexo A la usa para encender antorchas en el Nivel 3. | `PlayerMovement.cs:121` | Dash en **Shift izquierdo** (acción *Sprint*); E es «interactuar». Invisibilidad en **Q** (acción *Ability*). |
 | D11 | **Idioma de la UI.** El menú está en inglés («Play», «Level Selector», «Configuration», «Exit»); pausa y Game Over mezclan español e inglés. | Textos TMP de las escenas. | Todo en español, con textos en datos. |
 
@@ -520,8 +580,8 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 **Estado en la v2 (v0.32).** Cada mundo tiene su `Dialogos_<Emoción>` en `Assets/Data/Narrativa`
 con las líneas del guion (`Docs/Diseno/Guion.md`): apertura, eco de memoria, antes del jefe (si hay
 jefe) y cierre. La apertura y el cierre nombran la emoción del mundo. Se muestran abajo en el HUD
-(el cierre, en el fin de nivel). Los ecos de memoria ya tienen texto y sonarán con las memorias
-de la Fase 10.
+(el cierre, en el fin de nivel). Los ecos de memoria suenan desde la v0.37 en el primer
+checkpoint de cada nivel (`Checkpoint.ecoDeMemoria`), la primera vez que se toca.
 
 | Asset | Dónde | Formato | Prioridad |
 |---|---|---|---|
@@ -605,8 +665,9 @@ cápsulas tintadas con un color de la paleta de su mundo.
 | Ira | Soldado de lava | ✔ `SoldadoLava` / `Enemigo_SoldadoLava`; el Eco ocupa su sitio en el Nivel 1 | Cápsula naranja | — | P2 |
 | Ira | Golem de Ceniza (mini-jefe, vida 10) | ✔ `GolemCeniza.prefab`, con su arte. Inmune a la lava; los golpes no lo aturden (hiperarmadura) | ✔ Arte final (15 fotogramas) | Opcional: rehacer A2 (el LEEME trae el prompt) | P1 |
 | Ira | Torreta de fuego fija | ✔ Es una mecánica, no un enemigo: `TorretaFuego` / `Mecanicas/TorretaFuego.prefab` (Fase 9) | Bloque oscuro con boca naranja; la bola de fuego es un cuadrado naranja | Sprite de la torreta y de la bola (B10) | P1 |
-| Tristeza | Lamento | ✔ `Lamento` / `Enemigo_Lamento` | Cápsula azul | Ralentizar al jugador al tocarlo (Anexo: «reducen velocidad al contacto»), Fase 10 | P2 |
-| Tristeza | Esculturas Vivientes, Medusas de Hielo | ✗ | ✗ | Movimiento sinusoidal de las medusas (Fase 10) | P2 |
+| Tristeza | Lamento (el Eco de la Tristeza) | ✔ `Lamento` / `Enemigo_Lamento`; tres en el Nivel 2. ✔ Su pesar (v0.38): media velocidad 2 s | Cápsula azul. Su arte sale de editar los fotogramas del Eco (`Prompts_Mundo2.md`, B1): limpios 9 de 12 (Idle 2, Correr 4, Muerte 2 y `a2`) | El ataque (`a1` a `a4`, N30) e integrar el arte | P1 |
+| Tristeza | Escultura Viviente, Medusas de Hielo | ✔ En el Nivel 2: `Enemigo_Escultura` con `EsculturaDormida` (1, desde la v0.39) y `MedusaHielo` (4) | Rectángulo gris que se aclara al despertar; círculo celeste. Su arte está limpio y completo: 14 de la Escultura y 6 de la Medusa | Integrar el arte | P1 |
+| Tristeza | La Plañidera (mini-jefe) | ✔ En el Nivel 2 (v0.39): `Enemigo_Planidera`, con `Planidera` para las esquirlas | Rectángulo azul que se pone cian al apuntar y gris al llorar. Su arte está limpio: 16 fotogramas (`A2`, en otra rejilla) | Las tres esquirlas (N30) e integrar el arte | P1 |
 | Miedo | Espectro | ✔ `Espectro` / `Enemigo_Espectro` (detección en oscuridad) | Cápsula oscura translúcida | Que sea invisible salvo al atacar (Fase 10) | P2 |
 | Miedo | Centinela Ciego | ✔ `CentinelaCiego` / `Enemigo_CentinelaCiego` (detección por ruido) | Cápsula violeta | Tecla de caminar con teclado (N5) | P2 |
 | Culpa | Penitentes, Artilleros (+ proyectil) | ✗ | ✗ | `Proyectil` y cobertura (Fase 10) | P2 |
@@ -672,7 +733,7 @@ rectángulos de color: avisan translúcidos y queman casi opacos.
 | Jefe | Estado | Falta | Prioridad |
 |---|---|---|---|
 | **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Arte integrado en la rama `centinela-arte`, pendiente de tu prueba y de fusionar: los 29 sprites, los 8 clips, su Animator, el combate por eventos del dibujo, la ceniza de D4 con el fragmento que recoge Kael y el menú *Verificar Centinela*. La onda ✔ (v0.32) y la erupción entera ✔ (v0.34) ya tienen arte. Falta: el VFX de la caída del salto y, si quieres, rehacer R2. | P1 |
-| **Doncella del Lamento** (Tristeza) | Esqueleto: datos, prefab y dos fases sin patrones | Patrones de olas, inundación y congelamiento (Fase 10); todas las animaciones. Concepto: `Jefe2 (2).png` en la v1. | P2 |
+| **Doncella del Lamento** (Tristeza) | Esqueleto: datos, prefab y dos fases sin patrones | Patrones de olas, inundación, llanto y congelamiento (fase D del Mundo 2). **Su arte está recibido y limpio, sin importar:** los 28 fotogramas (con el diseño de `jefe2.jpeg`), la ola, el aviso de la inundación, las púas, la capa congelada, el fragmento y las cuatro cinemáticas. Antes de integrarlo: N34 (resolución de las cinemáticas), N35 (la cola cortada) y lo que hay que repetir (N30). | P1 |
 | **Espectro del Pavor** (Miedo) | Esqueleto: casi invisible en combate | Patrón de ataque con destello y clones (Fase 10); animaciones; la partícula que distingue al real. Concepto: `Jefe3 (2).png` en la v1. | P2 |
 | **Juez Silente** (Culpa) | Esqueleto: inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()` | Proyectar las memorias y conectarlas (`MemoryObject`, Fase 10); todo el arte. | P2 |
 | **El Verdadero Soldado** (Final) | Esqueleto: tres fases; no cae sin `CompletarIntegracion()` | Combate espejo, secciones de cada mundo y el plataformeo final (Fase 10); todo el arte (el concepto **no está** en el proyecto). | P2 |
@@ -746,7 +807,7 @@ escena, en ese orden. Un nivel sin escena aparece «en construcción» en el sel
 | `Menu_Inicial` | ✔ generada | ✔ (0) | Fondo y logo (hoy, texto sobre color liso) | P3 |
 | `Niveles` (selector) | ✔ generada | ✔ (1) | Íconos por mundo (B9) | P3 |
 | `Nivel1` (Ira) | ✔ Montada con su recorrido de diseño (v0.32, `DisenoNivel1`): tres secciones pintadas con el tileset, 7 Ecos y el Golem, las mecánicas, checkpoint en x 43 y la arena de 25 × 15 con la Centinela. | ✔ (2) | ✔ Probada por ti (v0.34): solo fallaba la línea del jefe en partida nueva, ya corregida. | P1 |
-| Nivel 2 (Tristeza) | ✗ | ✗ | Escena esqueleto (Fase 10) | P2 |
+| `Nivel2` (Tristeza) | ✔ Montada con su recorrido de diseño (v0.36, `DisenoNivel2`), en bloques de color: agua, hielo, 3 Lamentos, 2 checkpoints y la arena de 25 × 15 con la Doncella sin patrones. ✔ Sus mecánicas (v0.37): tapón rompible, placas flotantes, oxígeno, velo, ecos de intentos y eco de memoria. ✔ Sus enemigos (v0.38 y v0.39): Lamentos que pesan, una Escultura dormida, Medusas y la Plañidera, el mini-jefe. | ✔ (3) | La fase D (la Doncella), el arte y tu prueba (N31). | P1 |
 | Nivel 3 (Miedo) | ✗ | ✗ | idem | P2 |
 | Nivel 4 (Culpa) | ✗ | ✗ | idem | P2 |
 | Nivel 5 (Esperanza) | ✗ | ✗ | idem | P2 |
@@ -761,7 +822,7 @@ de la `LevelDatabase` y ejecuta *Fragmentum → Niveles → Preparar la escena d
 | Nivel | Disponible | Falta |
 |---|---|---|
 | 1 Ira | ✔ **Tileset volcánico de la v2** (`Assets/TileMap/tileset_32.png`): ya viste el Nivel 1 y las escenas de prueba con `PintorEscenario` (ladrillo, vigas, estatua, braseros, cadenas y escombros). Su versión grande con fondo negro está en `Tesis/TileMap Nivel 1`. En la v1: tiles de lava (`Tiles/LavaTile set`, `Tiles/freelavatileset-Sheet`) y `Starter Tiles Platformer/FireSet` | ✔ **Parallax volcánico de 6 capas** en `Assets/Sprites/Fondos/Mundo1Ira` (cielo, montañas, fortaleza, muro, catarata y primer plano), montado en `FondoMundo1.prefab`. ~ **Remates del muro** (opcional; el fondo está aprobado, N14): los extremos de cada tramo son un corte recto. ✗ Sprite de plataforma de basalto inestable (candidato: `Pixel Adventure 1/Traps/Falling Platforms`). |
-| 2 Tristeza | ✔ `Starter Tiles Platformer/IceSet`, `tileset/Tilemaps/rock_ice*.aseprite`, `Pixel Adventure 1/Traps/Sand Mud Ice` | ✗ Ciudad sumergida, corriente y superficie helada (parallax). ✗ Burbuja de oxígeno (UI). |
+| 2 Tristeza | ✔ `Starter Tiles Platformer/IceSet`, `tileset/Tilemaps/rock_ice*.aseprite`, `Pixel Adventure 1/Traps/Sand Mud Ice` | ~ **Recibido y limpio, sin importar** (`Tesis/Imagenes/limpios/Mundo2/`): el tileset y la decoración (falta cortarlos), siete capas de parallax (cielo, ciudad lejana, torre, fondo submarino, ciudad hundida y dos primeros planos; la torre hay que repetirla y las dos ciudades no casan por los bordes), la superficie del agua, las burbujas y la burbuja de oxígeno del HUD. ✗ El tapón de hielo rompible (N30). |
 | 3 Miedo | ✔ Parallax `TileMap/Forest` (*demon woods*, 4 capas), tileset de pantano `TileMap/ParallaxVideo`, antorcha animada (`Top Down Lava…/Torch ( No Light )`, 7 frames), URP 2D con `Light2D` ya activo | ✗ Raíces y ramas. ✗ Partícula de «ruido» del sigilo. |
 | 4 Culpa | ~ `Starter Tiles Platformer/DarkCastle` | ✗ Tierra quemada, escombros, tanques volcados. ✗ **Barril explosivo** (`Explodable`). ✗ Objetos de memoria. ✗ Marcas proyectadas en el suelo. |
 | 5 Esperanza | ✔ Fondos `TileMap/Naturaleza` (nature_1…8), `TileMap/Sky-Place`, `Tilemap2/Free Pixel Art Hill`, `BasicGreenTiles` | ✗ Musgo, flores y partículas flotantes (un Particle System puede servir sin arte). |
@@ -816,9 +877,9 @@ ningún clip importado en la v2.
 | Salida del nivel | `SalidaNivel` (Fase 6) | Provisional: un portal translúcido del color de acento. Falta decidir su aspecto; en los niveles con jefe (Fase 7) puede bastar la puerta de la arena. | P2 |
 | VFX del ataque cargado | modificador de `ATTACK` | ✗ | P1 |
 | Estela del dash | `DASH` | ✗ | P3 |
-| Material semitransparente de la sombra de eco | `EchoRecorder` | ✗ (sirve un `SpriteRenderer` con alfa) | P2 |
-| Fade a blanco (oxígeno agotado) | `UnderwaterZone` | Sin arte | — |
-| Volumen de post-procesado submarino | `UnderwaterZone` | URP instalado; falta el perfil | P2 |
+| Material semitransparente de la sombra de eco | `EcoDeIntentos` | ✔ No hace falta: la sombra es un `SpriteRenderer` translúcido con los fotogramas de Kael (v0.37). | — |
+| Fade a blanco (oxígeno agotado) | `OxigenoJugador` | Sustituido (v0.37): sin aire se pierde un corazón cada 2 s y la barra de aire parpadea en rojo. | — |
+| Volumen de post-procesado submarino | `IndicadorAgua` | ✔ Sustituido por el velo del HUD (v0.37): la viñeta de la interfaz en azul, sin perfil de URP. | — |
 | Barril explosivo + explosión | `Explodable` | ✗ | P2 |
 | Superficie de hielo | `IceSurface` | ✔ `IceSet` (falta un `PhysicsMaterial2D` de fricción 0,1) | P2 |
 
@@ -842,6 +903,10 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.39 (2026-10-10)** — Mundo 2, fase C cerrada: la Plañidera, el mini-jefe, en la plaza helada. Las 121 imágenes del Mundo 2, limpias. N32 resuelto; N30 reescrito con lo que falta; nuevos N34 (resolución de las cinemáticas) y N35 (la cola de la Doncella).
+- **0.38 (2026-10-09)** — Mundo 2, fase C: el pesar del Lamento, las Esculturas dormidas y las Medusas. Nuevos N32 (dónde va la Plañidera) y N33 (tamaño de la placa).
+- **0.37 (2026-10-08)** — Mundo 2, fase B: el tapón de hielo, las placas flotantes, el oxígeno, el velo, los ecos de intentos y el eco de memoria.
+- **0.36 (2026-10-08)** — El Mundo 2 tiene diseño y su fase A: el Nivel 2 montado en bloques de color. Nuevos N30 (las imágenes) y N31 (juega el nivel).
 - **0.34 (2026-10-08)** — Respuestas a la prueba del Nivel 1 montado: la línea de la Centinela en partida nueva, la erupción completa, Kael agachado a 1,08 u y `CinematicaFinalLvl2` retocada. Resueltos N25, N26, N27, N28 y N29.
 - **0.33 (2026-10-07)** — La v0.32, confirmada en `nivel1-montado`. La erupción quema con su columna dibujada (E3 y E4); N27 pide el aviso, el brote y el colapso. Kael se agacha y muere con su arte; nuevos N28 (altura agachado) y N29 (pie de `Morir`). N3 y B3 al día.
 - **0.32 (2026-10-07)** — Nivel 1 montado con su recorrido de diseño, guion cargado y la onda de la Centinela con arte. N10 y N11 resueltos; nuevos N26 (juega el nivel) y N27 (erupciones); N19 ampliado.

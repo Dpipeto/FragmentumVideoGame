@@ -28,12 +28,14 @@ namespace Fragmentum.EditorTools
     /// - el Golem de Ceniza con su arte en lugar del provisional;
     /// - en el Nivel 1, el <b>recorrido de diseño</b> (<see cref="DisenoNivel1"/>) en lugar del
     ///   provisional: es lo único que borra, y solo la primera vez (lo provisional y lo que se colocó
-    ///   para él: su escenario pintado, el checkpoint, la salida y la arena).
+    ///   para él: su escenario pintado, el checkpoint, la salida y la arena);
+    /// - en el Nivel 2, el suyo (<see cref="DisenoNivel2"/>), que se vuelve a montar entero cuando
+    ///   cambia su versión (<c>PreparadorNivelTristeza.cs</c>).
     ///
     /// Es idempotente: ejecutarla otra vez sobre una escena preparada no cambia nada, y la
     /// escena solo se guarda si cambió.
     /// </summary>
-    public static class PreparadorNivel
+    public static partial class PreparadorNivel
     {
         public const string NombreRaiz = "Nivel";
         public const string NombreProvisional = "Provisional (bórralo al pintar el nivel)";
@@ -169,6 +171,15 @@ namespace Fragmentum.EditorTools
                 cambios = true;
             }
 
+            // 1b. El recorrido de diseño del Nivel 2 (DisenoNivel2), ya con el LevelManager hecho:
+            //     coloca también el inicio, los checkpoints, la salida, la arena y la zona mortal, así
+            //     que los pasos de abajo no los crean. Se vuelve a montar si cambia su versión.
+            if (DisenoNivel2.EsDe(nivel) && !RecorridoNivel2AlDia(escena))
+            {
+                MontarRecorridoNivel2(escena, nivel, raiz);
+                cambios = true;
+            }
+
             // 2. Checkpoints.
             if (Buscar<Checkpoint>(escena) == null)
             {
@@ -244,6 +255,9 @@ namespace Fragmentum.EditorTools
             // 10. El Golem de Ceniza sin arte (la cápsula de la Fase 4) se sustituye por el que lo
             //     tiene, en su sitio y con su ruta de patrulla.
             cambios |= ConstructorGolem.SustituirGolemsSinArte(escena) > 0;
+
+            // 11. El eco de memoria del guion, en el primer checkpoint del nivel.
+            cambios |= AsegurarEcoDeMemoria(escena, nivel);
 
             return cambios;
         }
@@ -630,7 +644,7 @@ namespace Fragmentum.EditorTools
 
         // --- Piezas ---
 
-        private static void CrearCheckpoint(Transform padre, string id, float x, LevelData nivel, float suelo = AlturaSuelo)
+        private static Checkpoint CrearCheckpoint(Transform padre, string id, float x, LevelData nivel, float suelo = AlturaSuelo)
         {
             var objeto = new GameObject(id) { tag = GameTags.Checkpoint };
             objeto.transform.SetParent(padre, false);
@@ -649,6 +663,30 @@ namespace Fragmentum.EditorTools
             Asignar(checkpoint, "id", p => p.stringValue = id);
             Asignar(checkpoint, "indicador", p => p.objectReferenceValue = pano.GetComponent<SpriteRenderer>());
             Asignar(checkpoint, "colorActivo", p => p.colorValue = nivel.ColorAcento);
+            return checkpoint;
+        }
+
+        /// <summary>El id del checkpoint donde suena el eco de memoria del nivel: el primero.</summary>
+        public static string CheckpointDelEcoDeMemoria(LevelData nivel) => $"L{nivel.id}_CP1";
+
+        // El eco de memoria del guion suena en el primer checkpoint de cada nivel. Solo cambia el
+        // checkpoint si aún no lo tiene marcado.
+        private static bool AsegurarEcoDeMemoria(Scene escena, LevelData nivel)
+        {
+            var id = CheckpointDelEcoDeMemoria(nivel);
+            foreach (var raiz in escena.GetRootGameObjects())
+            {
+                foreach (var checkpoint in raiz.GetComponentsInChildren<Checkpoint>(true))
+                {
+                    if (checkpoint.Id == id && !checkpoint.EcoDeMemoria)
+                    {
+                        Asignar(checkpoint, "ecoDeMemoria", p => p.boolValue = true);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static void CrearSalida(Transform padre, float x, LevelData nivel, float suelo = AlturaSuelo)

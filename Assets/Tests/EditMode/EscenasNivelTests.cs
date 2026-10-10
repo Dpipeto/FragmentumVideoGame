@@ -67,6 +67,7 @@ namespace Fragmentum.Tests
             Assert.AreEqual(DisenoNivel1.SueloEn(DisenoNivel1.Checkpoint) + 0.05f, checkpoints[0].transform.position.y, 0.01f, "De pie en el suelo, no en el aire.");
             Assert.IsTrue(checkpoints[0].CompareTag(GameTags.Checkpoint));
             Assert.IsTrue(checkpoints[0].GetComponent<Collider2D>().isTrigger);
+            Assert.IsTrue(checkpoints[0].EcoDeMemoria, "Ahí suena el eco de memoria de la Ira («Una voz grita órdenes…»).");
         }
 
         [Test]

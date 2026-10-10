@@ -250,9 +250,11 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarReal(2f);
             Assert.AreEqual(ESTADOS_JUEGO.LEVEL_COMPLETE, Juego.EstadoActual, "Con pantalla, el fin de nivel espera al jugador.");
 
+            // Continuar lleva al mundo siguiente, que ya tiene escena.
             ContinuarDesdeFinDeNivel();
-            yield return EsperarEstado(ESTADOS_JUEGO.LEVEL_SELECT, 6f);
-            Assert.IsFalse(Interfaz.Hud.gameObject.activeSelf, "Fuera de los niveles no hay HUD.");
+            yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 8f);
+            Assert.AreSame(BaseDeDatos.niveles[1], Gestor.NivelActual, "Tras la Ira, la Tristeza.");
+            Assert.IsTrue(Interfaz.Hud.gameObject.activeSelf, "En el Nivel 2 vuelve el HUD.");
         }
 
         [UnityTest]

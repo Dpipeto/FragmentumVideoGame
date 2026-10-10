@@ -117,6 +117,12 @@ namespace Fragmentum.EditorTools
 
                 raiz.AddComponent<PlayerAbilities>();
 
+                // El aire bajo el agua (mundo de la Tristeza): fuera del agua no hace nada.
+                raiz.AddComponent<OxigenoJugador>();
+
+                // El pesar que deja el Lamento (Tristeza): media velocidad 2 s tras su golpe.
+                raiz.AddComponent<Pesadumbre>();
+
                 var input = raiz.AddComponent<FuenteInputJugador>();
                 var acciones = AssetDatabase.LoadMainAssetAtPath(RutaAccionesInput);
                 if (acciones == null)

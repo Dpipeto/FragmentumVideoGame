@@ -59,5 +59,52 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5836579621604681419, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3228964238068660396}
   m_SourcePrefab: {fileID: 100100000, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+--- !u!1 &3422258153952738231 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5836579621604681419, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 9187905737560333692}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3228964238068660396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422258153952738231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c9d766c853aca84f957fd81a16e5070, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Enemies.Pesar
+  golpes:
+  - {fileID: 4236694321709853235}
+  - {fileID: 3851408441277061572}
+  duracion: 2
+  factorVelocidad: 0.5
+--- !u!114 &3851408441277061572 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5400673593464718520, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 9187905737560333692}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 498b164808b890248beca0690a02d9b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Core.Combate.Hitbox
+--- !u!114 &4236694321709853235 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4992869791940261711, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 9187905737560333692}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 498b164808b890248beca0690a02d9b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Core.Combate.Hitbox

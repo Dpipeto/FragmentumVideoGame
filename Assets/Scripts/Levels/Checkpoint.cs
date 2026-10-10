@@ -29,6 +29,9 @@ namespace Fragmentum.Levels
         [SerializeField] private Color colorInactivo = new Color(0.55f, 0.55f, 0.6f, 1f);
         [SerializeField] private Color colorActivo = new Color(1f, 0.75f, 0.3f, 1f);
 
+        [Tooltip("Al tocarlo por primera vez, Kael dice la línea «eco de memoria» de los diálogos del nivel.")]
+        [SerializeField] private bool ecoDeMemoria;
+
         private CheckpointManager _gestor;
         private bool _avisadoSinGestor;
 
@@ -41,6 +44,9 @@ namespace Fragmentum.Levels
         public Vector2 PuntoReaparicion => puntoReaparicion != null ? (Vector2)puntoReaparicion.position : (Vector2)transform.position;
 
         public bool Activo { get; private set; }
+
+        /// <summary>¿Suena aquí el eco de memoria del nivel? (Lo dice el <see cref="LevelManager"/>.)</summary>
+        public bool EcoDeMemoria => ecoDeMemoria;
 
         internal void Vincular(CheckpointManager gestor) => _gestor = gestor;
 

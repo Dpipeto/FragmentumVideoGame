@@ -13,7 +13,8 @@ namespace Fragmentum.EditorTools
     /// <summary>
     /// Prefabs de las mecánicas del mundo de la Ira (Anexo A) en <c>Assets/Prefabs/Mecanicas</c>,
     /// con su arte (<see cref="ConstructorMecanicas"/>): plataforma inestable, plataforma de
-    /// combustión, lava, torreta de fuego y la bola de la torreta. Son las piezas que se
+    /// combustión, lava, torreta de fuego y la bola de la torreta. Y las del mundo de la Tristeza,
+    /// todavía sin arte: la placa de hielo flotante y el hielo rompible. Son las piezas que se
     /// arrastran al pintar un nivel, y las que coloca el preparador de escenas.
     ///
     /// - <b>Pivotes donde se pisa:</b> el de cada pieza es el de su arte (<see cref="TablaArte"/>):
@@ -37,6 +38,16 @@ namespace Fragmentum.EditorTools
         public const string TorretaFuego = "TorretaFuego";
         public const string BolaDeFuego = "BolaDeFuego";
 
+        // Las del mundo de la Tristeza (todavía sin arte).
+        public const string PlataformaFlotante = "PlataformaFlotante";
+        public const string HieloRompible = "HieloRompible";
+
+        /// <summary>La placa flotante: 2,5 u de ancho y 0,5 de grueso, con el pivote en la superficie.</summary>
+        public static readonly Vector2 TamanoPlaca = new Vector2(2.5f, 0.5f);
+
+        /// <summary>El tapón de hielo rompible: tapa un hueco de 2 u y asoma 1,25 u sobre el suelo (pivote arriba).</summary>
+        public static readonly Vector2 TamanoTapon = new Vector2(2f, 2.25f);
+
         /// <summary>Orden de dibujo de las piezas: detrás de los tiles del suelo (0) y de su decoración (-1).</summary>
         public const int OrdenDibujo = -2;
 
@@ -46,7 +57,7 @@ namespace Fragmentum.EditorTools
         /// <summary>Radio de la bola de fuego (provisional hasta que llegue su arte).</summary>
         public const float RadioBola = 0.3f;
 
-        [MenuItem("Fragmentum/Niveles/Crear prefabs de mecánicas (Ira)", priority = 133)]
+        [MenuItem("Fragmentum/Niveles/Crear prefabs de mecánicas (Ira y Tristeza)", priority = 133)]
         public static void MenuCrearPrefabs() => CrearPrefabs();
 
         public static bool CrearPrefabs()
@@ -59,6 +70,8 @@ namespace Fragmentum.EditorTools
             ok &= Guardar(PlataformaCombustion, CrearPlataformaCombustion);
             ok &= Guardar(Lava, CrearLava);
             ok &= Guardar(TorretaFuego, CrearTorreta);
+            ok &= Guardar(PlataformaFlotante, CrearPlataformaFlotante);
+            ok &= Guardar(HieloRompible, CrearHieloRompible);
             if (ok)
             {
                 Debug.Log($"[Fragmentum] Prefabs de mecánicas creados en {Carpeta}.");
@@ -242,6 +255,76 @@ namespace Fragmentum.EditorTools
             Asignar(componente, "boca", p => p.objectReferenceValue = boca);
             Asignar(componente, "bola", p => p.objectReferenceValue = Cargar(BolaDeFuego)?.GetComponent<Proyectil>());
             return raiz;
+        }
+
+        // --- Mundo de la Tristeza (sin arte: un rectángulo del tamaño de la pieza) ---
+
+        /// <summary>
+        /// La placa de hielo que sube y baja. Lleva encima su franja de hielo (un trigger hijo con
+        /// <see cref="ZonaModificadorMovimiento"/>), que se mueve con ella: si se llega corriendo, se resbala.
+        /// </summary>
+        private static GameObject CrearPlataformaFlotante()
+        {
+            var raiz = Raiz(PlataformaFlotante, Capa(Capas.Suelo), GameTags.IcePlatform);
+            var cuerpo = raiz.AddComponent<Rigidbody2D>();
+            cuerpo.bodyType = RigidbodyType2D.Kinematic;
+            cuerpo.interpolation = RigidbodyInterpolation2D.Interpolate;
+            var caja = raiz.AddComponent<BoxCollider2D>();
+            caja.size = TamanoPlaca;
+            caja.offset = new Vector2(0f, -TamanoPlaca.y * 0.5f);
+
+            var hielo = new GameObject("Hielo");
+            hielo.transform.SetParent(raiz.transform, false);
+            var franja = hielo.AddComponent<BoxCollider2D>();
+            franja.isTrigger = true;
+            franja.size = new Vector2(TamanoPlaca.x, 0.5f);
+            franja.offset = new Vector2(0f, 0.25f);
+            var zona = hielo.AddComponent<ZonaModificadorMovimiento>();
+            Asignar(zona, "tipo", p => p.enumValueIndex = (int)ZonaModificadorMovimiento.TIPOS.HIELO);
+
+            Provisional(raiz.transform, Rect.MinMaxRect(-TamanoPlaca.x * 0.5f, -TamanoPlaca.y, TamanoPlaca.x * 0.5f, 0f), Hex("B4D2E6"), "la placa de hielo flotante");
+            raiz.AddComponent<Levels.Mecanicas.PlataformaFlotante>();
+            return raiz;
+        }
+
+        /// <summary>
+        /// El tapón de hielo que solo rompe el Ataque Cargado. El cuerpo se pisa (capa del suelo);
+        /// la zona de golpe, igual de grande, está en la capa Enemy: es la que nota la espada.
+        /// </summary>
+        private static GameObject CrearHieloRompible()
+        {
+            var raiz = Raiz(HieloRompible, Capa(Capas.Suelo), GameTags.IcePlatform);
+            var centro = new Vector2(0f, -TamanoTapon.y * 0.5f);
+            var caja = raiz.AddComponent<BoxCollider2D>();
+            caja.size = TamanoTapon;
+            caja.offset = centro;
+
+            var golpe = new GameObject("ZonaDeGolpe") { layer = Capa(Capas.Enemy) };
+            golpe.transform.SetParent(raiz.transform, false);
+            var zonaGolpe = golpe.AddComponent<BoxCollider2D>();
+            zonaGolpe.size = TamanoTapon;
+            zonaGolpe.offset = centro;
+
+            var dibujo = Provisional(raiz.transform, Rect.MinMaxRect(-TamanoTapon.x * 0.5f, -TamanoTapon.y, TamanoTapon.x * 0.5f, 0f), Hex("BFD9F2"), "el hielo rompible");
+            var componente = raiz.AddComponent<Levels.Mecanicas.HieloRompible>();
+            Asignar(componente, "visual", p => p.objectReferenceValue = dibujo);
+            Asignar(componente, "zonaDeGolpe", p => p.objectReferenceValue = zonaGolpe);
+            return raiz;
+        }
+
+        /// <summary>El rectángulo provisional de una pieza sin arte, y el aviso de lo que falta.</summary>
+        private static SpriteRenderer Provisional(Transform padre, Rect zona, Color color, string pieza)
+        {
+            Debug.LogWarning($"[Fragmentum] Todavía no hay arte para {pieza}: el prefab lleva un rectángulo provisional (Docs/Diseno/Prompts_Mundo2.md).");
+            var objeto = new GameObject("Sprite") { layer = padre.gameObject.layer };
+            objeto.transform.SetParent(padre, false);
+            objeto.transform.localPosition = zona.center;
+            objeto.transform.localScale = new Vector3(zona.width, zona.height, 1f);
+            var dibujo = objeto.AddComponent<SpriteRenderer>();
+            dibujo.sprite = SpriteCuadrado;
+            dibujo.color = color;
+            dibujo.sortingOrder = OrdenDibujo;
+            return dibujo;
         }
 
         // --- Utilidades ---

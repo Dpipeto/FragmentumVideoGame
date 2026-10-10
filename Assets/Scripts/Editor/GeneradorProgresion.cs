@@ -30,6 +30,7 @@ namespace Fragmentum.EditorTools
         public const string RutaEscenaMenu = "Assets/Scenes/Menu_Inicial.unity";
         public const string RutaEscenaSelector = "Assets/Scenes/Niveles.unity";
         public const string RutaEscenaNivel1 = "Assets/Scenes/Nivel1.unity";
+        public const string RutaEscenaNivel2 = "Assets/Scenes/Nivel2.unity";
         public const string RutaSistemas = "Assets/Resources/Sistemas.prefab";
         public const string RutaGuiaMecanicas = "Assets/Data/Habilidades/GuiaMecanicas.asset";
 
@@ -98,6 +99,9 @@ namespace Fragmentum.EditorTools
             // Primero las escenas: la base de datos las referencia.
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaMenu) == null) CrearEscenaMenu(false);
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaSelector) == null) CrearEscenaSelector(false);
+
+            // La escena del Nivel 2 se crea vacía (cámara y luz); su recorrido lo monta PreparadorNivel.
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaNivel2) == null) CrearEscenaNivel(RutaEscenaNivel2);
             var bd = GenerarDatos(false);
 
             // Cinemáticas, diálogos y registro emocional (Fase 8): antes del prefab, que los usa.
@@ -167,7 +171,8 @@ namespace Fragmentum.EditorTools
                     Seccion("Sección 2", 25, 55, "Plataformeo sobre lava y plataformas de combustión. 4 Ecos de la Ira y el Golem de Ceniza. Checkpoint en x = 43."),
                     Seccion("Arena del jefe", 55, 80, "Sala cerrada de 25 × 15 u con plataformas a 3 alturas. La lava brota en las erupciones; el suelo es firme."))),
 
-                Asset<LevelData>("Niveles/L2_Tristeza", sobrescribir, n => Nivel(n, 2, null, "Ciudad Sumergida", tristeza, 3,
+                // El recorrido montado está en DisenoNivel2 (Docs/Diseno/Nivel2_Diseno.md).
+                Asset<LevelData>("Niveles/L2_Tristeza", sobrescribir, n => Nivel(n, 2, RutaEscenaNivel2, "Ciudad Sumergida", tristeza, 3,
                     "Pérdida, melancolía. El nivel es deliberadamente lento y pesado.",
                     new[] { "1E3A5F", "4A7FA5", "2C3E50", "E8EEF4" }, doncella, fTristeza, dash, new ReglasNivel(),
                     Seccion("Sección 1", 0, 30, "Sobre el hielo: suelo resbaladizo y plataformas flotantes. 3 Lamentos y 2 Esculturas Vivientes."),
@@ -206,7 +211,10 @@ namespace Fragmentum.EditorTools
             // checkpoints previstos por el Anexo A. Son campos de la Fase 6: en los assets que ya
             // existían se completan sin pisar lo que se haya editado a mano.
             Completar(niveles[0], "FF6B35", "la rabia consume al que la niega", DisenoNivel1.Checkpoint);
-            Completar(niveles[1], "00D4FF", "el dolor también es parte del yo");
+            Completar(niveles[1], "00D4FF", "el dolor también es parte del yo", Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
+
+            // Los niveles cuya escena llegó después de crear su asset: se les asigna sin tocar lo demás.
+            AsignarEscenaSiFalta(niveles[1], RutaEscenaNivel2);
             Completar(niveles[2], "7FE0B0", "lo que ocultas en la sombra crece");
             Completar(niveles[3], "C9A567", "el peso del ayer no define el mañana");
             Completar(niveles[4], "FFE4A0", "respira. el camino continúa");
@@ -375,6 +383,38 @@ namespace Fragmentum.EditorTools
         {
             var asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(ruta);
             return asset != null ? ReferenciaEscena.Desde(asset) : new ReferenciaEscena();
+        }
+
+        private static void AsignarEscenaSiFalta(LevelData n, string ruta)
+        {
+            if ((n.escena == null || !n.escena.Asignada) && AssetDatabase.LoadAssetAtPath<SceneAsset>(ruta) != null)
+            {
+                n.escena = Escena(ruta);
+                EditorUtility.SetDirty(n);
+            }
+        }
+
+        // --- Escenas de nivel ---
+
+        /// <summary>
+        /// La escena vacía de un nivel, desde la plantilla URP 2D (cámara y Global Light 2D). Lo demás
+        /// lo pone <see cref="PreparadorNivel"/>. Si ya existe, no se toca.
+        /// </summary>
+        public static void CrearEscenaNivel(string ruta)
+        {
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ruta) != null)
+            {
+                return;
+            }
+
+            var creada = CrearEscenaDesdePlantilla(ruta, false);
+            if (creada == null)
+            {
+                return;
+            }
+
+            EditorSceneManager.SaveScene(creada.Value, ruta);
+            Debug.Log($"[Fragmentum] Escena de nivel creada: {ruta}.");
         }
 
         // --- Build Settings ---

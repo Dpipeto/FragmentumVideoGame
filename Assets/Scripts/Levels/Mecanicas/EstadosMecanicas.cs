@@ -48,4 +48,20 @@ namespace Fragmentum.Levels.Mecanicas
         /// <summary>Encendida: la llama. Es la única que hace daño.</summary>
         BURNING
     }
+
+    /// <summary>
+    /// El hielo rompible del mundo de la Tristeza. Cada valor será el del parámetro <c>Estado</c>
+    /// de su Animator cuando tenga arte (Intacto, Agrietado y Roto).
+    /// </summary>
+    public enum ESTADOS_HIELO
+    {
+        /// <summary>Intacto: tapa el paso, con la grieta naranja.</summary>
+        INTACT,
+
+        /// <summary>Agrietado: un golpe normal lo resquebraja, pero sigue tapando el paso.</summary>
+        CRACKED,
+
+        /// <summary>Roto: el Ataque Cargado lo parte y deja el hueco abierto.</summary>
+        BROKEN
+    }
 }

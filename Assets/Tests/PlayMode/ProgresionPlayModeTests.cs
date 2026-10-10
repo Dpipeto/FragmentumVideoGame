@@ -48,10 +48,12 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual(ESTADOS_JUEGO.LEVEL_COMPLETE, Juego.EstadoActual);
             Assert.AreEqual(0f, Time.timeScale, "El fin de nivel detiene el tiempo.");
 
-            // La pantalla de fin de nivel espera al jugador; el nivel 2 no tiene escena → selector.
+            // La pantalla de fin de nivel espera al jugador; el Nivel 2 tiene escena → se juega.
             Assert.IsTrue(Interfaz.PantallaFinNivel.Visible);
             ContinuarDesdeFinDeNivel();
-            yield return EsperarEstado(ESTADOS_JUEGO.LEVEL_SELECT, 8f);
+            yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 8f);
+            Assert.AreEqual(bd.niveles[1].escena.Nombre, SceneManager.GetActiveScene().name, "Tras la Ira llega la Tristeza.");
+            Assert.AreSame(bd.niveles[1], Gestor.NivelActual);
 
             Assert.AreEqual(2, Gestor.Datos.nivelMaximoAlcanzado);
             CollectionAssert.Contains(Gestor.Datos.fragmentos, "IRA");
@@ -62,9 +64,16 @@ namespace Fragmentum.Tests.PlayMode
             CollectionAssert.Contains(enDisco.nivelesCompletados, 1);
             CollectionAssert.Contains(enDisco.fragmentos, "IRA");
 
+            // Con el tercer mundo desbloqueado (solo en memoria), el selector lo enseña «en construcción».
+            Gestor.Datos.nivelMaximoAlcanzado = 3;
+            Assert.IsTrue(Juego.Pausar());
+            Assert.IsTrue(Juego.IrAlSelector());
+            yield return EsperarEstado(ESTADOS_JUEGO.LEVEL_SELECT, 8f);
+
             selector = Object.FindAnyObjectByType<SelectorNivel>();
-            Assert.IsFalse(selector.Botones[1].interactable, "Desbloqueado pero sin escena: no se puede pulsar.");
-            StringAssert.Contains("En construcción", Etiqueta(selector.Botones[1]));
+            Assert.IsTrue(selector.Botones[1].interactable, "Desbloqueado y con escena: se puede jugar.");
+            Assert.IsFalse(selector.Botones[2].interactable, "Desbloqueado pero sin escena: no se puede pulsar.");
+            StringAssert.Contains("En construcción", Etiqueta(selector.Botones[2]));
             StringAssert.Contains("Fragmento integrado", Etiqueta(selector.Botones[0]));
         }
 
@@ -88,7 +97,8 @@ namespace Fragmentum.Tests.PlayMode
         [UnityTest]
         public IEnumerator NivelSinEscenaOBloqueado_NoSeCargaNiRompeNada()
         {
-            Assert.IsFalse(Juego.JugarNivel(BaseDeDatos.niveles[1]), "Nivel sin escena: «en construcción».");
+            Assert.IsFalse(Juego.JugarNivel(BaseDeDatos.niveles[1]), "Nivel bloqueado en una partida nueva.");
+            Assert.IsFalse(Juego.JugarNivel(BaseDeDatos.niveles[2]), "Nivel sin escena: «en construcción».");
             Assert.IsFalse(Juego.JugarNivel(BaseDeDatos.niveles[5]), "El final no se abre desde el principio.");
             Assert.IsFalse(SceneLoader.PuedeCargar("Level2"), "Los nombres de la v1 no existen.");
 
@@ -105,7 +115,7 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsTrue(Juego.ContinuarPartida());
             yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 5f);
 
-            Assert.AreSame(Nivel1, Gestor.NivelActual, "Solo el Nivel 1 tiene escena todavía.");
+            Assert.AreSame(BaseDeDatos.niveles[1], Gestor.NivelActual, "El tercer mundo no tiene escena: se continúa en el segundo.");
         }
 
         [UnityTest]

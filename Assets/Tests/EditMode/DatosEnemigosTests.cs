@@ -55,7 +55,7 @@ namespace Fragmentum.Tests
         public void SoloElGolemDeCeniza_EsInmuneALaLava()
         {
             Assert.IsTrue(Cargar("GolemCeniza").inmuneALava, "Decisión del diseño (PENDIENTES N9): el Golem no muere en la lava.");
-            foreach (var otro in new[] { "Generico", "SoldadoLava", "EcoIra", "Lamento", "Espectro", "CentinelaCiego" })
+            foreach (var otro in new[] { "Generico", "SoldadoLava", "EcoIra", "Lamento", "Escultura", "Planidera", "Espectro", "CentinelaCiego" })
             {
                 Assert.IsFalse(Cargar(otro).inmuneALava, $"{otro} sí muere en la lava.");
             }

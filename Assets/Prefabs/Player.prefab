@@ -146,6 +146,8 @@ GameObject:
   - component: {fileID: 7080754652132862450}
   - component: {fileID: 7013788726992291539}
   - component: {fileID: 4583511138702443616}
+  - component: {fileID: 4772881119654288434}
+  - component: {fileID: 5742908139482173402}
   - component: {fileID: 5774138641941576969}
   - component: {fileID: 7821389913373255066}
   - component: {fileID: 1365898330069885673}
@@ -324,6 +326,37 @@ MonoBehaviour:
   ventanaCargaSoltada: 0.25
   duracionInvisibilidad: 3
   cooldownInvisibilidad: 8
+--- !u!114 &4772881119654288434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8058499528671777402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b270059d857d9e446b9e30e60d0433af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Player.OxigenoJugador
+  capacidad: 15
+  recargaPorSegundo: 15
+  intervaloAsfixia: 2
+  motor: {fileID: 0}
+  vida: {fileID: 0}
+--- !u!114 &5742908139482173402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8058499528671777402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57fcac7e6323bc442b05ebafd94d8add, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Player.Pesadumbre
+  motor: {fileID: 0}
+  vida: {fileID: 0}
 --- !u!114 &5774138641941576969
 MonoBehaviour:
   m_ObjectHideFlags: 0
