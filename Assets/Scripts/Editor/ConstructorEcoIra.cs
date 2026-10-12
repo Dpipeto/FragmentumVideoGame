@@ -706,11 +706,20 @@ namespace Fragmentum.EditorTools
         /// Brasas y ceniza que salen de la cavidad del pecho al acabar la muerte: cuadrados de 2 a
         /// 3 píxeles del Eco, en una sola ráfaga.
         /// </summary>
-        private static ParticleSystem CrearEstallido(Transform pivote, int capa, Material material)
+        private static ParticleSystem CrearEstallido(Transform pivote, int capa, Material material) =>
+            CrearEstallido(pivote, capa, material, Pecho, ColorBrasa, ColorCeniza, PixelDeArte, 0.12f);
+
+        /// <summary>
+        /// El mismo estallido para los demás Ecos, con sus colores: sale de <paramref name="pecho"/>
+        /// (desde los pies y mirando a la derecha), en cuadrados de 2 a 3 veces
+        /// <paramref name="pixel"/>, y cae con <paramref name="gravedad"/>.
+        /// </summary>
+        public static ParticleSystem CrearEstallido(Transform pivote, int capa, Material material, Vector2 pecho, Color colorA, Color colorB,
+            float pixel, float gravedad)
         {
             var objeto = new GameObject("Pecho") { layer = capa };
             objeto.transform.SetParent(pivote, false);
-            objeto.transform.localPosition = Pecho;
+            objeto.transform.localPosition = pecho;
 
             var sistema = objeto.AddComponent<ParticleSystem>();
             sistema.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -721,9 +730,9 @@ namespace Fragmentum.EditorTools
             principal.playOnAwake = false;
             principal.startLifetime = new ParticleSystem.MinMaxCurve(0.45f, 0.9f);
             principal.startSpeed = new ParticleSystem.MinMaxCurve(0.8f, 2.4f);
-            principal.startSize = new ParticleSystem.MinMaxCurve(2f * PixelDeArte, 3f * PixelDeArte);
-            principal.startColor = new ParticleSystem.MinMaxGradient(ColorBrasa, ColorCeniza);
-            principal.gravityModifier = 0.12f;
+            principal.startSize = new ParticleSystem.MinMaxCurve(2f * pixel, 3f * pixel);
+            principal.startColor = new ParticleSystem.MinMaxGradient(colorA, colorB);
+            principal.gravityModifier = gravedad;
             principal.simulationSpace = ParticleSystemSimulationSpace.World;
             principal.maxParticles = 40;
             principal.stopAction = ParticleSystemStopAction.Destroy;

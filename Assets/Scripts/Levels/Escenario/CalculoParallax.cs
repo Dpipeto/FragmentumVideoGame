@@ -34,7 +34,14 @@ namespace Fragmentum.Levels.Escenario
         /// texturas de distinto ancho y la misma velocidad se mueven igual en pantalla.
         /// </summary>
         public static float OffsetTextura(float camaraX, float velocidad, float anchoTextura, float anchoCapa) =>
-            anchoTextura <= 0f ? 0f : Mathf.Repeat((camaraX * velocidad - anchoCapa * 0.5f) / anchoTextura, 1f);
+            OffsetTextura(camaraX, velocidad, anchoTextura, anchoCapa, 1f);
+
+        /// <summary>
+        /// Lo mismo para una textura que tarda <paramref name="periodo"/> anchos en volver a empezar:
+        /// 1 si se repite tal cual y 2 si se repite en espejo (una copia al derecho y otra al revés).
+        /// </summary>
+        public static float OffsetTextura(float camaraX, float velocidad, float anchoTextura, float anchoCapa, float periodo) =>
+            anchoTextura <= 0f ? 0f : Mathf.Repeat((camaraX * velocidad - anchoCapa * 0.5f) / anchoTextura, Mathf.Max(1f, periodo));
 
         /// <summary>
         /// Tramo de posiciones de la cámara (desde, hasta) en el que se ve al menos una parte de un

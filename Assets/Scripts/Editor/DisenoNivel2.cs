@@ -42,13 +42,20 @@ namespace Fragmentum.EditorTools
     /// inunda y congela (<see cref="Franjas"/>). El agua sube hasta <see cref="CapaHelada"/> (el
     /// diseño decía 4): a esa altura, la capa de hielo que deja al congelarse se alcanza desde el
     /// hielo seco con el doble salto, que a 4 u se quedaba en el límite exacto.
+    ///
+    /// Tras la prueba del autor (2026-10-12, PENDIENTES N31): la plaza este mide 16 u y no 6, para
+    /// que la Plañidera tenga sitio; la campana es 3 u más ancha y su repisa mide 4, con la mesa
+    /// junto a la silla vacía; la muralla es de hielo liso y no agarra (<see cref="NoAgarra"/>),
+    /// porque con el salto de pared se subía y se saltaba medio nivel; y junto al tapón Kael dice
+    /// cómo se rompe (<see cref="PistaDelTapon"/>). Todo lo que hay del tapón en adelante se
+    /// corrió 10 u, y de la campana en adelante, 13.
     /// </summary>
     public static class DisenoNivel2
     {
         public const int IdNivel = 2;
 
         /// <summary>Sube al cambiar el recorrido: <see cref="PreparadorNivel"/> lo vuelve a montar entero.</summary>
-        public const int Version = 6;
+        public const int Version = 12;
 
         /// <summary>Base de todos los bloques: por debajo de lo que enseña la cámara (−13).</summary>
         public const float Fondo = -14f;
@@ -165,6 +172,12 @@ namespace Fragmentum.EditorTools
             public float Desfase { get; }
         }
 
+        /// <summary>
+        /// Escala de los Lamentos: son los Ecos de este mundo y van al tamaño que el diseñador dio a
+        /// los Ecos de la Ira en el Nivel 1 (<see cref="DisenoNivel1.EscalaEco"/>, PENDIENTES N18).
+        /// </summary>
+        public static readonly Vector2 EscalaLamento = DisenoNivel1.EscalaEco;
+
         /// <summary>Alto de Kael (su cápsula): lo que tiene que quedar libre sobre un rellano.</summary>
         public const float AltoKael = 1.8f;
 
@@ -195,9 +208,24 @@ namespace Fragmentum.EditorTools
         /// <summary>Segundos de una oscilación de las placas.</summary>
         public const float PeriodoPlaca = 3f;
 
-        // --- Sección 1 (−6 a 36): la superficie helada. Tres Lamentos, una Escultura y la Plañidera ---
-        // --- Sección 2 (36 a 61): hundirse. La calle, la campana, la torre y cuatro Medusas ---
-        // --- Arena (61 a 96): la antesala y la sala de la Doncella, de 25 × 15 u ---
+        // --- Sección 1 (−6 a 46): la superficie helada. Tres Lamentos, una Escultura y la Plañidera ---
+        // --- Sección 2 (46 a 74): hundirse. La calle, la campana, la torre y cuatro Medusas ---
+        // --- Arena (74 a 109): la antesala y la sala de la Doncella, de 25 × 15 u ---
+
+        /// <summary>
+        /// Los tramos del <c>LevelData</c> (desde, hasta). De ellos sale lo que enseña la cámara,
+        /// que llega 6 u más allá de cada extremo: de la pared de la izquierda (−6) a la del fondo
+        /// de la arena (109). Los pone <see cref="GeneradorProgresion"/>.
+        /// </summary>
+        public static readonly Vector2[] Secciones =
+        {
+            new Vector2(0f, 40f),
+            new Vector2(40f, 70f),
+            new Vector2(70f, 103f),
+        };
+
+        /// <summary>Lo que la cámara pasa de cada extremo de las secciones (<c>LevelManager.margenCamara</c>).</summary>
+        public const float MargenCamara = 6f;
 
         /// <summary>Lo que se pisa y su relleno (capa del suelo).</summary>
         public static readonly Bloque[] Suelos =
@@ -206,15 +234,15 @@ namespace Fragmentum.EditorTools
             new Bloque("PrimerHielo", 5f, 13f, Fondo, 0f),
             new Bloque("FondoDeLasPlacas", 13f, 21f, Fondo, -5f),
             new Bloque("EscalonDeLasPlacas", 20f, 21f, -5f, -3f),
-            new Bloque("Plaza", 21f, 36f, Fondo, 0f),
+            new Bloque("Plaza", 21f, 46f, Fondo, 0f),
             new Bloque("Puente", 25f, 30f, 0f, 2f),
-            new Bloque("SueloCalle", 36f, 60f, Fondo, -11f),
-            new Bloque("RepisaDeLaCampana", 49f, 51f, -8f, -7.5f),
-            new Bloque("Rellano1", 57f, 60f, -7.25f, -6.75f),
-            new Bloque("Rellano2", 54f, 57f, -3f, -2.5f),
-            new Bloque("Rellano3", 57f, 60f, 0.75f, 1.25f),
-            new Bloque("Antesala", 61f, 69f, Fondo, 0f),
-            new Bloque("SueloArena", 69f, 96f, Fondo, 0f),
+            new Bloque("SueloCalle", 46f, 73f, Fondo, -11f),
+            new Bloque("RepisaDeLaCampana", 59f, 63f, -8f, -7.5f),
+            new Bloque("Rellano1", 70f, 73f, -7.25f, -6.75f),
+            new Bloque("Rellano2", 67f, 70f, -3f, -2.5f),
+            new Bloque("Rellano3", 70f, 73f, 0.75f, 1.25f),
+            new Bloque("Antesala", 74f, 82f, Fondo, 0f),
+            new Bloque("SueloArena", 82f, 109f, Fondo, 0f),
         };
 
         /// <summary>
@@ -224,22 +252,47 @@ namespace Fragmentum.EditorTools
         public static readonly Bloque[] Paredes =
         {
             new Bloque("ParedIzquierda", -7f, -6f, Fondo, Tope),
-            new Bloque("TechoDeHielo", 38f, 53f, -1f, 0f),
-            new Bloque("Muralla", 38f, 40f, 0f, 9f),
-            new Bloque("CampanaOeste", 46f, 47f, -8.5f, -1f),
-            new Bloque("CampanaEste", 52f, 53f, -8.5f, -1f),
-            new Bloque("TorreOeste", 53f, 54f, -4f, 7.5f),
-            new Bloque("TorreEsteBaja", 60f, 61f, Fondo, 1.25f),
-            new Bloque("TorreEsteAlta", 60f, 61f, 4.5f, 7.5f),
-            new Bloque("TejadoDeLaTorre", 53f, 61f, 7.5f, 8.5f),
-            new Bloque("ParedArena", 95f, 96f, 0f, Tope),
-            new Bloque("TechoArena", 69f, 96f, 15f, Tope),
+            new Bloque("TechoDeHielo", 48f, 66f, -1f, 0f),
+            new Bloque("Muralla", 48f, 50f, 0f, 9f),
+            new Bloque("CampanaOeste", 56f, 57f, -8.5f, -1f),
+            new Bloque("CampanaEste", 65f, 66f, -8.5f, -1f),
+            new Bloque("TorreOeste", 66f, 67f, -4f, 7.5f),
+            new Bloque("TorreEsteBaja", 73f, 74f, Fondo, 1.25f),
+            new Bloque("TorreEsteAlta", 73f, 74f, 4.5f, 7.5f),
+            new Bloque("TejadoDeLaTorre", 66f, 74f, 7.5f, 8.5f),
+            new Bloque("ParedArena", 108f, 109f, 0f, Tope),
+            new Bloque("TechoArena", 82f, 109f, 15f, Tope),
         };
+
+        /// <summary>
+        /// Los bloques que son de hielo macizo y no de ladrillo: el techo helado de la calle y la
+        /// muralla que cierra la plaza.
+        /// </summary>
+        public static bool EsDeHielo(string bloque) => bloque == "TechoDeHielo" || bloque == "Muralla";
+
+        /// <summary>
+        /// Las paredes en las que Kael no se agarra (<see cref="Fragmentum.Core.SinAgarre"/>): la
+        /// muralla. Es de hielo liso: sin esto se subía con el salto de pared, se andaba por el
+        /// techo helado y por el tejado de la torre, y se caía en la antesala sin haber bajado al agua.
+        /// </summary>
+        public static bool NoAgarra(string bloque) => bloque == "Muralla";
+
+        /// <summary>
+        /// La silla vacía del primer checkpoint (el punto de sus patas): en la repisa de la campana,
+        /// a la izquierda de la mesa y de la bandera.
+        /// </summary>
+        public static readonly Vector2 SillaVacia = new Vector2(59.6f, -7.5f);
+
+        /// <summary>El centro de la torre del reloj: ahí cuelga su campana y ahí se ve la del fondo.</summary>
+        public const float CentroDeLaTorre = 70f;
+
+        /// <summary>La campana del campanario: cuelga del tejado de la torre, en el centro.</summary>
+        public static readonly Vector2 CampanaDelCampanario = new Vector2(CentroDeLaTorre, 7.5f);
 
         /// <summary>El balcón de la arena: nunca se inunda. La Doncella lo atraviesa.</summary>
         public static readonly Bloque[] PlataformasArena =
         {
-            new Bloque("Balcon", 80f, 85f, 6.5f, 7f),
+            new Bloque("Balcon", 93f, 98f, 6.5f, 7f),
         };
 
         /// <summary>
@@ -252,8 +305,8 @@ namespace Fragmentum.EditorTools
         {
             new Placa("PlacaFlotante1", 15.25f, 0.5f, amplitud: 0.5f, desfase: 0f),
             new Placa("PlacaFlotante2", 18.75f, 0.5f, amplitud: 0.5f, desfase: PeriodoPlaca * 0.5f),
-            new Placa("PlacaArena1", 76f, 3.5f, amplitud: 0.5f, desfase: 0f),
-            new Placa("PlacaArena2", 89f, 3.5f, amplitud: 0.5f, desfase: PeriodoPlaca * 0.5f),
+            new Placa("PlacaArena1", 89f, 3.5f, amplitud: 0.5f, desfase: 0f),
+            new Placa("PlacaArena2", 102f, 3.5f, amplitud: 0.5f, desfase: PeriodoPlaca * 0.5f),
         };
 
         /// <summary>
@@ -271,17 +324,17 @@ namespace Fragmentum.EditorTools
         public static readonly Zona[] Aguas =
         {
             new Zona("AguaDeLasPlacas", 13f, 21f, -5f, 0f - BajoLaSuperficie),
-            new Zona("AguaDeLaCalle", 36f, 46f, -11f, -1f),
-            new Zona("AguaBajoLaCampana", 46f, 53f, -11f, -7.5f - BajoLaSuperficie),
-            new Zona("AguaAntesDeLaTorre", 53f, 54f, -11f, -4f),
-            new Zona("AguaDeLaTorre", 54f, 60f, -11f, 1.25f - BajoLaSuperficie),
+            new Zona("AguaDeLaCalle", 46f, 56f, -11f, -1f),
+            new Zona("AguaBajoLaCampana", 56f, 66f, -11f, -7.5f - BajoLaSuperficie),
+            new Zona("AguaAntesDeLaTorre", 66f, 67f, -11f, -4f),
+            new Zona("AguaDeLaTorre", 67f, 73f, -11f, 1.25f - BajoLaSuperficie),
         };
 
         /// <summary>Donde se respira bajo el agua: dentro de la campana y en el campanario.</summary>
         public static readonly Zona[] BolsasDeAire =
         {
-            new Zona("BolsaDeLaCampana", 47f, 52f, -7.5f - BajoLaSuperficie, -1f),
-            new Zona("Campanario", 54f, 60f, 1.25f - BajoLaSuperficie, 7.5f),
+            new Zona("BolsaDeLaCampana", 57f, 65f, -7.5f - BajoLaSuperficie, -1f),
+            new Zona("Campanario", 67f, 73f, 1.25f - BajoLaSuperficie, 7.5f),
         };
 
         /// <summary>
@@ -292,18 +345,24 @@ namespace Fragmentum.EditorTools
         {
             new Zona("HieloDelPrimerTramo", 5f, 13f, 0f, 0.5f),
             new Zona("HieloDeLaPlazaOeste", 21f, 25f, 0f, 0.5f),
-            new Zona("HieloDeLaPlazaEste", 30f, 36f, 0f, 0.5f),
-            new Zona("HieloDeLaArena", 70f, 95f, 0f, 0.5f),
+            new Zona("HieloDeLaPlazaEste", 30f, 46f, 0f, 0.5f),
+            new Zona("HieloDeLaArena", 83f, 108f, 0f, 0.5f),
         };
 
         /// <summary>El hueco del suelo de la plaza que lleva a la calle. Lo tapa el hielo rompible.</summary>
-        public static readonly Zona Agujero = new Zona("Agujero", 36f, 38f, -1f, 0f);
+        public static readonly Zona Agujero = new Zona("Agujero", 46f, 48f, -1f, 0f);
 
         /// <summary>
         /// El tapón de hielo rompible, con su pivote arriba en el centro: tapa el agujero desde su
         /// fondo (y −1) y asoma 1,25 u sobre la plaza, para que la espada lo alcance de frente.
         /// </summary>
-        public static readonly Vector2 HieloRompible = new Vector2(37f, 1.25f);
+        public static readonly Vector2 HieloRompible = new Vector2(47f, 1.25f);
+
+        /// <summary>
+        /// Donde Kael dice cómo se rompe el tapón (la línea «pista» de sus diálogos): las 4 u de
+        /// plaza que hay delante de él. La dice también si lo agrieta con un golpe normal.
+        /// </summary>
+        public static readonly Zona PistaDelTapon = new Zona("PistaDelTapon", 42f, 46f, 0f, 3f);
 
         public static readonly Enemigo[] Enemigos =
         {
@@ -311,40 +370,44 @@ namespace Fragmentum.EditorTools
             new Enemigo("Escultura_1", TIPOS_ENEMIGO.ESCULTURA, 23.5f, 0f, 23.5f, 23.5f),
             new Enemigo("Lamento_2", TIPOS_ENEMIGO.LAMENTO, 27.5f, 2f, 26f, 29f),
             // El mini-jefe, donde estaba la segunda Escultura: guarda el tapón, la única salida.
-            new Enemigo("Planidera", TIPOS_ENEMIGO.PLANIDERA, 32f, 0f, 31f, 33f),
-            new Enemigo("Lamento_3", TIPOS_ENEMIGO.LAMENTO, 34.5f, 0f, 33.5f, 35.5f),
+            // En mitad de la plaza este, que mide 16 u: flota 2 u a cada lado.
+            new Enemigo("Planidera", TIPOS_ENEMIGO.PLANIDERA, 38f, 0f, 36f, 40f),
+            new Enemigo("Lamento_3", TIPOS_ENEMIGO.LAMENTO, 44.5f, 0f, 43.5f, 45.5f),
             // La calle: suben y bajan a la contra, cada 4 s. Por encima de ellas quedan 3,5 u de agua libre.
-            new Enemigo("Medusa_1", TIPOS_ENEMIGO.MEDUSA, 40.5f, -7.75f, 40.5f, 40.5f, vertical: true, amplitud: 2.75f, periodo: 4f, desfase: 0f),
-            new Enemigo("Medusa_2", TIPOS_ENEMIGO.MEDUSA, 43.5f, -7.75f, 43.5f, 43.5f, vertical: true, amplitud: 2.75f, periodo: 4f, desfase: 2f),
+            new Enemigo("Medusa_1", TIPOS_ENEMIGO.MEDUSA, 50.5f, -7.75f, 50.5f, 50.5f, vertical: true, amplitud: 2.75f, periodo: 4f, desfase: 0f),
+            new Enemigo("Medusa_2", TIPOS_ENEMIGO.MEDUSA, 53.5f, -7.75f, 53.5f, 53.5f, vertical: true, amplitud: 2.75f, periodo: 4f, desfase: 2f),
             // La torre: cruzan de pared a pared cada 5 s, entre los rellanos y sin rozar a Kael en ellos.
-            new Enemigo("Medusa_3", TIPOS_ENEMIGO.MEDUSA, 57f, -4f, 54.5f, 59.5f, vertical: false, amplitud: 2.5f, periodo: 5f, desfase: 0f),
-            new Enemigo("Medusa_4", TIPOS_ENEMIGO.MEDUSA, 57f, 0.1f, 54.5f, 59.5f, vertical: false, amplitud: 2.5f, periodo: 5f, desfase: 2.5f),
+            new Enemigo("Medusa_3", TIPOS_ENEMIGO.MEDUSA, CentroDeLaTorre, -4f, 67.5f, 72.5f, vertical: false, amplitud: 2.5f, periodo: 5f, desfase: 0f),
+            new Enemigo("Medusa_4", TIPOS_ENEMIGO.MEDUSA, CentroDeLaTorre, 0.1f, 67.5f, 72.5f, vertical: false, amplitud: 2.5f, periodo: 5f, desfase: 2.5f),
         };
 
         public const float Inicio = 2f;
 
         /// <summary>
         /// Los checkpoints (también en <c>LevelData.puntosDeControl</c>): en la repisa seca de la
-        /// campana, junto a la silla vacía, y en la antesala, antes del jefe.
+        /// campana, pasadas la silla vacía y la mesa, y en la antesala, antes del jefe. Curan.
         /// </summary>
         public static readonly Vector2[] Checkpoints =
         {
-            new Vector2(50f, -7.5f),
-            new Vector2(65f, 0f),
+            new Vector2(62.4f, -7.5f),
+            new Vector2(78f, 0f),
         };
 
         public const float SueloArena = 0f;
         public const float TechoArena = 15f;
 
         /// <summary>La puerta que se cierra detrás del jugador, en el borde de la arena.</summary>
-        public const float PuertaDesde = 69f;
-        public const float PuertaHasta = 70f;
+        public const float PuertaDesde = 82f;
+        public const float PuertaHasta = 83f;
 
         /// <summary>El trigger de entrada: el jugador ya ha aterrizado y la puerta queda detrás.</summary>
-        public const float Entrada = 72f;
+        public const float Entrada = 85f;
 
-        public const float Jefe = 82.5f;
-        public const float Salida = 93f;
+        public const float Jefe = 95.5f;
+        public const float Salida = 106f;
+
+        /// <summary>Hasta dónde llega la zona mortal, a cada lado del nivel.</summary>
+        public static readonly Vector2 AnchoZonaMortal = new Vector2(-20f, 125f);
 
         /// <summary>Por dentro de la puerta y de la pared de la derecha.</summary>
         public static Vector2 LimitesArena => new Vector2(PuertaHasta, Paredes.Single(p => p.Nombre == "ParedArena").Desde);
@@ -373,9 +436,89 @@ namespace Fragmentum.EditorTools
         /// </summary>
         public static readonly Zona[] Franjas =
         {
-            new Zona("FranjaA", 70f, 78f, SueloArena, SueloArena + AguaDeLaInundacion),
-            new Zona("FranjaB", 78f, 87f, SueloArena, SueloArena + AguaDeLaInundacion),
-            new Zona("FranjaC", 87f, 95f, SueloArena, SueloArena + AguaDeLaInundacion),
+            new Zona("FranjaA", 83f, 91f, SueloArena, SueloArena + AguaDeLaInundacion),
+            new Zona("FranjaB", 91f, 100f, SueloArena, SueloArena + AguaDeLaInundacion),
+            new Zona("FranjaC", 100f, 108f, SueloArena, SueloArena + AguaDeLaInundacion),
+        };
+
+        /// <summary>
+        /// Una pieza del tileset o de los props colocada de adorno: su pivote en (X, Y). No se pisa
+        /// ni choca. Las que cuelgan o tapan una pared van por delante de los bloques.
+        /// </summary>
+        public readonly struct Decorado
+        {
+            public Decorado(string nombre, ConstructorEscenarioMundo2.Pieza pieza, float x, float y, bool volteado = false, bool delante = false)
+            {
+                Nombre = nombre;
+                Pieza = pieza;
+                X = x;
+                Y = y;
+                Volteado = volteado;
+                Delante = delante;
+            }
+
+            public string Nombre { get; }
+            public ConstructorEscenarioMundo2.Pieza Pieza { get; }
+            public float X { get; }
+            public float Y { get; }
+
+            /// <summary>Dibujado en espejo, para que dos iguales no se vean iguales.</summary>
+            public bool Volteado { get; }
+
+            /// <summary>Por delante de los bloques (cuelga sobre una pared), no por detrás.</summary>
+            public bool Delante { get; }
+
+            public Vector2 Posicion => new Vector2(X, Y);
+        }
+
+        /// <summary>
+        /// El atrezo (PENDIENTES N36: «decide tú»). La idea de cada cosa:
+        /// - <b>la estatua</b> sale antes que la Escultura Viviente (en el inicio) y otra vez en la
+        ///   plaza este: la primera enseña que las estatuas son decorado, y la Escultura lo desmiente;
+        /// - <b>los faroles</b> marcan los tres sitios en los que se puede parar: el inicio, el
+        ///   puente de piedra y la antesala;
+        /// - <b>la plaza de la Plañidera</b> es una plaza en ruinas: una columna rota y unas rocas;
+        /// - <b>la mesa</b>, junto a la silla vacía del eco de memoria («Alguien deja una silla vacía
+        ///   en la mesa»);
+        /// - <b>la calle hundida</b>: algas, la campana caída, otra columna y rocas en el fondo;
+        /// - <b>las cadenas</b> a los lados de la campana del campanario, y <b>los estandartes</b>
+        ///   sobre el frente del puente y bajo el balcón de la arena.
+        /// La silla y la campana tienen su propio campo, que usan las pruebas.
+        /// </summary>
+        public static readonly Decorado[] Decorados =
+        {
+            // El inicio.
+            new Decorado("Estatua_Inicio", ConstructorEscenarioMundo2.Estatua, -3f, 0f),
+            new Decorado("Farol_Inicio", ConstructorEscenarioMundo2.Farol, 4.2f, 0f),
+
+            // El puente de piedra: los estandartes caen sobre su frente.
+            new Decorado("Estandartes_Puente", ConstructorEscenarioMundo2.Estandartes, 27.5f, 2f, delante: true),
+            new Decorado("Farol_Puente", ConstructorEscenarioMundo2.Farol, 25.6f, 2f, volteado: true),
+
+            // La plaza este, la de la Plañidera.
+            new Decorado("Rocas_Plaza", ConstructorEscenarioMundo2.Rocas, 32.2f, 0f),
+            new Decorado("Columna_Plaza", ConstructorEscenarioMundo2.ColumnaRota, 35f, 0f),
+            new Decorado("Estatua_Plaza", ConstructorEscenarioMundo2.Estatua, 41.5f, 0f, volteado: true),
+
+            // La calle hundida.
+            new Decorado("Algas_Calle_1", ConstructorEscenarioMundo2.Algas, 49f, -11f),
+            new Decorado("Columna_Calle", ConstructorEscenarioMundo2.ColumnaRota, 52f, -11f, volteado: true),
+            new Decorado("CampanaCaida", ConstructorEscenarioMundo2.CampanaCaida, 55f, -11f),
+            new Decorado("Algas_Campana", ConstructorEscenarioMundo2.Algas, 57.7f, -11f, volteado: true),
+            new Decorado("Rocas_Calle", ConstructorEscenarioMundo2.Rocas, 61f, -11f, volteado: true),
+            new Decorado("Algas_Calle_2", ConstructorEscenarioMundo2.Algas, 64.4f, -11f),
+            new Decorado("Algas_Torre", ConstructorEscenarioMundo2.Algas, 68f, -11f, volteado: true),
+
+            // La campana: la mesa, entre la silla vacía y la bandera.
+            new Decorado("MesaVacia", ConstructorEscenarioMundo2.Mesa, 61f, -7.5f),
+
+            // El campanario: las cadenas, a los lados de la campana.
+            new Decorado("Cadena_Oeste", ConstructorEscenarioMundo2.Cadena, CentroDeLaTorre - 1.8f, 7.5f),
+            new Decorado("Cadena_Este", ConstructorEscenarioMundo2.Cadena, CentroDeLaTorre + 1.8f, 7.5f, volteado: true),
+
+            // La antesala y la arena.
+            new Decorado("Farol_Antesala", ConstructorEscenarioMundo2.Farol, 76f, 0f),
+            new Decorado("Estandartes_Balcon", ConstructorEscenarioMundo2.Estandartes, 95.5f, 6.5f),
         };
 
         /// <summary>

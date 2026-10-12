@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Fragmentum.Core;
 using Fragmentum.Data;
 using Fragmentum.Narrative;
@@ -175,9 +176,9 @@ namespace Fragmentum.EditorTools
                 Asset<LevelData>("Niveles/L2_Tristeza", sobrescribir, n => Nivel(n, 2, RutaEscenaNivel2, "Ciudad Sumergida", tristeza, 3,
                     "Pérdida, melancolía. El nivel es deliberadamente lento y pesado.",
                     new[] { "1E3A5F", "4A7FA5", "2C3E50", "E8EEF4" }, doncella, fTristeza, dash, new ReglasNivel(),
-                    Seccion("Sección 1", 0, 30, "Sobre el hielo: suelo resbaladizo y plataformas flotantes. 3 Lamentos y 2 Esculturas Vivientes."),
-                    Seccion("Sección 2", 30, 60, "Bajo el agua, con oxígeno limitado. 4 Medusas de Hielo."),
-                    Seccion("Arena del jefe", 60, 90, "Superficie helada sobre agua."))),
+                    Seccion("Sección 1", DisenoNivel2.Secciones[0].x, DisenoNivel2.Secciones[0].y, "Sobre el hielo: suelo resbaladizo y plataformas flotantes. 3 Lamentos y 2 Esculturas Vivientes."),
+                    Seccion("Sección 2", DisenoNivel2.Secciones[1].x, DisenoNivel2.Secciones[1].y, "Bajo el agua, con oxígeno limitado. 4 Medusas de Hielo."),
+                    Seccion("Arena del jefe", DisenoNivel2.Secciones[2].x, DisenoNivel2.Secciones[2].y, "Superficie helada sobre agua."))),
 
                 Asset<LevelData>("Niveles/L3_Miedo", sobrescribir, n => Nivel(n, 3, null, "Bosque Tenebroso", miedo, 4,
                     "Ansiedad, inseguridad. Explota la desorientación y la incertidumbre.",
@@ -212,6 +213,10 @@ namespace Fragmentum.EditorTools
             // existían se completan sin pisar lo que se haya editado a mano.
             Completar(niveles[0], "FF6B35", "la rabia consume al que la niega", DisenoNivel1.Checkpoint);
             Completar(niveles[1], "00D4FF", "el dolor también es parte del yo", Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
+
+            // El recorrido del Nivel 2 cambia con su diseño (se alargó el 2026-10-12): sus tramos, de
+            // los que sale lo que enseña la cámara, y sus checkpoints son siempre los de DisenoNivel2.
+            SeguirElDiseno(niveles[1], DisenoNivel2.Secciones, Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
 
             // Los niveles cuya escena llegó después de crear su asset: se les asigna sin tocar lo demás.
             AsignarEscenaSiFalta(niveles[1], RutaEscenaNivel2);
@@ -368,6 +373,36 @@ namespace Fragmentum.EditorTools
             }
 
             if ((n.puntosDeControl == null || n.puntosDeControl.Count == 0) && puntosDeControl.Length > 0)
+            {
+                n.puntosDeControl = new List<float>(puntosDeControl);
+                cambio = true;
+            }
+
+            if (cambio)
+            {
+                EditorUtility.SetDirty(n);
+            }
+        }
+
+        // Pone en el nivel los tramos y los checkpoints de su diseño, si no son ya esos. Los nombres
+        // y los textos de las secciones no se tocan.
+        private static void SeguirElDiseno(LevelData n, Vector2[] tramos, float[] puntosDeControl)
+        {
+            var cambio = false;
+            for (var i = 0; n.secciones != null && i < n.secciones.Count && i < tramos.Length; i++)
+            {
+                // SeccionNivel es un struct: se cambia la copia y se vuelve a guardar en la lista.
+                var seccion = n.secciones[i];
+                if (!Mathf.Approximately(seccion.desdeX, tramos[i].x) || !Mathf.Approximately(seccion.hastaX, tramos[i].y))
+                {
+                    seccion.desdeX = tramos[i].x;
+                    seccion.hastaX = tramos[i].y;
+                    n.secciones[i] = seccion;
+                    cambio = true;
+                }
+            }
+
+            if (n.puntosDeControl == null || !n.puntosDeControl.SequenceEqual(puntosDeControl))
             {
                 n.puntosDeControl = new List<float>(puntosDeControl);
                 cambio = true;

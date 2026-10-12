@@ -171,8 +171,10 @@ namespace Fragmentum.EditorTools
                 d.vidaMaxima = 4; d.danio = 1; d.danioContacto = 1;
                 d.velocidadPatrulla = 0.8f; d.velocidadPersecucion = 1.4f; d.esperaEnWaypoint = 2.5f;
                 d.deteccion = distancia; d.detectionRadius = 5f;
-                d.attackRadius = 1.2f; d.attackCooldown = 2.2f;
-                d.duracionAtaque = 0.8f; d.inicioVentanaGolpe = 0.45f; d.finVentanaGolpe = 0.6f;
+                // El ataque, con los ajustes del Eco de la Ira tras la primera prueba del Nivel 1: el
+                // clip a 1,6× (0,8 s → 0,5 s) y 0,45 s de descanso (ConstructorLamento).
+                d.attackRadius = 1.2f; d.attackCooldown = 0.45f;
+                d.duracionAtaque = 0.5f; d.inicioVentanaGolpe = 0.28125f; d.finVentanaGolpe = 0.375f;
                 d.damagedDuration = 0.5f; d.resistenciaRetroceso = 0.6f;
                 d.tinte = Hex("4A7FA5");
             });
@@ -592,14 +594,29 @@ namespace Fragmentum.EditorTools
 
                 var objetoSprite = new GameObject("Sprite") { layer = raiz.layer };
                 objetoSprite.transform.SetParent(cuerpo.transform, false);
-                objetoSprite.transform.localScale = new Vector3(RadioMedusa * 2f, RadioMedusa * 2f, 1f);
                 var sprite = objetoSprite.AddComponent<SpriteRenderer>();
-                sprite.sprite = SpriteCirculo;
-                sprite.color = new Color(0.55f, 0.85f, 1f, 0.85f);
                 sprite.sortingOrder = 5;
-                var provisional = objetoSprite.AddComponent<SpriteProvisional>();
-                Asignar(provisional, "assetPendiente", p => p.stringValue = "Medusa de Hielo (Prompts_Mundo2.md, B3)");
-                Asignar(provisional, "tamano", p => p.vector2Value = new Vector2(RadioMedusa * 2f, RadioMedusa * 2f));
+
+                // Con su arte (ConstructorMedusa): sus clips. Sin él, el círculo provisional.
+                Animator animator = null;
+                var reposo = ConstructorMedusa.Reposo;
+                var controlador = ConstructorMedusa.Controlador;
+                if (reposo != null && controlador != null)
+                {
+                    sprite.sprite = reposo;
+                    animator = objetoSprite.AddComponent<Animator>();
+                    animator.runtimeAnimatorController = controlador;
+                    animator.applyRootMotion = false;
+                }
+                else
+                {
+                    objetoSprite.transform.localScale = new Vector3(RadioMedusa * 2f, RadioMedusa * 2f, 1f);
+                    sprite.sprite = SpriteCirculo;
+                    sprite.color = new Color(0.55f, 0.85f, 1f, 0.85f);
+                    var provisional = objetoSprite.AddComponent<SpriteProvisional>();
+                    Asignar(provisional, "assetPendiente", p => p.stringValue = "Medusa de Hielo (Prompts_Mundo2.md, B3)");
+                    Asignar(provisional, "tamano", p => p.vector2Value = new Vector2(RadioMedusa * 2f, RadioMedusa * 2f));
+                }
 
                 var objetoContacto = new GameObject("Contacto") { layer = Capa(Capas.EnemyWeapon) };
                 objetoContacto.transform.SetParent(cuerpo.transform, false);
@@ -613,6 +630,8 @@ namespace Fragmentum.EditorTools
 
                 var medusa = raiz.AddComponent<MedusaHielo>();
                 Asignar(medusa, "cuerpo", p => p.objectReferenceValue = cuerpo.transform);
+                Asignar(medusa, "dibujo", p => p.objectReferenceValue = animator != null ? sprite : null);
+                Asignar(medusa, "animator", p => p.objectReferenceValue = animator);
 
                 var prefab = PrefabUtility.SaveAsPrefabAsset(raiz, RutaPrefabMedusa, out var guardado);
                 if (!guardado)

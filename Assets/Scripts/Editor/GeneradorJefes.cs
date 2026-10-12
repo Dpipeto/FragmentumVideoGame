@@ -263,6 +263,18 @@ namespace Fragmentum.EditorTools
                 p.color = Hex("00D4FF");
             });
 
+            // Las olas llevan su dibujo (ConstructorMecanicasMundo2) en vez del rectángulo. Como con las
+            // ondas de la Centinela, solo se rellena el campo vacío.
+            var dibujoOla = ConstructorMecanicasMundo2.PrefabOla;
+            foreach (var patron in new[] { ola, olaDoble })
+            {
+                if (dibujoOla != null && patron.efecto == null)
+                {
+                    patron.efecto = dibujoOla;
+                    EditorUtility.SetDirty(patron);
+                }
+            }
+
             Completar("DoncellaLamento", sobrescribir, j =>
             {
                 j.vidaMaxima = 26;
@@ -475,9 +487,10 @@ namespace Fragmentum.EditorTools
                 sprite.sortingOrder = 5;
                 var animator = objetoSprite.AddComponent<Animator>();
 
-                // Los jefes con arte (de momento, la Centinela) llevan sus fotogramas, su Animator
+                // Los jefes con arte (la Centinela y la Doncella) llevan sus fotogramas, su Animator
                 // y su fragmento; los demás, la cápsula provisional.
-                var conArte = nombre == ConstructorCentinela.NombreDatos && ConstructorCentinela.Vestir(objetoSprite, pivote, controlador);
+                var conArte = (nombre == ConstructorCentinela.NombreDatos && ConstructorCentinela.Vestir(objetoSprite, pivote, controlador)) ||
+                              (nombre == ConstructorDoncella.NombreDatos && ConstructorDoncella.Vestir(objetoSprite, pivote, controlador));
                 if (!conArte)
                 {
                     objetoSprite.transform.localPosition = new Vector3(0f, tamano.y * 0.5f, 0f);

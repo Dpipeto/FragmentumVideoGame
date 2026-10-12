@@ -23,4 +23,4 @@ MonoBehaviour:
   olas: 1
   intervalo: 0.8
   recuperacion: 0.6
-  efecto: {fileID: 0}
+  efecto: {fileID: 661676664945302504, guid: 0b12ffc4f5485264192d7792abcdf147, type: 3}

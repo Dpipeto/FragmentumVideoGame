@@ -616,9 +616,15 @@ namespace Fragmentum.EditorTools
         /// arriba, separadas de la ceniza por al menos una fila vacía. Devuelve su centro y su
         /// tamaño en unidades, respecto del pivote (los pies), o null si no hay fragmento separado.
         /// </summary>
-        public static (Vector2 centro, Vector2 tamano)? MedirFragmento()
+        public static (Vector2 centro, Vector2 tamano)? MedirFragmento() =>
+            MedirFragmento(RutaSprite(ClipDe(Muerte).Fotogramas.Last()), Pivote, PixelesPorUnidad);
+
+        /// <summary>
+        /// Lo mismo en el último fotograma de la muerte de cualquier jefe: <paramref name="ruta"/> es
+        /// su PNG, con el pivote y los píxeles por unidad de su regla.
+        /// </summary>
+        public static (Vector2 centro, Vector2 tamano)? MedirFragmento(string ruta, Vector2 pivoteNormalizado, float pixelesPorUnidad)
         {
-            var ruta = RutaSprite(ClipDe(Muerte).Fotogramas.Last());
             var textura = new Texture2D(2, 2);
             try
             {
@@ -656,9 +662,9 @@ namespace Fragmentum.EditorTools
                     }
                 }
 
-                var pivote = new Vector2(Pivote.x * ancho, Pivote.y * alto);
-                var centro = (new Vector2(izquierda + derecha + 1, abajo + arriba + 1) * 0.5f - pivote) / PixelesPorUnidad;
-                var tamano = new Vector2(derecha - izquierda + 1, arriba - abajo + 1) / PixelesPorUnidad;
+                var pivote = new Vector2(pivoteNormalizado.x * ancho, pivoteNormalizado.y * alto);
+                var centro = (new Vector2(izquierda + derecha + 1, abajo + arriba + 1) * 0.5f - pivote) / pixelesPorUnidad;
+                var tamano = new Vector2(derecha - izquierda + 1, arriba - abajo + 1) / pixelesPorUnidad;
                 return (centro, tamano);
             }
             finally
@@ -677,7 +683,15 @@ namespace Fragmentum.EditorTools
                 return null;
             }
 
-            var (centro, tamano) = medida.Value;
+            return CrearFragmento(pivote, dibujo, medida.Value, PixelesPorUnidad);
+        }
+
+        /// <summary>
+        /// El fragmento de cualquier jefe, con la medida de <see cref="MedirFragmento(string, Vector2, float)"/>.
+        /// </summary>
+        public static FragmentoJefe CrearFragmento(Transform pivote, SpriteRenderer dibujo, (Vector2 centro, Vector2 tamano) medida, float pixelesPorUnidad)
+        {
+            var (centro, tamano) = medida;
             var objeto = new GameObject("Fragmento"); // capa Default: la toca el jugador
             objeto.transform.SetParent(pivote, false);
             objeto.transform.localPosition = new Vector3(centro.x, 0f, 0f);
@@ -697,7 +711,7 @@ namespace Fragmentum.EditorTools
             if (mascara.sprite != null)
             {
                 // Un píxel de margen alrededor del fragmento; la ceniza queda 20 px más abajo.
-                var margen = 2f / PixelesPorUnidad;
+                var margen = 2f / pixelesPorUnidad;
                 var medidaSprite = mascara.sprite.bounds.size;
                 objetoMascara.transform.localScale = new Vector3((tamano.x + margen) / medidaSprite.x, (tamano.y + margen) / medidaSprite.y, 1f);
             }

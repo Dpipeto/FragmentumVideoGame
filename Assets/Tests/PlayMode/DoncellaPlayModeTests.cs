@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Fragmentum.Bosses;
 using Fragmentum.Bosses.Patrones;
+using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Data;
 using Fragmentum.Levels.Mecanicas;
@@ -129,7 +130,9 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual(LimitesArena.y - ola.tamanoOla.x * 0.5f, zona.transform.position.x, 0.05f, "Nace en la pared que tiene a la espalda.");
             Assert.AreEqual(doncella.Suelo + ola.tamanoOla.y * 0.5f, zona.transform.position.y, 0.05f, "A ras del hielo, no a su altura.");
             Assert.IsFalse(zona.Activa, "Primero avisa, sin hacer daño.");
-            Assert.IsTrue(zona.GetComponent<SpriteRenderer>().enabled, "Sin arte todavía, se ve como un rectángulo.");
+            Assert.IsFalse(zona.GetComponent<SpriteRenderer>().enabled, "Con su efecto, el rectángulo de la zona no se ve.");
+            var dibujo = zona.GetComponentInChildren<DibujoDeZona>();
+            Assert.IsNotNull(dibujo, "La viste su ola (OlaDeAgua).");
 
             yield return EsperarHasta(() => zona.Activa, 1.5f, "que la ola salga");
             var salida = zona.transform.position.x;
@@ -331,6 +334,76 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsTrue(doncella.Derrotado);
             Assert.AreEqual(ESTADOS_FRANJA.DRY, _a.Estado, "Al caer ella, el agua se va.");
             Assert.IsFalse(doncella.Llorando);
+        }
+
+        // --- Con su arte ---
+
+        [UnityTest]
+        public IEnumerator ConArte_UnGolpeBloqueado_LaVuelveHieloUnInstante_YNoLaTine()
+        {
+            var doncella = CrearDoncella();
+            Assert.IsTrue(doncella.TieneArte, "El prefab lleva su arte.");
+            SinPatrones(doncella, 1f);
+            yield return CrearJugadorEnSuelo(new Vector2(-8f, 0f));
+            doncella.Activar(Jugador.transform, LimitesArena);
+            var dibujo = doncella.GetComponentInChildren<ColaFundida>().GetComponent<SpriteRenderer>();
+            var material = dibujo.sharedMaterial;
+            yield return null;
+
+            doncella.Vida.RecibirGolpe(new Golpe(3, doncella.Centro));
+            Assert.IsTrue(doncella.DestelloDeHieloActivo, "Un golpe que no le hace nada la vuelve una silueta de hielo.");
+            Assert.AreNotSame(material, dibujo.sharedMaterial);
+
+            yield return new WaitForSeconds(0.3f);
+            Assert.IsFalse(doncella.DestelloDeHieloActivo, "Dura un instante.");
+            Assert.AreSame(material, dibujo.sharedMaterial, "Y vuelve su material: el que le funde la cola.");
+            Assert.AreEqual(Color.white, dibujo.color, "Con arte no se tiñe para avisar: sus colores son los del dibujo.");
+        }
+
+        [UnityTest]
+        public IEnumerator ConArte_SuDibujoSigueAlLlanto_YArrodilladaNoSeFundeLaCola()
+        {
+            var doncella = CrearDoncella();
+            SinPatrones(doncella, 1f);
+            yield return CrearJugadorEnSuelo(new Vector2(-8f, 0f));
+            doncella.Activar(Jugador.transform, LimitesArena);
+            var animador = doncella.GetComponentInChildren<Animator>();
+            var cola = doncella.GetComponentInChildren<ColaFundida>();
+            yield return new WaitForSeconds(0.2f);
+            Assert.AreEqual((int)ESTADOS_LLANTO.FLOTA, animador.GetInteger(AnimatorParams.EstadoMecanica.Hash));
+            Assert.Greater(cola.FraccionActual, 0f, "Flotando, la cola (que el lienzo corta) se funde por abajo.");
+
+            doncella.Llorar(0.8f);
+            yield return EsperarHasta(() => animador.GetInteger(AnimatorParams.EstadoMecanica.Hash) == (int)ESTADOS_LLANTO.LLORA, 0.5f,
+                "que su Animator sepa que llora");
+            yield return EsperarHasta(() => cola.FraccionActual == 0f, 0.6f, "que se la vea arrodillada, con el dibujo entero");
+            Assert.IsTrue(doncella.Llorando);
+
+            yield return EsperarHasta(() => !doncella.Llorando, 1.5f, "que deje de llorar");
+            yield return EsperarHasta(() => animador.GetInteger(AnimatorParams.EstadoMecanica.Hash) == (int)ESTADOS_LLANTO.FLOTA, 0.5f,
+                "que su Animator vuelva a flotar");
+        }
+
+        [UnityTest]
+        public IEnumerator ConArte_SiMuereSobreLaCapa_CaeAlHieloSeco_YAhiDejaSuFragmento()
+        {
+            var doncella = CrearDoncella();
+            DirectaALaFase2(doncella, Patron<PatronInundacion>("Inundacion"), Patron<PatronCongelar>("Congelar"), Patron<PatronLlanto>("LlantoSobreElAgua"));
+            yield return CrearJugadorEnSuelo(new Vector2(-8f, 0f));
+            doncella.Activar(Jugador.transform, LimitesArena);
+            yield return EsperarHasta(() => _a.Congelada, 9f, "que congele la franja de Kael");
+            yield return EsperarHasta(() => doncella.EstadoActual == ESTADOS_JEFE.VULNERABLE, 4f, "el llanto");
+            Assert.Greater(doncella.Pies.y, doncella.Suelo + 3f, "Llora en alto, sobre la capa.");
+
+            doncella.Vida.Matar();
+            yield return null;
+            Assert.IsTrue(doncella.Derrotado);
+            yield return new WaitForSeconds(DoncellaLamento.CaidaAlMorir + 0.15f);
+            Assert.AreEqual(doncella.Suelo, doncella.Pies.y, 0.01f, "Se derrite cayendo: la capa ya no está y el charco queda en el hielo seco.");
+            Assert.AreEqual(doncella.Suelo, doncella.transform.position.y, 0.01f);
+
+            yield return EsperarHasta(() => doncella.Fragmento != null && doncella.Fragmento.Disponible, 3f, "que aparezca su fragmento");
+            Assert.Less(doncella.Fragmento.transform.position.y, doncella.Suelo + 2.5f, "Al alcance de Kael desde el suelo, no colgado en el aire.");
         }
 
         // --- Utilidades ---

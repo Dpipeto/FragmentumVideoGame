@@ -222,6 +222,16 @@ namespace Fragmentum.EditorTools
             // Antes del guion: cada momento que solo tiene líneas marcadas pasa a la del guion; un
             // momento con alguna línea escrita a mano se queda como está.
             var lineas = dialogos.lineas ?? new List<LineaDialogo>();
+
+            // Un momento que el guion ganó después de crearse el asset (la pista): se añade su línea.
+            var faltan = LineasDelGuion(nivel, guion).Where(d => !lineas.Any(l => l != null && l.momento == d.momento)).ToList();
+            if (faltan.Count > 0)
+            {
+                lineas.AddRange(faltan);
+                dialogos.lineas = lineas;
+                EditorUtility.SetDirty(dialogos);
+            }
+
             if (!lineas.Any(l => l != null && EsProvisional(l.texto)))
             {
                 return dialogos;
@@ -241,13 +251,18 @@ namespace Fragmentum.EditorTools
             return dialogos;
         }
 
-        /// <summary>Las líneas del guion de un mundo, en orden: apertura, eco de memoria, antes del jefe y cierre.</summary>
+        /// <summary>Las líneas del guion de un mundo, en orden: apertura, eco de memoria, la pista, antes del jefe y cierre.</summary>
         private static List<LineaDialogo> LineasDelGuion(LevelData nivel, GuionMundos.Mundo guion)
         {
             var lineas = new List<LineaDialogo> { Linea("Kael", MOMENTOS_DIALOGO.APERTURA, guion.Apertura) };
             if (!string.IsNullOrEmpty(guion.EcoMemoria))
             {
                 lineas.Add(Linea("Kael", MOMENTOS_DIALOGO.ECO_MEMORIA, guion.EcoMemoria));
+            }
+
+            if (!string.IsNullOrEmpty(guion.Pista))
+            {
+                lineas.Add(Linea("Kael", MOMENTOS_DIALOGO.PISTA, guion.Pista));
             }
 
             if (nivel.jefe != null && !string.IsNullOrEmpty(guion.AntesDelJefe))

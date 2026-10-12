@@ -197,6 +197,37 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual(-1, Jugador.Mirando);
         }
 
+        [UnityTest]
+        public IEnumerator EnUnaParedSinAgarre_NiSeDeslizaNiSaltaDesdeElla()
+        {
+            // El hielo liso de la muralla del Nivel 2: una pared como la de arriba, pero marcada.
+            Suelo(-10f, 10f);
+            var pared = Bloque("ParedDeHielo", 3f, 4f, 0f, 12f, Capas.Wall);
+            pared.AddComponent<SinAgarre>();
+            yield return CrearJugador(new Vector2(2.3f, 6f));
+
+            Input.EjeHorizontal = 1f;
+            yield return new WaitForSeconds(0.25f);
+            var sensores = Jugador.GetComponent<PlayerSensors>();
+            Assert.IsFalse(sensores.ParedDerecha, "Para los sentidos de Kael no es una pared a la que agarrarse.");
+            Assert.AreEqual(ESTADOS_JUGADOR.FALL, Jugador.EstadoActual, "Cae junto a ella sin frenarse.");
+            Assert.LessOrEqual(PiesJugador.x, 3f - 0.39f, "Pero sigue siendo sólida: no la atraviesa.");
+
+            // El salto junto a ella es el doble salto de siempre, no un salto de pared.
+            Input.PulsarSalto();
+            for (var i = 0; i < 4; i++)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+
+            Assert.AreEqual(0, Veces(ESTADOS_JUGADOR.WALL_SLIDE), "No se desliza por ella.");
+            Assert.AreEqual(0, Veces(ESTADOS_JUGADOR.WALL_JUMP), "Ni salta desde ella.");
+
+            // La misma pared, sin la marca, agarra.
+            Object.DestroyImmediate(pared.GetComponent<SinAgarre>());
+            yield return EsperarEstado(ESTADOS_JUGADOR.WALL_SLIDE, 2f);
+        }
+
         // --- Daño, i-frames, muerte y reaparición ---
 
         [UnityTest]

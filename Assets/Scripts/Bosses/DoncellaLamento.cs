@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Fragmentum.Bosses.Patrones;
+using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Data;
 using Fragmentum.Levels.Mecanicas;
@@ -8,9 +10,22 @@ using UnityEngine;
 
 namespace Fragmentum.Bosses
 {
+    /// <summary>Lo que hace la Doncella con su llanto: es lo que lee su Animator (el entero «Estado»).</summary>
+    public enum ESTADOS_LLANTO
+    {
+        /// <summary>Flota o ataca: mandan los gestos de sus ataques.</summary>
+        FLOTA,
+
+        /// <summary>Baja adonde le toca llorar, con la mano en la cara (L1).</summary>
+        BAJA,
+
+        /// <summary>Llora, arrodillada y con la cara descubierta (L2 y L3): la ventana.</summary>
+        LLORA
+    }
+
     /// <summary>
     /// Doncella del Lamento, jefe del mundo de la Tristeza (<c>Docs/Diseno/Nivel2_Diseno.md</c>,
-    /// sección 6). Todavía sin arte: una cápsula azul.
+    /// sección 6). Con su arte (<c>ConstructorDoncella</c>) o, sin él, una cápsula azul.
     ///
     /// - <b>Flota:</b> espera en el hielo y, al empezar el combate, sube y va de lado a lado sobre
     ///   la arena. Es un cuerpo cinemático: ni cae ni choca, y los muros de la arena son sus límites.
@@ -32,6 +47,9 @@ namespace Fragmentum.Bosses
     {
         private const float Rugido = 0.9f;
         private const float DestelloDeHielo = 0.12f;
+
+        /// <summary>Segundos que tarda en caer al hielo seco al morir, desde donde llorara.</summary>
+        public const float CaidaAlMorir = 0.9f;
         private const float Llegada = 0.05f;
 
         // Lo que guarda a cada lado al colocarse dentro de una franja, junto a una pared o al agua.
@@ -61,12 +79,21 @@ namespace Fragmentum.Bosses
         [Tooltip("Sobre una franja congelada, lo que quedan sus pies por encima de la capa: de pie en ella, la espada llega.")]
         [SerializeField, Min(0f)] private float alturaSobreLaCapa = 0.2f;
 
+        [Header("Con arte")]
+        [Tooltip("La silueta de hielo con la que destella cuando un golpe no le hace nada (no estaba llorando). " +
+                 "Teñir el sprite no se vería sobre el dibujo. Vacío = sin destello.")]
+        [SerializeField] private Material destelloDeHielo;
+
         [Header("La arena")]
         [Tooltip("Las franjas del suelo que inunda y congela, de izquierda a derecha. Vacío = las que cuelgan de su arena.")]
         [SerializeField] private FranjaInundable[] franjas = new FranjaInundable[0];
 
         private Rigidbody2D _cuerpo;
         private SpriteRenderer _sprite;
+        private Animator _animador;
+        private Material _materialNormal;
+        private ESTADOS_LLANTO _llantoAnimado;
+        private Coroutine _caida;
         private float _suelo;
         private int _vaiven = 1;
         private float _finQuieta = float.NegativeInfinity;
@@ -86,6 +113,13 @@ namespace Fragmentum.Bosses
         public event Action OnGolpeEnElHielo;
 
         public bool Llorando => _llorando;
+
+        /// <summary>¿Se ve ahora como una silueta de hielo? (Un golpe que no le hizo nada, con arte.)</summary>
+        public bool DestelloDeHieloActivo => _materialNormal != null && _sprite != null && _sprite.sharedMaterial == destelloDeHielo;
+
+        /// <summary>Para su dibujo: flota, baja a llorar o llora.</summary>
+        public ESTADOS_LLANTO Llanto =>
+            _llorando ? ESTADOS_LLANTO.LLORA : _hayOrden && PatronActual is PatronLlanto ? ESTADOS_LLANTO.BAJA : ESTADOS_LLANTO.FLOTA;
 
         /// <summary>La altura del hielo de la arena: donde espera antes del combate.</summary>
         public float Suelo => _suelo;
@@ -119,6 +153,7 @@ namespace Fragmentum.Bosses
             _cuerpo.linearVelocity = Vector2.zero;
 
             _sprite = GetComponentInChildren<SpriteRenderer>();
+            _animador = GetComponentInChildren<Animator>();
             _suelo = transform.position.y;
 
             if ((franjas == null || franjas.Length == 0) && transform.parent != null)
@@ -146,9 +181,36 @@ namespace Fragmentum.Bosses
         protected override void Update()
         {
             base.Update();
-            if (_sprite != null && !Derrotado && Time.time < _finDestello)
+            if (_sprite != null && !Derrotado)
             {
-                _sprite.color = Hielo;
+                if (TieneArte)
+                {
+                    // Con arte no se tiñe para avisar (el aviso es su gesto): solo late en cian mientras llora.
+                    _sprite.color = RecibeDanioDoble ? ColorVentana(Color.white) : Color.white;
+                }
+                else if (Time.time < _finDestello)
+                {
+                    _sprite.color = Hielo;
+                }
+            }
+
+            // El destello de hielo dura un instante: después vuelve su material.
+            if (_materialNormal != null && Time.time >= _finDestello)
+            {
+                if (_sprite != null && _sprite.sharedMaterial == destelloDeHielo)
+                {
+                    _sprite.sharedMaterial = _materialNormal;
+                }
+
+                _materialNormal = null;
+            }
+
+            // Con arte: el llanto lo sigue su Animator.
+            var llanto = Llanto;
+            if (llanto != _llantoAnimado && TieneArte && _animador != null && _animador.isInitialized)
+            {
+                _llantoAnimado = llanto;
+                AnimatorParams.FijarEntero(_animador, AnimatorParams.EstadoMecanica, (int)llanto);
             }
         }
 
@@ -222,6 +284,19 @@ namespace Fragmentum.Bosses
         }
 
         // --- Para sus patrones ---
+
+        /// <summary>
+        /// Con arte, empieza el gesto de un ataque (<c>AnimatorParams.Ola</c>, <c>Inundar</c> o
+        /// <c>Congelar</c>) para que su momento llegue en <paramref name="anticipacion"/> segundos:
+        /// el aviso del patrón. Sin arte no hace nada: el aviso es su color.
+        /// </summary>
+        public void Gesto(in AnimatorParams.Parametro ataque, float anticipacion)
+        {
+            if (TieneArte)
+            {
+                Arte.Atacar(ataque, anticipacion, false);
+            }
+        }
 
         /// <summary>
         /// La manda a un punto (el de sus pies) dentro de la arena, a <paramref name="velocidad"/>
@@ -376,6 +451,13 @@ namespace Fragmentum.Bosses
             _vaiven = 1;
             _finQuieta = float.NegativeInfinity;
             _finDestello = float.NegativeInfinity;
+            _llantoAnimado = ESTADOS_LLANTO.FLOTA;
+            if (_caida != null)
+            {
+                StopCoroutine(_caida);
+                _caida = null;
+            }
+
             SecarFranjas();
         }
 
@@ -384,6 +466,34 @@ namespace Fragmentum.Bosses
         {
             DejarDeLlorar();
             SecarFranjas();
+            if (TieneArte && isActiveAndEnabled)
+            {
+                _caida = StartCoroutine(CaerAlHielo());
+            }
+        }
+
+        // Muere donde lloraba: sobre la capa de hielo o metida en el agua, que desaparecen con
+        // ella. Con arte se derrite cayendo, para que el charco y el fragmento queden en el hielo
+        // seco, donde Kael llega a recogerlo, y no colgados en el aire.
+        private IEnumerator CaerAlHielo()
+        {
+            var desde = Pies;
+            var inicio = Time.time;
+            while (Time.time - inicio < CaidaAlMorir)
+            {
+                var avance = (Time.time - inicio) / CaidaAlMorir;
+                Posar(new Vector2(desde.x, Mathf.Lerp(desde.y, _suelo, avance * avance)));
+                yield return null;
+            }
+
+            Posar(new Vector2(desde.x, _suelo));
+            _caida = null;
+        }
+
+        private void Posar(Vector2 pies)
+        {
+            _cuerpo.position = pies;
+            transform.position = new Vector3(pies.x, pies.y, transform.position.z);
         }
 
         // Llora: late en el cian de sus lágrimas. Es la señal de que ahora sí se la puede herir.
@@ -397,6 +507,12 @@ namespace Fragmentum.Bosses
         private void AlBloquearGolpe(Golpe golpe)
         {
             _finDestello = Time.time + DestelloDeHielo;
+            if (TieneArte && destelloDeHielo != null && _sprite != null && _materialNormal == null && _sprite.sharedMaterial != destelloDeHielo)
+            {
+                _materialNormal = _sprite.sharedMaterial;
+                _sprite.sharedMaterial = destelloDeHielo;
+            }
+
             OnGolpeEnElHielo?.Invoke();
         }
 

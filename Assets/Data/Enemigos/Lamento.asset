@@ -29,13 +29,14 @@ MonoBehaviour:
   factorHisteresis: 1.5
   attackRadius: 1.2
   alturaAtaque: 1.5
-  attackCooldown: 2.2
-  duracionAtaque: 0.8
-  inicioVentanaGolpe: 0.45
-  finVentanaGolpe: 0.6
+  attackCooldown: 0.45
+  duracionAtaque: 0.5
+  inicioVentanaGolpe: 0.28125
+  finVentanaGolpe: 0.37499997
+  hiperarmadura: 0
   damagedDuration: 0.5
   retroceso: {x: 4, y: 3}
   resistenciaRetroceso: 0.6
   deathDelay: 1
   spriteMiraDerecha: 1
-  tinte: {r: 0.2901961, g: 0.49803922, b: 0.64705884, a: 1}
+  tinte: {r: 1, g: 1, b: 1, a: 1}

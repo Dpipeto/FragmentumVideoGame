@@ -10,6 +10,9 @@ namespace Fragmentum.Levels
     /// jugador reaparece aquí en lugar de al principio del nivel (tarea D8: el juego es de
     /// plataformas con daño por contacto y no se puede reiniciar desde cero en cada muerte).
     ///
+    /// Además <b>cura</b>: cada vez que Kael lo toca, también cuando ya está activo, recupera toda
+    /// la vida (decisión del 2026-10-12, para todos los niveles).
+    ///
     /// El id se guarda en la partida, así que debe ser estable: si se deja vacío se deriva de
     /// la posición, y mover el checkpoint invalida los guardados que lo usaban (el jugador
     /// empezaría desde el inicio, con un aviso por consola; nunca un error).
@@ -32,10 +35,16 @@ namespace Fragmentum.Levels
         [Tooltip("Al tocarlo por primera vez, Kael dice la línea «eco de memoria» de los diálogos del nivel.")]
         [SerializeField] private bool ecoDeMemoria;
 
+        [Tooltip("Cada vez que Kael lo toca recupera toda la vida, también si ya estaba activo.")]
+        [SerializeField] private bool cura = true;
+
         private CheckpointManager _gestor;
         private bool _avisadoSinGestor;
 
         public event Action<Checkpoint> OnActivado;
+
+        /// <summary>Curó a Kael: cuántos corazones recuperó.</summary>
+        public event Action<Checkpoint, int> OnCuro;
 
         public string Id => string.IsNullOrEmpty(id)
             ? $"CP_{Mathf.RoundToInt(transform.position.x)}_{Mathf.RoundToInt(transform.position.y)}"
@@ -47,6 +56,9 @@ namespace Fragmentum.Levels
 
         /// <summary>¿Suena aquí el eco de memoria del nivel? (Lo dice el <see cref="LevelManager"/>.)</summary>
         public bool EcoDeMemoria => ecoDeMemoria;
+
+        /// <summary>¿Cura a Kael al tocarlo?</summary>
+        public bool Cura => cura;
 
         internal void Vincular(CheckpointManager gestor) => _gestor = gestor;
 
@@ -78,13 +90,28 @@ namespace Fragmentum.Levels
         private void OnTriggerEnter2D(Collider2D otro)
         {
             // Solo el cuerpo del jugador (no su espada, que también es un trigger) y vivo.
-            if (Activo || otro.isTrigger || otro.attachedRigidbody == null)
+            if (otro.isTrigger || otro.attachedRigidbody == null)
             {
                 return;
             }
 
             var jugador = otro.attachedRigidbody.GetComponent<PlayerController>();
             if (jugador == null || !jugador.EstaVivo)
+            {
+                return;
+            }
+
+            // Cura siempre, también el que ya está activo: volver a él es volver a respirar.
+            if (cura && jugador.Vida != null)
+            {
+                var curado = jugador.Vida.Curar(jugador.Vida.VidaMaxima);
+                if (curado > 0)
+                {
+                    OnCuro?.Invoke(this, curado);
+                }
+            }
+
+            if (Activo)
             {
                 return;
             }

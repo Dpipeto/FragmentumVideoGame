@@ -21,8 +21,9 @@ namespace Fragmentum.Levels.Mecanicas
     /// que el agua sigue ahí cuando el jefe corta su ataque para llorar. <see cref="Secar"/> la
     /// devuelve al principio (el combate se reinicia o termina).
     ///
-    /// Sin arte todavía: el agua, el aviso, las púas y la capa son rectángulos de color, como las
-    /// zonas de daño de los jefes.
+    /// Con su arte (<see cref="ArteDeFranja"/>) la dibuja <see cref="DibujoDeFranja"/>. Sin él, el
+    /// agua, el aviso, las púas y la capa son rectángulos de color, como las zonas de daño de los
+    /// jefes.
     /// </summary>
     [DisallowMultipleComponent]
     public class FranjaInundable : MonoBehaviour
@@ -60,14 +61,21 @@ namespace Fragmentum.Levels.Mecanicas
 
         public Color colorHielo = new Color(0.91f, 0.93f, 0.96f, 1f);
 
+        [Header("Arte")]
+        [Tooltip("Las imágenes de cada momento. Vacío o incompleto = los rectángulos provisionales.")]
+        [SerializeField] private ArteDeFranja arte;
+
         private readonly List<Collider2D> _atrapados = new List<Collider2D>();
         private GameObject _objetoAgua;
         private BoxCollider2D _agua;
         private SpriteRenderer _visualAgua;
         private SpriteRenderer _aviso;
         private GameObject _objetoCapa;
+        private SpriteRenderer _visualCapa;
         private BoxCollider2D _capa;
         private ZonaDeDanio _puas;
+        private DibujoDeFranja _dibujo;
+        private float _inicioEstado;
         private float _finEstado;
         private float _duracionAgua;
         private float _duracionPuas;
@@ -113,6 +121,29 @@ namespace Fragmentum.Levels.Mecanicas
         /// <summary>Segundos que le quedan al estado actual (0 en seco y mientras baja el agua).</summary>
         public float TiempoRestante =>
             Estado == ESTADOS_FRANJA.DRY || Estado == ESTADOS_FRANJA.DRAINING ? 0f : Mathf.Max(0f, _finEstado - Time.time);
+
+        /// <summary>Segundos que lleva en el estado actual.</summary>
+        public float TiempoEnEstado => Time.time - _inicioEstado;
+
+        /// <summary>Lo avanzado que va el estado actual, de 0 a 1 (1 si no tiene duración).</summary>
+        public float AvanceDelEstado =>
+            _finEstado > _inicioEstado ? Mathf.Clamp01((Time.time - _inicioEstado) / (_finEstado - _inicioEstado)) : 1f;
+
+        /// <summary>Segundos que las púas hacen daño al congelarse (lo que se pidió en <see cref="Congelar"/>).</summary>
+        public float DuracionPuas => _duracionPuas;
+
+        /// <summary>Las imágenes con las que se dibuja. Se fija antes de inundarla por primera vez.</summary>
+        public ArteDeFranja Arte
+        {
+            get => arte;
+            set => arte = value;
+        }
+
+        /// <summary>¿Se dibuja con su arte? (Lo sabe después de construirse: al inundarla por primera vez.)</summary>
+        public bool ConArte => _dibujo != null;
+
+        /// <summary>El dibujo con arte, o null.</summary>
+        public DibujoDeFranja Dibujo => _dibujo;
 
         public bool Contiene(float x) => x >= Desde && x <= Hasta;
 
@@ -296,6 +327,7 @@ namespace Fragmentum.Levels.Mecanicas
             Construir();
             var anterior = Estado;
             Estado = estado;
+            _inicioEstado = Time.time;
             _finEstado = Time.time + duracion;
 
             switch (estado)
@@ -359,7 +391,7 @@ namespace Fragmentum.Levels.Mecanicas
             var alto = Mathf.Max(0.1f, alturaCapa - grosorCapa);
             var centro = new Vector2(CentroX, Suelo + alto * 0.5f);
             _puas = ZonaDeDanio.Crear($"{name}_Puas", centro, new Vector2(ancho, alto), _danioPuas, Capas.MascaraJugador,
-                0f, _duracionPuas, Vector2.zero, colorHielo);
+                0f, _duracionPuas, Vector2.zero, colorHielo, _dibujo == null);
         }
 
         private void FijarCapa(bool puesta)
@@ -429,7 +461,8 @@ namespace Fragmentum.Levels.Mecanicas
                 _objetoCapa.layer = capaSuelo;
             }
 
-            Rectangulo(_objetoCapa, cuadrado, new Vector2(ancho, grosorCapa), OrdenCapa).color = colorHielo;
+            _visualCapa = Rectangulo(_objetoCapa, cuadrado, new Vector2(ancho, grosorCapa), OrdenCapa);
+            _visualCapa.color = colorHielo;
             _capa = _objetoCapa.AddComponent<BoxCollider2D>();
             _capa.size = new Vector2(ancho, grosorCapa);
 
@@ -440,6 +473,15 @@ namespace Fragmentum.Levels.Mecanicas
             zonaResbala.isTrigger = true;
             zonaResbala.size = new Vector2(ancho, AltoResbala);
             resbala.AddComponent<ZonaModificadorMovimiento>().FijarTipo(ZonaModificadorMovimiento.TIPOS.HIELO);
+
+            // Con arte, los rectángulos no se ven: lo dibuja todo DibujoDeFranja.
+            if (arte != null && arte.Completo)
+            {
+                _visualAgua.enabled = false;
+                _visualCapa.enabled = false;
+                _dibujo = gameObject.AddComponent<DibujoDeFranja>();
+                _dibujo.Montar(this, arte);
+            }
         }
 
         private GameObject Hijo(string nombre, Vector2 posicion)
@@ -468,7 +510,7 @@ namespace Fragmentum.Levels.Mecanicas
                 return;
             }
 
-            _aviso.enabled = Estado == ESTADOS_FRANJA.WARNING;
+            _aviso.enabled = Estado == ESTADOS_FRANJA.WARNING && _dibujo == null;
             if (_aviso.enabled)
             {
                 _aviso.color = new Color(colorAgua.r, colorAgua.g, colorAgua.b, 0.12f + 0.18f * Mathf.PingPong(Time.time * 4f, 1f));

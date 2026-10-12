@@ -94,6 +94,66 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator UnaCinematicaDe480_CambiaLaRejillaDeLaCamara_YLaSiguienteLaDevuelve()
+        {
+            yield return EntrarEnNivel1();
+            CutsceneData doncella = null;
+#if UNITY_EDITOR
+            doncella = UnityEditor.AssetDatabase.LoadAssetAtPath<CutsceneData>("Assets/Data/Narrativa/Cinematica_Jefe_Tristeza.asset");
+#endif
+            Assert.IsNotNull(doncella, "Falta la presentación de la Doncella.");
+            var grande = new Vector2Int(480, 268);
+            Assert.AreEqual(grande, doncella.Rejilla);
+
+            // La Pixel Perfect Camera recalcula su escala cada vez que dibuja, y en modo batch no se
+            // dibuja ningún fotograma: se le pide uno sobre una pantalla de 1920 × 1080.
+            var pantalla = new RenderTexture(1920, 1080, 24);
+            try
+            {
+                Assert.IsTrue(Juego.IniciarCinematica(doncella));
+                yield return null;
+                yield return null;
+                Assert.IsTrue(Reproductor.EnRejilla);
+                Assert.AreEqual(grande, Camara.Rejilla, "La cámara dibuja en la rejilla de sus planos.");
+                Assert.AreEqual(480, Camara.PixelPerfect.refResolutionX);
+                Assert.AreEqual(268, Camara.PixelPerfect.refResolutionY);
+                Assert.AreEqual(134f, Camara.Camara.orthographicSize, 1e-4f);
+                Assert.AreEqual(4, EscalaEn(pantalla), "En 1920 × 1080, cada píxel del plano son 4 × 4.");
+                var k = Mathf.Max(1, Mathf.Min(Screen.width / 480, Screen.height / 268));
+                Assert.AreEqual(new Vector2(480 * k, 268 * k), Reproductor.RectImagenEnPantalla.size, "El plano entero, a la escala de la pantalla.");
+                Assert.IsTrue(Juego.TerminarCinematica());
+                yield return null;
+
+                // Una de las de siempre devuelve la cámara a 240 × 135.
+                Assert.IsTrue(Juego.IniciarCinematica(Corta("DespuesDeLaDoncella")));
+                yield return null;
+                yield return null;
+                Assert.AreEqual(CamaraCinematica.RejillaPorDefecto, Camara.Rejilla);
+                Assert.AreEqual(240, Camara.PixelPerfect.refResolutionX);
+                Assert.AreEqual(67.5f, Camara.Camara.orthographicSize, 1e-4f);
+                Assert.AreEqual(8, EscalaEn(pantalla), "Y vuelve a ampliar por 8, como antes.");
+                Assert.IsTrue(Juego.TerminarCinematica());
+                yield return null;
+            }
+            finally
+            {
+                Camara.Camara.targetTexture = null;
+                pantalla.Release();
+                Object.Destroy(pantalla);
+            }
+        }
+
+        // La escala a la que la cámara de cinemáticas amplía al dibujar en esa pantalla.
+        private int EscalaEn(RenderTexture pantalla)
+        {
+            Camara.Camara.targetTexture = pantalla;
+            Camara.Camara.Render();
+            var escala = Camara.Escala;
+            Camara.Camara.targetTexture = null;
+            return escala;
+        }
+
+        [UnityTest]
         public IEnumerator PorBeats_SubeDesdeNegro_TiemblaUnPixel_Encuadra_YAcabaConDosFotogramasDeFlash()
         {
             yield return EntrarEnNivel1();

@@ -245,11 +245,16 @@ namespace Fragmentum.EditorTools
                 cambios |= PintorEscenario.Pintar(escena, provisional, true) > 0;
             }
 
-            // 9. El fondo con parallax del mundo, con los hitos repartidos según la longitud del
-            //    nivel. Por ahora solo existe el de la Ira.
+            // 9. El fondo con parallax del mundo: el de la Ira, con los hitos repartidos según la
+            //    longitud del nivel, y el de la Tristeza, con su fondo de debajo del agua.
             if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.IRA && Buscar<ParallaxMovement>(escena) == null)
             {
                 cambios |= ConstructorFondoMundo1.Colocar(escena, nivel);
+            }
+
+            if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.TRISTEZA && !ConstructorFondoMundo2.EstaColocado(escena))
+            {
+                cambios |= ConstructorFondoMundo2.Colocar(escena, nivel);
             }
 
             // 10. El Golem de Ceniza sin arte (la cápsula de la Fase 4) se sustituye por el que lo

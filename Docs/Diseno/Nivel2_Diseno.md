@@ -1,12 +1,15 @@
 # Nivel 2 · Tristeza · Ciudad Sumergida: el recorrido
 
-> **Estado:** aprobado el 2026-10-08, con todas las decisiones de la sección 9. **Fases A, B, C y D
-> montadas** en `Assets/Scenes/Nivel2.unity`, todavía sin arte: el recorrido con sus bloques, el
+> **Estado:** aprobado el 2026-10-08, con todas las decisiones de la sección 9. **Fases A a F
+> montadas** en `Assets/Scenes/Nivel2.unity`: el recorrido con sus bloques, el
 > agua y el hielo, los Lamentos, los dos checkpoints, la salida y la arena (A); el tapón de hielo
 > rompible, las placas que flotan, el oxígeno, los ecos de intentos, el eco de memoria y el velo
 > submarino (B); el pesar del Lamento, la Escultura dormida, las Medusas y la Plañidera, el
 > mini-jefe, en el sitio de la segunda Escultura (C); y la Doncella del Lamento con sus olas, su
-> inundación, su hielo y su llanto (D). Los números de
+> inundación, su hielo y su llanto (D); todo su arte, con el fondo y el tileset (E); y las
+> cinemáticas de la Doncella (F). **El autor lo jugó el 2026-10-12** y pidió los cambios de «Lo
+> que cambió tras la prueba del autor» (sección 3): el recorrido es 13 u más largo. Falta el
+> sonido. Los números de
 > abajo son los de `Assets/Scripts/Editor/DisenoNivel2.cs`, que monta `PreparadorNivel` y
 > comprueban las pruebas (`DisenoNivel2Tests`, `EscenaNivel2Tests`, `Nivel2PlayModeTests`). Si
 > cambias el recorrido, cámbialo allí y sube su `Version`: la escena se vuelve a montar entera.
@@ -29,7 +32,7 @@ pero también sostiene». El nivel convierte esas tres frases en reglas de juego
 1. **Suprimir: la superficie helada.** El hielo es la tristeza congelada, el «estoy bien». En él
    todo resbala y nada agarra. Si corres, acabas en el agua; si caminas (Alt), tienes el control.
    Los Lamentos se pegan y te vuelven pesado. Y la superficie no lleva a ningún sitio: termina en
-   una muralla que no se puede subir.
+   una muralla de hielo liso que no se puede subir, ni con el salto de pared.
 2. **Sentir: hundirse.** La única salida es romper el hielo y dejarse caer. El hielo solo cede al
    **Ataque Cargado**, la ira que Kael aprendió a contener en el mundo anterior. La grieta brilla
    en naranja, el único color cálido del mundo. Abajo todo es lento y oscuro, y falta el aire.
@@ -61,12 +64,14 @@ Medidas con los parámetros reales de Kael (`ParametrosJugador`).
 |---|---|---|
 | **Hielo** | Kael tarda 0,57 s en arrancar y 0,5 s en frenar. A toda velocidad resbala 1,5 u; caminando (Alt), solo 0,2 u. | ✔ Una franja de 0,5 u con `ZonaModificadorMovimiento` (hielo: aceleración ×0,15) sobre cada suelo de hielo y sobre cada placa. |
 | **Agua** | Velocidad ×0,6, gravedad ×0,3 y salto ×0,6, como dice el Anexo. Resultado: va más lento (3,6 u/s) y cae despacio (máx. 5,4 u/s), pero salta **más alto**: 2,9 u (en seco, 2,4) y 5,0 con doble salto (en seco, 4,1). Se ve menos: los bordes de la pantalla se oscurecen en azul. | ✔ Zonas de `ZonaModificadorMovimiento` (agua), con un velo translúcido por delante de Kael; el dash ya se bloqueaba bajo el agua sin el Dash Acuático. La visibilidad reducida es un velo del HUD (`IndicadorAgua`), la viñeta de la interfaz en azul, en lugar de un volumen de post-procesado de URP: hace lo mismo sin un perfil más que mantener. |
-| **Oxígeno** | 15 s bajo el agua. Se recarga en las bolsas de aire y al salir del agua (lleno en 1 s). **Si se acaba, Kael pierde un corazón cada 2 s**, sin empujón, hasta que respira o muere (con 5 corazones, 10 s más). Mientras tanto, la barra de aire del HUD parpadea en rojo. *Decidido el 2026-10-08.* | ✔ `OxigenoJugador` en el prefab de Kael, con su cuenta en `ReservaOxigeno`. Quita vida con `Health.PerderVida`, que no es un golpe: sin retroceso, sin i-frames y sin escudo. La barra de aire está en `IndicadorAgua`, bajo la de vida, y aparece al meterse en el agua. |
+| **Oxígeno** | **10 s** bajo el agua (eran 15 hasta el 2026-10-12: al probarlo sobraba). Se recarga en las bolsas de aire y al salir del agua (lleno en 1 s). **Si se acaba, Kael pierde un corazón cada 2 s**, sin empujón, hasta que respira o muere (con 5 corazones, 10 s más). Mientras tanto, la barra de aire del HUD parpadea en rojo. *Decidido el 2026-10-08.* | ✔ `OxigenoJugador` en el prefab de Kael, con su cuenta en `ReservaOxigeno`. Quita vida con `Health.PerderVida`, que no es un golpe: sin retroceso, sin i-frames y sin escudo. La barra de aire está en `IndicadorAgua`, bajo la de vida, y aparece al meterse en el agua. |
 | **Bolsas de aire** | Huecos sin agua bajo un techo: la campana hundida y el campanario. | ✔ Son la ausencia de agua. Falta la columna de burbujas que las señale (arte, A6). |
 | **Placas flotantes** | Placas de hielo de 2,5 u que suben y bajan 0,5 u en un seno de 3 s, a la contra dos a dos. Resbalan como el hielo. | ✔ `PlataformaFlotante`, un cuerpo cinemático: al subir empuja a Kael y al bajar (como mucho a 1 u/s) Kael la sigue por su peso. Su franja de hielo es un hijo y se mueve con ella. |
-| **Hielo rompible** | Un tapón que llena el agujero y asoma 1,25 u sobre la plaza. Un golpe normal solo lo agrieta. El Ataque Cargado lo rompe y deja el hueco abierto. *No está en el Anexo A; aprobado el 2026-10-08.* | ✔ `HieloRompible`. La espada solo golpea la capa Enemy, así que el tapón lleva una zona de golpe en esa capa, que no choca con Kael. |
+| **Hielo rompible** | Un tapón que llena el agujero y asoma 1,25 u sobre la plaza. Un golpe normal solo lo agrieta. El Ataque Cargado lo rompe y deja el hueco abierto. **Al llegar ante él, Kael lo dice** («Este hielo no cede a un golpe cualquiera. Hace falta el Ataque Cargado: contener el golpe… y soltarlo.»), y otra vez si lo agrieta sin haberlo oído. *No está en el Anexo A; aprobado el 2026-10-08. La pista, pedida el 2026-10-12.* | ✔ `HieloRompible`. La espada solo golpea la capa Enemy, así que el tapón lleva una zona de golpe en esa capa, que no choca con Kael. La pista es una `ZonaDeDialogo` delante de él, con el momento «pista» de los diálogos del nivel. |
 | **Ecos de intentos** | Graba los últimos 8 s de Kael (posición, fotograma y hacia dónde mira). Al morir guarda ese intento, y al reaparecer lo repite con una sombra translúcida que después se desvanece. | ✔ `EcoDeIntentos` (el `EchoRecorder` del Anexo), con un búfer circular (`GrabacionIntento`). No necesita arte: usa los fotogramas de Kael. |
 | **Eco de memoria** | Kael dice su línea de memoria la primera vez que toca el checkpoint («Alguien deja una silla vacía en la mesa…»). | ✔ `Checkpoint.ecoDeMemoria`, en el primer checkpoint de cada nivel; lo dice el `LevelManager`. Suena también en el Nivel 1 («Una voz grita órdenes…»). |
+| **Checkpoints que curan** | Cada vez que Kael toca un checkpoint recupera toda la vida, también si ya estaba activo. En este mundo importa: el aire que falta se paga en corazones, y la bandera de la campana los devuelve. *Pedido el 2026-10-12, para todos los niveles.* | ✔ `Checkpoint.cura`, activado por defecto: vale también para el Nivel 1. |
+| **Hielo liso** | La muralla que cierra la plaza es de hielo: se choca con ella, pero Kael ni se desliza por ella ni salta desde ella. *Pedido el 2026-10-12: con el salto de pared se subía y se saltaba medio nivel.* | ✔ `SinAgarre`, una marca en la pared que `PlayerSensors` se salta al buscar dónde agarrarse. |
 
 **El Dash Acuático se gana aquí, no se usa aquí.** En este mundo el dash no funciona bajo el
 agua, y así ya está programado. El agua se aprende sin atajos; la habilidad se estrena en el
@@ -85,23 +90,23 @@ esa décima hace que, de pie en el borde, Kael ya esté en seco.
 | **Inicio** | −6 a 5 | piedra, y 0 | Kael aparece en x 2. | **Apertura:** Kael habla al aparecer. La piedra seca es el único suelo que agarra hasta el puente. |
 | **El primer hielo** | 5 a 13 | hielo, y 0 | Un Lamento en x 9 (patrulla de 7 a 11). | A resbalar: pelear sin poder frenar. Si el Lamento te alcanza, te vuelve pesado 2 s. |
 | **Las placas** | 13 a 21 | agua hasta y −0,1 | Dos placas (x 15,25 y x 18,75) que suben de y 0 a y 1, a la contra. Debajo, 5 u de agua y un escalón (x 20 a 21, y −3) para salir. | Si llegas corriendo, resbalas al agua; si caminas, te quedas encima. **Caer no mata:** es el primer contacto con el agua, sin riesgo. |
-| **La plaza helada** | 21 a 36 | hielo, y 0; puente de piedra (x 25 a 30, y 2) | Una Escultura en x 23,5. Lamentos en x 27,5 (en el puente) y x 34,5. **La Plañidera**, el mini-jefe, en x 32 (flota de x 31 a x 33). | Lo que parecía decorado despierta. En el puente se pelea bien; en el hielo, no. Y la plaza este tiene guardiana: hay que esperar a que baje la guardia. |
-| **La muralla** | 36 a 40 | — | Al final de la plaza, el agujero (x 36 a 38) tapado por el hielo rompible, que asoma 1,25 u, y justo detrás una muralla de 9 u. El techo de hielo sigue más allá, pero no se pisa. | Por arriba no hay salida. El golpe contenido de la Ira abre el camino. |
-| **Hundirse** | 36 a 46 | agua; fondo en y −11 | Se cae 11 u, despacio. La calle hundida, con dos Medusas que suben y bajan (x 40,5 y x 43,5). | Todo pesa y se ve poco. Aparece la burbuja del oxígeno. Esperar el hueco entre las medusas. |
-| **La campana** | 46 a 53 | campana colgada del techo | Sus paredes bajan hasta y −8,5: se pasa por debajo, de pie. Dentro, el agua llega a y −7,5 y por encima queda el aire. Se sube a la repisa seca (x 49 a 51) con un doble salto bajo el agua de 3,5 u. | **CP1**, junto a la mesa y la silla vacía, y **eco de memoria.** Respirar. |
-| **La torre del reloj** | 53 a 61 | agua hasta y 1,25 | Se entra por debajo de su pared (abierta hasta y −4). Tres rellanos: y −6,75, y −2,5 e y 1,25, a ras del agua. Dos Medusas cruzan de lado a lado cada 5 s, a la contra (y −4 e y 0,1). | **El agua sostiene:** los dos primeros escalones (4,25 u) no se suben en seco (4,1) y bajo el agua sí (5,0). El último (3,75 u) sale del agua. |
-| **El campanario** | 54 a 60, y 1,25 a 7,5 | aire | Las campanas y una ventana a la derecha (y 1,25 a 4,5). | Salir del agua andando. |
-| **La antesala** | 61 a 69 | piedra, y 0 | **CP2** en x 65. | Respiro antes del jefe. |
-| **La arena** | 69 a 96 | hielo, y 0 | Sala de 25 × 15 u (interior de x 70 a 95), como la del Nivel 1. Placas en x 76 y x 89 (y 3,5) y balcón fijo (x 80 a 85, y 7), que nunca se inunda. La Doncella en x 82,5. Entrada en x 72; salida en x 93. El suelo se parte en tres franjas que ella inunda: A (x 70 a 78), B (78 a 87) y C (87 a 95). | La **presentación** al cruzar la entrada. El suelo resbala. Su agua frena, y su hielo es adonde hay que subirse para herirla. |
+| **La plaza helada** | 21 a 46 | hielo, y 0; puente de piedra (x 25 a 30, y 2) | Una Escultura en x 23,5. Lamentos en x 27,5 (en el puente) y x 44,5. **La Plañidera**, el mini-jefe, en x 38 (flota de x 36 a x 40), en mitad de la plaza este, que mide 16 u. | Lo que parecía decorado despierta. En el puente se pelea bien; en el hielo, no. Y la plaza este tiene guardiana: hay que esperar a que baje la guardia. |
+| **La muralla** | 46 a 50 | — | Al final de la plaza, el agujero (x 46 a 48) tapado por el hielo rompible, que asoma 1,25 u, y justo detrás una muralla de 9 u, **de hielo liso: no agarra**. En las 4 u de delante (x 42 a 46), Kael dice cómo se rompe el tapón. El techo de hielo sigue más allá, pero no se pisa. | Por arriba no hay salida, ni con el salto de pared. El golpe contenido de la Ira abre el camino. |
+| **Hundirse** | 46 a 56 | agua; fondo en y −11 | Se cae 11 u, despacio. La calle hundida, con dos Medusas que suben y bajan (x 50,5 y x 53,5). | Todo pesa y se ve poco. Aparece la burbuja del oxígeno. Esperar el hueco entre las medusas. |
+| **La campana** | 56 a 66 | campana colgada del techo | Sus paredes bajan hasta y −8,5: se pasa por debajo, de pie. Dentro (8 u), el agua llega a y −7,5 y por encima queda el aire. Se sube a la repisa seca (x 59 a 63) con un doble salto bajo el agua de 3,5 u, por el hueco del oeste o por el del este, que miden 2 u. | **CP1** (x 62,4), pasadas la silla vacía y la mesa, y **eco de memoria.** Respirar, y curarse. |
+| **La torre del reloj** | 66 a 74 | agua hasta y 1,25 | Se entra por debajo de su pared (abierta hasta y −4). Tres rellanos: y −6,75, y −2,5 e y 1,25, a ras del agua. Dos Medusas cruzan de lado a lado cada 5 s, a la contra (y −4 e y 0,1). | **El agua sostiene:** los dos primeros escalones (4,25 u) no se suben en seco (4,1) y bajo el agua sí (5,0). El último (3,75 u) sale del agua. |
+| **El campanario** | 67 a 73, y 1,25 a 7,5 | aire | Las campanas y una ventana a la derecha (y 1,25 a 4,5). | Salir del agua andando. |
+| **La antesala** | 74 a 82 | piedra, y 0 | **CP2** en x 78. | Respiro antes del jefe: la bandera cura. |
+| **La arena** | 82 a 109 | hielo, y 0 | Sala de 25 × 15 u (interior de x 83 a 108), como la del Nivel 1. Placas en x 89 y x 102 (y 3,5) y balcón fijo (x 93 a 98, y 7), que nunca se inunda. La Doncella en x 95,5. Entrada en x 85; salida en x 106. El suelo se parte en tres franjas que ella inunda: A (x 83 a 91), B (91 a 100) y C (100 a 108). | La **presentación** al cruzar la entrada. El suelo resbala. Su agua frena, y su hielo es adonde hay que subirse para herirla. |
 
 **Recuento frente al Anexo A:**
 
 | | Anexo A | Montado |
 |---|---|---|
-| Sección 1 | 0–30 u: sobre el hielo, resbalamiento y plataformas flotantes; 3 Lamentos y 2 Esculturas Vivientes | −6 a 36 u: lo mismo, salvo que la segunda Escultura es ahora la Plañidera, el mini-jefe |
-| Sección 2 | 30–60 u: bajo el agua, visibilidad reducida, 4 Medusas de Hielo, el melee es poco efectivo | 36 a 61 u: lo mismo |
-| Arena | 60–90 u: superficie helada sobre agua, suelo resbaladizo | 69 a 96 u: 25 × 15 u con suelo de hielo |
-| Longitud | ~90 u | ~100 u: la antesala del CP2 añade 8 |
+| Sección 1 | 0–30 u: sobre el hielo, resbalamiento y plataformas flotantes; 3 Lamentos y 2 Esculturas Vivientes | −6 a 46 u: lo mismo, salvo que la segunda Escultura es ahora la Plañidera, el mini-jefe, con una plaza de 16 u para ella |
+| Sección 2 | 30–60 u: bajo el agua, visibilidad reducida, 4 Medusas de Hielo, el melee es poco efectivo | 46 a 74 u: lo mismo |
+| Arena | 60–90 u: superficie helada sobre agua, suelo resbaladizo | 82 a 109 u: 25 × 15 u con suelo de hielo |
+| Longitud | ~90 u | ~115 u: la antesala del CP2 añade 8; la plaza de la Plañidera, 10; y la campana, 3 |
 | Checkpoints | no dice | dos: CP1 en la campana y CP2 en la antesala |
 
 ### Lo que cambió al montarlo
@@ -126,7 +131,8 @@ esa décima hace que, de pie en el borde, Kael ya esté en seco.
 
 ### Cómo se ve hoy
 
-Fotos de la escena montada (fase A, bloques de color, sin Kael):
+Fotos de la escena montada (fase A, bloques de color, sin Kael, **antes de alargar el nivel**: la
+plaza este medía 6 u y la campana, 5):
 
 ![El Nivel 2 entero](Nivel2_Montado.png)
 
@@ -190,10 +196,47 @@ Fotos de la escena montada (fase A, bloques de color, sin Kael):
 - **En la fase 2 la ronda es: ola doble, inundación, congelar y llanto.** El llanto va justo
   después de congelar para que la capa de hielo (6 s) siga ahí mientras llora.
 
-### Lo que falta, por fases
+### Lo que cambió tras la prueba del autor (2026-10-12)
 
-- **E · Arte:** vestir todo lo anterior con las imágenes, que ya están limpias.
-- **F · Narrativa y sonido:** la presentación y la derrota de la Doncella, y la música.
+El autor jugó el nivel entero (PENDIENTES N31). Dio por buenos el hielo, el agua, las placas, la
+Escultura, la torre y la Doncella con sus dos fases, y pidió esto:
+
+- **El aire dura 10 s, no 15.** Cada tramo sin aire se hace en unos 8 s sin esperar: con 15
+  sobraban 7 y la barra no importaba. Con 10 quedan 2 para esperar a una Medusa; lo que falte se
+  paga en corazones, que devuelve el checkpoint de la campana.
+- **Kael dice cómo se rompe el tapón.** La grieta naranja lo sugería, pero solo lo entendía
+  quien lo había programado. La línea suena al llegar a 4 u del tapón y, si no la ha oído, cuando
+  lo agrieta con un golpe normal. No se repite seguida y calla con el tapón roto.
+- **La plaza este mide 16 u, no 6.** Era el hueco de la segunda Escultura, que no anda; a la
+  Plañidera, que flota, barre y lanza esquirlas, se le quedaba corto. Ahora flota en el centro
+  (x 38), con 6 u libres a cada lado. El tercer Lamento sigue junto al tapón.
+- **Las esquirlas de la Plañidera son vez y media más grandes** (0,4 × 0,2 u), y su zona de golpe
+  crece con ellas (radio 0,18 u).
+- **La muralla es de hielo liso y no agarra.** El diseño contaba con que no se salta (9 u), pero
+  Kael trepa una pared sola encadenando saltos de pared: subía, andaba por el techo helado y por
+  el tejado de la torre y caía en la antesala sin haber bajado al agua. Las demás paredes siguen
+  agarrando; la regla se ve: lo que es de hielo no agarra.
+- **Los checkpoints curan** toda la vida cada vez que Kael los toca, en todos los niveles.
+- **El atrezo** (el autor lo dejó a mi criterio, N36). La estatua de piedra sale en el inicio,
+  antes que la Escultura Viviente, y otra vez en la plaza este: la primera enseña que las
+  estatuas son decorado y la Escultura lo desmiente. Los faroles marcan los tres sitios donde se
+  puede parar (el inicio, el puente y la antesala). La plaza de la Plañidera es una plaza en
+  ruinas (rocas y una columna rota). La mesa va junto a la silla vacía del eco de memoria
+  («Alguien deja una silla vacía en la mesa»), y para que quepan la silla, la mesa y la bandera
+  **la campana es 3 u más ancha** y su repisa mide 4 u, con un hueco de 2 u a cada lado. En la
+  calle hundida hay algas, la campana caída, otra columna y rocas; a los lados de la campana del
+  campanario, dos cadenas; y los estandartes cuelgan sobre el frente del puente y bajo el balcón
+  de la arena. Todo está en `DisenoNivel2.Decorados`: quitar una pieza es borrar su línea.
+- **Todo lo que hay del tapón en adelante se corrió 10 u, y de la campana en adelante, 13.** Las
+  secciones del `LevelData` (de las que sale lo que enseña la cámara) y la torre del fondo siguen
+  al diseño.
+
+### Lo que falta
+
+- **El sonido:** no hay ningún audio en el proyecto.
+- **Las puertas:** la salida, la verja de la arena y la bandera del checkpoint son rectángulos
+  de color, y el cierre del mundo, tres frases sobre negro. Los prompts de sus imágenes están en
+  `Prompts_Puertas.md`.
 
 ## 4. Medidas de Kael, para que todo se pueda cruzar
 
@@ -209,18 +252,18 @@ Fotos de la escena montada (fase A, bloques de color, sin Kael):
 - **Al salir del agua**, lo que sobra del salto sube 0,3 veces lo que subiría dentro: por eso las
   subidas que acaban en la superficie son más bajas (sección 3).
 - **Oxígeno:** los dos tramos sin aire (del agujero a la campana y de la campana al campanario)
-  se hacen en unos 8 s sin esperar. Los 15 s dejan margen para esperar a las medusas, y después
-  todavía quedan los corazones.
+  se hacen en unos 8 s sin esperar. Los 10 s dejan 2 para esperar a una medusa; después quedan
+  los corazones, que devuelve el checkpoint.
 - `DisenoNivel2Tests` comprueba cada salto en su medio, con los mismos márgenes que el Nivel 1.
 
 ## 5. Los enemigos
 
 | Enemigo | Cuántos | Cómo se comporta | Qué enseña | En el código |
 |---|---|---|---|---|
-| **Lamento** ✔ | 3 | Es el **Eco de la Tristeza**: el mismo cuerpo que el Eco de la Ira, empapado y chorreando agua (el azul de `Referencias/Arte/EnemigosNiveles.jpeg`). Lento y pesado: los datos ya existen (patrulla a 0,8 u/s, persigue a 1,4 u/s y espera 2,5 s en cada punto). Su zarpazo quita 1 de vida y **pesa**, porque Kael va a la mitad de velocidad durante 2 s. Así se cumple el «reducen velocidad al contacto» del Anexo. | La tristeza se pega si te dejas alcanzar. | `Pesar` en su arma y en su cuerpo, que aplica la `Pesadumbre` de Kael (un modificador de movimiento con tiempo). No toca `EnemyController`. Usará el controlador de animación del Eco. |
+| **Lamento** ✔ | 3 | Es el **Eco de la Tristeza**: el mismo cuerpo que el Eco de la Ira, empapado y chorreando agua (el azul de `Referencias/Arte/EnemigosNiveles.jpeg`). Lento y pesado: los datos ya existen (patrulla a 0,8 u/s, persigue a 1,4 u/s y espera 2,5 s en cada punto). Desde la fase E va a la escala de los Ecos del Nivel 1 (1,8 × 1,5) y golpea como ellos: el clip a 1,6× y 0,45 s de descanso. Su zarpazo quita 1 de vida y **pesa**, porque Kael va a la mitad de velocidad durante 2 s. Así se cumple el «reducen velocidad al contacto» del Anexo. | La tristeza se pega si te dejas alcanzar. | `Pesar` en su arma y en su cuerpo, que aplica la `Pesadumbre` de Kael (un modificador de movimiento con tiempo). No toca `EnemyController`. Usará el controlador de animación del Eco. |
 | **Escultura Viviente** ✔ | 2 | Parece una estatua más del decorado. Despierta cuando Kael pasa cerca, se gira despacio y descarga un golpe lento y telegrafiado. Tiene hiperarmadura, como el Golem: los golpes no la interrumpen. **No anda** (aprobado el 2026-10-08), y tras golpear tarda en recuperarse: ahí se la castiga. *El Anexo solo la nombra.* | Leer antes de actuar: no todo lo quieto está muerto. | `EnemyController` y `EnemyData` con la hiperarmadura que ya existe; `EsculturaDormida` lo enciende al despertar. El despertar será su clip. Golpe: 1 s de aviso, 2 de daño, y 2,25 s clavada después. |
 | **Medusa de Hielo** ✔ | 4 | Flota sobre una línea con un seno: vertical en la calle y horizontal en la torre. Quema al contacto. **No muere** (aprobado): la espada solo la aparta y la encoge 1 s. Es la forma de cumplir «el melee es poco efectivo aquí». | Hay cosas que no se vencen: se atraviesan eligiendo el momento. | Componente propio, `MedusaHielo`, porque no anda ni persigue: un cuerpo cinemático en la capa Enemy (la espada la nota y Kael la atraviesa) con un contacto que quema. Un golpe la aparta 1,5 u y la encoge 1 s. |
-| **La Plañidera** (mini-jefe) ✔ | 1 | Es el Golem del Mundo 2: un espectro encapuchado, con los ojos vendados y un arco de esquirlas a la espalda. 10 de vida. Flota hacia Kael a 1,6 u/s. Cuando lleva 2,5 s persiguiéndolo, alza las esquirlas (0,5 s), las apunta (0,8 s: el aviso) y lanza tres, una cada 0,35 s, hacia donde esté Kael; cada una quita 1 y se deshace contra el suelo o las paredes. Sin ellas llora 2 s, sin atacar ni moverse: ahí se la castiga. Si Kael se le pega, echa el brazo atrás 0,55 s y barre (quita 2). Hiperarmadura, como el Golem; tocarla no hace daño. | Esperar a que baje la guardia: lo mismo que pedirá la Doncella. | `EnemyController` y `EnemyData` con hiperarmadura, como el Golem, para acechar y barrer. `Planidera` lleva las esquirlas: apaga el controlador mientras las maneja y las lanza con el `Proyectil` de la torreta. |
+| **La Plañidera** (mini-jefe) ✔ | 1 | Es el Golem del Mundo 2: un espectro encapuchado, con los ojos vendados y un arco de esquirlas a la espalda. 10 de vida. Flota hacia Kael a 1,6 u/s. Cuando lleva 2,5 s persiguiéndolo, alza las esquirlas (0,5 s), las apunta (0,8 s: el aviso) y lanza tres, una cada 0,35 s, hacia donde esté Kael; cada una mide 0,4 × 0,2 u (vez y media lo que medía, para verla venir), quita 1 y se deshace contra el suelo o las paredes. Sin ellas llora 2 s, sin atacar ni moverse: ahí se la castiga. Si Kael se le pega, echa el brazo atrás 0,55 s y barre (quita 2). Hiperarmadura, como el Golem; tocarla no hace daño. | Esperar a que baje la guardia: lo mismo que pedirá la Doncella. | `EnemyController` y `EnemyData` con hiperarmadura, como el Golem, para acechar y barrer. `Planidera` lleva las esquirlas: apaga el controlador mientras las maneja y las lanza con el `Proyectil` de la torreta. |
 
 ## 6. El jefe: la Doncella del Lamento
 
@@ -412,7 +455,18 @@ fotogramas ya están generados.
   fase D»). Fue un ajuste al montarlo, no una decisión del autor: está en PENDIENTES N31 para
   que lo pruebe.
 
+**Respondido el 2026-10-12, tras jugarlo** (PENDIENTES N31, N36, N37 y N38):
+- **El aire dura 10 s**, no los 15 de la decisión 4.
+- **Kael da la pista del tapón**, con una línea que escribí yo (está en `Guion.md`).
+- **La plaza de la Plañidera mide 16 u** y **sus esquirlas son más grandes.**
+- **La muralla no agarra:** el salto de pared no vale en el hielo liso.
+- **Los checkpoints curan**, en todos los niveles.
+- **El resto del tileset** lo coloqué yo («decide tú»); los Lamentos y la cinemática de la
+  Doncella se quedan como están.
+
 Lo que difiere del Anexo A irá a N19, para corregirlo en la tesis: el hielo rompible, los dos
 checkpoints, el oxígeno que quita vida en lugar del fundido a blanco, la Doncella que solo es
 vulnerable al llorar, el comportamiento de la Escultura, y la Plañidera, que no está en el Anexo
-y deja el nivel con una Escultura en vez de dos.
+y deja el nivel con una Escultura en vez de dos. Y, desde el 2026-10-12: el aire dura 10 s y no
+15, los checkpoints curan, y el nivel mide unos 115 u (las secciones van de −6 a 46, de 46 a 74 y
+de 74 a 109).

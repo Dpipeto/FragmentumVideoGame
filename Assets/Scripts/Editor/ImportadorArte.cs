@@ -23,6 +23,12 @@ namespace Fragmentum.EditorTools
                 return;
             }
 
+            if (assetPath.StartsWith(ConstructorFondoMundo2.CarpetaArte + "/"))
+            {
+                ConstructorFondoMundo2.AjustarImportador(importador, ConstructorFondoMundo2.CapaDeRuta(assetPath));
+                return;
+            }
+
             if (assetPath.StartsWith(ConstructorFondoMundo1.CarpetaFondos + "/"))
             {
                 ConstructorFondoMundo1.AjustarImportador(importador, ConstructorFondoMundo1.CapaDeRuta(assetPath));

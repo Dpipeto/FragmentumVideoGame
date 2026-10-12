@@ -137,6 +137,29 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void EnLaTristeza_KaelTieneLaPistaDelTapon_YNombraElAtaqueCargado()
+        {
+            foreach (var nivel in BaseDeDatos().niveles)
+            {
+                var guion = GuionMundos.De(nivel.emocion.id);
+                var pistas = nivel.dialogos.Del(MOMENTOS_DIALOGO.PISTA);
+                if (string.IsNullOrEmpty(guion.Pista))
+                {
+                    Assert.IsEmpty(pistas, $"{nivel.name}: su mundo no tiene pista.");
+                    continue;
+                }
+
+                Assert.AreEqual(guion.Pista, pistas.Single().texto, nivel.name);
+                Assert.AreEqual("Kael", pistas.Single().hablante, "Se lo dice Kael.");
+            }
+
+            // La del mundo 2 nombra la habilidad que da el mundo 1: es lo que rompe el tapón de hielo.
+            var cargado = BaseDeDatos().niveles[0].habilidadOtorgada.nombre;
+            StringAssert.Contains(cargado, GuionMundos.De(EMOCIONES.TRISTEZA).Pista);
+            Assert.IsTrue(string.IsNullOrEmpty(GuionMundos.De(EMOCIONES.IRA).Pista), "En la Ira todavía no la tiene.");
+        }
+
+        [Test]
         public void LasCinematicasDeCierre_SonLasDelGuion_YNombranLaHabilidadOElFragmento()
         {
             foreach (var nivel in BaseDeDatos().niveles.Where(n => n.emocion.id != EMOCIONES.INTEGRACION))

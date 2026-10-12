@@ -105,6 +105,9 @@ namespace Fragmentum.UI
         /// <summary>¿La cinemática en curso se dibuja con la cámara de cinemáticas, en su rejilla?</summary>
         public bool EnRejilla { get; private set; }
 
+        /// <summary>La rejilla de la cinemática en curso: el tamaño de sus planos.</summary>
+        public Vector2Int Rejilla => Actual != null ? Actual.Rejilla : CamaraCinematica.RejillaPorDefecto;
+
         /// <summary>Segundos desde que empezó la cinemática en curso.</summary>
         public float Tiempo => Reproduciendo ? Time.unscaledTime - _inicio : 0f;
 
@@ -166,7 +169,7 @@ namespace Fragmentum.UI
             {
                 if (EnRejilla)
                 {
-                    var rejilla = CamaraCinematica.RectEnPantalla(Screen.width, Screen.height);
+                    var rejilla = CamaraCinematica.RectEnPantalla(Screen.width, Screen.height, Rejilla);
                     return new Rect(rejilla.x, rejilla.y, rejilla.width, rejilla.height);
                 }
 
@@ -270,6 +273,7 @@ namespace Fragmentum.UI
             _franjaAbajo.enabled = cinematica.sobreElJuego && !EnRejilla;
             if (EnRejilla)
             {
+                Camara.FijarRejilla(cinematica.Rejilla);
                 Camara.Empezar();
             }
             else if (Camara != null)
@@ -522,7 +526,7 @@ namespace Fragmentum.UI
         /// </summary>
         private void EscribirSobreLaRejilla(List<LineaTiempoCinematica.TextoVisible> textos, Vector2Int encuadre)
         {
-            var rejilla = CamaraCinematica.RectEnPantalla(Screen.width, Screen.height);
+            var rejilla = CamaraCinematica.RectEnPantalla(Screen.width, Screen.height, Rejilla);
             var lienzo = Lienzo;
             var factor = lienzo != null && lienzo.scaleFactor > 0f ? lienzo.scaleFactor : 1f;
             for (var i = 0; i < textos.Count; i++)
@@ -549,8 +553,9 @@ namespace Fragmentum.UI
         public static void ColocarSobreRejilla(Text texto, Shadow sombra, Cartel cartel, CutsceneData cinematica, RectInt rejilla, float factor,
             Vector2Int encuadre = default)
         {
-            var k = rejilla.width / CamaraCinematica.AnchoReferencia;
-            var (punto, alineacion) = CamaraCinematica.Anclaje(cartel, encuadre);
+            var plano = cinematica.Rejilla;
+            var k = rejilla.width / plano.x;
+            var (punto, alineacion) = CamaraCinematica.Anclaje(cartel, encuadre, plano);
             var (fx, fy) = TextoEnRejilla.Factores(alineacion);
 
             texto.text = cartel.texto;
@@ -565,7 +570,7 @@ namespace Fragmentum.UI
             rect.anchorMax = Vector2.zero;
             rect.pivot = new Vector2(fx, 1f - fy);
             rect.sizeDelta = new Vector2(rejilla.width, rejilla.height) / factor;
-            rect.anchoredPosition = new Vector2(rejilla.x + punto.x * k, rejilla.y + (CamaraCinematica.AltoReferencia - punto.y) * k) / factor;
+            rect.anchoredPosition = new Vector2(rejilla.x + punto.x * k, rejilla.y + (plano.y - punto.y) * k) / factor;
         }
 
         private (Text, CanvasGroup, Shadow) TextoSobreRejilla(int indice)

@@ -10,7 +10,10 @@ namespace Fragmentum.Narrative
         APERTURA,
         ECO_MEMORIA,
         PRE_JEFE,
-        CIERRE
+        CIERRE,
+
+        /// <summary>Lo que Kael se dice ante un obstáculo que pide una habilidad (el tapón de hielo).</summary>
+        PISTA
     }
 
     /// <summary>Una línea de diálogo interno: quién habla, qué dice y cuándo.</summary>
@@ -29,7 +32,8 @@ namespace Fragmentum.Narrative
 
     /// <summary>
     /// Diálogos internos de un mundo (tarea G): líneas de Kael y de los Arquitectos al abrir el
-    /// mundo, al activar una memoria, antes del jefe y al cerrar. Las líneas deben nombrar la
+    /// mundo, al activar una memoria, antes del jefe, al cerrar y ante un obstáculo que pide una
+    /// habilidad (la pista). Las líneas de apertura y de cierre deben nombrar la
     /// emoción del mundo; viven aquí y nunca en la escena.
     ///
     /// Los textos son los del guion (Docs/Diseno/Guion.md), que carga el generador de narrativa.

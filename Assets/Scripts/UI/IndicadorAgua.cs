@@ -6,14 +6,15 @@ namespace Fragmentum.UI
 {
     /// <summary>
     /// Lo que el HUD enseña del agua (mundo de la Tristeza):
-    /// - <b>La barra de aire</b>, bajo la de vida: aparece al meterse en el agua y se va cuando el
-    ///   aire vuelve a estar lleno. Sin aire parpadea en rojo: Kael está perdiendo corazones.
+    /// - <b>El aire</b>, bajo la vida: una burbuja que se vacía (<see cref="ArteInterfaz"/>) o, sin
+    ///   su arte, una barra. Aparece al meterse en el agua y se va cuando el aire vuelve a estar
+    ///   lleno. Sin aire parpadea en rojo: Kael está perdiendo corazones.
     /// - <b>El velo submarino:</b> los bordes de la pantalla se oscurecen en azul mientras Kael está
     ///   bajo el agua. Es la «visibilidad reducida» del Anexo A, hecha con la viñeta de la interfaz
     ///   en lugar de con un volumen de post-procesado.
     ///
-    /// Sin arte: la barra es un rectángulo y el velo, la viñeta generada por código. Cuando llegue
-    /// la burbuja del HUD (<c>Prompts_Mundo2.md</c>, A7) sustituirá a la barra.
+    /// El velo es la viñeta generada por código. La burbuja va a su tamaño: un píxel suyo, un
+    /// píxel de la interfaz.
     /// Solo escucha a <see cref="OxigenoJugador"/>: no pregunta nada en cada fotograma.
     /// </summary>
     public class IndicadorAgua : MonoBehaviour
@@ -29,16 +30,25 @@ namespace Fragmentum.UI
         private Image _velo;
         private GameObject _barra;
         private Image _relleno;
+        private Image _burbuja;
+        private Sprite[] _fotogramas;
+        private float _aire = 1f;
         private OxigenoJugador _oxigeno;
         private float _alfaVelo;
         private float _alfaVeloObjetivo;
         private bool _asfixia;
 
-        /// <summary>¿Se ve la barra de aire?</summary>
+        /// <summary>¿Se ve el aire (la burbuja o la barra)?</summary>
         public bool BarraVisible => _barra != null && _barra.activeSelf;
 
-        /// <summary>Lo que marca la barra (0 a 1).</summary>
-        public float Aire => _relleno != null ? _relleno.fillAmount : 1f;
+        /// <summary>El aire que marca (0 a 1).</summary>
+        public float Aire => _aire;
+
+        /// <summary>¿El aire es la burbuja dibujada? (Si no, la barra provisional.)</summary>
+        public bool ConBurbuja => _burbuja != null;
+
+        /// <summary>El fotograma de la burbuja que se ve ahora, o null sin arte.</summary>
+        public Sprite Burbuja => _burbuja != null ? _burbuja.sprite : null;
 
         /// <summary>Opacidad del velo submarino ahora mismo (0 fuera del agua).</summary>
         public float Velo => _alfaVelo;
@@ -56,6 +66,20 @@ namespace Fragmentum.UI
             _velo.name = "VeloSubmarino";
             _velo.color = new Color(ColorVelo.r, ColorVelo.g, ColorVelo.b, 0f);
             _velo.gameObject.SetActive(false);
+
+            var arte = ArteInterfaz.Cargar();
+            if (arte != null && arte.TieneOxigeno)
+            {
+                _fotogramas = arte.oxigeno;
+                _burbuja = FabricaUI.Objeto("BurbujaAire", raiz).gameObject.AddComponent<Image>();
+                _burbuja.sprite = _fotogramas[0];
+                _burbuja.raycastTarget = false;
+                var tamano = _fotogramas[0].rect.size;
+                FabricaUI.Colocar(_burbuja.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -100f), tamano, new Vector2(0f, 1f));
+                _barra = _burbuja.gameObject;
+                _barra.SetActive(false);
+                return;
+            }
 
             var fondo = FabricaUI.Objeto("BarraAire", raiz).gameObject.AddComponent<Image>();
             fondo.color = new Color(0f, 0f, 0f, 0.6f);
@@ -117,11 +141,23 @@ namespace Fragmentum.UI
             }
 
             _barra.SetActive(bajoElAgua || fraccion < 0.999f);
-            _relleno.fillAmount = Mathf.Clamp01(fraccion);
+            _aire = Mathf.Clamp01(fraccion);
             _asfixia = asfixia;
-            if (!asfixia)
+            if (_burbuja != null)
             {
-                _relleno.color = ColorAire;
+                _burbuja.sprite = _fotogramas[ArteInterfaz.FotogramaDeAire(_aire, _fotogramas.Length)];
+                if (!asfixia)
+                {
+                    _burbuja.color = Color.white;
+                }
+            }
+            else
+            {
+                _relleno.fillAmount = _aire;
+                if (!asfixia)
+                {
+                    _relleno.color = ColorAire;
+                }
             }
 
             _alfaVeloObjetivo = bajoElAgua ? OpacidadVelo : 0f;
@@ -140,9 +176,19 @@ namespace Fragmentum.UI
                 PintarVelo();
             }
 
-            if (_asfixia && _relleno != null)
+            if (!_asfixia)
             {
-                var encendido = Mathf.Repeat(Time.unscaledTime * ParpadeosPorSegundo, 1f) < 0.5f;
+                return;
+            }
+
+            var encendido = Mathf.Repeat(Time.unscaledTime * ParpadeosPorSegundo, 1f) < 0.5f;
+            if (_burbuja != null)
+            {
+                // La burbuja rota, que late en rojo.
+                _burbuja.color = encendido ? ColorAsfixia : Color.white;
+            }
+            else if (_relleno != null)
+            {
                 _relleno.color = encendido ? ColorAsfixia : ColorAire;
                 _relleno.fillAmount = encendido ? 1f : 0f;
             }

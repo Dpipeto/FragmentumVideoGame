@@ -282,7 +282,17 @@ namespace Fragmentum.EditorTools
             var zona = hielo.AddComponent<ZonaModificadorMovimiento>();
             Asignar(zona, "tipo", p => p.enumValueIndex = (int)ZonaModificadorMovimiento.TIPOS.HIELO);
 
-            Provisional(raiz.transform, Rect.MinMaxRect(-TamanoPlaca.x * 0.5f, -TamanoPlaca.y, TamanoPlaca.x * 0.5f, 0f), Hex("B4D2E6"), "la placa de hielo flotante");
+            // Con su arte, la placa dibujada (su pivote está en la superficie); sin él, el rectángulo.
+            var placa = ConstructorMecanicasMundo2.PlacaFlotante;
+            if (placa != null)
+            {
+                ConArte(raiz.transform, placa);
+            }
+            else
+            {
+                Provisional(raiz.transform, Rect.MinMaxRect(-TamanoPlaca.x * 0.5f, -TamanoPlaca.y, TamanoPlaca.x * 0.5f, 0f), Hex("B4D2E6"), "la placa de hielo flotante");
+            }
+
             raiz.AddComponent<Levels.Mecanicas.PlataformaFlotante>();
             return raiz;
         }
@@ -305,14 +315,45 @@ namespace Fragmentum.EditorTools
             zonaGolpe.size = TamanoTapon;
             zonaGolpe.offset = centro;
 
-            var dibujo = Provisional(raiz.transform, Rect.MinMaxRect(-TamanoTapon.x * 0.5f, -TamanoTapon.y, TamanoTapon.x * 0.5f, 0f), Hex("BFD9F2"), "el hielo rompible");
+            // Con su arte, el tapón dibujado y su Animator, que sigue el estado del script (intacto,
+            // agrietado y roto); sin él, el rectángulo que cambia de color.
+            SpriteRenderer dibujo;
+            Animator animator = null;
+            var intacto = ConstructorMecanicasMundo2.TaponIntacto;
+            var controlador = ConstructorMecanicasMundo2.Tapon.Controlador;
+            if (intacto != null && controlador != null)
+            {
+                dibujo = ConArte(raiz.transform, intacto);
+                animator = dibujo.gameObject.AddComponent<Animator>();
+                animator.runtimeAnimatorController = controlador;
+                animator.applyRootMotion = false;
+                animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            }
+            else
+            {
+                dibujo = Provisional(raiz.transform, Rect.MinMaxRect(-TamanoTapon.x * 0.5f, -TamanoTapon.y, TamanoTapon.x * 0.5f, 0f), Hex("BFD9F2"), "el hielo rompible");
+            }
+
             var componente = raiz.AddComponent<Levels.Mecanicas.HieloRompible>();
             Asignar(componente, "visual", p => p.objectReferenceValue = dibujo);
+            Asignar(componente, "animator", p => p.objectReferenceValue = animator);
             Asignar(componente, "zonaDeGolpe", p => p.objectReferenceValue = zonaGolpe);
             return raiz;
         }
 
         /// <summary>El rectángulo provisional de una pieza sin arte, y el aviso de lo que falta.</summary>
+        // El dibujo de una pieza con arte: en el origen del prefab (el pivote de su sprite es el suyo)
+        // y a escala 1 (su tamaño lo dan sus píxeles por unidad).
+        private static SpriteRenderer ConArte(Transform padre, Sprite sprite)
+        {
+            var objeto = new GameObject("Sprite") { layer = padre.gameObject.layer };
+            objeto.transform.SetParent(padre, false);
+            var dibujo = objeto.AddComponent<SpriteRenderer>();
+            dibujo.sprite = sprite;
+            dibujo.sortingOrder = OrdenDibujo;
+            return dibujo;
+        }
+
         private static SpriteRenderer Provisional(Transform padre, Rect zona, Color color, string pieza)
         {
             Debug.LogWarning($"[Fragmentum] Todavía no hay arte para {pieza}: el prefab lleva un rectángulo provisional (Docs/Diseno/Prompts_Mundo2.md).");

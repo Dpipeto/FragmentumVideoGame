@@ -149,6 +149,8 @@ namespace Fragmentum.EditorTools
             .Concat(ConstructorCentinela.FotogramasIdle.Select(fotograma =>
                 new Regla(ConstructorCentinela.RutaSprite(fotograma), ConstructorCentinela.PixelesPorUnidadIdle, ConstructorCentinela.Pivote,
                     "Centinela, idle frontal: dibujado más grande; a 58 mide lo mismo que en combate.")))
+            // Mundo 2 (Tristeza): cada constructor lleva las reglas de su arte.
+            .Concat(ArteMundo2.Reglas)
             .ToArray();
 
         public static IReadOnlyList<Regla> Reglas => Tabla;

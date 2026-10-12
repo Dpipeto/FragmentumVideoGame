@@ -12,6 +12,9 @@ namespace Fragmentum.Player
     /// La pared se detecta a ambos lados por separado. El wall jump usa el lado de la pared
     /// detectada, no la escala del sprite; en el prototipo, depender de <c>localScale.x</c>
     /// hacía saltar hacia la pared cuando el sprite estaba volteado.
+    ///
+    /// Una pared marcada con <see cref="SinAgarre"/> (el hielo liso) no cuenta como pared: Kael
+    /// choca con ella, pero ni se desliza ni salta desde ella.
     /// </summary>
     [DisallowMultipleComponent]
     public class PlayerSensors : MonoBehaviour
@@ -92,8 +95,8 @@ namespace Fragmentum.Player
 
             var b = cuerpo.bounds;
             var tamano = new Vector2(alcancePared, b.size.y * altoRelativoPared);
-            ParedDerecha = HayAlgo(new Vector2(b.max.x + alcancePared * 0.5f, b.center.y), tamano);
-            ParedIzquierda = HayAlgo(new Vector2(b.min.x - alcancePared * 0.5f, b.center.y), tamano);
+            ParedDerecha = HayAlgo(new Vector2(b.max.x + alcancePared * 0.5f, b.center.y), tamano, soloConAgarre: true);
+            ParedIzquierda = HayAlgo(new Vector2(b.min.x - alcancePared * 0.5f, b.center.y), tamano, soloConAgarre: true);
         }
 
         /// <summary>
@@ -126,7 +129,8 @@ namespace Fragmentum.Player
             return !HayAlgo(centro, tamano);
         }
 
-        private bool HayAlgo(Vector2 centro, Vector2 tamano)
+        // Con soloConAgarre no cuenta lo marcado como SinAgarre: es pared para chocar, no para agarrarse.
+        private bool HayAlgo(Vector2 centro, Vector2 tamano, bool soloConAgarre = false)
         {
             _resultados.Clear();
             Physics2D.OverlapBox(centro, tamano, 0f, _filtro, _resultados);
@@ -134,10 +138,18 @@ namespace Fragmentum.Player
             var propio = cuerpo != null ? cuerpo.attachedRigidbody : null;
             for (var i = 0; i < _resultados.Count; i++)
             {
-                if (_resultados[i] != null && (propio == null || _resultados[i].attachedRigidbody != propio))
+                var otro = _resultados[i];
+                if (otro == null || (propio != null && otro.attachedRigidbody == propio))
                 {
-                    return true;
+                    continue;
                 }
+
+                if (soloConAgarre && otro.TryGetComponent<SinAgarre>(out _))
+                {
+                    continue;
+                }
+
+                return true;
             }
 
             return false;

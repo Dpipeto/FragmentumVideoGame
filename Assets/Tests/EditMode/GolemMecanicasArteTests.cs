@@ -444,7 +444,9 @@ namespace Fragmentum.Tests
             // Los 10 fotogramas de la torreta y las plataformas se usan; la lava no tiene clip.
             var usados = ConstructorMecanicas.TodosLosClips.SelectMany(c => c.Fotogramas).Distinct().ToList();
             Assert.AreEqual(10, usados.Count);
-            var clips = AssetDatabase.FindAssets("t:AnimationClip", new[] { AnimMecanicas }).Select(AssetDatabase.GUIDToAssetPath).ToList();
+            // Solo los de esta carpeta: los de las mecánicas de los demás mundos van en subcarpetas.
+            var clips = AssetDatabase.FindAssets("t:AnimationClip", new[] { AnimMecanicas }).Select(AssetDatabase.GUIDToAssetPath)
+                .Where(c => System.IO.Path.GetDirectoryName(c)?.Replace('\\', '/') == AnimMecanicas).ToList();
             Assert.AreEqual(ClipsMecanicas.Length + 1, clips.Count, "Y el vuelo de la bola:\n" + string.Join("\n", clips));
             Assert.IsFalse(clips.Any(c => c.Contains("Lava")), "La lava es un solo fotograma: no tiene clip.");
         }

@@ -205,16 +205,129 @@ namespace Fragmentum.Tests.PlayMode
             yield return new WaitForSeconds(2.1f);
             Assert.AreEqual(vida - 2, Jugador.Vida.Vida, "Dos segundos después, otro.");
 
-            // A la bolsa de aire de la campana: se respira.
+            // A la bolsa de aire de la campana, en la otra punta de la repisa (junto a la silla
+            // vacía, sin tocar la bandera): se respira.
             var cp1 = Object.FindObjectsByType<Checkpoint>(FindObjectsInactive.Include).Single(c => c.Id == "L2_CP1");
-            yield return Mover(cp1.transform.position);
+            yield return Mover(cp1.transform.position + new Vector3(-2.8f, 0f, 0f));
             yield return new WaitForSeconds(1.2f);
             Assert.IsFalse(Jugador.Motor.BajoElAgua);
             Assert.IsFalse(oxigeno.Asfixiandose);
             Assert.AreEqual(1f, oxigeno.Fraccion, 1e-3f, "El aire vuelve entero.");
-            Assert.AreEqual(vida - 2, Jugador.Vida.Vida, "Los corazones perdidos no vuelven.");
+            Assert.AreEqual(vida - 2, Jugador.Vida.Vida, "Respirar no devuelve los corazones perdidos.");
             Assert.IsFalse(Interfaz.Hud.Agua.BarraVisible, "Con el aire lleno y fuera del agua, la barra se va.");
             Assert.Less(Interfaz.Hud.Agua.Velo, 0.05f, "Y el velo también.");
+
+            // La bandera, un paso más allá, sí: cura.
+            yield return Mover(cp1.transform.position);
+            Assert.AreEqual(Jugador.Vida.VidaMaxima, Jugador.Vida.Vida, "El checkpoint de la campana devuelve toda la vida.");
+        }
+
+        [UnityTest]
+        public IEnumerator ElAire_Dura10s_YLosCheckpoints_CuranCadaVezQueKaelLosToca()
+        {
+            yield return EntrarEnNivel2();
+            ApagarEnemigos();
+            Assert.AreEqual(10f, Jugador.GetComponent<OxigenoJugador>().Capacidad, 1e-4f, "Eran 15 s: al probar el nivel sobraba aire.");
+
+            var cp2 = Object.FindObjectsByType<Checkpoint>(FindObjectsInactive.Include).Single(c => c.Id == "L2_CP2");
+            Assert.IsTrue(cp2.Cura);
+            var bandera = (Vector2)cp2.transform.position;
+            var lejos = bandera + new Vector2(-3f, 0f);
+            var vida = Jugador.Vida;
+
+            yield return Mover(lejos);
+            vida.PerderVida(3);
+            Assert.AreEqual(vida.VidaMaxima - 3, vida.Vida, "En la antesala, lejos de la bandera, sigue herido.");
+
+            yield return Mover(bandera);
+            Assert.AreEqual(vida.VidaMaxima, vida.Vida, "Al tocarla recupera toda la vida: llega entero al jefe.");
+            var nivel = Object.FindAnyObjectByType<LevelManager>();
+            Assert.AreSame(cp2, nivel.Checkpoints.Activo);
+
+            yield return Mover(lejos);
+            vida.PerderVida(2);
+            yield return Mover(bandera);
+            Assert.AreEqual(vida.VidaMaxima, vida.Vida, "Y otra vez, aunque ya esté activo.");
+        }
+
+        [UnityTest]
+        public IEnumerator AnteElTapon_KaelDiceQueHaceFaltaElAtaqueCargado_SinRepetirse()
+        {
+            yield return EntrarEnNivel2();
+            ApagarEnemigos();
+            Fragmentum.Narrative.DialogueManager.Instancia.Limpiar(); // la apertura, fuera
+            var pista = Object.FindAnyObjectByType<ZonaDeDialogo>();
+            var tapon = Object.FindAnyObjectByType<HieloRompible>();
+            Assert.IsNotNull(pista, "Delante del tapón hay una zona con la pista.");
+            Assert.AreSame(tapon, pista.Hielo);
+            var centro = (Vector2)tapon.transform.position;
+
+            // En la plaza, lejos del tapón, Kael no dice nada.
+            yield return LlevarJugadorA(new Vector2(centro.x - 9f, 0.05f));
+            yield return null;
+            yield return null;
+            Assert.AreEqual(0, pista.Veces, "De lejos no la dice.");
+            Assert.IsTrue(string.IsNullOrEmpty(Interfaz.Hud.LineaActual));
+
+            // Al llegar ante él, sí.
+            yield return LlevarJugadorA(new Vector2(centro.x - 1.7f, 0.05f));
+            yield return null;
+            yield return null;
+            Assert.AreEqual(1, pista.Veces);
+            StringAssert.Contains("Ataque Cargado", Interfaz.Hud.LineaActual, "Kael dice con qué se rompe.");
+
+            // Un golpe normal lo agrieta. La pista acaba de sonar: no se repite.
+            var espada = Jugador.transform.Find("Pivote/Espada").GetComponent<Fragmentum.Core.Combate.Hitbox>();
+            yield return Espadazo(espada, false);
+            Assert.AreEqual(ESTADOS_HIELO.CRACKED, tapon.Estado);
+            Assert.AreEqual(1, pista.Veces, "No la dice dos veces seguidas.");
+
+            // Roto, ya no hay nada que decir.
+            yield return Espadazo(espada, true);
+            Assert.IsTrue(tapon.Roto);
+            Assert.IsFalse(pista.Decir(), "Con el tapón roto, calla.");
+            Assert.AreEqual(1, pista.Veces);
+        }
+
+        [UnityTest]
+        public IEnumerator SiKaelAgrietaElTaponSinHaberOidoLaPista_LaDiceEntonces()
+        {
+            yield return EntrarEnNivel2();
+            ApagarEnemigos();
+            Fragmentum.Narrative.DialogueManager.Instancia.Limpiar();
+            var pista = Object.FindAnyObjectByType<ZonaDeDialogo>();
+            var tapon = Object.FindAnyObjectByType<HieloRompible>();
+
+            // Un golpe que no es cargado, sin que Kael haya pasado por delante.
+            Assert.IsTrue(tapon.RecibirGolpe(default(Golpe)));
+            Assert.AreEqual(ESTADOS_HIELO.CRACKED, tapon.Estado);
+            yield return null;
+            yield return null;
+            Assert.AreEqual(1, pista.Veces, "Acaba de ver que un golpe no basta: es cuando hace falta.");
+            StringAssert.Contains("Ataque Cargado", Interfaz.Hud.LineaActual);
+        }
+
+        [UnityTest]
+        public IEnumerator LaMuralla_NoSeSubeConElSaltoDePared()
+        {
+            yield return EntrarEnNivel2();
+            ApagarEnemigos();
+            var muralla = Object.FindObjectsByType<SinAgarre>(FindObjectsInactive.Include).Single();
+            Assert.AreEqual("Muralla", muralla.name);
+            var caja = muralla.GetComponent<BoxCollider2D>().bounds;
+            var sensores = Jugador.GetComponent<PlayerSensors>();
+
+            // Kael pegado a su cara oeste, en el aire, por encima del tapón.
+            yield return Mover(new Vector2(caja.min.x - 0.45f, 4f));
+            yield return null;
+            Assert.IsFalse(sensores.ParedDerecha, "El hielo liso no es una pared a la que agarrarse.");
+            Assert.AreNotEqual(ESTADOS_JUGADOR.WALL_SLIDE, Jugador.EstadoActual);
+
+            // Una pared de ladrillo, sí: la de la izquierda del inicio.
+            var pared = Object.FindObjectsByType<BoxCollider2D>(FindObjectsInactive.Include).Single(c => c.name == "ParedIzquierda").bounds;
+            yield return Mover(new Vector2(pared.max.x + 0.45f, 3f));
+            yield return null;
+            Assert.IsTrue(sensores.ParedIzquierda, "Las demás paredes siguen agarrando.");
         }
 
         [UnityTest]
@@ -576,8 +689,8 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual(ESTADOS_ENEMIGO.DEAD, controlador.EstadoActual, "Y muere por el camino de siempre.");
             Assert.AreEqual(ESTADOS_PLANIDERA.ACECHA, planidera.Estado, "No se queda apuntando.");
 
-            yield return new WaitForSeconds(controlador.Datos.deathDelay + 0.3f);
-            Assert.IsTrue(planidera == null, "Desaparece.");
+            // Con su arte se deshace (M1 a M3), deja la venda un momento y se desvanece.
+            yield return Hasta(() => planidera == null, 4f, "que desaparezca");
         }
 
         // --- La arena: la Doncella del Lamento ---
@@ -621,6 +734,68 @@ namespace Fragmentum.Tests.PlayMode
             var antes = doncella.Vida.Vida;
             doncella.Vida.RecibirGolpe(new Golpe(1, doncella.Centro));
             Assert.AreEqual(antes - 2, doncella.Vida.Vida, "Llorando, cada golpe vale el doble.");
+        }
+
+        // --- Las cinemáticas de la Doncella y su fragmento ---
+
+        [UnityTest]
+        public IEnumerator AlEntrarEnLaArena_SePresentaLaDoncella_YAlCaer_SeVeSuDerrota_YSuFragmentoDaElDashAcuatico()
+        {
+            yield return EntrarEnNivel2();
+            ApagarEnemigos();
+            var arena = Object.FindAnyObjectByType<ArenaJefe>();
+            var doncella = (DoncellaLamento)arena.Jefe;
+            var salida = Object.FindAnyObjectByType<SalidaNivel>();
+            var rejilla = new Vector2Int(480, 268);
+            Assert.IsFalse(salida.Abierta, "Con ella viva, la salida está cerrada.");
+            Assert.IsFalse(Jugador.Habilidades.Tiene(HABILIDADES.DASH_ACUATICO));
+
+            // Al cruzar la entrada, su presentación: sus planos, opacos y en su rejilla.
+            yield return LlevarJugadorA(EnElSuelo(arena.transform.position));
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar, la presentación de la Doncella.");
+            Assert.IsNotNull(Nivel2.cinematicaJefe);
+            Assert.AreSame(Nivel2.cinematicaJefe, Juego.CinematicaActual);
+            Assert.IsTrue(arena.Presentando);
+            Assert.IsFalse(doncella.EnCombate, "Ella espera a que termine.");
+            Assert.IsFalse(Interfaz.Cinematica.SobreElJuego, "Con sus planos, es opaca.");
+            Assert.AreEqual(rejilla, Interfaz.CamaraCinematica.Rejilla, "Sus planos de 480 × 268, en su rejilla.");
+
+            yield return SaltarCinematicaSiHay();
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual);
+            Assert.IsTrue(arena.EnCombate);
+            Assert.IsTrue(doncella.EnCombate);
+            StringAssert.Contains("DONCELLA DEL LAMENTO", Interfaz.Hud.NombreJefe);
+
+            // Al caer se derrite y deja su fragmento sobre el charco: todavía no hay recompensa.
+            doncella.Vida.Matar();
+            yield return null;
+            yield return null;
+            Assert.IsTrue(arena.JefeDerrotado);
+            Assert.IsTrue(doncella.DejaFragmento);
+            CollectionAssert.DoesNotContain(Gestor.Datos.fragmentos, "TRISTEZA", "El fragmento hay que recogerlo.");
+            yield return Hasta(() => doncella.Fragmento.Disponible, 5f, "que el fragmento aparezca sobre el charco (M5)");
+
+            // Cuando termina de derretirse, su cinemática; después, de vuelta al juego.
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Cuando termina de derretirse, la cinemática de su derrota.");
+            Assert.IsNotNull(Nivel2.cinematicaJefeDerrotado);
+            Assert.AreSame(Nivel2.cinematicaJefeDerrotado, Juego.CinematicaActual);
+            Assert.AreEqual(rejilla, Interfaz.CamaraCinematica.Rejilla);
+            yield return SaltarCinematicaSiHay();
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual, "Y se vuelve al juego, con el fragmento en el charco.");
+            Assert.IsTrue(doncella.Fragmento.Disponible);
+            Assert.IsFalse(arena.Superada, "La arena no se abre antes de recogerlo.");
+
+            // El fragmento flota a la altura de la cabeza de Kael: lo recoge al pasar por debajo.
+            Assert.AreEqual(doncella.Suelo, doncella.Pies.y, 0.01f, "El charco está en el hielo.");
+            yield return LlevarJugadorA(new Vector2(doncella.Fragmento.Centro.x, arena.transform.position.y + 0.05f));
+            yield return Hasta(() => doncella.FragmentoRecogido, 1.5f, "que Kael recoja el fragmento al pasar por debajo");
+            CollectionAssert.Contains(Gestor.Datos.fragmentos, "TRISTEZA");
+            Assert.IsTrue(Jugador.Habilidades.Tiene(HABILIDADES.DASH_ACUATICO), "El Dash Acuático se puede usar ya, antes de salir.");
+            Assert.IsFalse(Interfaz.Hud.JefeVisible);
+
+            yield return Hasta(() => arena.Superada, 4f, "que se abra la arena");
+            Assert.IsFalse(arena.PuertasCerradas);
+            Assert.IsTrue(salida.Abierta, "Tras la derrota se abre la salida.");
         }
 
         private static IEnumerator Hasta(System.Func<bool> condicion, float maximo, string descripcion)

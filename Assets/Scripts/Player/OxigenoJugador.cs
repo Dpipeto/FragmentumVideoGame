@@ -104,7 +104,8 @@ namespace Fragmentum.Player
     /// <see cref="capacidad"/> s y se recarga al salir del agua o en una bolsa de aire. Cuando se
     /// acaba, Kael no muere de golpe: pierde un corazón cada <see cref="intervaloAsfixia"/> s, sin
     /// retroceso (<see cref="Health.PerderVida"/>), hasta que respira o muere. Decisión del
-    /// 2026-10-08, en lugar del fundido a blanco del Anexo.
+    /// 2026-10-08, en lugar del fundido a blanco del Anexo. Dura 10 s desde el 2026-10-12 (eran
+    /// 15, y al probar el nivel sobraba): cada tramo sin aire se hace en unos 8.
     ///
     /// Sabe si está bajo el agua por el motor (<see cref="PlayerMotor.BajoElAgua"/>), que lo marcan
     /// las zonas de agua. La barra del HUD escucha <see cref="OnCambio"/>.
@@ -114,10 +115,10 @@ namespace Fragmentum.Player
     public class OxigenoJugador : MonoBehaviour
     {
         [Tooltip("Segundos de aire bajo el agua.")]
-        [Min(1f)] [SerializeField] private float capacidad = 15f;
+        [Min(1f)] [SerializeField] private float capacidad = 10f;
 
-        [Tooltip("Segundos de aire que se recuperan por segundo fuera del agua (15 = lleno en 1 s).")]
-        [Min(0.5f)] [SerializeField] private float recargaPorSegundo = 15f;
+        [Tooltip("Segundos de aire que se recuperan por segundo fuera del agua (los de la capacidad = lleno en 1 s).")]
+        [Min(0.5f)] [SerializeField] private float recargaPorSegundo = 10f;
 
         [Tooltip("Sin aire, se pierde un corazón cada estos segundos.")]
         [Min(0.25f)] [SerializeField] private float intervaloAsfixia = 2f;

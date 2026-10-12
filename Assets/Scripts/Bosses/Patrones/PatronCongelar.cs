@@ -1,4 +1,5 @@
 using System.Collections;
+using Fragmentum.Core;
 using UnityEngine;
 
 namespace Fragmentum.Bosses.Patrones
@@ -34,6 +35,7 @@ namespace Fragmentum.Bosses.Patrones
 
             jefe.MirarAlJugador();
             jefe.Avisar(aviso);
+            (jefe as DoncellaLamento)?.Gesto(AnimatorParams.Congelar, aviso);
             foreach (var franja in inundadas)
             {
                 franja.Congelar(aviso, duracionPuas, duracionCapa, danio);

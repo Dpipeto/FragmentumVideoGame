@@ -16,38 +16,41 @@ MonoBehaviour:
   diapositivas:
   - imagen: {fileID: 0}
     texto: 
-    carteles:
-    - texto: DONCELLA DEL LAMENTO
-      inicio: 0.2
-      duracion: 2.8
-      posicion: 1
-      titulo: 1
-      sinFundido: 0
-      enPunto: 0
-      punto: {x: 0, y: 0}
-      alineacion: 0
-    - texto: Ciudad Sumergida
-      inicio: 0.6
-      duracion: 2.4
-      posicion: 2
-      titulo: 0
-      sinFundido: 0
-      enPunto: 0
-      punto: {x: 0, y: 0}
-      alineacion: 0
-    duracion: 3
+    carteles: []
+    duracion: 0.3
     audio: {fileID: 0}
     fundidoEntrada: 0
     fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
+  - imagen: {fileID: 21300000, guid: 6e3526f5ea7536a4faa77adc60164049, type: 3}
+    texto: 
+    carteles:
+    - texto: "\xC9l cerr\xF3 los ojos para no llorar, y la ciudad se hundi\xF3."
+      inicio: 0.9
+      duracion: 3.6
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 240}
+      alineacion: 1
+    duracion: 3.8
+    audio: {fileID: 0}
+    fundidoEntrada: 0.7
+    fundidoSalida: 0.3
     desplazamiento: {x: 0, y: 0}
     temblores: []
     brasas: 0
     flashFinal: 0
     cues: []
   - imagen: {fileID: 0}
-    texto: "Doncella del Lamento: \xC9l cerr\xF3 los ojos para no llorar, y la ciudad se hundi\xF3. \xBFVienes a cerrarlos t\xFA tambi\xE9n?"
+    texto: 
     carteles: []
-    duracion: 4.5
+    duracion: 0.2
     audio: {fileID: 0}
     fundidoEntrada: 0
     fundidoSalida: 0
@@ -56,15 +59,55 @@ MonoBehaviour:
     brasas: 0
     flashFinal: 0
     cues: []
+  - imagen: {fileID: 21300000, guid: f9ad18304a0167540ba7e47604b7ef1f, type: 3}
+    texto: 
+    carteles:
+    - texto: "\xBFVienes a cerrarlos t\xFA tambi\xE9n?"
+      inicio: 0.5
+      duracion: 1.8
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 240}
+      alineacion: 1
+    - texto: DONCELLA DEL LAMENTO
+      inicio: 2.5
+      duracion: 1.7
+      posicion: 2
+      titulo: 1
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 222}
+      alineacion: 1
+    - texto: Ciudad Sumergida
+      inicio: 2.5
+      duracion: 1.7
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 246}
+      alineacion: 1
+    duracion: 3.6
+    audio: {fileID: 0}
+    fundidoEntrada: 0.6
+    fundidoSalida: 0.3
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   saltable: 1
-  soloPrimeraVez: 0
+  soloPrimeraVez: 1
   llevaDialogoDelJefe: 1
-  montaje: 0
-  sobreElJuego: 1
+  montaje: 1
+  sobreElJuego: 0
   opacidadVelo: 0.55
-  escalaEntera: 0
+  escalaEntera: 1
+  rejilla: {x: 480, y: 268}
   fuente: {fileID: 0}
-  tamanoFuente: 8
+  tamanoFuente: 10
   interlineado: 0
   colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
   temblorPixeles: 1
@@ -72,8 +115,8 @@ MonoBehaviour:
   fundidoImagen: 0.4
   fundidoTexto: 0.4
   margenTexto: 0.8
-  bloqueoSalto: 1
-  avisoSaltar: Pulsa cualquier tecla para saltar
+  bloqueoSalto: 0.5
+  avisoSaltar: 
   finAviso: 4
   opacidadAviso: 0.45
   musica: {fileID: 0}

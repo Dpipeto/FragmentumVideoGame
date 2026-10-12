@@ -15,7 +15,7 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 SALIDA = os.path.join(AQUI, '..', 'Docs', 'Diseno', 'Nivel2_Diseno.png')
 
 U = 14                      # px por unidad
-X0, X1, Y0, Y1 = -7, 97, -13, 17
+X0, X1, Y0, Y1 = -7, 110, -13, 17
 MARGEN_IZQ, MARGEN_SUP, MARGEN_INF = 40, 76, 170
 ANCHO = (X1 - X0) * U + MARGEN_IZQ + 24
 ALTO = (Y1 - Y0) * U + MARGEN_SUP + MARGEN_INF
@@ -78,42 +78,42 @@ d = ImageDraw.Draw(img, 'RGBA')
 f, fb, fp, ft = fuente(13), fuente(13, True), fuente(11), fuente(20, True)
 
 # Secciones
-SECCIONES = ((-7, 36, 'SECCIÓN 1 · La superficie helada', (20, 30, 44)),
-             (36, 61, 'SECCIÓN 2 · Hundirse', (14, 26, 46)),
-             (61, 97, 'ARENA · La Doncella del Lamento', (22, 30, 50)))
+SECCIONES = ((-7, 46, 'SECCIÓN 1 · La superficie helada', (20, 30, 44)),
+             (46, 74, 'SECCIÓN 2 · Hundirse', (14, 26, 46)),
+             (74, 110, 'ARENA · La Doncella del Lamento', (22, 30, 50)))
 for desde, hasta, _, color in SECCIONES:
     rect(d, desde, Y0, hasta, Y1, color)
 
 # --- Lo mismo que DisenoNivel2 ---
 BAJO = 0.1                       # DisenoNivel2.BajoLaSuperficie
 AGUAS = [(13, 21, -5, 0 - BAJO),         # AguaDeLasPlacas: caer no mata
-         (36, 46, -11, -1),              # AguaDeLaCalle
-         (46, 53, -11, -7.5 - BAJO),     # AguaBajoLaCampana
-         (53, 54, -11, -4),              # AguaAntesDeLaTorre
-         (54, 60, -11, 1.25 - BAJO)]     # AguaDeLaTorre
-BOLSAS = [(47, 52, -7.5 - BAJO, -1),     # BolsaDeLaCampana
-          (54, 60, 1.25 - BAJO, 7.5)]    # Campanario
-SUELOS = [(-6, 5, 0), (5, 13, 0), (13, 21, -5), (21, 36, 0), (36, 60, -11), (61, 69, 0), (69, 96, 0)]
+         (46, 56, -11, -1),              # AguaDeLaCalle
+         (56, 66, -11, -7.5 - BAJO),     # AguaBajoLaCampana
+         (66, 67, -11, -4),              # AguaAntesDeLaTorre
+         (67, 73, -11, 1.25 - BAJO)]     # AguaDeLaTorre
+BOLSAS = [(57, 65, -7.5 - BAJO, -1),     # BolsaDeLaCampana
+          (67, 73, 1.25 - BAJO, 7.5)]    # Campanario
+SUELOS = [(-6, 5, 0), (5, 13, 0), (13, 21, -5), (21, 46, 0), (46, 73, -11), (74, 82, 0), (82, 109, 0)]
 BLOQUES = [(20, 21, -5, -3),          # EscalonDeLasPlacas
            (25, 30, 0, 2),            # Puente
-           (49, 51, -8, -7.5),        # RepisaDeLaCampana
-           (57, 60, -7.25, -6.75),    # Rellano1
-           (54, 57, -3, -2.5),        # Rellano2
-           (57, 60, 0.75, 1.25),      # Rellano3
-           (80, 85, 6.5, 7)]          # Balcon
+           (59, 63, -8, -7.5),        # RepisaDeLaCampana
+           (70, 73, -7.25, -6.75),    # Rellano1
+           (67, 70, -3, -2.5),        # Rellano2
+           (70, 73, 0.75, 1.25),      # Rellano3
+           (93, 98, 6.5, 7)]          # Balcon
+MURALLA = (48, 50, 0, 9)                  # de hielo liso: no agarra (DisenoNivel2.NoAgarra)
 PAREDES = [(-7, -6, FONDO_BLOQUES, 17),   # ParedIzquierda
-           (38, 53, -1, 0),               # TechoDeHielo
-           (38, 40, 0, 9),                # Muralla
-           (46, 47, -8.5, -1),            # CampanaOeste
-           (52, 53, -8.5, -1),            # CampanaEste
-           (53, 54, -4, 7.5),             # TorreOeste
-           (60, 61, FONDO_BLOQUES, 1.25), # TorreEsteBaja
-           (60, 61, 4.5, 7.5),            # TorreEsteAlta
-           (53, 61, 7.5, 8.5),            # TejadoDeLaTorre
-           (95, 96, 0, 17),               # ParedArena
-           (69, 96, 15, 17)]              # TechoArena
-HIELOS = [(5, 13), (21, 25), (30, 36), (70, 95)]
-PLACAS = [(15.25, 0.5), (18.75, 0.5), (76, 3.5), (89, 3.5)]   # centro de su oscilación
+           (48, 66, -1, 0),               # TechoDeHielo
+           (56, 57, -8.5, -1),            # CampanaOeste
+           (65, 66, -8.5, -1),            # CampanaEste
+           (66, 67, -4, 7.5),             # TorreOeste
+           (73, 74, FONDO_BLOQUES, 1.25), # TorreEsteBaja
+           (73, 74, 4.5, 7.5),            # TorreEsteAlta
+           (66, 74, 7.5, 8.5),            # TejadoDeLaTorre
+           (108, 109, 0, 17),             # ParedArena
+           (82, 109, 15, 17)]             # TechoArena
+HIELOS = [(5, 13), (21, 25), (30, 46), (83, 108)]
+PLACAS = [(15.25, 0.5), (18.75, 0.5), (89, 3.5), (102, 3.5)]   # centro de su oscilación
 
 for x0, x1, y0, y1 in AGUAS:
     rect(d, x0, y0, x1, y1, AGUA)
@@ -131,10 +131,18 @@ for x0, x1, y0, y1 in BLOQUES + PAREDES:
 for x0, x1 in HIELOS:
     rect(d, x0, -0.35, x1, 0, HIELO)
 
+# La muralla, de hielo liso: no se sube con el salto de pared
+rect(d, MURALLA[0], MURALLA[2], MURALLA[1], MURALLA[3], FLOTANTE, HIELO, 2)
+
 # Hielo rompible: un tapón que llena el agujero y asoma 1,25 u; solo cede al Ataque Cargado
-rect(d, 36, -1, 38, 1.25, (60, 40, 30), ROMPIBLE, 2)
-a, b = px(26.6, -1.4)
+rect(d, 46, -1, 48, 1.25, (60, 40, 30), ROMPIBLE, 2)
+a, b = px(36.6, -1.4)
 d.text((a, b), 'hielo rompible (Ataque Cargado) →', font=fp, fill=ROMPIBLE)
+
+# La pista: delante del tapón, Kael dice cómo se rompe (DisenoNivel2.PistaDelTapon)
+discontinuo(d, 42, 0, 46, 3, ROMPIBLE, paso=4)
+a, b = px(40.2, 4.4)
+d.text((a, b), 'pista de Kael', font=fp, fill=ROMPIBLE)
 
 
 def flotante(x, y, ancho=2.5, amplitud=0.6):
@@ -147,11 +155,11 @@ for x, y in PLACAS:
     flotante(x, y, amplitud=0.5)
 
 # Inundación de la arena (fase D): tres franjas (DisenoNivel2.Franjas), sube hasta y 3,5
-for i, (x0, x1) in enumerate(((70, 78), (78, 87), (87, 95))):
+for i, (x0, x1) in enumerate(((83, 91), (91, 100), (100, 108))):
     discontinuo(d, x0, 0, x1, 3.5, (120, 180, 230), paso=4)
     a, b = px(x0 + 0.4, 3.3)
     d.text((a, b), 'ABC'[i], font=fb, fill=(120, 180, 230))
-a, b = px(70.5, -1.2)
+a, b = px(83.5, -1.2)
 d.text((a, b), 'franjas A, B y C: agua hasta y 3,5 (rayado); congelada, se pisa', font=fp, fill=(120, 180, 230))
 
 
@@ -162,51 +170,52 @@ def punto(x, y, color, letra, r=7):
     d.text((a - w / 2, b - 2 * r + 1), letra, font=fp, fill=(10, 16, 24))
 
 
-for x, y in ((9, 0), (27.5, 2), (34.5, 0)):
+for x, y in ((9, 0), (27.5, 2), (44.5, 0)):
     punto(x, y, LAMENTO, 'L')
 punto(23.5, 0, ESCULTURA, 'S', r=9)
-# El mini-jefe, donde estaba la segunda Escultura: guarda el tapón de hielo.
-punto(32, 0, PLANIDERA, 'P', r=13)
-for x, y, flecha in ((40.5, -8.5, '↕'), (43.5, -6.5, '↕'), (57, -4.75, '↔'), (57, -0.7, '↔')):
+# El mini-jefe, en mitad de la plaza este (16 u): guarda el tapón de hielo.
+punto(38, 0, PLANIDERA, 'P', r=13)
+for x, y, flecha in ((50.5, -8.5, '↕'), (53.5, -6.5, '↕'), (70, -4.75, '↔'), (70, -0.7, '↔')):
     punto(x, y, MEDUSA, 'M')
     a, b = px(x + 0.7, y + 0.9)
     d.text((a, b), flecha, font=fb, fill=TEXTO)
 # Flota con los pies a y 3: entera bajo el balcón y dentro de lo que enseña la cámara.
-punto(82.5, 3, JEFE, 'D', r=16)
-a, b = px(82.5, 10.4)
+punto(95.5, 3, JEFE, 'D', r=16)
+a, b = px(95.5, 10.4)
 d.text((a - 76, b), 'flota a y 3; baja a llorar', font=fp, fill=TEXTO)
 
 # Inicio, checkpoints, salida, puerta
 a, b = px(2, 0)
 d.rectangle([a - 4, b - 22, a + 4, b], fill=HIELO)
 d.text((a - 14, b - 40), 'Kael', font=fb, fill=TEXTO)
-for x, y, nombre in ((50, -7.5, 'CP1 · la silla vacía'), (65, 0, 'CP2')):
+for x, y, nombre in ((62.4, -7.5, 'CP1 · la silla vacía y la mesa'), (78, 0, 'CP2')):
     a, b = px(x, y)
     d.line([a, b, a, b - 30], fill=(200, 200, 205), width=3)
     d.polygon([(a, b - 30), (a + 12, b - 25), (a, b - 20)], fill=ACENTO)
-    if x < 60:
-        a2, b2 = px(47.3, -9.3)
+    if x < 70:
+        a2, b2 = px(57.3, -9.3)
         d.text((a2, b2), nombre, font=fp, fill=TEXTO)
     else:
         d.text((a - 10, b - 46), nombre, font=fp, fill=TEXTO)
-a, b = px(93, 0)
+a, b = px(106, 0)
 d.rectangle([a - 10, b - 80, a + 10, b], outline=ACENTO, width=2)
 d.text((a - 16, b - 96), 'salida', font=fp, fill=TEXTO)
-a, b = px(66, 5.4)
+a, b = px(79, 5.4)
 d.text((a, b), 'puerta →', font=fp, fill=TEXTO)
-a, b = px(40.3, 1.4)
+a, b = px(50.6, 1.4)
 d.text((a, b), 'techo de hielo: no se pisa', font=fp, fill=TENUE)
 
 # Rótulos de tramo
 for x, y, texto in ((-5.5, 3.2, 'piedra: no resbala'), (6, 2.0, 'primer hielo'), (13.2, 2.6, 'placas flotantes'),
-                    (13.2, -6.6, 'caer al agua no mata'), (25, 4.0, 'puente de piedra'), (38.2, 10.6, 'muralla'),
-                    (36.5, -2.6, 'la calle hundida'), (46.3, 0.2, 'la campana'), (53.6, 10, 'la torre del reloj'),
-                    (54.3, 5.6, 'campanario (aire)'), (54.2, -10, 'escalones de 4,25 u'), (61.5, 2.4, 'antesala')):
+                    (13.2, -6.6, 'caer al agua no mata'), (25, 4.0, 'puente de piedra'), (31, 6.4, 'plaza este: 16 u'),
+                    (44.2, 10.6, 'muralla de hielo: no agarra'),
+                    (46.5, -2.6, 'la calle hundida'), (57.3, 0.2, 'la campana'), (66.6, 10, 'la torre del reloj'),
+                    (67.3, 5.6, 'campanario (aire)'), (67.2, -10, 'escalones de 4,25 u'), (74.5, 2.4, 'antesala')):
     a, b = px(x, y)
     d.text((a, b), texto, font=fp, fill=TENUE)
 
 # Cotas
-for x in range(-5, 96, 5):
+for x in range(-5, 110, 5):
     a, b = px(x, Y0)
     d.line([a, b, a, b + 6], fill=TENUE)
     d.text((a - 6, b + 8), str(x), font=fp, fill=TENUE)
@@ -238,9 +247,9 @@ for color, nombre in items:
     d.text((lx + 20, ly + fila * 22), nombre, font=f, fill=TEXTO)
     lx += ancho_item
 ly += (fila + 1) * 22 + 8
-d.text((MARGEN_IZQ, ly), 'Diálogos: apertura al aparecer (x 2) · eco de memoria en CP1, junto a la silla vacía · presentación de la Doncella al cruzar la entrada (x 72) · cierre al recoger el fragmento.',
+d.text((MARGEN_IZQ, ly), 'Diálogos: apertura al aparecer (x 2) · la pista ante el tapón (x 42 a 46) · eco de memoria en CP1, junto a la silla vacía · presentación de la Doncella al cruzar la entrada (x 85) · cierre al recoger el fragmento.',
        font=f, fill=TENUE)
-d.text((MARGEN_IZQ, ly + 20), 'Medidas de Kael: en seco sube 2,4 u (4,1 con doble salto); bajo el agua, 2,9 u (5,0). Los dos primeros escalones de la torre (4,25 u) solo se suben bajo el agua.',
+d.text((MARGEN_IZQ, ly + 20), 'Medidas de Kael: en seco sube 2,4 u (4,1 con doble salto); bajo el agua, 2,9 u (5,0). Los dos primeros escalones de la torre (4,25 u) solo se suben bajo el agua. Aire: 10 s. Los checkpoints curan.',
        font=f, fill=TENUE)
 
 os.makedirs(os.path.dirname(SALIDA), exist_ok=True)

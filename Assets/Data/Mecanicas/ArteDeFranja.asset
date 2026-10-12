@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246440ec163f0d546922a2a5d5b291d9, type: 3}
+  m_Name: ArteDeFranja
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Levels.Mecanicas.ArteDeFranja
+  aviso:
+  - {fileID: 21300000, guid: f7ca92ff3ccd3ea41bd3e6d5e8817225, type: 3}
+  - {fileID: 21300000, guid: 7d359d87a40e89244855277f55684d4b, type: 3}
+  separacionAviso: 3
+  superficie:
+  - {fileID: 21300000, guid: 796be174f52ff034394ae5da6336edbb, type: 3}
+  - {fileID: 21300000, guid: 3f080822a6d730c4dae8dd6329db55fa, type: 3}
+  - {fileID: 21300000, guid: fdadcfb4fafe0dd4e98b7e1f28a04802, type: 3}
+  segundosSuperficie: 0.25
+  fondoSuperficie: 0.6976744
+  colorAgua: {r: 0.10980392, g: 0.17254902, b: 0.26666668, a: 0.5019608}
+  puasAviso: {fileID: 21300000, guid: d315272a88fbd59458a95bb58ee96d58, type: 3}
+  puasBrota: {fileID: 21300000, guid: 2626e5fd1b5c96e4a83d2fe3dd83b3c5, type: 3}
+  puasQuietas:
+  - {fileID: 21300000, guid: d815c6d27b425d4478e45732a35191ec, type: 3}
+  - {fileID: 21300000, guid: 54c590eb75cf6ac458df5b9479cbc95b, type: 3}
+  puasRompe: {fileID: 21300000, guid: 0da015077e76a7348a42eeed6833df18, type: 3}
+  anchoPuas: 2.4418604
+  segundosBrota: 0.08
+  segundosQuieta: 0.12
+  segundosRompe: 0.25
+  capaSeForma: {fileID: 21300000, guid: 92a902d7787eb4348af6b7ad0c729826, type: 3}
+  capaEntera: {fileID: 21300000, guid: 192a5314a819bbc4d83b2485b652954b, type: 3}
+  capaSeDerrite: {fileID: 21300000, guid: 51d83c9911a28e74cac03525f3e38377, type: 3}
+  anchoLosa: 2.6617646
+  segundosFormarse: 0.15
+  segundosDerretirse: 0.6

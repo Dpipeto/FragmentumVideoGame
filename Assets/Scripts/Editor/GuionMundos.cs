@@ -30,6 +30,12 @@ namespace Fragmentum.EditorTools
             /// <summary>La línea del jefe antes del combate. Vacío: el mundo no tiene jefe.</summary>
             public string AntesDelJefe;
 
+            /// <summary>
+            /// Lo que Kael se dice ante el obstáculo del mundo que pide una habilidad que ya tiene
+            /// (el tapón de hielo y el Ataque Cargado). Vacío: el mundo no tiene.
+            /// </summary>
+            public string Pista;
+
             public string Cierre;
 
             /// <summary>Los textos de la cinemática de cierre del mundo.</summary>
@@ -61,6 +67,7 @@ namespace Fragmentum.EditorTools
                 Apertura = "Una ciudad entera bajo el agua y ni una lágrima en la superficie. Así de callada es la Tristeza.",
                 EcoMemoria = "Alguien deja una silla vacía en la mesa. Nadie la quita. Nadie la nombra.",
                 AntesDelJefe = "Él cerró los ojos para no llorar, y la ciudad se hundió. ¿Vienes a cerrarlos tú también?",
+                Pista = "Este hielo no cede a un golpe cualquiera. Hace falta el Ataque Cargado: contener el golpe… y soltarlo.",
                 Cierre = "Me dejé hundir y no me ahogué. La Tristeza pesa, pero también sostiene.",
                 CinematicaCierre = new[]
                 {

@@ -135,12 +135,36 @@ namespace Fragmentum.Tests
             }
 
             Assert.IsTrue(hielos.All(h => h.Modificador.aceleracion < 0.5f), "El hielo resbala.");
-            foreach (var agua in aguas)
+            // Con su arte, la zona no se dibuja ella: la dibujan su superficie y, debajo, su cuerpo liso.
+            var conArte = ConstructorMecanicasMundo2.SuperficieDelAgua != null;
+            foreach (var esperado in DisenoNivel2.Aguas)
             {
-                var dibujo = agua.GetComponent<SpriteRenderer>();
-                Assert.IsNotNull(dibujo, $"{agua.name} se ve.");
-                Assert.Less(dibujo.color.a, 1f, "Translúcida.");
-                Assert.AreEqual(PreparadorNivel.OrdenAgua, dibujo.sortingOrder, "Por delante de Kael: se le ve sumergido.");
+                var agua = aguas.Single(a => a.name == esperado.Nombre);
+                var dibujos = new List<SpriteRenderer>();
+                if (conArte)
+                {
+                    Assert.IsNull(agua.GetComponent<SpriteRenderer>(), $"{agua.name}: con arte, el velo liso sobra.");
+                    var superficie = agua.transform.parent.Find(PreparadorNivel.NombreSuperficie(esperado));
+                    var cuerpo = agua.transform.parent.Find(PreparadorNivel.NombreCuerpoDelAgua(esperado));
+                    Assert.IsNotNull(superficie, $"{agua.name} tiene su superficie.");
+                    Assert.IsNotNull(cuerpo, $"{agua.name} tiene su cuerpo.");
+                    Assert.AreEqual(esperado.Arriba, superficie.position.y, 1e-4f, $"{agua.name}: la superficie, a la altura del agua.");
+                    Assert.AreEqual(esperado.Hasta - esperado.Desde, superficie.GetComponent<SpriteRenderer>().size.x, 1e-4f, agua.name);
+                    Assert.IsNotNull(superficie.GetComponent<BucleDeSprites>(), $"{agua.name}: la superficie se mueve.");
+                    dibujos.Add(superficie.GetComponent<SpriteRenderer>());
+                    dibujos.Add(cuerpo.GetComponent<SpriteRenderer>());
+                }
+                else
+                {
+                    dibujos.Add(agua.GetComponent<SpriteRenderer>());
+                }
+
+                foreach (var dibujo in dibujos)
+                {
+                    Assert.IsNotNull(dibujo, $"{agua.name} se ve.");
+                    Assert.Less(dibujo.color.a, 1f, "Translúcida.");
+                    Assert.AreEqual(PreparadorNivel.OrdenAgua, dibujo.sortingOrder, "Por delante de Kael: se le ve sumergido.");
+                }
             }
         }
 
@@ -157,7 +181,7 @@ namespace Fragmentum.Tests
             {
                 var enemigo = enemigos.SingleOrDefault(e => e.name == esperado.Nombre);
                 Assert.IsNotNull(enemigo, $"Falta {esperado.Nombre}.");
-                Assert.AreEqual(GeneradorEnemigos.CarpetaPrefabs + "/Enemigo_Lamento.prefab", PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(enemigo.gameObject));
+                Assert.AreEqual(RutaPrefab("Lamento"), PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(enemigo.gameObject));
                 Assert.AreEqual(new Vector2(esperado.X, esperado.Y + 0.05f), (Vector2)enemigo.transform.position, esperado.Nombre);
                 Assert.IsNotNull(enemigo.GetComponent<Pesar>(), $"{esperado.Nombre} pesa.");
 
@@ -171,7 +195,7 @@ namespace Fragmentum.Tests
             {
                 var escultura = enemigos.SingleOrDefault(e => e.name == esperada.Nombre);
                 Assert.IsNotNull(escultura, $"Falta {esperada.Nombre}.");
-                Assert.AreEqual(GeneradorEnemigos.CarpetaPrefabs + "/Enemigo_Escultura.prefab", PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(escultura.gameObject));
+                Assert.AreEqual(RutaPrefab("Escultura"), PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(escultura.gameObject));
                 Assert.AreEqual(new Vector2(esperada.X, esperada.Y + 0.05f), (Vector2)escultura.transform.position, esperada.Nombre);
                 Assert.IsFalse(escultura.enabled, $"{esperada.Nombre} empieza dormida.");
                 Assert.IsNotNull(escultura.GetComponent<EsculturaDormida>());
@@ -187,7 +211,7 @@ namespace Fragmentum.Tests
             Assert.AreEqual(1, planideras.Count, "Un mini-jefe.");
             var planidera = planideras[0];
             Assert.AreEqual(esperada.Nombre, planidera.name);
-            Assert.AreEqual(GeneradorEnemigos.CarpetaPrefabs + "/Enemigo_Planidera.prefab", PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(planidera.gameObject));
+            Assert.AreEqual(RutaPrefab("Planidera"), PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(planidera.gameObject));
             Assert.AreEqual(new Vector2(esperada.X, esperada.Y + 0.05f), (Vector2)planidera.transform.position);
 
             var controlador = planidera.GetComponent<EnemyController>();
@@ -265,6 +289,64 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void LasSeccionesDelNivel_SonLasDelDiseno_YLaCamaraLlegaAlFondoDeLaArena()
+        {
+            Assert.AreEqual(DisenoNivel2.Secciones.Length, _datos.secciones.Count);
+            for (var i = 0; i < _datos.secciones.Count; i++)
+            {
+                Assert.AreEqual(DisenoNivel2.Secciones[i].x, _datos.secciones[i].desdeX, 1e-4f, _datos.secciones[i].nombre);
+                Assert.AreEqual(DisenoNivel2.Secciones[i].y, _datos.secciones[i].hastaX, 1e-4f, _datos.secciones[i].nombre);
+            }
+
+            var margen = new SerializedObject(Todos<LevelManager>(_nivel2).Single()).FindProperty("margenCamara").floatValue;
+            Assert.AreEqual(DisenoNivel2.MargenCamara, margen, 1e-4f);
+            var fondo = DisenoNivel2.Paredes.Single(p => p.Nombre == "ParedArena");
+            Assert.AreEqual(fondo.Hasta, _datos.Extension.y + margen, 1e-4f, "La cámara llega hasta la pared del fondo de la arena.");
+        }
+
+        [Test]
+        public void LaMuralla_NoAgarra_YEsLaUnica()
+        {
+            var sinAgarre = Todos<SinAgarre>(_nivel2);
+            Assert.AreEqual(1, sinAgarre.Count, "Solo la muralla: las demás paredes se escalan.");
+            Assert.AreEqual("Muralla", sinAgarre[0].name);
+            Assert.IsTrue(DisenoNivel2.NoAgarra(sinAgarre[0].name));
+            var caja = sinAgarre[0].GetComponent<BoxCollider2D>();
+            Assert.IsFalse(caja.isTrigger, "Sigue siendo una pared: se choca con ella.");
+            Assert.AreEqual(LayerMask.NameToLayer(Capas.Wall), caja.gameObject.layer);
+        }
+
+        [Test]
+        public void DelanteDelTapon_KaelTieneSuPista()
+        {
+            var zonas = Todos<ZonaDeDialogo>(_nivel2);
+            Assert.AreEqual(1, zonas.Count);
+            var zona = zonas[0];
+            Assert.AreEqual(PreparadorNivel.NombrePistaDelTapon, zona.name);
+            Assert.AreEqual(Fragmentum.Narrative.MOMENTOS_DIALOGO.PISTA, zona.Momento);
+            Assert.AreSame(Todos<HieloRompible>(_nivel2).Single(), zona.Hielo, "La dice también si agrieta el tapón, y calla si ya está roto.");
+
+            var caja = zona.GetComponent<BoxCollider2D>();
+            Assert.IsTrue(caja.isTrigger, "No choca: Kael la atraviesa.");
+            var rect = Rectangulo(caja);
+            var esperado = DisenoNivel2.PistaDelTapon.Rect;
+            Assert.AreEqual(esperado.xMin, rect.xMin, 0.01f);
+            Assert.AreEqual(esperado.xMax, rect.xMax, 0.01f);
+            Assert.AreEqual(esperado.yMin, rect.yMin, 0.01f);
+            Assert.AreEqual(esperado.yMax, rect.yMax, 0.01f);
+
+            var lineas = _datos.dialogos.Del(Fragmentum.Narrative.MOMENTOS_DIALOGO.PISTA);
+            Assert.AreEqual(1, lineas.Count, "El nivel tiene la línea que dice.");
+            StringAssert.Contains("Ataque Cargado", lineas[0].texto);
+        }
+
+        [Test]
+        public void LosCheckpoints_Curan()
+        {
+            Assert.IsTrue(Todos<Checkpoint>(_nivel2).All(c => c.Cura), "Decisión del 2026-10-12: todos los checkpoints curan a Kael.");
+        }
+
+        [Test]
         public void ElAgujero_LoTapaElHieloRompible_YHayEcosDeIntentos()
         {
             var tapones = Todos<HieloRompible>(_nivel2);
@@ -323,6 +405,15 @@ namespace Fragmentum.Tests
             var loMasAltoQueSeVe = DisenoNivel2.SueloArena + desplazamiento.y + camara.orthographicSize;
             Assert.LessOrEqual(DisenoNivel2.SueloArena + DisenoNivel2.VueloDoncella + doncella.Datos.tamano.y, loMasAltoQueSeVe,
                 "Flota dentro de lo que enseña la cámara cuando Kael está en el suelo.");
+        }
+
+        // El prefab de una variante: el de su arte (Lamento.prefab) si está y, si no, el de bloques
+        // de color (Enemigo_Lamento.prefab). Es el que coloca el preparador del nivel.
+        private static string RutaPrefab(string variante)
+        {
+            var prefab = GeneradorEnemigos.CargarPrefab(variante);
+            Assert.IsNotNull(prefab, $"Falta el prefab de {variante}: ejecuta Fragmentum → Regenerar todo.");
+            return AssetDatabase.GetAssetPath(prefab);
         }
 
         private static List<T> Todos<T>(Scene escena) where T : Component =>

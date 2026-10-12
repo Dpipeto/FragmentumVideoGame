@@ -9,6 +9,337 @@
 
 ---
 
+## Mundo 2: lo que salió de jugarlo (2026-10-12)
+
+Misma rama, `nivel2-recorrido`. El autor jugó el Nivel 2 de principio a fin (PENDIENTES N31). Dio
+por buenos el hielo, el agua, las placas, el golpe de la Escultura, la torre, la Doncella con sus
+dos fases, los Lamentos (N37) y la cinemática (N38); pidió seis cambios y dejó a mi criterio el
+resto del tileset (N36). `EnemyController`, `PlayerController`, `GameManager` y `BossController`
+no se tocan.
+
+### 1. El aire sobraba
+
+- **Problema.** Con 15 s de aire, la calle hundida y la torre se cruzaban sin mirar la barra.
+- **Causa.** Cada tramo sin aire se hace en unos 8 s: los 15 de la decisión del 2026-10-08
+  dejaban 7 de margen.
+- **Solución.** 10 s (`OxigenoJugador`), y se sigue llenando en 1 s al respirar. Quedan 2 s para
+  esperar a una Medusa. Lo que falte se paga, como antes, con un corazón cada 2 s, que ahora
+  devuelve el checkpoint de la campana (punto 6).
+
+### 2. El tapón solo lo entendía quien lo había programado
+
+- **Problema.** Nada decía que el tapón de hielo se rompe con el Ataque Cargado.
+- **Causa.** La pista era la grieta naranja, el color de la Ira. Sugiere, pero no dice, y un
+  golpe normal lo agrieta sin romperlo: parece que basta con insistir.
+- **Solución.** Una línea nueva de Kael: «Este hielo no cede a un golpe cualquiera. Hace falta el
+  Ataque Cargado: contener el golpe… y soltarlo.» Retoma el cierre del Mundo 1 («contener un
+  golpe… y soltarlo cuando decida») y nombra la habilidad, para que se sepa qué usar.
+  - Suena al llegar ante el tapón (las 4 u de plaza de delante) y, si no se ha oído, al agrietarlo
+    con un golpe normal, que es cuando el jugador acaba de ver que no basta. No se repite
+    seguida y calla con el tapón roto. Es `ZonaDeDialogo`, una pieza nueva.
+  - Es un momento nuevo de los diálogos (`MOMENTOS_DIALOGO.PISTA`), y su texto vive en
+    `GuionMundos`, como los demás. El generador de narrativa ahora añade a un asset que ya
+    existía los momentos que le falten, sin tocar lo escrito a mano.
+
+### 3. La Plañidera no tenía sitio
+
+- **Problema.** El mini-jefe peleaba en 6 u de hielo, entre el puente y el tapón.
+- **Causa.** Ocupó el hueco de la segunda Escultura, pensado para un enemigo que no anda.
+- **Solución.** La plaza este mide 16 u. Ella flota en el centro (x 38, de 36 a 40), con 6 u
+  libres hasta el puente y otras 6 hasta el tapón; el tercer Lamento sigue junto al tapón. Todo
+  lo que hay del tapón en adelante se corrió 10 u, y de la campana en adelante, 13 (punto 7): el
+  nivel mide 115 u y no 102. `DisenoNivel2.Version` sube a 12 y la escena se vuelve a montar.
+  - **La cámara.** Lo que enseña sale de las secciones del `LevelData`, que eran números fijos
+    del generador: se habría quedado a 13 u del fondo de la arena. Ahora las secciones y los
+    checkpoints del Nivel 2 siguen a su diseño (`GeneradorProgresion.SeguirElDiseno`), y la torre
+    del reloj del fondo, también.
+
+### 4. Las esquirlas no se veían venir
+
+- **Solución.** Vez y media más grandes: se importan a 104 px por unidad, no a 156, sin tocar
+  los PNG. La piedra mide 0,4 × 0,2 u y su zona de golpe crece con ella (radio 0,18 u).
+
+### 5. La muralla se escalaba
+
+- **Problema.** Con el salto de pared se subía la muralla que cierra la plaza, se andaba por el
+  techo helado y por el tejado de la torre, y se caía en la antesala: medio nivel saltado, con
+  todo lo de debajo del agua.
+- **Causa.** El diseño contaba con que «no se salta» (9 u), y la prueba medía eso. Pero Kael
+  trepa una pared sola encadenando saltos de pared: la altura no lo para.
+- **Solución.** La muralla es de hielo liso y no agarra. `SinAgarre` es una marca que se pone en
+  la pared; `PlayerSensors`, al buscar una pared a la que agarrarse, se salta las que la llevan.
+  Sigue siendo sólida. Se dibuja con el bloque de hielo, como el techo helado, para que la regla
+  se vea: lo que es de hielo no agarra. Las demás paredes no cambian.
+  - Es el único cambio en el código de Kael: unas líneas en sus sentidos (`PlayerSensors`), no
+    en `PlayerController`.
+
+### 6. Los checkpoints curan
+
+- **Solución.** Cada vez que Kael toca un checkpoint recupera toda la vida, también si ya estaba
+  activo (`Checkpoint.cura`, con su evento `OnCuro`). Viene activado por defecto, así que vale
+  para los checkpoints ya montados del Nivel 1 y del Nivel 2 sin tocar sus escenas, y para los
+  que vengan.
+
+### 7. El resto del tileset
+
+- **Problema.** De las dos hojas solo estaban colocados el ladrillo, el hielo, la viga, la silla
+  y la campana (N36).
+- **Solución.** Nueve piezas más, cortadas de las hojas sin tocarlas y colocadas desde
+  `DisenoNivel2.Decorados`:
+  - **la estatua** en el inicio, antes que la Escultura Viviente, y otra en la plaza este: la
+    primera enseña que las estatuas son decorado y la Escultura lo desmiente;
+  - **los faroles** en los tres sitios donde se puede parar: el inicio, el puente y la antesala;
+  - **rocas y una columna rota** en la plaza de la Plañidera, que queda como una plaza en ruinas;
+  - **la mesa**, junto a la silla vacía del eco de memoria. Para que quepan la silla, la mesa y
+    la bandera, la campana es 3 u más ancha y su repisa mide 4 u, con un hueco de 2 u a cada lado
+    (antes, el del este medía 1);
+  - **algas, la campana caída, otra columna y rocas** en la calle hundida;
+  - **dos cadenas** junto a la campana del campanario, y **los estandartes** sobre el frente del
+    puente y bajo el balcón de la arena.
+- **Sin usar:** los remates de nieve con carámbanos, el charco helado, la repisa pequeña, los
+  postes, las escuadras, los dos puentes de madera, la ventana y los demás trozos de muro.
+
+### 8. Los prompts que pidió
+
+- `Docs/Diseno/Prompts_Puertas.md`: la puerta de salida de cada mundo (cerrada, abriéndose y
+  abierta), las dos cinemáticas de Kael cruzándola y, opcionales, la verja de la arena y la
+  bandera del checkpoint.
+- Al final de `Docs/Diseno/Prompts_Gemini.md`: lo que le falta a la Centinela, que son la caída
+  del salto (tres imágenes, editando la onda) y `R2`.
+
+### Pruebas
+
+470 EditMode y 196 PlayMode en verde. Nuevas o cambiadas:
+
+- `DisenoNivel2Tests`: la plaza este da 14 u o más y deja 4 a cada lado de la Plañidera; la
+  muralla es la única pared que no agarra y no se pasa ni subido al tapón; la pista está delante
+  del tapón y fuera de la ronda de la Plañidera; las secciones llevan la cámara de pared a pared;
+  en la campana caben la silla, la mesa y la bandera; y cada pieza de atrezo se apoya en un
+  suelo o cuelga de un bloque en el que cabe.
+- `EscenaNivel2Tests`: las secciones del asset, la muralla con su marca, la zona de la pista
+  enlazada al tapón y los checkpoints que curan.
+- `ArteMundo2Tests`: las quince piezas cortadas a su tamaño y con su pivote, el hielo de la
+  muralla de arriba abajo y cada pieza de atrezo en su sitio.
+- `DatosNarrativaTests`: la pista del guion está en los diálogos de la Tristeza y nombra la
+  habilidad del Mundo 1.
+- `JugadorPlayModeTests`: junto a una pared sin agarre, Kael ni se desliza ni salta desde ella;
+  sin la marca, la misma pared agarra.
+- `FlujoNivelPlayModeTests` y `Nivel2PlayModeTests`: los checkpoints curan en los dos niveles,
+  también el que ya está activo; respirar no cura y la bandera sí; la pista suena al llegar y al
+  agrietar, sin repetirse; y la muralla no se detecta como pared.
+
+Una cosa que enseñaron las pruebas: las secciones del nivel son un `struct`, y al cambiarlas a
+través de la lista se cambiaba una copia. Lo vio `EscenaNivel2Tests` (la cámara seguía acabando
+en x 96).
+
+---
+
+## Mundo 2, fase F: las cinemáticas de la Doncella (2026-10-10)
+
+Misma rama, `nivel2-recorrido`. Con el arte ya dentro (fase E), quedaban la narrativa y el
+sonido del mundo. Los textos del guion estaban cargados desde que se aprobó
+(`Docs/Diseno/Guion.md`): la apertura, el eco de memoria de la silla vacía, la línea de la
+Doncella y el cierre. Faltaban sus cinemáticas. `EnemyController`, `PlayerController`,
+`GameManager` y `BossController` no se tocan.
+
+### 1. Una rejilla por cinemática
+
+- **Problema.** Los cuatro planos de la Doncella miden 480 × 268 (decisión N34) y la cámara de
+  cinemáticas solo sabía dibujar en 240 × 135: se habría visto una esquina del plano.
+- **Causa.** La rejilla eran dos constantes de `CamaraCinematica`, y de ellas colgaban el tamaño
+  de la textura, el encuadre, el flash y el sitio de cada texto.
+- **Solución.** Cada cinemática trae su rejilla (`CutsceneData.rejilla`, 240 × 135 por defecto) y
+  la cámara la adopta al empezar (`FijarRejilla`): cambia la resolución de la Pixel Perfect
+  Camera, lo que ve y el flash. Los textos se colocan en la rejilla de su cinemática, tanto los
+  de la interfaz como los de fuente bitmap. En 1920 × 1080 los planos de 480 se amplían por 4,
+  con 4 px de franja arriba y abajo; en 1280 × 720, por 2. Las cinemáticas del Nivel 1 no
+  cambian: siguen a ×8. Las brasas siguen repartidas a lo ancho de 240: solo las usa la
+  Centinela.
+
+### 2. La presentación y la derrota
+
+- **Problema.** Al entrar en su arena salía la presentación genérica (su nombre sobre el juego
+  congelado), y al vencerla no se veía nada.
+- **Causa.** Sus planos estaban limpios desde la fase C, pero sin montar. Y para ella no hay un
+  guion plano a plano, como el de la Centinela.
+- **Solución.** `ConstructorCinematicasNivel2` las monta, y «Regenerar todo» lo llama.
+  - **Presentación** (`Cinematica_Jefe_Tristeza`), 9,8 s, una vez por partida: negro 0,3 s; la
+    nave helada, con ella subiendo por la grieta (sube en 0,7 s, se queda 3,8 y se va en 0,3);
+    negro 0,2 s; y su rostro (0,6 + 3,6 + 0,3). Lleva la estructura de la de la Centinela y casi
+    su duración (las presentaciones de jefe no pasan de 10 s), sin brasas, temblores ni flash.
+    Dice su línea del guion repartida entre los dos planos, sin cambiarle una letra: «Él cerró
+    los ojos para no llorar, y la ciudad se hundió.» sobre la nave y «¿Vienes a cerrarlos tú
+    también?» de cerca. Al final entra su rótulo, con el nombre del mundo debajo. La letra
+    mide 10 px del plano: 40 en pantalla, como la de la Centinela.
+  - **Derrota** (`Cinematica_Derrota_Tristeza`), cuando termina de derretirse: ella deshecha
+    sobre el hielo y la ciudad fuera del agua, 4,5 s cada plano, sin texto, como la de la Ira.
+    Después se vuelve al juego, con el fragmento en el charco.
+  - Si falta algún plano no se toca nada: la presentación sigue siendo la genérica.
+- **Para verlas sin jugar:** Fragmentum → Cinemáticas → Capturar las cinemáticas de la Doncella
+  deja seis imágenes en `Docs/Cinematicas`.
+
+### 3. Sin sonido
+
+- En el proyecto no hay ningún audio, y no se ha inventado ninguno: ni música ni cues. Cuando lo
+  haya, la música del nivel y la del jefe van en `L2_Tristeza` y la de cada cinemática, en su
+  asset (PENDIENTES B8).
+
+### Pruebas
+
+460 EditMode y 190 PlayMode en verde. Nuevas: `CinematicaDoncellaTests` (los cuatro planos, la
+presentación beat a beat, su línea contra el guion, la derrota, la rejilla de 480 en 1080 y en
+720, la cámara que cambia de rejilla y vuelve, y el texto en su píxel), una en `ArteMundo2Tests`
+(el verificador nota una cinemática fuera de su rejilla o sin un plano), una en
+`CinematicaRejillaPlayModeTests` (con el reproductor de verdad, la cámara amplía por 4 los planos
+de la Doncella y vuelve a ampliar por 8 los del Nivel 1) y una en `Nivel2PlayModeTests`, que
+recorre el final del nivel: la presentación al entrar en la arena, la derrota cuando termina de
+derretirse y el fragmento, que Kael recoge al pasar por debajo y le da el Dash Acuático. `VerificadorNivel2` revisa también los
+cuatro planos y las dos cinemáticas.
+
+Dos cosas que enseñaron las pruebas. La primera versión de la presentación duraba 13,6 s, y
+`DatosNarrativaTests` exige que la de cada jefe no pase de 10: se acortó a 9,8 s dejando a su
+línea el tiempo de leerla (no más de 17 letras por segundo). Y en modo batch no se dibuja ningún
+fotograma, así que la Pixel Perfect Camera no recalcula su escala sola: la prueba le pide uno
+sobre una textura de 1920 × 1080.
+
+---
+
+## Mundo 2, fase E: el arte de la Tristeza (2026-10-10)
+
+Misma rama, `nivel2-recorrido`. Entran en el juego los 124 PNG limpios del Mundo 2
+(`Tesis/Imagenes/limpios/Mundo2`): enemigos, jefe, efectos, mecánicas, la burbuja del aire, el
+fondo y el tileset. Ningún PNG se reescala, se recorta ni se recentra: todo son reglas de
+importación (píxeles por unidad y pivote) y rectángulos sobre las hojas. `EnemyController`,
+`PlayerController`, `GameManager` y `BossController` no se tocan.
+
+### 1. Traer el arte y darle sus reglas
+
+- **Problema.** El arte limpio vivía fuera del proyecto, y cada pieza llegó a una escala distinta.
+- **Solución.** `Herramientas/traer_arte_mundo2.py` copia los PNG byte a byte a sus carpetas
+  (`--comprobar` dice si alguno cambió). `ArteMundo2.Reglas` reúne las reglas de cada constructor y
+  se suma a `TablaArte`, así que el importador de siempre las aplica. «Regenerar todo» llama a
+  `ArteMundo2.Enemigos`, `Jefe` y `Mecanicas`, y hay un menú propio: Fragmentum → Niveles → Generar
+  el arte del Mundo 2 (Tristeza). Sin los PNG, nada falla: cada pieza se queda como estaba.
+
+### 2. Los cuatro enemigos
+
+- **El Lamento** (`ConstructorLamento`). Es el Eco de la Ira empapado, así que usa su cuerpo, su
+  arma y su controlador. Sus doce fotogramas llegaron con lienzos y escalas distintos: cada uno
+  lleva su regla, con el ancla de los pies donde la tiene ese mismo fotograma del Eco. Los cuatro
+  del ataque no van a la escala que decía el LEEME (82, 79, 79 y 73 px por unidad): encajando cada
+  silueta sobre la del Eco salen 81, 77, 76 y 70. Gotea agua, y al morir deja su charco.
+- **La Escultura** (`ConstructorEscultura`). Duerme en `E1`, despierta en tres fotogramas y golpea.
+  `A3`, `A4` y `A5` vienen dibujados mirando al otro lado que los demás: el clip del ataque lleva
+  una curva que voltea el dibujo justo en esos tres. Un golpe la hace encogerse (`H1`) sin
+  interrumpirla, y rota se queda en `M4`.
+- **La Medusa** (`ConstructorMedusa`). Flota en bucle, se aparta de la espada (`A1`, mirando hacia
+  donde la empujan) y se encoge mientras no quema (`A2`).
+- **La Plañidera** (`ConstructorPlanidera`). Su `Estado` mueve el dibujo: alza, apunta, lanza, se
+  queda desarmada y se rehace. El fotograma del barrido (`A2`) tiene otro lienzo: se ancla por el
+  corazón, que mide lo mismo que en los demás, y no «un 23 % más fino» como decía el LEEME. Las
+  esquirlas van a tres veces su densidad de píxel, que es como salen del tamaño de su mano.
+- Las tres miran a la izquierda en el dibujo: el prefab las voltea y la geometría sigue en
+  «mirando a la derecha».
+
+### 3. Los Lamentos, al tamaño y al ritmo de los Ecos del Nivel 1
+
+- **Problema.** El Lamento salía pequeño (1 u de alto junto a un Kael de 1,8) y golpeaba despacio:
+  0,45 s de aviso y 2,2 s de descanso entre golpes.
+- **Causa.** Es el Eco de este mundo, y le faltaban los dos ajustes que el autor hizo a los Ecos de
+  la Ira tras probar el Nivel 1: los escaló a 1,8 × 1,5 (PENDIENTES N18) y aceleró su golpe.
+- **Solución.** `DisenoNivel2.EscalaLamento` es `DisenoNivel1.EscalaEco`, y el Nivel 2 coloca a sus
+  tres Lamentos a esa escala. `ConstructorLamento.VelocidadAtaque` es la del Eco (1,6×): el aviso
+  dura 0,28 s, el zarpazo 0,09 s y el ataque entero 0,5 s; descansa 0,45 s, como el Eco. Sus datos
+  llevan esos tiempos. Sigue siendo lento en lo demás: anda a 0,8 u/s, persigue a 1,4 y espera
+  2,5 s en cada punto.
+
+### 4. La Doncella
+
+- **Sus clips** (`ConstructorDoncella`): flota (`F1`, `F2`, `F3`, `F2`; `F4` no se usa, rompe el
+  vaivén), un gesto por ataque (ola, inundar y congelar, cada uno con su momento en el tercer
+  fotograma), el rugido, el llanto (baja, llora arrodillada y se alza) y la muerte, que acaba en
+  el charco con su fragmento.
+- **El aviso es su gesto.** Cada patrón le pide el gesto (`DoncellaLamento.Gesto`) para que su
+  momento llegue justo cuando acaba el aviso. Con arte ya no se tiñe de rojo para avisar: solo
+  late en cian mientras llora.
+- **La cola cortada (N35).** El lienzo corta su cola de agua en los 28 fotogramas. Un shader propio
+  (`Fragmentum/SpriteFundidoAbajo`) funde a transparente las 22 filas de abajo, y `ColaFundida` lo
+  apaga en los fotogramas que sí están enteros (arrodillada y el charco).
+- **El golpe que no le hace nada** la vuelve una silueta de hielo un instante: con arte, el
+  destello blanco de antes no se veía (el color de un sprite solo oscurece).
+- **Problema: moría en el aire.** En la fase 2 llora sobre la capa de hielo, a 3,7 u. Al morir, la
+  capa se deshace, y el charco y el fragmento se quedaban colgados donde lloraba.
+- **Solución.** Con arte se derrite cayendo (`CaerAlHielo`, 0,9 s): el charco y el fragmento
+  quedan en el hielo seco, donde Kael llega.
+
+### 5. Las mecánicas y los efectos
+
+- **El tapón de hielo:** intacto, agrietado y, al romperse, las esquirlas y los restos en el borde
+  del agujero. **La placa flotante**, a 66 px por unidad (N33). **Una columna de burbujas** bajo
+  cada bolsa de aire.
+- **El agua.** La zona ya no es un velo liso: lleva su superficie dibujada, en bucle y repetida a
+  lo ancho, sobre un cuerpo liso del color con el que acaba. La última fila del lienzo de la
+  superficie viene vacía: sin descontarla quedaba una raya de fondo sin teñir entre los dos.
+- **La ola** de la Doncella (`OlaDeAgua.prefab`): avisa, avanza y rompe.
+- **Las franjas de la arena** (`ArteDeFranja` y `DibujoDeFranja`): las grietas del aviso, la
+  superficie del agua, la escarcha, las púas que brotan, se quedan y se rompen, y las losas de la
+  capa, que se forman, aguantan y avisan de que se derriten. La franja sigue mandando: el dibujo
+  solo mira en qué estado está y cuánto lleva en él.
+
+### 6. La burbuja del aire
+
+- En el HUD, la barra del aire es ahora la burbuja (`ArteInterfaz`, en `Resources`): cinco
+  fotogramas, de llena a punto de romperse. Al asfixiarse parpadea en rojo.
+
+### 7. El fondo
+
+- **Problema.** El Nivel 2 baja 11 u bajo el agua, y el fondo del Mundo 1 sigue a la cámara: el
+  cielo se vería también en la calle hundida.
+- **Solución.** `ConstructorFondoMundo2` monta dos grupos. El de la vista (cielo, ciudad lejana,
+  torre y carámbanos) sigue a la cámara, como en el Mundo 1. El de debajo del agua (los rayos de
+  luz, la ciudad hundida y las algas) está anclado al mundo: `ParallaxMovement` tiene ahora la
+  opción de no seguir a la cámara en vertical. Las dos ciudades no casan por los bordes: se repiten
+  en espejo.
+- **Problema: una raya vertical** cruzaba el fondo cada pocos metros.
+- **Causa.** Mi script de limpieza (`limpiar_mundo2.py`) dejaba transparentes la primera columna y
+  la primera fila de las capas con alfa: el cierre morfológico erosiona el borde del lienzo.
+- **Solución.** Las capas del fondo se cierran sobre el lienzo prolongado. Las cuatro capas con
+  alfa se limpiaron otra vez: mismo tamaño, y solo cambian los bordes.
+
+### 8. El tileset y los props
+
+- **Problema.** Los bloques del nivel eran rectángulos de color.
+- **Causa.** El tileset del Mundo 2 no es una rejilla de celdas, como el volcánico: son dos hojas
+  de piezas sueltas, y el pintor del Nivel 1 no vale.
+- **Solución.** `ConstructorEscenarioMundo2` corta las hojas en piezas (rectángulos, sin tocar los
+  PNG) y viste cada bloque: **ladrillo** en la masa (32 × 32 px elegidos para repetirse sin
+  costura; a 32 px por unidad casa de un bloque al siguiente), **vigas de madera nevadas** en las
+  plataformas finas (las patas no se repiten) y **hielo** sobre los suelos que resbalan y en el
+  techo helado de la calle. La colisión sigue siendo la del bloque. Y dos props que pide el
+  diseño: **la silla vacía** junto al primer checkpoint y **la campana** del campanario. El resto
+  de las hojas queda sin colocar (PENDIENTES N36).
+
+### 9. Un verificador para el Nivel 2
+
+- `VerificadorNivel2` (Fragmentum → Niveles → Verificar el arte del Nivel 2, y al final de
+  «Regenerar todo») revisa con las comprobaciones del Nivel 1 los sprites y sus reglas, los
+  clips y sus eventos, los Animators y los prefabs, y además lo que no es un prefab con Animator:
+  el volteo del ataque de la Escultura, el arte de las franjas, la burbuja, la cola y el fragmento
+  de la Doncella, la ola de sus patrones, el fondo y el tileset.
+
+### Pruebas
+
+450 EditMode y 188 PlayMode en verde. Nuevas: `ArteMundo2Tests` (el verificador y lo que
+encuentra cuando algo se rompe a propósito, el Lamento ajustado como el Eco, las cuentas de las
+franjas, de la burbuja y de los bucles, las piezas del tileset y la escena vestida) y tres en
+`DoncellaPlayModeTests` (el destello de hielo, el dibujo que sigue al llanto y la caída al morir
+sobre la capa). Cambian las que daban por hecho que no había arte: las de `EscenaNivel2Tests`
+(el agua ya no es un velo y los prefabs son los del arte), la de la ola y la de la derrota sin
+arte (ahora con el Espectro), la de la muerte de la Plañidera (tarda lo que su dibujo) y la que
+comparaba el descanso del Lamento con el de la Ira. `DisenoNivel2.Version` sube a 11.
+
+---
+
 ## Mundo 2, fase D: la Doncella del Lamento (2026-10-10)
 
 Misma rama, `nivel2-recorrido`. El autor respondió a lo que quedaba abierto de las imágenes

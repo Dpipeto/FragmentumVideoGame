@@ -89,6 +89,61 @@ namespace Fragmentum.EditorTools
             return rutas;
         }
 
+        /// <summary>Los instantes de la presentación de la Doncella que se capturan: la nave, su línea, la pregunta y el rótulo.</summary>
+        public static readonly float[] InstantesDoncella = { 0.8f, 3f, 6.5f, 9f };
+
+        /// <summary>Y los de su derrota: un plano y el otro.</summary>
+        public static readonly float[] InstantesDerrotaDoncella = { 2f, 7f };
+
+        [MenuItem("Fragmentum/Cinemáticas/Capturar las cinemáticas de la Doncella", priority = 153)]
+        public static void MenuCapturarDoncella()
+        {
+            var rutas = CapturarDoncella(1920, 1080);
+            if (rutas.Count > 0)
+            {
+                EditorUtility.RevealInFinder(rutas[0]);
+            }
+        }
+
+        /// <summary><c>-executeMethod Fragmentum.EditorTools.CapturaCinematica.CapturarDoncellaEnModoBatch -quit</c></summary>
+        public static void CapturarDoncellaEnModoBatch()
+        {
+            if (CapturarDoncella(1920, 1080).Count == 0 && Application.isBatchMode)
+            {
+                EditorApplication.Exit(1);
+            }
+        }
+
+        /// <summary>
+        /// Captura la presentación y la derrota de la Doncella (planos de 480 × 268, en su rejilla) en
+        /// <see cref="InstantesDoncella"/> e <see cref="InstantesDerrotaDoncella"/>. Devuelve las rutas guardadas.
+        /// </summary>
+        public static List<string> CapturarDoncella(int ancho, int alto)
+        {
+            var rutas = new List<string>();
+            var presentacion = AssetDatabase.LoadAssetAtPath<CutsceneData>(ConstructorCinematicasNivel2.RutaPresentacion);
+            var derrota = AssetDatabase.LoadAssetAtPath<CutsceneData>(ConstructorCinematicasNivel2.RutaDerrota);
+            if (presentacion == null || derrota == null)
+            {
+                Debug.LogError($"[Cinemática] Faltan {ConstructorCinematicasNivel2.RutaPresentacion} o {ConstructorCinematicasNivel2.RutaDerrota}.");
+                return rutas;
+            }
+
+            Directory.CreateDirectory(ConstructorCamaraCinematica.CarpetaCapturas);
+            foreach (var t in InstantesDoncella)
+            {
+                rutas.Add(Guardar(presentacion, t, ancho, alto, $"Doncella_Presentacion_{Instante(t)}s"));
+            }
+
+            foreach (var t in InstantesDerrotaDoncella)
+            {
+                rutas.Add(Guardar(derrota, t, ancho, alto, $"Doncella_Derrota_{Instante(t)}s"));
+            }
+
+            Debug.Log($"[Cinemática] Cinemáticas de la Doncella capturadas en {ConstructorCamaraCinematica.CarpetaCapturas}: {rutas.Count} imágenes.");
+            return rutas;
+        }
+
         private static string Guardar(CutsceneData datos, float t, int ancho, int alto, string nombre)
         {
             var captura = Capturar(datos, t, ancho, alto);
@@ -120,6 +175,7 @@ namespace Fragmentum.EditorTools
                 SceneManager.MoveGameObjectToScene(copia, escena);
                 camara.Camara.scene = escena;
                 camara.Camara.targetTexture = objetivo;
+                camara.FijarRejilla(datos.Rejilla);
                 camara.Empezar();
 
                 var linea = new LineaTiempoCinematica(datos);
@@ -203,7 +259,7 @@ namespace Fragmentum.EditorTools
             lienzo.worldCamera = camara;
             lienzo.planeDistance = 1f;
 
-            var rejilla = CamaraCinematica.RectEnPantalla(objetivo.width, objetivo.height);
+            var rejilla = CamaraCinematica.RectEnPantalla(objetivo.width, objetivo.height, datos.Rejilla);
             foreach (var visible in textos)
             {
                 var texto = FabricaUI.Texto(objetoLienzo.transform, "Texto", string.Empty, 40, Color.white);

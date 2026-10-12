@@ -1,0 +1,438 @@
+fileFormatVersion: 2
+guid: 5a31dd760e5fb204da3203b614458487
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2566739535865308962
+    second: TileMap2_0
+  - first:
+      213: -289738984576760467
+    second: TileMap2_1
+  - first:
+      213: 6049853807682793137
+    second: TileMap2_2
+  - first:
+      213: 68068773099118379
+    second: TileMap2_3
+  - first:
+      213: -1605688791467125262
+    second: TileMap2_4
+  - first:
+      213: 7750564829723329593
+    second: TileMap2_5
+  - first:
+      213: 1209589408619982012
+    second: TileMap2_6
+  - first:
+      213: -8036632086330522272
+    second: TileMap2_7
+  - first:
+      213: 8709199945666222226
+    second: TileMap2_8
+  - first:
+      213: 4520553451186647800
+    second: TileMap2_9
+  - first:
+      213: 931067082030082606
+    second: TileMap2_10
+  - first:
+      213: -1970008014351732746
+    second: TileMap2_11
+  - first:
+      213: 5862047002839970412
+    second: TileMap2_12
+  - first:
+      213: -603942071250832750
+    second: TileMap2_13
+  - first:
+      213: 8565228158674561594
+    second: TileMap2_14
+  - first:
+      213: 3418374946243604290
+    second: TileMap2_15
+  - first:
+      213: -4011477719237666744
+    second: TileMap2_16
+  - first:
+      213: -1340438433333141445
+    second: TileMap2_17
+  - first:
+      213: 4640829633504903617
+    second: TileMap2_18
+  - first:
+      213: 3574784826973508471
+    second: TileMap2_19
+  - first:
+      213: 6469272352952487856
+    second: TileMap2_20
+  - first:
+      213: 7356887707030643368
+    second: TileMap2_21
+  - first:
+      213: 5183489814389074922
+    second: TileMap2_22
+  - first:
+      213: 5302851106217348391
+    second: TileMap2_23
+  - first:
+      213: -5070548805068752823
+    second: TileMap2_24
+  - first:
+      213: 4331580226144744465
+    second: TileMap2_25
+  - first:
+      213: 3690064551790527623
+    second: TileMap2_26
+  - first:
+      213: -8467046320003767097
+    second: TileMap2_27
+  - first:
+      213: 8357110545456041250
+    second: TileMap2_28
+  - first:
+      213: 8679969259885022367
+    second: TileMap2_29
+  - first:
+      213: 7972140118373467375
+    second: TileMap2_30
+  - first:
+      213: -3054321876020143596
+    second: TileMap2_31
+  - first:
+      213: 7565347357498407579
+    second: TileMap2_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Ladrillo
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 230
+        width: 32
+        height: 32
+      alignment: 9
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fa0070463495e294498d96934cbeedc3
+      internalID: 472633440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hielo
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 141
+        width: 39
+        height: 38
+      alignment: 9
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cecca35c0c5685e418e8b9ab8b6c5d42
+      internalID: 2126627601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HieloMacizo
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 147
+        width: 39
+        height: 32
+      alignment: 9
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a9040a58626038b4ba8c92deae29d91e
+      internalID: -971599383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Viga
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 52
+        width: 156
+        height: 30
+      alignment: 9
+      pivot: {x: 0, y: 0.96666664}
+      border: {x: 32, y: 0, z: 24, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e6ac74ad2a1256446ad317f48aa08024
+      internalID: 1036008882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Estatua
+      rect:
+        serializedVersion: 2
+        x: 357
+        y: 4
+        width: 90
+        height: 75
+      alignment: 9
+      pivot: {x: 0.5, y: 0.04}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c290221309b3edc47a9d143a54160b82
+      internalID: 1002431386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Farol
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 88
+        width: 28
+        height: 41
+      alignment: 9
+      pivot: {x: 0.5, y: 0.048780486}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cda8784737e679e45a5dfff3a782288c
+      internalID: -422089212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Rocas
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 141
+        width: 59
+        height: 29
+      alignment: 9
+      pivot: {x: 0.5, y: 0.06896552}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c1602200af00a6b44a54ba2f6a97725a
+      internalID: 1750071380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Estandartes
+      rect:
+        serializedVersion: 2
+        x: 252
+        y: 65
+        width: 72
+        height: 62
+      alignment: 9
+      pivot: {x: 0.5, y: 0.91935486}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cfad1be46988aa84497c8b932c8fd8df
+      internalID: -314241652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cadena
+      rect:
+        serializedVersion: 2
+        x: 373
+        y: 85
+        width: 39
+        height: 29
+      alignment: 9
+      pivot: {x: 0.5, y: 0.9310345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fc28a6abaec897645bb6b8ae2b104547
+      internalID: 1633226706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 30b409cf2614f4d4ba426413ac2a07b0
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Cadena: 1633226706
+      Estandartes: -314241652
+      Estatua: 1002431386
+      Farol: -422089212
+      Hielo: 2126627601
+      HieloMacizo: -971599383
+      Ladrillo: 472633440
+      Rocas: 1750071380
+      Viga: 1036008882
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

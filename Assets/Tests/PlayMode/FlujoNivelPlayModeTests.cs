@@ -60,6 +60,49 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual("Punto de control", Interfaz.Hud.AvisoActual, "El HUD avisa al activarlo.");
         }
 
+        // Mueve a Kael sin revivirlo: Revivir ya le devolvería la vida.
+        private static IEnumerator Mover(Vector2 pies)
+        {
+            var cuerpo = Jugador.GetComponent<Rigidbody2D>();
+            cuerpo.position = pies;
+            cuerpo.linearVelocity = Vector2.zero;
+            for (var i = 0; i < 6; i++)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ElCheckpoint_CuraAKael_TambienCuandoYaEstaActivo()
+        {
+            yield return EntrarEnNivel1();
+            var checkpoint = PrimerCheckpoint;
+            Assert.IsTrue(checkpoint.Cura, "Los checkpoints curan (2026-10-12).");
+            var inicio = Nivel.Checkpoints.PuntoInicio;
+            var vida = Jugador.Vida;
+            var curas = 0;
+            checkpoint.OnCuro += (_, corazones) => curas += corazones;
+
+            vida.PerderVida(3);
+            Assert.AreEqual(vida.VidaMaxima - 3, vida.Vida);
+            yield return Mover(checkpoint.PuntoReaparicion);
+            Assert.AreEqual(vida.VidaMaxima, vida.Vida, "Al tocar la bandera recupera toda la vida.");
+            Assert.AreSame(checkpoint, Nivel.Checkpoints.Activo, "Y se activa, como siempre.");
+            Assert.AreEqual(3, curas);
+
+            // Vuelve herido al mismo checkpoint, que ya está activo: cura otra vez.
+            yield return Mover(inicio);
+            vida.PerderVida(2);
+            yield return Mover(checkpoint.PuntoReaparicion);
+            Assert.AreEqual(vida.VidaMaxima, vida.Vida, "El que ya está activo también cura.");
+            Assert.AreEqual(5, curas);
+
+            // Con la vida entera no hay nada que curar.
+            yield return Mover(inicio);
+            yield return Mover(checkpoint.PuntoReaparicion);
+            Assert.AreEqual(5, curas, "Sano, no avisa de ninguna cura.");
+        }
+
         [UnityTest]
         public IEnumerator Morir_MuestraElGameOver_YReintentarVuelveAlCheckpoint()
         {

@@ -212,7 +212,8 @@ namespace Fragmentum.Tests
             var oxigeno = prefab.GetComponent<OxigenoJugador>();
             Assert.IsNotNull(oxigeno, "Kael respira bajo el agua con OxigenoJugador.");
             var datos = new SerializedObject(oxigeno);
-            Assert.AreEqual(15f, datos.FindProperty("capacidad").floatValue, "Decisión del 2026-10-08: 15 s de aire.");
+            Assert.AreEqual(10f, datos.FindProperty("capacidad").floatValue, "10 s de aire: eran 15 y al probar el nivel sobraba (2026-10-12).");
+            Assert.AreEqual(10f, datos.FindProperty("recargaPorSegundo").floatValue, "Y se llena en 1 s al respirar.");
             Assert.AreEqual(2f, datos.FindProperty("intervaloAsfixia").floatValue, "Y después, un corazón cada 2 s.");
         }
     }

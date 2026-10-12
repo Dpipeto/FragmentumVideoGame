@@ -338,8 +338,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b270059d857d9e446b9e30e60d0433af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Player.OxigenoJugador
-  capacidad: 15
-  recargaPorSegundo: 15
+  capacidad: 10
+  recargaPorSegundo: 10
   intervaloAsfixia: 2
   motor: {fileID: 0}
   vida: {fileID: 0}

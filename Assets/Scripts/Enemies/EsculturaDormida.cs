@@ -141,6 +141,13 @@ namespace Fragmentum.Enemies
             if (!Despierta)
             {
                 Encender();
+                return;
+            }
+
+            // Con arte: acusa el golpe (H1) sin aturdirse. En mitad de su golpe no: el aviso no se corta.
+            if (animator != null && animator.isInitialized && _vida.EstaVivo && _controlador.EstadoActual != ESTADOS_ENEMIGO.ATTACK)
+            {
+                AnimatorParams.Disparar(animator, AnimatorParams.Golpeada);
             }
         }
 
@@ -158,6 +165,12 @@ namespace Fragmentum.Enemies
                 foreach (var c in GetComponentsInChildren<Collider2D>())
                 {
                     c.enabled = false;
+                }
+
+                // Con arte, se desmorona con su clip de muerte.
+                if (animator != null && animator.isInitialized)
+                {
+                    AnimatorParams.FijarBool(animator, AnimatorParams.Death, true);
                 }
 
                 Destroy(gameObject, 1f);

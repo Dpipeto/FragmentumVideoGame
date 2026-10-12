@@ -34,10 +34,20 @@ namespace Fragmentum.Levels.Escenario
         /// <summary>Las capas son algo más anchas que la vista, por si el redondeo deja una columna sin cubrir.</summary>
         public const float MargenAncho = 1.02f;
 
+        [Tooltip("Seguir a la cámara también en vertical: cada capa ocupa siempre la vista entera (el cielo, las montañas). " +
+                 "Desactivado, las capas se quedan a la altura y con el alto con que se colocaron y solo se mueven en horizontal: " +
+                 "un fondo que está en un sitio del mundo, como el de debajo del agua.")]
+        [SerializeField] private bool seguirCamaraEnY = true;
+
+        [Tooltip("Distancia a la cámara de la capa más lejana de todo el fondo, de la que salen las velocidades. " +
+                 "0 = la de la más lejana de estas capas. Se fija cuando el fondo se reparte en varios grupos.")]
+        [SerializeField, Min(0f)] private float lejania;
+
         private Camera _camara;
         private Renderer[] _capas = new Renderer[0];
         private float[] _velocidades = new float[0];
         private float[] _proporciones = new float[0];
+        private float[] _periodos = new float[0];
         private int[] _propiedades = new int[0];
         private MaterialPropertyBlock _bloque;
         private bool _avisadoPerspectiva;
@@ -50,6 +60,9 @@ namespace Fragmentum.Levels.Escenario
 
         /// <summary>La capa (Renderer) de ese índice, en el orden de las hijas.</summary>
         public Renderer Capa(int capa) => _capas[capa];
+
+        /// <summary>¿Las capas siguen a la cámara en vertical y ocupan la vista entera?</summary>
+        public bool SigueCamaraEnY => seguirCamaraEnY;
 
         private void Start()
         {
@@ -96,21 +109,27 @@ namespace Fragmentum.Levels.Escenario
             _capas = capas.ToArray();
             _velocidades = new float[_capas.Length];
             _proporciones = new float[_capas.Length];
+            _periodos = new float[_capas.Length];
             _propiedades = new int[_capas.Length];
 
             var zCamara = camara.transform.position.z;
-            var lejania = 0f;
-            foreach (var capa in _capas)
+            var masLejana = lejania;
+            if (masLejana <= 0f)
             {
-                lejania = Mathf.Max(lejania, capa.transform.position.z - zCamara);
+                foreach (var capa in _capas)
+                {
+                    masLejana = Mathf.Max(masLejana, capa.transform.position.z - zCamara);
+                }
             }
 
             for (var i = 0; i < _capas.Length; i++)
             {
                 var material = _capas[i].sharedMaterial;
                 var textura = material != null ? material.mainTexture : null;
-                _velocidades[i] = CalculoParallax.VelocidadPorProfundidad(_capas[i].transform.position.z, zCamara, lejania);
+                _velocidades[i] = CalculoParallax.VelocidadPorProfundidad(_capas[i].transform.position.z, zCamara, masLejana);
                 _proporciones[i] = textura != null && textura.height > 0 ? (float)textura.width / textura.height : 1f;
+                // Una textura que se repite en espejo (sus bordes no casan) tarda dos anchos en volver a empezar.
+                _periodos[i] = textura != null && textura.wrapModeU == TextureWrapMode.Mirror ? 2f : 1f;
                 _propiedades[i] = Shader.PropertyToID(TexturaPrincipal(material) + "_ST");
                 AvisarSiNoSeDesplaza(_capas[i], material);
             }
@@ -134,7 +153,7 @@ namespace Fragmentum.Levels.Escenario
             }
 
             var posicion = camara.transform.position;
-            transform.position = new Vector3(posicion.x, posicion.y, transform.position.z);
+            transform.position = new Vector3(posicion.x, seguirCamaraEnY ? posicion.y : transform.position.y, transform.position.z);
 
             var alto = camara.orthographicSize * 2f;
             var ancho = alto * camara.aspect * MargenAncho;
@@ -149,13 +168,16 @@ namespace Fragmentum.Levels.Escenario
                     continue;
                 }
 
+                // Siguiendo a la cámara, la capa ocupa la vista entera. Anclada, conserva su altura
+                // y su alto en el mundo y solo se ensancha hasta cubrir la vista.
                 var local = capa.transform.localPosition;
-                capa.transform.localPosition = new Vector3(0f, 0f, local.z);
-                capa.transform.localScale = new Vector3(ancho / escala.x, alto / escala.y, 1f);
+                var altoCapa = seguirCamaraEnY ? alto : capa.transform.localScale.y * escala.y;
+                capa.transform.localPosition = new Vector3(0f, seguirCamaraEnY ? 0f : local.y, local.z);
+                capa.transform.localScale = new Vector3(ancho / escala.x, altoCapa / escala.y, 1f);
 
-                // La textura ocupa todo el alto de la vista: su ancho en el mundo sale de su proporción.
-                var anchoTextura = alto * _proporciones[i];
-                var offset = CalculoParallax.OffsetTextura(posicion.x, _velocidades[i], anchoTextura, ancho);
+                // La textura ocupa todo el alto de la capa: su ancho en el mundo sale de su proporción.
+                var anchoTextura = altoCapa * _proporciones[i];
+                var offset = CalculoParallax.OffsetTextura(posicion.x, _velocidades[i], anchoTextura, ancho, _periodos[i]);
 
                 capa.GetPropertyBlock(_bloque);
                 _bloque.SetVector(_propiedades[i], new Vector4(ancho / anchoTextura, 1f, offset, 0f));

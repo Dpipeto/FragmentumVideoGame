@@ -1,4 +1,5 @@
 using System;
+using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using UnityEngine;
 
@@ -46,6 +47,14 @@ namespace Fragmentum.Enemies
         [Tooltip("Lo que encoge: el dibujo y las zonas de golpe y de contacto.")]
         [SerializeField] private Transform cuerpo;
 
+        [Header("Con arte (sin él se quedan vacíos)")]
+        [Tooltip("Su dibujo: el fotograma del golpe (A1) está pintado apartándose hacia la izquierda y se voltea si la apartan hacia la derecha.")]
+        [SerializeField] private SpriteRenderer dibujo;
+
+        [Tooltip("El Animator con sus clips: flotar, apartada y encogida.")]
+        [SerializeField] private Animator animator;
+
+        private bool _encogidaEnElAnimator;
         private Rigidbody2D _rigido;
         private Vector2 _base;
         private float _inicio;
@@ -99,6 +108,7 @@ namespace Fragmentum.Enemies
 
         private void Update()
         {
+            Animar();
             if (cuerpo == null)
             {
                 return;
@@ -106,6 +116,22 @@ namespace Fragmentum.Enemies
 
             var objetivo = Encogida ? _escalaCuerpo * escalaEncogida : _escalaCuerpo;
             cuerpo.localScale = Vector3.MoveTowards(cuerpo.localScale, objetivo, 4f * Time.deltaTime);
+        }
+
+        // Con arte: mientras siga encogida se queda con el núcleo apagado (A2); después vuelve a flotar.
+        private void Animar()
+        {
+            if (animator == null || !animator.isInitialized || _encogidaEnElAnimator == Encogida)
+            {
+                return;
+            }
+
+            _encogidaEnElAnimator = Encogida;
+            AnimatorParams.FijarBool(animator, AnimatorParams.Encogida, _encogidaEnElAnimator);
+            if (!_encogidaEnElAnimator && dibujo != null)
+            {
+                dibujo.flipX = false;
+            }
         }
 
         public bool RecibirGolpe(in Golpe golpe)
@@ -123,6 +149,16 @@ namespace Fragmentum.Enemies
 
             _apartado = Vector2.ClampMagnitude(_apartado + direccion.normalized * empuje, empuje);
             _finEncogida = Time.time + tiempoEncogida;
+            if (dibujo != null)
+            {
+                dibujo.flipX = direccion.x > 0f;
+            }
+
+            if (animator != null && animator.isInitialized)
+            {
+                AnimatorParams.Disparar(animator, AnimatorParams.Apartada);
+            }
+
             OnApartada?.Invoke();
             return true;
         }

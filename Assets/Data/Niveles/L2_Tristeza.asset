@@ -34,7 +34,7 @@ MonoBehaviour:
   cinematicaEntrada: {fileID: 0}
   cinematicaCierre: {fileID: 11400000, guid: dab1a0691e758aa48bbf6a626abe67c1, type: 2}
   cinematicaJefe: {fileID: 11400000, guid: 1733680fa3636b84295fc2d61683d4ca, type: 2}
-  cinematicaJefeDerrotado: {fileID: 0}
+  cinematicaJefeDerrotado: {fileID: 11400000, guid: dfa141d334e003e48a1c5484cdf70a63, type: 2}
   dialogos: {fileID: 11400000, guid: 7ada1a0327ceaab4a81600eb1ceeaf41, type: 2}
   reglas:
     agacharse: 0
@@ -44,18 +44,18 @@ MonoBehaviour:
   secciones:
   - nombre: "Secci\xF3n 1"
     desdeX: 0
-    hastaX: 30
+    hastaX: 40
     contenido: 'Sobre el hielo: suelo resbaladizo y plataformas flotantes. 3 Lamentos y 2 Esculturas Vivientes.'
   - nombre: "Secci\xF3n 2"
-    desdeX: 30
-    hastaX: 60
+    desdeX: 40
+    hastaX: 70
     contenido: "Bajo el agua, con ox\xEDgeno limitado. 4 Medusas de Hielo."
   - nombre: Arena del jefe
-    desdeX: 60
-    hastaX: 90
+    desdeX: 70
+    hastaX: 103
     contenido: Superficie helada sobre agua.
   puntosDeControl:
-  - 50
-  - 65
+  - 62.4
+  - 78
   acento: {r: 0, g: 0.83137256, b: 1, a: 1}
   cita: "el dolor tambi\xE9n es parte del yo"

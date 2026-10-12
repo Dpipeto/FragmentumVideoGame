@@ -133,6 +133,7 @@ MonoBehaviour:
   sobreElJuego: 0
   opacidadVelo: 0.55
   escalaEntera: 1
+  rejilla: {x: 240, y: 135}
   fuente: {fileID: 0}
   tamanoFuente: 5
   interlineado: 0

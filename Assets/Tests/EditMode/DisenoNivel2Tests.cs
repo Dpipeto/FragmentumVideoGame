@@ -284,18 +284,124 @@ namespace Fragmentum.Tests
             Assert.AreEqual(DisenoNivel2.PisadaDe("Plaza").Y, planidera.Y, 1e-4f, "En el suelo de la plaza.");
             Assert.IsFalse(DisenoNivel2.Enemigos.Any(e => e.Tipo == TIPOS.ESCULTURA && e.X > puente.Hasta),
                 "Ocupa el sitio de la segunda Escultura: en la plaza este no queda ninguna.");
-            Assert.Greater(DisenoNivel2.Agujero.Desde - puente.Hasta, 5f, "La plaza este da sitio para esquivar las esquirlas.");
+            Assert.GreaterOrEqual(DisenoNivel2.Agujero.Desde - puente.Hasta, 14f,
+                "La plaza este da sitio para pelear con ella: medía 6 u y al probarla quedaba corta (2026-10-12).");
             Assert.Greater(puente.Y, 1.5f, "Y el puente, para ponerse a cubierto: tapa lo que hay detrás.");
+
+            // Con sitio a los dos lados: ni pegada al puente ni encima del tapón.
+            Assert.GreaterOrEqual(planidera.Desde - puente.Hasta, 4f, "Entre el puente y ella cabe Kael con holgura.");
+            Assert.GreaterOrEqual(DisenoNivel2.Agujero.Desde - planidera.Hasta, 4f, "Y entre ella y el tapón.");
+        }
+
+        [Test]
+        public void LaMuralla_EsDeHieloLiso_YEsLaUnicaParedQueNoAgarra()
+        {
+            // Con el salto de pared se subía, se andaba por el techo helado y por el tejado de la
+            // torre, y se caía en la antesala sin bajar al agua (prueba del autor, 2026-10-12).
+            var sinAgarre = DisenoNivel2.Paredes.Where(p => DisenoNivel2.NoAgarra(p.Nombre)).Select(p => p.Nombre).ToList();
+            CollectionAssert.AreEqual(new[] { "Muralla" }, sinAgarre);
+            Assert.IsTrue(DisenoNivel2.EsDeHielo("Muralla"), "Se ve de hielo: lo que resbala no agarra.");
+            Assert.IsFalse(DisenoNivel2.Suelos.Any(s => DisenoNivel2.NoAgarra(s.Nombre)), "Los suelos no cambian.");
+
+            // Sin agarrarse, por encima no se pasa: ni desde la plaza ni desde lo alto del tapón.
+            var muralla = DisenoNivel2.Paredes.Single(p => p.Nombre == "Muralla");
+            var desdeElTapon = DisenoNivel2.HieloRompible.y + AlturaDobleSalto(MEDIOS.SECO);
+            Assert.Greater(muralla.Arriba, desdeElTapon + 1f, "Ni subido al tapón se llega arriba.");
+
+            // Y es lo único que separa la plaza del techo helado, que lleva a la torre.
+            var techo = DisenoNivel2.Paredes.Single(p => p.Nombre == "TechoDeHielo");
+            Assert.AreEqual(muralla.Desde, techo.Desde, 1e-4f);
+            Assert.AreEqual(muralla.Abajo, techo.Arriba, 1e-4f, "La muralla se levanta sobre el techo helado.");
+        }
+
+        [Test]
+        public void LaPistaDelTapon_EstaDelanteDeEl_SobreLaPlaza()
+        {
+            var pista = DisenoNivel2.PistaDelTapon;
+            Assert.AreEqual(DisenoNivel2.Agujero.Desde, pista.Hasta, 1e-4f, "Llega hasta el tapón.");
+            Assert.AreEqual(DisenoNivel2.PisadaDe("Plaza").Y, pista.Abajo, 1e-4f, "A ras de la plaza.");
+            Assert.That(pista.Hasta - pista.Desde, Is.InRange(3f, 6f), "Se dice al llegar, no desde lejos.");
+            Assert.GreaterOrEqual(pista.Arriba - pista.Abajo, AltoKael, "También si llega saltando.");
+
+            var planidera = DisenoNivel2.Enemigos.Single(e => e.Tipo == TIPOS.PLANIDERA);
+            Assert.Less(planidera.Hasta, pista.Desde, "No suena en mitad de la ronda de la Plañidera.");
+        }
+
+        [Test]
+        public void LasSecciones_LlevanLaCamara_DeLaParedDeLaIzquierdaALaDelFondoDeLaArena()
+        {
+            var secciones = DisenoNivel2.Secciones;
+            Assert.AreEqual(3, secciones.Length, "Las del Anexo A: dos secciones y la arena.");
+            for (var i = 1; i < secciones.Length; i++)
+            {
+                Assert.AreEqual(secciones[i - 1].y, secciones[i].x, 1e-4f, "Cada una empieza donde acaba la anterior.");
+            }
+
+            var izquierda = DisenoNivel2.Paredes.Single(p => p.Nombre == "ParedIzquierda");
+            var fondo = DisenoNivel2.Paredes.Single(p => p.Nombre == "ParedArena");
+            Assert.AreEqual(izquierda.Hasta, secciones[0].x - DisenoNivel2.MargenCamara, 1e-4f, "La cámara no enseña nada a la izquierda del inicio.");
+            Assert.AreEqual(fondo.Hasta, secciones[secciones.Length - 1].y + DisenoNivel2.MargenCamara, 1e-4f,
+                "Y llega justo hasta el fondo de la arena: se ve entera.");
+            Assert.Less(DisenoNivel2.AnchoZonaMortal.x, izquierda.Desde, "La zona mortal cubre el nivel entero.");
+            Assert.Greater(DisenoNivel2.AnchoZonaMortal.y, fondo.Hasta);
+        }
+
+        [Test]
+        public void LaCampana_TieneSitioParaLaSillaLaMesaYLaBandera_YSeEntraYSeSalePorLosDosLados()
+        {
+            var repisa = DisenoNivel2.PisadaDe("RepisaDeLaCampana");
+            var oeste = DisenoNivel2.Paredes.Single(p => p.Nombre == "CampanaOeste");
+            var este = DisenoNivel2.Paredes.Single(p => p.Nombre == "CampanaEste");
+            Assert.GreaterOrEqual(repisa.Desde - oeste.Hasta, AnchoKael * 2f, "Por el oeste se sube.");
+            Assert.GreaterOrEqual(este.Desde - repisa.Hasta, AnchoKael * 2f, "Y por el este se baja hacia la torre sin volver atrás.");
+
+            // De izquierda a derecha: la silla, la mesa y la bandera, sin pisarse.
+            var silla = DisenoNivel2.SillaVacia.x + ConstructorEscenarioMundo2.Silla.Tamano.x * 0.5f;
+            var mesa = DisenoNivel2.Decorados.Single(d => d.Pieza.Nombre == ConstructorEscenarioMundo2.Mesa.Nombre);
+            var medioAncho = mesa.Pieza.Tamano.x * 0.5f;
+            Assert.AreEqual(repisa.Y, mesa.Y, 1e-4f, "La mesa, en la repisa.");
+            Assert.GreaterOrEqual(mesa.X - medioAncho, silla, "A la derecha de la silla vacía.");
+            Assert.LessOrEqual(mesa.X + medioAncho, DisenoNivel2.Checkpoints[0].x, "Y a la izquierda de la bandera.");
+            Assert.Less(DisenoNivel2.Checkpoints[0].x, repisa.Hasta, "La bandera, en la repisa.");
+        }
+
+        [Test]
+        public void ElAtrezo_SeApoyaEnUnSuelo_OCuelgaDeUnBloque_YCabeEnEl()
+        {
+            var decorados = DisenoNivel2.Decorados;
+            Assert.AreEqual(decorados.Length, decorados.Select(d => d.Nombre).Distinct().Count(), "Cada pieza, con su nombre.");
+
+            var bloques = DisenoNivel2.Suelos.Concat(DisenoNivel2.Paredes).Concat(DisenoNivel2.PlataformasArena).ToList();
+            foreach (var decorado in decorados)
+            {
+                var medioAncho = decorado.Pieza.Tamano.x * 0.5f;
+
+                // Lo que tiene el pivote arriba, cuelga: de debajo de un bloque o, si va por delante,
+                // desde su borde de arriba (los estandartes sobre el frente del puente).
+                var cuelga = decorado.Pieza.Pivote.y < decorado.Pieza.Caja.height * 0.5f;
+                var apoyo = bloques.Where(b => decorado.X - medioAncho >= b.Desde - 1e-4f && decorado.X + medioAncho <= b.Hasta + 1e-4f)
+                    .Any(b => Mathf.Abs((cuelga && !decorado.Delante ? b.Abajo : b.Arriba) - decorado.Y) < 1e-4f);
+                Assert.IsTrue(apoyo, $"{decorado.Nombre} no tiene debajo (o encima) un bloque en el que quepa.");
+                Assert.IsTrue(cuelga || !decorado.Delante, $"{decorado.Nombre}: lo que se apoya va detrás de los bloques, no delante.");
+            }
+
+            // La estatua sale antes que la Escultura Viviente: primero se aprende que es decorado.
+            var escultura = DisenoNivel2.Enemigos.First(e => e.Tipo == TIPOS.ESCULTURA);
+            Assert.IsTrue(decorados.Any(d => d.Pieza.Nombre == ConstructorEscenarioMundo2.Estatua.Nombre && d.X < escultura.X),
+                "Hay una estatua de piedra antes que la que despierta.");
         }
 
         [Test]
         public void LosEnemigos_SonLosDelAnexo_YCadaUnoEstaEnSuSitio()
         {
-            Assert.AreEqual(3, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.LAMENTO && e.X < 36f), "Anexo A: 3 Lamentos en la sección 1.");
-            Assert.AreEqual(1, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.ESCULTURA && e.X < 36f),
+            // La superficie acaba en el agujero; lo de debajo del agua, en la antesala.
+            var agujero = DisenoNivel2.Agujero.Desde;
+            var antesala = DisenoNivel2.PisadaDe("Antesala").Desde;
+            Assert.AreEqual(3, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.LAMENTO && e.X < agujero), "Anexo A: 3 Lamentos en la sección 1.");
+            Assert.AreEqual(1, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.ESCULTURA && e.X < agujero),
                 "El Anexo dice 2 Esculturas Vivientes: la segunda dejó su sitio a la Plañidera (PENDIENTES N32).");
             Assert.AreEqual(1, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.PLANIDERA), "Un mini-jefe, como el Golem del Mundo 1.");
-            Assert.AreEqual(4, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.MEDUSA && e.X >= 36f && e.X < 61f), "4 Medusas de Hielo bajo el agua.");
+            Assert.AreEqual(4, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.MEDUSA && e.X >= agujero && e.X < antesala), "4 Medusas de Hielo bajo el agua.");
 
             foreach (var enemigo in DisenoNivel2.Enemigos.Where(e => e.Tipo != TIPOS.MEDUSA))
             {

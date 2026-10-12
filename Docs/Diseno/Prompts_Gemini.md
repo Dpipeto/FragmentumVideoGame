@@ -208,3 +208,78 @@ The glowing shard on his left shoulder stays as it is.
 
 **Cuando la tengas:** guárdala encima de `CinematicaFinalLvl2.jpg` y avísame. Se reprocesa con
 `python cine.py CinematicaFinalLvl2` y entra sola.
+
+---
+
+## Lo que le falta a la Centinela (2026-10-12)
+
+Son las dos cosas que quedan en «Arte que más necesito» de `PENDIENTES.md`: la caída del salto,
+que no tiene dibujo propio, y `R2`, que salió sobreexpuesto. Ninguna bloquea nada.
+
+### La caída del salto (3) → `Tesis/Imagenes/Caida/Caida1.jpg` … `Caida3.jpg`
+
+**Qué es en el juego:** en la fase de furia la Centinela salta hacia Kael. Desde que despega, el
+sitio donde va a caer queda marcado en el suelo durante los 0,8 s del vuelo; al aterrizar quema
+ese tramo (3 u de ancho y 1,4 u de alto, 0,15 s) y suelta una onda hacia cada lado. Las ondas ya
+tienen su dibujo. La marca y el golpe no: hoy no se pinta nada y lo enseñan solo `J4` y `J5`.
+
+**La maestra es `Caida2`, el golpe.** Sale de editar la onda, como la ola de la Doncella: así
+hereda su tamaño de píxel y su línea de suelo, y entra a su misma escala (98 px por unidad).
+
+**Adjunta:** `Tesis/Imagenes/Onda/Onda2.jpg`.
+
+```text
+Edit the attached image. Keep EXACTLY the same 2048x2048 canvas, the same flat #FF00FF magenta
+background, the same art-pixel size (the same blocks), the same palette (dark basalt, deep red,
+orange, only a few yellow-white hot pixels) and the same floor line: the bottom row stays on the
+same line.
+
+Replace the travelling wave with a SYMMETRIC GROUND IMPACT, centered horizontally on the canvas:
+the burst thrown up when something very heavy lands on a volcanic floor. A low, wide splash of
+molten rock, about one quarter WIDER than the attached wave and about as tall as it: roughly
+three times as wide as it is tall. Two crests of lava curl outwards, one to the left and one to
+the right, mirror images of each other; between them, chunks of black basalt and a few droplets
+are thrown straight up. The middle is the hottest part.
+
+Its bottom row is flat. NOTHING below that row and nothing lying around it: no ground, no
+crater, no mound. It must work on any floor. Nothing touches the canvas edges.
+Hard-edged opaque pixels only. NO blur, NO glow halo, NO soft magenta edge, NO semi-transparent
+smoke, NO gradient, NO transparency checkerboard, NO text, NO border, NO shadow on the floor.
+```
+
+Después, **adjuntando siempre `Caida2.jpg`** y con la plantilla de edición de la erupción («Edit
+the attached image. Keep EXACTLY the same canvas… Redraw ONLY…»):
+
+- **`Caida1.jpg`, la marca que avisa:** «WARNING: no burst yet. Only a patch of glowing cracks
+  lying on the bottom row, exactly as wide as the base of the burst, and four or five ember
+  pixels rising above it. At most 8 blocks tall. Nothing else.»
+- **`Caida3.jpg`, lo que queda:** «AFTERMATH: the burst falling apart, about a third of its
+  height, same base and same width. The basalt chunks are falling back down, a few embers above
+  them. No rocks left lying on the floor.»
+
+**Cuando lleguen:** avísame. Compruebo que las tres tengan la rejilla y la base de la onda; si
+cuadran, `Caida1` marca el sitio mientras ella vuela, `Caida2` es el golpe y `Caida3` lo cierra.
+
+### `R2`, el rugido que salió sobreexpuesto → `Tesis/Jefe1 animaciones/Rugido/R2.jpg`
+
+**Qué pasa:** en `R2` el torso y la hoja quedaron casi blancos, en vez de piedra negra con las
+grietas al rojo blanco. Se ve 0,35 s, al empezar las fases 2 y 3. Es opcional.
+
+**Adjunta, en este orden:** `Tesis/Jefe1 animaciones/Rugido/R2.jpg` (la que se edita) y
+`Tesis/Jefe1 animaciones/Rugido/R1.jpg` (cómo tiene que verse la armadura).
+
+```text
+Edit the FIRST attached image. Keep EXACTLY the same canvas, the same background, the same
+art-pixel size, the same character, the same pose, the same silhouette and the same position:
+the feet stay on the same line and in the same place.
+
+Change ONLY the exposure of the armor. The armor stays BLACK volcanic stone, exactly as dark as
+in the SECOND attached image; only the cracks go white-hot. The plate itself never turns white.
+The blade of the sword stays dark stone with a glowing edge: it is not a white bar. Keep the
+roar as it is: the open stance, the raised fist, the embers flying off the cracks.
+
+Hard-edged pixels. NO blur, NO glow halo over the armor, NO white wash, NO text, NO border.
+```
+
+**Cuando la tengas:** guárdala encima de `R2.jpg` y avísame. Se vuelve a limpiar con
+`limpiar_centinela.py` y entra sola al sustituir el PNG: los ajustes de importación no cambian.
