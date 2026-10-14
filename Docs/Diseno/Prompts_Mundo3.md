@@ -1,16 +1,17 @@
 # Prompts del Mundo 3 · Miedo
 
-**Primera tanda: los enemigos y el jefe** de `Nivel3_Diseno.md` (sección 8). El Espectro del
-Pavor va por **Google AI Studio** (apartado B); todo lo demás, por **Gemini**. Los prompts del
-escenario, las mecánicas, el fondo, las cinemáticas y las puertas irán en una segunda tanda,
-cuando el diseño esté aprobado (PENDIENTES N44).
+Todas las imágenes de `Nivel3_Diseno.md` (sección 8), en dos tandas:
+
+- **Primera tanda (2026-10-13): los enemigos y el jefe**, apartados A a D. El Espectro del Pavor va
+  por **Google AI Studio** (apartado B); todo lo demás, por **Gemini**.
+- **Segunda tanda (2026-10-14), con el diseño ya aprobado: el escenario, las mecánicas, el fondo,
+  las cinemáticas y las puertas**, apartados E a J. Todo por Gemini.
+
+El diseño se aprobó entero el 2026-10-14 («haz lo que recomiendas»): el Centinela Ciego con su
+máscara de gas y el Acechador se pueden pedir ya, como todo lo demás.
 
 Los prompts están en inglés porque Gemini sigue mejor las medidas así. Las explicaciones van en
 español.
-
-> **Si el diseño cambia** con tus respuestas a N44 (por ejemplo, si el Centinela Ciego no lleva
-> máscara de gas o si no quieres al Acechador), espera a que corrija su prompt antes de
-> generarlo. El Espectro y el jefe no dependen de ninguna decisión: se pueden pedir ya.
 
 ---
 
@@ -138,7 +139,7 @@ body. The mask is the last solid thing left, falling. Only here, the chest hole 
 
 ### A2. Centinela Ciego → `Mundo3/Centinela/`
 
-*Propuesta mía (decisión 6 de `Nivel3_Diseno.md`):* un centinela de trinchera, ciego, con una
+*Decisión 6 de `Nivel3_Diseno.md`, aprobada:* un centinela de trinchera, ciego, con una
 máscara de gas cuyos cristales están pintados y rajados. No ve: oye. Patrulla, se para a
 escuchar y lanza una estocada con la bayoneta.
 
@@ -194,7 +195,7 @@ En `M2` y `M3`, cambia la línea de los cristales por «In this image, the lense
 
 ### A3. El Acechador, mini-jefe del Mundo 3 → `Mundo3/Acechador/`
 
-*Propuesta mía (decisión 5 de `Nivel3_Diseno.md`):* como el Golem en el Mundo 1 y la Plañidera
+*Decisión 5 de `Nivel3_Diseno.md`, aprobada:* como el Golem en el Mundo 1 y la Plañidera
 en el Mundo 2. Una bestia de sombra sin ojos, como un lobo enorme: lo que «respira entre los
 árboles» en la apertura. Caza por el ruido: se agazapa y gruñe (el aviso), embiste en línea
 recta y, si se estrella contra un árbol, se queda aturdido. Tiene hiperarmadura, como el Golem:
@@ -267,9 +268,8 @@ brilla por dentro, una gema en el pecho, hojas negras que flotan alrededor y una
 oscuras solo se verían sus vetas y su máscara, que es justo lo que pide el combate: es invisible y
 se le ve al avisar.
 
-Si te gusta tal cual (decisión 7), **sáltate B1** y ve directo a la maestra (B2) adjuntando
-`jefe3.jpeg`. Si quieres verlo con otro aspecto, B1 pide tres variantes que conservan lo que
-funciona.
+Aprobaste quedarte con él tal cual (decisión 7): **sáltate B1** y ve directo a la maestra (B2)
+adjuntando `jefe3.jpeg`. B1 queda por si algún día quieres verlo con otro aspecto.
 
 ### Cómo usar AI Studio
 
@@ -484,3 +484,334 @@ fully opaque pixels. NO blur, NO glow halo, NO transparency checkerboard, NO tex
 
 Cuando tengas un paquete completo, avísame. Lo reviso antes de integrarlo: el mismo tamaño de
 píxel, la misma base y nada de damero. Si algo no cuadra, te digo qué repetir.
+
+---
+
+# Segunda tanda (2026-10-14): el escenario, las mecánicas, el fondo, las cinemáticas y las puertas
+
+Las mismas reglas del apartado 0. Aquí casi todo sale de **editar algo que ya existe** (las hojas
+del Mundo 2, sus fondos, sus cinemáticas): así hereda el tamaño del píxel y la distribución, y el
+juego corta las piezas en los mismos sitios.
+
+## E. El escenario y las mecánicas
+
+### E1. Tileset del bosque → `Mundo3/Tileset/TileMap3.png`
+
+**Adjunta:** `Tesis/Imagenes/Mundo2/Tileset/TileMap2.jpg`. Pide la misma distribución: si cada
+pieza queda en su sitio, el juego la corta igual que en el Mundo 2.
+
+```text
+Edit the attached pixel-art tileset sheet. Keep EXACTLY the same canvas, the same layout (every
+piece in the same place and with the same size), the same art-pixel size and the same hard pixel
+style. Keep the flat solid #FF00FF magenta background.
+
+Change only the theme: the frozen drowned city becomes a DARK HAUNTED FOREST at night.
+Palette: black #0A0A0F, dark violet #2D1B4E, swamp green #1A2E1A, spectral grey #3A3A4A, and a
+few pale green #7FE6B0 pixels for moss and glowing fungus. No snow, no ice, no blue, no orange.
+
+- The stone masonry blocks -> packed dark earth with small stones and thin roots running through
+  it; the top edge of each block is a thin layer of dead leaves and moss.
+- The pieces with icicles hanging below -> the same shapes in earth, with roots and thin
+  rootlets hanging below.
+- The square slab of ice -> a square block of a dense TANGLE OF DARK, WET ROOTS.
+- The pile of ice blocks -> a pile of fallen dead branches and stones.
+- The frozen puddle -> a small puddle of dark swamp water.
+- The snowy wooden beams and their supports -> thick gnarled TREE BRANCHES with bark and moss on
+  top, and the vertical posts -> dark tree trunks.
+- The frozen torn sails -> torn, rotten military canvas hanging stiff from a branch.
+- The anchor chain -> a hanging tangle of vines and roots.
+- The street lamp -> an old trench oil lamp, UNLIT, rusty, hanging from a hook.
+- The hooded statue -> a soldier's grave: a rifle stuck bayonet-down in a mound of earth, an old
+  helmet resting on its stock, stones around it.
+
+Every block of earth must tile seamlessly with copies of itself on all four sides.
+Hard-edged fully opaque pixels. NO blur, NO glow halo, NO gradients, NO transparency
+checkerboard, NO text, NO border.
+```
+
+### E2. Decoración extra → `Mundo3/Tileset/Props3.png`
+
+**Adjunta:** `Tesis/Imagenes/Mundo2/Tileset/Props2.jpg`, por lo mismo.
+
+```text
+Edit the attached props sheet. Keep EXACTLY the same canvas, the same layout (every prop in the
+same place and about the same size), the same art-pixel size and the same hard pixel style, and
+the flat solid #FF00FF magenta background. Change only the theme to a DARK HAUNTED FOREST at
+night with an old war trench, with the palette black #0A0A0F, dark violet #2D1B4E, swamp green
+#1A2E1A, spectral grey #3A3A4A and a little pale green #7FE6B0 moss:
+- The bell hanging from a beam -> an old soldier's helmet and a canteen hanging by their straps
+  from a gnarled branch.
+- The arched window -> the entrance of a trench dugout: a low frame of rotten planks with
+  sandbags piled around it, pitch dark inside.
+- The seaweed -> three tall dark ferns.
+- The table and the chair -> a wooden ammunition crate and a short stack of sandbags.
+- The bell lying on the floor -> an old helmet lying half buried in dead leaves.
+- The broken column and its fallen piece -> a dead tree stump and a fallen rotten log.
+No snow, no ice, no blue, no orange. Hard-edged fully opaque pixels. NO blur, NO glow halo, NO
+gradients, NO transparency checkerboard, NO text, NO border.
+```
+
+### E3. La antorcha (5) → `Mundo3/Antorcha/Apagada.png`, `Encendida1.png` … `Encendida3.png`, `Consumida.png`
+
+En el juego mide 0,6 × 2 u. Se enciende con E, alumbra 8 u durante 15 s y se consume. **Su
+llama es lo único cálido de todo el mundo.**
+
+**Adjunta:** `Tesis/Imagenes/Mundo1/Golem/Idle/Golem I1.jpg`, solo para el tamaño del píxel.
+
+#### La maestra → `Apagada.png`
+
+```text
+Pixel art game sprite, side view, flat solid #FF00FF magenta background, the same art-pixel size
+and hard dark outline style as the attached golem. The golem is only a size reference: copy
+nothing else from it.
+A WOODEN TORCH ON A POST stuck in the forest floor, UNLIT, about 12 art pixels wide and 48 tall,
+centered horizontally, its base on a flat bottom row: a rough dark wooden post and, on top, a
+head of tarred rags bound with rusty wire, cold and black. A thin white cloth ribbon tied around
+the post. Leave about 30 art pixels of empty magenta ABOVE the torch: the flame of the next
+images goes there.
+Palette: black #0A0A0F, dark violet #2D1B4E, swamp green #1A2E1A, spectral grey #3A3A4A. No
+flame, no warm colour.
+Hard-edged fully opaque pixels. NO blur, NO glow halo, NO transparency checkerboard, NO text,
+NO border, NO floor shadow.
+```
+
+#### Los demás, editando siempre `Apagada.png` (plantilla del apartado 0)
+
+| Archivo | Change |
+|---|---|
+| `Encendida1.png` | «LIT: a flame on the head of the torch, about 14 art pixels tall, drawn with solid pixels: warm orange #FFB040 outside, yellow #FFE080 inside and a pale yellow core; three sparks above it. This warm flame is the only warm colour in the image» |
+| `Encendida2.png` | «LIT, the same flame leaning a little to the left, the sparks in other places» |
+| `Encendida3.png` | «LIT, the same flame taller and leaning a little to the right» |
+| `Consumida.png` | «BURNT OUT: the rags charred down to a black stub, two dying dark red embers in it and a thin wisp of grey smoke above» |
+
+### E4. El cepo (2) → `Mundo3/Cepo/Abierto.png`, `Cerrado.png`
+
+Mide 1 u de ancho. A oscuras solo se ve a 1 u de Kael: el juego lo esconde; el dibujo es el de
+siempre.
+
+**Adjunta:** `Golem I1.jpg`, para el tamaño del píxel.
+
+```text
+Pixel art game sprite, side view, flat solid #FF00FF magenta background, the same art-pixel size
+and hard dark outline style as the attached golem (only a size reference).
+A rusty steel BEAR TRAP lying OPEN on the forest floor, seen from the side, about 26 art pixels
+wide and 8 tall, centered, on a flat bottom row: two jagged semicircular jaws opened flat, a
+round pressure plate between them, a short chain, half covered by a few dead leaves. Dark rusty
+grey #3A3A4A and black, a few paler pixels on the teeth. No blood.
+Hard-edged fully opaque pixels. NO blur, NO glow halo, NO transparency checkerboard, NO text.
+```
+
+Después, editándolo: **`Cerrado.png`:** «SNAPPED SHUT: the two jaws closed upright against each
+other into a tall jagged arch about 12 art pixels tall, the dead leaves thrown up around it».
+
+### E5. Las ramas (4) → `Mundo3/Rama/Rama.png`, `RamaPodrida.png`, `RamaRota.png`, `Astillas.png`
+
+Las ramas son las plataformas del bosque: miden 2 u de largo y media de grueso (las de la arena,
+3). El juego repite su parte central para alargarlas, como las vigas del Mundo 2. **La podrida
+tiene que distinguirse con luz, pero solo con luz:** misma forma, otro color.
+
+**Adjunta:** `Golem I1.jpg`, para el tamaño del píxel.
+
+```text
+Pixel art game sprite, side view, flat solid #FF00FF magenta background, the same art-pixel size
+and hard dark outline style as the attached golem (only a size reference).
+A horizontal TREE BRANCH used as a platform, about 48 art pixels long and 12 tall, centered:
+thick dark bark (black #0A0A0F, dark violet #2D1B4E), a perfectly FLAT walkable top on a single
+row, covered with moss (swamp green #1A2E1A, a few pale green #7FE6B0 pixels), and both ends
+broken off irregularly. The middle 24 art pixels must be able to repeat side by side with no
+visible seam.
+Hard-edged fully opaque pixels. NO blur, NO glow halo, NO transparency checkerboard, NO text.
+```
+
+Después, editando **`Rama.png`**:
+- **`RamaPodrida.png`:** «the same branch ROTTEN: dry grey bark (#3A3A4A, light grey #6A6A78),
+  two long cracks along it, pale fungus shelves underneath, no moss. Exactly the same shape and
+  the same flat top».
+- **`RamaRota.png`:** «the rotten grey branch SNAPPING in the middle: the two halves bent down at
+  the break, splinters sticking out».
+- **`Astillas.png`:** «no branch: only splinters and chips of grey rotten wood falling apart».
+
+### E6. La cinta blanca (2) → `Mundo3/Cinta/Cinta1.png`, `Cinta2.png`
+
+Marca el camino bueno de la bifurcación. Solo se ve con luz.
+
+```text
+Pixel art game sprite, side view, flat solid #FF00FF magenta background, the same art-pixel size
+as the attached golem (only a size reference).
+A strip of torn WHITE CLOTH tied in a knot around a short piece of dark branch, its loose end
+hanging down and to the right, about 12 art pixels wide and 16 tall, centered. Off-white #E8E4DC
+with light grey folds.
+Hard-edged fully opaque pixels. NO blur, NO glow halo, NO transparency checkerboard, NO text.
+```
+
+Después, editándola: **`Cinta2.png`:** «the loose end of the cloth blown to the left by a
+breeze».
+
+## F. El fondo (parallax, como el de los otros dos mundos)
+
+**Adjunta en todos:** `Tesis/Imagenes/Mundo2/fondos/Cielo.jpg`, el del Mundo 2, para el estilo, el
+tamaño del píxel y el formato (16:9). Las capas que se ven a través de otras llevan magenta en lo
+que debe quedar transparente; el cielo es opaco. **El fondo de este mundo casi no se verá**: el
+nivel es oscuro. Por eso importan las siluetas, no los detalles.
+
+| Archivo | Prompt |
+|---|---|
+| `Fondos/Cielo.jpg` | `Pixel art parallax background layer, 16:9, same style, same art-pixel size and same format as the attached image. A NIGHT SKY over a forest: very dark violet #2D1B4E low on the horizon fading to black #0A0A0F at the top, a pale cold MOON half hidden behind thin dark clouds, sparse single-pixel stars. Fully opaque, no ground, no trees. The left and right edges must match so it can repeat horizontally. Hard-edged pixels, NO blur, NO gradient banding, NO text.` |
+| `Fondos/BosqueLejano.jpg` | `Pixel art parallax background layer, 16:9, same style as the attached image. The distant silhouette of a DENSE FOREST: rows of tall, pointed and bare trees in near-black violet (#1A1426, #2D1B4E), a thin band of grey mist at their feet along the bottom. Everything above the treeline is flat solid #FF00FF magenta. The left and right edges must match. Hard-edged pixels, NO blur, NO text.` |
+| `Fondos/BosqueCercano.jpg` | `Pixel art parallax background layer, 16:9, same style as the attached image. Tall dark TREE TRUNKS with twisted bare branches, closer and bigger than a distant forest, black #0A0A0F with swamp green #1A2E1A moss, a few branches crossing between them. Between the trunks and above the branches, flat solid #FF00FF magenta. The left and right edges must match. Hard-edged pixels, NO blur, NO text.` |
+| `Fondos/ArbolHueco.jpg` | `Pixel art background prop, same style as the attached image. A HUGE ANCIENT DEAD TREE, much taller than any other, with a dark hollow at its base like a doorway, roots spread like claws, and a few pale green #7FE6B0 fungus lights on its bark. A landmark seen from far away. Flat solid #FF00FF magenta around it. Hard-edged pixels, NO blur, NO text.` *(Es el hito, como la fortaleza y la torre: se ve desde el inicio y es donde espera el jefe.)* |
+| `Fondos/Niebla.jpg` | `Pixel art parallax foreground layer, 16:9, same style as the attached image. A horizontal band of low MIST along the bottom third, drawn with solid pixels in two or three tones of spectral grey #3A3A4A and dark violet #2D1B4E, with a wavy top edge. Everything else flat solid #FF00FF magenta. The left and right edges must match. Hard-edged pixels, NO blur, NO soft gradients, NO text.` |
+| `Fondos/PrimerPlanoArriba.jpg` *(opcional)* | `Pixel art foreground layer, 16:9, same style as the attached image. Black leafless branches and hanging moss along the top edge. Everything else flat solid #FF00FF magenta. Edges match for repeating. Hard-edged pixels, NO blur, NO text.` |
+| `Fondos/PrimerPlanoAbajo.jpg` *(opcional)* | `Pixel art foreground layer, 16:9, same style as the attached image. Ferns and thorny bushes rising from the bottom edge, black with dark green. Everything else flat solid #FF00FF magenta. Edges match for repeating. Hard-edged pixels, NO blur, NO text.` |
+
+## G. Las cinemáticas del jefe (480 × 268, como las del Mundo 2)
+
+**Pídelas cuando tengas la maestra del jefe** (`Espectro del Pavor/I1.png`).
+
+**Adjunta, en este orden:**
+1. `Tesis/Imagenes/Mundo2/Cinematicas/DerrotaDoncella2.jpg` (el lienzo y el tamaño del píxel de
+   las cinemáticas a 480);
+2. `Tesis/Imagenes/Mundo2/Cinematicas/SalidaTristeza2.jpeg` (Kael, de espaldas, con sus huecos y
+   sus dos fragmentos);
+3. `Tesis/Imagenes/Mundo3/Espectro del Pavor/I1.png` (el jefe).
+
+Todas empiezan así:
+
+```text
+Pixel art cinematic still, 16:9. EXACTLY the same canvas and the same art-pixel size (the same
+blocks) as the FIRST attached image, and the same style. Palette: black #0A0A0F, dark violet
+#2D1B4E, swamp green #1A2E1A, spectral grey #3A3A4A, and pale green #7FE6B0 only for what
+glows. The hero is the one in the SECOND attached image: same design and same dark worn coat,
+with the orange shard on his left shoulder and the light blue one on his left forearm. The
+guardian is the one in the THIRD attached image. Hard-edged pixels, NO blur, NO text, NO border,
+NO letterbox bars.
+```
+
+Y siguen con:
+
+| Archivo | Plano |
+|---|---|
+| `Cinematicas/PresentacionEspectro1.jpg` | «A clearing in a pitch-black forest at night. The hero, tiny, at the bottom left, inside a small circle of dim light around him (his own light): only that circle and a few blades of grass in it are visible. Everything else is black. Far away in the centre of the dark, at the height of a tall man, the two thin glowing pale green cracks of a mask, watching him.» |
+| `Cinematicas/PresentacionEspectro2.jpg` | «Close-up of the guardian from the chest up, half dissolved into the dark: only the glowing cracks of his mask, the veins of his armour and the edge of his curved sword, raised beside his face, are lit in bright pale green; the rest of him is black leaves fading into the black background. A few black leaves float around him.» |
+| `Cinematicas/DerrotaEspectro1.jpg` | «The guardian breaking apart into a storm of black leaves in the centre of the clearing, his cracked mask falling, pale green light leaking from its cracks. Around him the darkness is thinning: grey-violet tree trunks begin to appear. The hero, tiny, at the bottom left, watching.» |
+| `Cinematicas/DerrotaEspectro2.jpg` | «The same forest seen with light for the first time: soft silver moonlight falls into the clearing, the trees are dark green and violet, low mist on the ground, a few firefly pixels. The hero, tiny, in the centre, holding a small dark violet gem that glows.» |
+
+## H. Las puertas de este mundo (como las de los otros dos)
+
+### Decisiones mías, por si quieres cambiarlas antes de generar
+
+- **El emblema es un farol apagado que se enciende al abrirse** la puerta. Es la segunda frase
+  del cierre: el bosque era «un lugar donde nadie había encendido una luz».
+- **La puerta está tallada en el tronco de un árbol muerto**, sellada por raíces.
+- **Por la puerta abierta se ve el mundo siguiente:** la luz ocre y polvorienta de los campos de
+  batalla de la Culpa, con ceniza.
+- **El checkpoint es una lámpara de trinchera** colgada de una estaca con una cinta blanca:
+  apagada y encendida. Es luz cálida, como la de las antorchas.
+- **La verja de la arena es un muro de raíces negras con espinas** sobre una empalizada.
+- **Los huecos de Kael:** al salir del Miedo, el fragmento violeta tapa **el codo derecho** y
+  quedan dos huecos, las dos pantorrillas. El hueco lo elegí yo, como en la Tristeza.
+
+### H1. La puerta → `Mundo3/Puerta/Puerta1.jpg` … `Puerta4.jpg`
+
+**Adjunta:** `Mundo3/Tileset/TileMap3.png` (el tileset del bosque, E1), para el tamaño del píxel y
+el estilo. Si todavía no lo tienes, `Mundo2/Tileset/TileMap2.jpg`.
+
+```text
+Pixel art game sprite for a 2D side-view platformer, flat solid #FF00FF magenta background.
+Same art-pixel size and same hard pixel style as the attached tileset.
+
+A GATE GROWN INTO THE TRUNK OF A HUGE DEAD TREE, seen straight from the front, CLOSED. About 96
+art pixels wide and 128 art pixels tall, centered on the canvas, standing on its own flat bottom
+row. Gnarled bark forms a pointed arch. Inside it, two door leaves of black rotten planks, bound
+by thick roots that have grown across the seam and seal it. Pale fungus on the bark. At the top
+of the arch, carved into the wood, the emblem of an UNLIT LANTERN.
+Palette: black #0A0A0F, dark violet #2D1B4E, swamp green #1A2E1A, spectral grey #3A3A4A, a few
+pale green #7FE6B0 fungus pixels. No warm colours.
+
+Nothing below the bottom row: no ground, no roots spreading on the floor. Nothing touches the
+canvas edges. Hard-edged fully opaque pixels only. NO blur, NO glow halo, NO gradient, NO
+transparency checkerboard, NO text, NO border, NO shadow on the floor.
+```
+
+Después, **editando siempre `Puerta1.jpg`** con la plantilla de edición de
+`Prompts_Puertas.md`:
+
+- **`Puerta2.jpg`, abriéndose:** «the roots across the seam have snapped and withered; the door
+  leaves are ajar: the vertical gap in the middle shows a band of dusty light drawn as flat solid
+  colours (pale ochre #E0C890 in the centre, ochre #C9A567, burnt brown #5C3D1E at the sides). A
+  tiny warm flame (#FFB040) has appeared in the carved lantern.»
+- **`Puerta3.jpg`, abierta:** «the door leaves are fully open and hidden behind the frame: the
+  whole doorway is filled with dusty war light drawn as flat solid bands (pale ochre #E0C890 in
+  the centre, then ochre #C9A567, then burnt brown #5C3D1E next to the frame), with four or five
+  grey ash pixels drifting out of it. The carved lantern on the arch is LIT with a warm flame
+  (#FFB040, yellow).»
+- **`Puerta4.jpg`, abierta (variante):** «the same open gate as described for the open state.
+  Move the bands of light one or two art pixels and put the ash pixels in different places, so
+  this image and the previous one can flicker in a loop.» *(Adjunta `Puerta3.jpg` y edítala.)*
+
+### H2. La verja de la arena → `Mundo3/Verja/Verja.jpg`
+
+Con el prompt de la verja de `Prompts_Puertas.md` (A3), adjuntando el tileset del bosque, y con
+`<TEMA>` = «A wall of black THORNY ROOTS and brambles grown over an old wooden palisade: twisted
+black roots, sharp grey thorns, a few pale green #7FE6B0 fungus pixels. No warm colours.»
+
+### H3. El checkpoint → `Mundo3/Checkpoint/Checkpoint1.jpg`, `Checkpoint2.jpg`
+
+Con el prompt del checkpoint de `Prompts_Puertas.md` (A3), adjuntando el tileset del bosque, y con
+`<TEMA>` = «an old trench OIL LAMP hanging from a hook on a wooden stake, UNLIT: dark glass, a
+rusty frame, a white cloth ribbon tied to the stake.» Y la encendida, editándola: «the lamp is
+LIT: a small warm flame (#FFB040 and yellow pixels) inside the glass, the ribbon lifted by a
+breeze».
+
+### H4. La cinemática de salida (480 × 268) → `Mundo3/Cinematicas/SalidaMiedo1.jpg`, `SalidaMiedo2.jpg`
+
+**Pídela cuando tengas `Puerta3.jpg` y las cinemáticas del jefe.**
+
+**Adjunta, en este orden:**
+1. `Mundo3/Cinematicas/DerrotaEspectro2.jpg` (el bosque con luz y el tamaño del píxel);
+2. `Mundo2/Cinematicas/SalidaTristeza2.jpeg` (Kael, de espaldas);
+3. `Mundo3/Puerta/Puerta3.jpg` (la puerta abierta).
+
+Las dos empiezan así:
+
+```text
+Pixel art cinematic still, 16:9. EXACTLY the same canvas and the same art-pixel size (the same
+blocks) as the FIRST attached image, and the same style and palette. The hero is the one in the
+SECOND attached image: same design and same dark worn coat. He now carries THREE glowing shards:
+the orange one on his left shoulder, the light blue one on his left forearm and a dark violet one
+that fills the hole in his right elbow. Exactly TWO empty holes remain in his body: his left calf
+and his right calf. The gate is the one in the THIRD attached image, with its lit lantern on the
+arch. Hard-edged pixels, NO blur, NO text, NO border, NO letterbox bars.
+```
+
+| Archivo | Frases que lleva encima | Plano |
+|---|---|---|
+| `SalidaMiedo1.jpg` | «La oscuridad retrocede un paso. Luego otro.» y «El bosque no era un laberinto: era un lugar donde nadie había encendido una luz.» | «Wide shot of the clearing after the fight, now in soft silver moonlight: dark green and violet trees, low mist, a few fireflies. On the right third of the image the tree gate stands OPEN, warm dusty ochre light pouring out of it across the grass. The hero, tiny, at the bottom left, seen from behind, walking toward it.» |
+| `SalidaMiedo2.jpg` | «Kael integra el Fragmento del Miedo. Puede ocultarse sin dejar de avanzar.» | «Close shot from behind the hero as he steps through the open tree gate: his dark silhouette, from the knees up, in the left-centre of the image, framed by the bark arch. In front of him the doorway, full of dusty ochre light and drifting grey ash, with the far silhouettes of broken fences. The three shards glow on him: orange, light blue and violet. Behind him, at the edges, the moonlit forest.» |
+
+## I. Kael (opcional)
+
+**Caminar a escondidas**, en Pixelorama: en este mundo se camina mucho (Alt) y hoy usa el clip de
+correr más despacio. Cuatro fotogramas en bucle, en el lienzo de Kael: encogido, los hombros
+bajos, pasos cortos y la mano cerca de la espada. Exporta la tira a 1× a
+`Tesis/Imagenes Kael/Sigilo/`.
+
+## J. Dónde va cada cosa (segunda tanda)
+
+| Carpeta en `Tesis/Imagenes/Mundo3/` | Archivos | Herramienta |
+|---|---|---|
+| `Tileset/` | `TileMap3`, `Props3` | Gemini (editando las hojas del Mundo 2) |
+| `Antorcha/` | `Apagada`, `Encendida1` … `Encendida3`, `Consumida` | Gemini (editando `Apagada`) |
+| `Cepo/` | `Abierto`, `Cerrado` | Gemini |
+| `Rama/` | `Rama`, `RamaPodrida`, `RamaRota`, `Astillas` | Gemini (editando `Rama`) |
+| `Cinta/` | `Cinta1`, `Cinta2` | Gemini |
+| `Fondos/` | `Cielo`, `BosqueLejano`, `BosqueCercano`, `ArbolHueco`, `Niebla` y, opcionales, `PrimerPlanoArriba` y `PrimerPlanoAbajo` | Gemini |
+| `Cinematicas/` | `PresentacionEspectro1`, `PresentacionEspectro2`, `DerrotaEspectro1`, `DerrotaEspectro2`, `SalidaMiedo1`, `SalidaMiedo2` | Gemini |
+| `Puerta/` | `Puerta1` … `Puerta4` | Gemini (editando `Puerta1`) |
+| `Verja/` | `Verja` | Gemini |
+| `Checkpoint/` | `Checkpoint1`, `Checkpoint2` | Gemini |
+| `Tesis/Imagenes Kael/Sigilo/` | la tira de caminar a escondidas | Pixelorama (opcional) |
+
+**Orden recomendado para esta tanda:** el tileset (E1) primero, porque la puerta, la verja y el
+checkpoint lo adjuntan; luego las mecánicas (E3 a E6), que son pequeñas; el fondo; y al final
+las cinemáticas, que necesitan al jefe y la puerta.

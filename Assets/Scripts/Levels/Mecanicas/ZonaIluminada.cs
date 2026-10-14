@@ -4,9 +4,9 @@ using UnityEngine;
 namespace Fragmentum.Levels.Mecanicas
 {
     /// <summary>
-    /// Círculo de luz fijo que se registra en <see cref="Iluminacion"/>. Es la versión
-    /// mínima de la antorcha del Nivel 3: la <c>Torch</c> de la Fase 10 añadirá el encendido
-    /// con la tecla E, la duración de 15 s y el despertar de los Espectros.
+    /// Círculo de luz fijo que se registra en <see cref="Iluminacion"/>: siempre encendido, sin
+    /// luz que se vea. La antorcha del Nivel 3 es <see cref="Antorcha"/>, con su encendido, su
+    /// duración y su luz 2D; este queda para las pruebas y para la luz fija de otros mundos.
     /// </summary>
     public class ZonaIluminada : MonoBehaviour, IFuenteLuz
     {

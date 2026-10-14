@@ -30,7 +30,8 @@ namespace Fragmentum.EditorTools
     ///   provisional: es lo único que borra, y solo la primera vez (lo provisional y lo que se colocó
     ///   para él: su escenario pintado, el checkpoint, la salida y la arena);
     /// - en el Nivel 2, el suyo (<see cref="DisenoNivel2"/>), que se vuelve a montar entero cuando
-    ///   cambia su versión (<c>PreparadorNivelTristeza.cs</c>).
+    ///   cambia su versión (<c>PreparadorNivelTristeza.cs</c>), y lo mismo el del Nivel 3
+    ///   (<see cref="DisenoNivel3"/>, <c>PreparadorNivelMiedo.cs</c>).
     ///
     /// Es idempotente: ejecutarla otra vez sobre una escena preparada no cambia nada, y la
     /// escena solo se guarda si cambió.
@@ -177,6 +178,13 @@ namespace Fragmentum.EditorTools
             if (DisenoNivel2.EsDe(nivel) && !RecorridoNivel2AlDia(escena))
             {
                 MontarRecorridoNivel2(escena, nivel, raiz);
+                cambios = true;
+            }
+
+            // 1c. El del Nivel 3 (DisenoNivel3), igual que el del Nivel 2.
+            if (DisenoNivel3.EsDe(nivel) && !RecorridoNivel3AlDia(escena))
+            {
+                MontarRecorridoNivel3(escena, nivel, raiz);
                 cambios = true;
             }
 

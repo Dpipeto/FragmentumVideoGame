@@ -20,6 +20,8 @@ namespace Fragmentum.Levels
     /// - <b>Configuración:</b> fondo de cámara con la paleta, límites de cámara desde las
     ///   secciones del Anexo A y música del nivel. Lo que falte (música, prefab) se avisa por
     ///   consola y el nivel sigue funcionando.
+    /// - <b>Oscuridad:</b> si las reglas del nivel la piden (el Miedo), activa la luz de cada tramo
+    ///   de la escena (<see cref="LuzDelNivel"/>) y enciende la luz propia de Kael.
     /// - <b>Reaparición:</b> tras un Game Over, la FSM global pide reintentar
     ///   (<see cref="EventosJuego.ReintentoSolicitado"/>) y el jugador vuelve al checkpoint
     ///   activo. Fuera de los niveles del juego (escenas de prueba) no hay Game Over: el jugador
@@ -151,6 +153,8 @@ namespace Fragmentum.Levels
             {
                 _camara.Encuadrar();
             }
+
+            PrepararOscuridad();
 
             // Las líneas de apertura esperan a que se juegue (tras la cinemática de entrada, si la hay).
             if (nivel != null && DialogueManager.Instancia != null)
@@ -355,6 +359,40 @@ namespace Fragmentum.Levels
             if (limitesDesdeSecciones && tramo.y > tramo.x)
             {
                 _camara.FijarLimites(new Vector2(tramo.x - margenCamara, alturaCamara.x), new Vector2(tramo.y + margenCamara, alturaCamara.y));
+            }
+        }
+
+        // En Start: la luz global y Kael ya pasaron por su Awake.
+        private void PrepararOscuridad()
+        {
+            if (nivel == null || !nivel.reglas.oscuridad)
+            {
+                return;
+            }
+
+            LuzDelNivel luz = null;
+            foreach (var raiz in gameObject.scene.GetRootGameObjects())
+            {
+                luz = raiz.GetComponentInChildren<LuzDelNivel>(true);
+                if (luz != null)
+                {
+                    break;
+                }
+            }
+
+            if (luz != null)
+            {
+                luz.Activar(_jugador != null ? _jugador.transform : null);
+            }
+            else
+            {
+                Debug.LogWarning($"[Nivel] '{nivel.Titulo}' pide oscuridad, pero su escena no tiene LuzDelNivel: se queda con luz. Prepara la escena (Fragmentum → Niveles).", this);
+            }
+
+            var propia = _jugador != null ? _jugador.GetComponent<LuzJugador>() : null;
+            if (propia != null)
+            {
+                propia.Encender(nivel.reglas.radioLuzJugador);
             }
         }
 

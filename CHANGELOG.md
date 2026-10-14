@@ -9,6 +9,177 @@
 
 ---
 
+## Mundo 3, fase B: la oscuridad, las antorchas, los cepos y las ramas que ceden (2026-10-14)
+
+Misma rama `nivel3-recorrido`, sobre la fase A. El autor pidió seguir con la
+fase B. Es la fase de las mecánicas del Miedo, sin arte: rectángulos de color y luces 2D.
+
+### 1. La oscuridad y la luz de Kael
+
+- **Problema.** El `L3_Miedo` decía desde la Fase 5 que el nivel es oscuro y que Kael lleva una luz
+  de 3 u, pero nada lo aplicaba: el Nivel 3 se jugaba con luz.
+- **Causa.** Faltaban las luces: el Anexo A pide luces 2D de URP, y el proyecto ya usa el
+  renderizador 2D, pero ninguna escena las cambiaba.
+- **Solución.**
+  - **`LuzDelNivel`** lleva la luz global de la escena y la cambia según el tramo en que esté
+    Kael, poco a poco: la linde con luna, el bosque cerrado a oscuras, el claro y la antesala con
+    luna otra vez y la arena con la oscuridad total. Los valores están en `DisenoNivel3.Luces`.
+  - **`LuzJugador`**: una luz 2D hija de Kael, apagada en el prefab.
+  - **El `LevelManager` aplica las reglas del nivel**: si `reglas.oscuridad`, activa la
+    `LuzDelNivel` de la escena y enciende la luz de Kael con `reglas.radioLuzJugador`. En el
+    Editor la escena se sigue viendo con luz, y fuera del Miedo nada cambia.
+  - La luz de Kael no se registra en `Iluminacion`: con ella ve dónde pisa, pero los Espectros no
+    la respetan.
+
+### 2. Las antorchas y la tecla E
+
+- **Problema.** La antorcha es la decisión central del mundo: alumbra 8 u durante 15 s, enseña las
+  trampas, despierta a lo que duerme y se enciende una vez por vida. Interactuar (E) existía en el
+  input, pero nada la usaba.
+- **Causa.** Solo estaba `ZonaIluminada`, el círculo fijo de la Fase 4.
+- **Solución.**
+  - **`Antorcha`**, con tres estados (apagada, encendida, consumida). Mientras arde se registra en
+    `Iluminacion`, desde la llama, y parpadea los 3 últimos segundos. Al encenderse lo anuncia
+    (`Antorcha.AlEncenderse`), para que en la fase C despierten los Espectros de su radio. Vuelve a
+    estar lista cuando Kael reaparece tras morir.
+  - **`Interacciones` e `InteraccionJugador`**: lo que se puede usar se registra, y Kael usa lo
+    que tiene más cerca al pulsar E. La tecla se lee en un solo sitio.
+  - **El aviso del HUD** (`AvisoInteraccion`): «E · Encender» sobre la antorcha que Kael tiene al
+    alcance. Es el tutorial de la primera antorcha.
+
+### 3. El cepo y el ruido
+
+- **Problema.** Las trampas del Anexo A son «invisibles hasta 1 u». La propuesta las hizo cepos que
+  sujetan y suenan, y pidió que el jugador vea cuándo hace ruido.
+- **Causa.** No existían ni el cepo ni una forma de hacer ruido que no fuera correr.
+- **Solución.**
+  - **`Cepo`**: se ve a 1 u de Kael o bajo una antorcha, y se funde al aparecer. Al pisarlo:
+    - Quita 1 sin retroceso: lo sujeta, no lo empuja.
+    - Lo sujeta 1 s: no anda, no salta y no sale con el dash. Lo hace con un modificador del motor
+      y sujetando su posición, sin tocar `PlayerController`.
+    - Suena a 8 u.
+    - Se queda cerrado y a la vista hasta que Kael reaparece.
+  - **`PlayerModoMovimiento.HacerRuido`**: el chasquido sale por el mismo canal que la carrera, así
+    que los Centinelas Ciegos de la Fase 4 ya lo oyen, sin cambiar `EnemyController`.
+  - **`AnillosDeRuido`**: cada ruido dibuja a los pies de Kael un anillo pálido que crece hasta
+    donde se oye (6 u corriendo, 8 u el cepo) y se desvanece. Son líneas sin imagen que no reaccionan
+    a la luz: se ven a oscuras.
+
+### 4. Las ramas podridas y las cintas
+
+- **Problema.** En la fase A las ramas podridas eran ramas de otro color, que se veían a oscuras y
+  no cedían.
+- **Causa.** Eran bloques del recorrido.
+- **Solución.**
+  - **El prefab `RamaPodrida`**: la `PlataformaInestable` del Nivel 1 con los tiempos del Miedo
+    (cruje 0,3 s y vuelve a los 4 s) y el componente `RamaPodrida`. A oscuras se ve como las sanas;
+    bajo una antorcha, gris; y tiembla mientras cruje.
+  - **Las cuatro cintas blancas** de la ruta buena cuelgan de las ramas sanas de las copas y solo
+    se ven con luz. La antorcha de la bifurcación alcanza la primera.
+  - `DisenoNivel3.Version` pasa a 3: la escena se vuelve a montar con todo esto.
+  - Los prefabs de la antorcha, el cepo y la rama podrida se crean con los de las otras mecánicas
+    (`GeneradorMecanicas`), con un rectángulo provisional que avisa de que falta su arte.
+
+### Pruebas
+
+- **Nuevas:**
+  - `MecanicasMiedoTests` (9): los tres prefabs con las medidas del diseño; la luz, la
+    interacción y los anillos de Kael; el parpadeo; cuándo se ve un cepo; qué luz toca en cada
+    tramo; y qué tiene Kael al alcance.
+  - `MecanicasMiedoPlayModeTests` (7):
+    - La antorcha: solo al alcance, su tiempo, su parpadeo, una vez por vida.
+    - El cepo: se ve de cerca o con luz; sujeta, quita y suena; lo oye un Centinela que no oye
+      caminar; se rearma al reaparecer.
+    - La rama podrida: cruje, se parte, vuelve y se delata con luz.
+    - Los anillos y la luz de Kael.
+- **Ampliadas:**
+  - `DisenoNivel3Tests` (+3): la luz de cada tramo, las cintas y las ramas podridas.
+  - `EscenaNivel3Tests` (+3): la oscuridad, las antorchas y los cepos, las ramas podridas y las
+    cintas, en la escena.
+  - `Nivel3PlayModeTests` (+3): la oscuridad cambia por tramos y Kael lleva su luz; la primera
+    antorcha, con su aviso, enseña el primer cepo; el Nivel 1 sigue con luz.
+- **534 EditMode y 220 PlayMode en verde.**
+
+---
+
+## Mundo 3, fase A: el recorrido del Nivel 3 (2026-10-14)
+
+Rama `nivel3-recorrido`, que sale de `nivel2-recorrido` (antes, los commits de la v0.45 y de la
+propuesta). El autor dio por buenos los dos niveles alargados con su puntaje (N42) y pidió empezar
+el Mundo 3 como el 2: primero el mundo, sus enemigos (el básico, de la familia de los Ecos) y su
+jefe, con sus prompts. Aprobó la propuesta con sus nueve decisiones («haz lo que recomiendas»).
+Esta fase monta el recorrido en bloques de color, todavía con luz.
+
+### 1. El diseño del Mundo 3
+
+- **Problema.** El Nivel 3 solo existía como dato (`L3_Miedo`, de 0 a 70 u, sin escena). Del
+  Miedo ya estaban programados desde la Fase 4 el sigilo (`PlayerModoMovimiento`), la detección
+  en la oscuridad y por ruido y la Invisibilidad Parcial, pero no había un nivel donde usarlos ni
+  un diseño que dijera cómo enseñan la emoción.
+- **Causa.** El Anexo A da las piezas (antorchas que despiertan a los Espectros, Centinelas Ciegos
+  que oyen, un laberinto de dos rutas, trampas ocultas, un jefe invisible), no su recorrido.
+- **Solución.** Un diseño en tres tiempos que sale de la línea del guion, «ocultarse sin
+  perderse» (`Docs/Diseno/Nivel3_Diseno.md`): en la linde la luz enseña las trampas pero despierta
+  lo que duerme; en el bosque cerrado, a oscuras, esconderse funciona pero no basta (el camino
+  fácil acaba en un callejón); y en el claro y la arena hay que enfrentar al miedo (hacer ruido a
+  propósito ante el Acechador, acercarse al Espectro del Pavor cuando avisa). El Espectro es el Eco
+  de este mundo (el verde que se deshace en polvo de `EnemigosNiveles.jpeg`). Las decisiones
+  aprobadas: antorchas de un uso por vida, Espectros dormidos que despierta la luz o el roce, cepos
+  que sujetan y suenan, la ruta falsa en un callejón, un mini-jefe nuevo (el Acechador), el
+  Centinela Ciego con máscara de gas, el jefe de `jefe3.jpeg`, el castigo de golpear a una sombra
+  y un nivel de unos 145 u con tres checkpoints y 15 min de tiempo con bono. Los prompts de todas
+  sus imágenes están en `Docs/Diseno/Prompts_Mundo3.md`, en dos tandas.
+
+### 2. El recorrido como datos y su montaje
+
+- **Problema.** Había que llevar el diseño a una escena que crezca por fases, como la del Nivel 2.
+- **Causa.** Es el mismo caso que el Nivel 2.
+- **Solución.**
+  - **`DisenoNivel3`**: suelos, ramas sanas y podridas, paredes, las ramas de la arena, antorchas,
+    cepos, enemigos, checkpoints, la arena y los saltos del recorrido. Su `Version` hace que
+    `PreparadorNivel` (con `PreparadorNivelMiedo.cs`) lo vuelva a montar entero cuando cambia.
+  - **La escena `Nivel3`** se crea desde la plantilla URP 2D al regenerar, se asigna a su
+    `LevelData` con sus cuatro secciones y sus tres checkpoints y entra en Build Settings: el
+    tercer mundo ya se juega desde el selector. El que queda «en construcción» es el cuarto.
+  - **Las raíces del callejón no agarran** (`SinAgarre`, como el hielo liso del Mundo 2): sin eso,
+    el salto de pared sacaba de la trampa.
+  - **Los Espectros y los Centinelas Ciegos** de la Fase 4 están en su sitio, con su ruta. El
+    Acechador llega en la fase C; las antorchas, los cepos y la oscuridad, en la B.
+  - **El tiempo con bono del Nivel 3 es de 15 min** (`TablaPuntaje`): aquí se camina mucho.
+
+### 3. Cruzarlo todo caminando
+
+- **Problema.** En el Miedo correr hace ruido. Si algún salto obligara a correr, el sigilo sería
+  una trampa y no una decisión.
+- **Causa.** Caminando (Alt), Kael va a 2,1 u/s: un salto le avanza 1,5 u y uno doble, 2,5. El
+  esquema de la propuesta tenía huecos de 1,5 u y un barranco con un escalón que quedaba bajo una
+  rama: Kael daba con la cabeza al saltar.
+- **Solución.**
+  - **Todas las ramas van a 1 u unas de otras**, y `DisenoNivel3Tests` comprueba cada salto con la
+    velocidad de caminar (con los márgenes de siempre, el 85 % del alcance y el 90 % de la altura).
+  - **El barranco mide 2,5 u de hondo y no tiene escalón:** bajo sus ramas quedan 2 u y se sale
+    con el doble salto junto a cualquiera de sus paredes, donde no hay rama encima. Las pruebas
+    comprueban que bajo cada rama por la que se pasa caben Kael y 0,2 u más.
+  - **El callejón es de verdad un callejón:** desde su fondo, nada de encima queda al alcance del
+    doble salto, y sus raíces no agarran. Se vuelve por un escalón.
+  - **La primera rama de las copas está a 1 u del borde**, no encima: encima le cortaba el paso a
+    Kael y escondía la bajada a la hondonada.
+
+### Pruebas
+
+- **Nuevas:** `DisenoNivel3Tests` (13: las medidas de caminar, que coinciden con `FuenteInputJugador`
+  y con el umbral del sigilo; cada salto caminando; que del inicio se llega a la arena sin pasar
+  por la trampa; el callejón; el hueco bajo las ramas; las ramas podridas sobre la trampa; la
+  arena; las secciones; los recuentos del Anexo A; los checkpoints; las antorchas y los cepos),
+  `EscenaNivel3Tests` (9: la escena sigue al diseño) y `Nivel3PlayModeTests` (3: correr hace ruido
+  y caminar no, la trinchera guarda la partida, las raíces no agarran y el puesto del vigía se
+  sostiene).
+- **Cambiadas:** `ProgresionPlayModeTests` y `DatosProgresionTests`, porque el tercer mundo ya
+  tiene escena.
+- **519 EditMode y 210 PlayMode en verde.**
+
+---
+
 ## Puntaje, menú con letra e imagen, niveles más largos y las puertas de cada mundo (2026-10-13)
 
 El autor dio por buenos el Nivel 2 tal como quedó (N39) y las decisiones de diseño de las

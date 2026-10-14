@@ -1,9 +1,10 @@
 """
 Esquema del Nivel 3 (Docs/Diseno/Nivel3_Diseno.png): vista lateral a escala, 1 u = 14 px.
 
-Es un dibujo de diseño, no una captura del juego: es la PROPUESTA de Docs/Diseno/Nivel3_Diseno.md,
-todavía sin montar. Cuando exista Assets/Scripts/Editor/DisenoNivel3.cs, las medidas de aquí
-tendrán que seguir a las suyas, como en el Nivel 2.
+Es un dibujo de diseño, no una captura del juego. Las medidas son las del recorrido montado
+(Assets/Scripts/Editor/DisenoNivel3.cs y Docs/Diseno/Nivel3_Diseno.md): si cambias una, cambia
+las otras (la luz de cada tramo está en DisenoNivel3.Luces). Lo que todavía no está en la escena
+(el Acechador y sus árboles) se dibuja igual, porque es el diseño.
 
 Uso:  python Herramientas/esquema_nivel3.py
 """
@@ -82,37 +83,38 @@ f, fb, fp, ft = fuente(13), fuente(13, True), fuente(11), fuente(20, True)
 
 for desde, hasta, _, color in SECCIONES:
     rect(d, desde, Y0, hasta, Y1, color)
-# El claro: el único sitio del bosque sin copas, donde entra la luna
-rect(d, 89, 0, 106, Y1, (30, 32, 48))
+# El claro (el único sitio del bosque sin copas) y la antesala: entra la luna desde x 89
+rect(d, 89, 0, 112, Y1, (30, 32, 48))
 
 # --- La propuesta (Nivel3_Diseno.md, sección 3) ---
-SUELOS = [(-6, 17, 0), (17, 27, -3), (27, 38, 0), (38, 46, -2), (46, 58, 0), (58, 72, -4), (73, 112, 0),
+SUELOS = [(-6, 17, 0), (17, 27, -2.5), (27, 38, 0), (38, 46, -2), (46, 58, 0), (58, 73, -4), (74, 112, 0),
           (112, 139, 0)]
 RAMAS = [(18, 20, 0), (24, 26, 0),                    # el barranco de la linde
-         (57, 59.5, 2), (60, 62, 4),                  # subir a las copas desde la bifurcación
-         (66, 71, 4.5),                               # el puesto del vigía
-         (77, 79, 2.5),                               # bajar de las copas
-         (116, 119, 3.5), (132, 135, 3.5)]            # las dos ramas de la arena
-PODRIDAS = [(21, 23, 0), (63.5, 65.5, 4), (74.5, 76.5, 4)]
-BLOQUES = [(58, 59.5, -4, -2)]                        # el escalón para salir de la hondonada
+         (59, 61, 2), (62, 64, 4),                    # subir a las copas desde la bifurcación
+         (68, 74, 4.5),                               # el puesto del vigía
+         (78, 80, 3),                                 # bajar de las copas
+         (117, 120, 3.5), (131, 134, 3.5)]            # las dos ramas de la arena
+PODRIDAS = [(21, 23, 0), (65, 67, 4), (75, 77, 4)]
+BLOQUES = [(58, 60, -4, -2)]                          # el escalón para salir de la hondonada
 PAREDES = [(-7, -6, FONDO_BLOQUES, 17),               # ParedIzquierda
            (138, 139, 0, 17),                         # ParedArena
            (112, 139, 15, 17)]                        # TechoArena
-RAICES = (72, 73, -4, 4.5)                            # el fondo del callejón: no agarra
-TECHO_CALLEJON = (66, 72, -1.5, -0.5)                 # las raíces que cubren el callejón
+RAICES = (73, 74, FONDO_BLOQUES, 4)                   # el fondo del callejón: no agarra
 
 for x0, x1, y in SUELOS:
     rect(d, x0, FONDO_BLOQUES, x1, y, TIERRA, BORDE_TIERRA)
 for x0, x1, y0, y1 in BLOQUES + PAREDES:
     rect(d, x0, y0, x1, y1, TIERRA, BORDE_TIERRA)
 rect(d, RAICES[0], RAICES[2], RAICES[1], RAICES[3], RAIZ, PODRIDA, 2)
-rect(d, TECHO_CALLEJON[0], TECHO_CALLEJON[2], TECHO_CALLEJON[1], TECHO_CALLEJON[3], RAIZ, PODRIDA, 1)
 for x0, x1, y in RAMAS:
     rect(d, x0, y - 0.4, x1, y, RAMA)
 for x0, x1, y in PODRIDAS:
     rect(d, x0, y - 0.4, x1, y, PODRIDA)
     a, b = px((x0 + x1) / 2, y + 1.0)
     d.text((a - 3, b), '×', font=fb, fill=PODRIDA)
+# Las cintas blancas de la ruta buena (las copas): cuelgan de lo alto de su rama
+for x, y in ((60, 2), (63, 4), (69, 4.5), (79, 3)):
+    rect(d, x - 0.08, y - 0.85, x + 0.08, y + 0.05, (240, 240, 232))
 
 # La trinchera, con su checkpoint y su eco de memoria
 a, b = px(38.3, -2.4)
@@ -145,11 +147,11 @@ def cepo(x, y):
     d.polygon([(a - 7, b), (a, b - 8), (a + 7, b)], outline=CEPO, fill=(80, 20, 20))
 
 
-for x, y in ((11, 0), (22, -3), (34, 0), (63, -4), (68, -4)):
+for x, y in ((11, 0), (22, -2.5), (34, 0), (61.5, -4), (67, -4)):
     cepo(x, y)
-for x, y in ((14, 0), (33, 0), (52, 0), (77.8, 2.5), (66, -4), (70, -4)):
+for x, y in ((14, 0), (33, 0), (56.5, 0), (78, 0), (69, -4), (71.5, -4)):
     punto(x, y, ESPECTRO, 'E')
-for x, y in ((51, 0), (68.5, 4.5), (61, -4)):
+for x, y in ((51, 0), (71, 4.5), (63.5, -4)):
     punto(x, y, CENTINELA, 'C', r=8)
 punto(98, 0, ACECHADOR, 'A', r=13)
 punto(125.5, 0, JEFE, 'P', r=16)
@@ -160,7 +162,7 @@ d.text((a - 92, b), 'invisible salvo al avisar y atacar', font=fp, fill=TEXTO)
 a, b = px(2, 0)
 d.rectangle([a - 4, b - 22, a + 4, b], fill=LUNA)
 d.text((a - 14, b - 40), 'Kael', font=fb, fill=TEXTO)
-for x, y, nombre in ((41, -2, 'CP1 · eco de memoria'), (81, 0, 'CP2'), (109, 0, 'CP3')):
+for x, y, nombre in ((41, -2, 'CP1 · eco de memoria'), (82.5, 0, 'CP2'), (109, 0, 'CP3')):
     a, b = px(x, y)
     d.line([a, b, a, b - 30], fill=(200, 200, 205), width=3)
     d.polygon([(a, b - 30), (a + 12, b - 25), (a, b - 20)], fill=ANTORCHA)
@@ -176,7 +178,7 @@ for x, y, texto in ((-5.5, 3.2, 'inicio'), (5, 10.4, 'primera antorcha: E'), (17
                     (27.5, 10.4, 'segunda antorcha'), (44.2, 4.4, 'salir de la trinchera sin ruido'),
                     (52.5, 10.4, 'la bifurcación'), (57.5, 7.6, 'arriba: las copas (la buena)'),
                     (58.3, -5.9, 'abajo: la hondonada (la trampa)'), (66.2, 6.4, 'el puesto del vigía'),
-                    (66.2, 0.4, 'callejón cubierto'), (73.4, 6.4, 'raíces que no agarran'),
+                    (66.2, -1.6, 'callejón'), (74.4, 6.0, 'raíces que no agarran'),
                     (84.3, 10.4, 'antorcha del claro'), (104.6, 4.4, 'antesala')):
     a, b = px(x, y)
     d.text((a, b), texto, font=fp, fill=TENUE)
@@ -197,7 +199,7 @@ for x, _, nombre, _ in SECCIONES:
     d.text((a + 6, b + 4), nombre, font=fb, fill=TEXTO)
 
 # Título y leyenda
-d.text((MARGEN_IZQ, 14), 'Nivel 3 · Miedo · Bosque Tenebroso — propuesta de recorrido (vista lateral, 1 u = 1 tile)', font=ft, fill=TEXTO)
+d.text((MARGEN_IZQ, 14), 'Nivel 3 · Miedo · Bosque Tenebroso — el recorrido (vista lateral, 1 u = 1 tile)', font=ft, fill=TEXTO)
 d.text((MARGEN_IZQ, 44), 'La luz enseña el camino pero despierta a los Espectros; correr hace ruido y los ciegos oyen. Esconderse sirve; quedarse quieto, no.',
        font=f, fill=TENUE)
 ly = ALTO - MARGEN_INF + 44
@@ -216,7 +218,7 @@ for color, nombre in items:
 ly += (fila + 1) * 22 + 8
 d.text((MARGEN_IZQ, ly), 'Círculos: la luz de cada antorcha (8 u) y la de Kael (3 u). Diálogos: apertura al aparecer · eco de memoria en el CP1, en la trinchera · presentación del Espectro al cruzar la verja · cierre al recoger el fragmento.',
        font=f, fill=TENUE)
-d.text((MARGEN_IZQ, ly + 20), 'Medidas de Kael: sube 2,4 u (4,1 con doble salto). Caminando (Alt) va a 2,1 u/s y no hace ruido; corriendo, 6 u/s y lo oyen los ciegos. Los checkpoints curan.',
+d.text((MARGEN_IZQ, ly + 20), 'Medidas de Kael: sube 2,4 u (4,1 con doble salto). Caminando (Alt) va a 2,1 u/s y no hace ruido; con el doble salto avanza 2,5 u, así que ningún hueco obliga a correr. Los checkpoints curan.',
        font=f, fill=TENUE)
 
 os.makedirs(os.path.dirname(SALIDA), exist_ok=True)

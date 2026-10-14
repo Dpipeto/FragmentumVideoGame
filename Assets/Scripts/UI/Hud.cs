@@ -8,7 +8,7 @@ namespace Fragmentum.UI
 {
     /// <summary>
     /// HUD de los niveles: barra de vida del jugador, el puntaje y el reloj, el mundo actual, un aviso breve
-    /// (checkpoint, fragmento obtenido) y la barra del jefe durante su combate. Vive con los sistemas persistentes (lo crea el UIManager), así
+    /// (checkpoint, fragmento obtenido), la tecla de Interactuar sobre lo que Kael tiene al alcance y la barra del jefe durante su combate. Vive con los sistemas persistentes (lo crea el UIManager), así
     /// que ninguna escena de nivel necesita su propio HUD, y se engancha al jugador que registra
     /// el GameManager en cada escena.
     ///
@@ -31,8 +31,12 @@ namespace Fragmentum.UI
         private bool _construido;
         private IndicadorAgua _agua;
         private ContadorPuntaje _puntaje;
+        private AvisoInteraccion _interaccion;
 
         public LifeBar Barra => _barra;
+
+        /// <summary>El aviso de Interactuar sobre lo que Kael tiene al alcance (una antorcha).</summary>
+        public AvisoInteraccion Interaccion => _interaccion;
 
         /// <summary>El puntaje y el reloj del nivel, arriba a la derecha.</summary>
         public ContadorPuntaje Puntaje => _puntaje;
@@ -110,6 +114,9 @@ namespace Fragmentum.UI
             _aviso = FabricaUI.Texto(raiz, "Aviso", string.Empty, 30, new Color(1f, 1f, 1f, 0.9f));
             FabricaUI.Colocar(_aviso.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(1000f, 50f));
             _aviso.gameObject.SetActive(false);
+
+            _interaccion = gameObject.AddComponent<AvisoInteraccion>();
+            _interaccion.Construir(raiz);
 
             ConstruirBarraJefe(raiz);
             ConstruirDialogo(raiz);
@@ -215,6 +222,7 @@ namespace Fragmentum.UI
             Construir();
             _barra.Vincular(jugador != null ? jugador.Vida : null);
             _agua.Vincular(jugador != null ? jugador.GetComponent<OxigenoJugador>() : null);
+            _interaccion.Vincular(jugador);
         }
 
         /// <summary>Pone el nombre del mundo en una esquina (vacío fuera de los niveles).</summary>

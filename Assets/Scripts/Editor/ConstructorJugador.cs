@@ -7,6 +7,7 @@ using Fragmentum.Player;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Tilemaps;
 using static Fragmentum.EditorTools.UtilidadesEditor;
 
@@ -36,6 +37,12 @@ namespace Fragmentum.EditorTools
         private static readonly Color ColorTecho = Hex("2D1B4E");
         private static readonly Color ColorJugador = Hex("E8EEF4");
         private static readonly Color ColorPeligro = Hex("CC4400");
+
+        /// <summary>La luz de Kael: pálida, un poco fría. Lo único cálido del mundo del Miedo son las antorchas.</summary>
+        public static readonly Color ColorLuz = new Color(0.82f, 0.87f, 1f, 1f);
+
+        /// <summary>El radio de la luz de Kael en el prefab; cada nivel a oscuras pone el suyo (Anexo A: 3 u).</summary>
+        public const float RadioLuzPorDefecto = 3f;
 
         // --- Menús ---
 
@@ -133,7 +140,33 @@ namespace Fragmentum.EditorTools
                 Asignar(input, "acciones", p => p.objectReferenceValue = acciones);
 
                 var controlador = raiz.AddComponent<PlayerController>();
-                raiz.AddComponent<PlayerModoMovimiento>();
+                var modo = raiz.AddComponent<PlayerModoMovimiento>();
+
+                // Interactuar (E): encender las antorchas del mundo del Miedo.
+                raiz.AddComponent<InteraccionJugador>();
+
+                // Los anillos de ruido (Miedo): solo hay ruido donde el nivel pide sigilo.
+                var anillos = raiz.AddComponent<AnillosDeRuido>();
+                Asignar(anillos, "modo", p => p.objectReferenceValue = modo);
+                Asignar(anillos, "material", p => p.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Material>(ConstructorFondoMundo1.RutaMaterialSprites));
+
+                // La luz propia de Kael (Miedo, Anexo A: 3 u e intensidad 1,5), a la altura del pecho
+                // y apagada: la enciende el LevelManager en los niveles a oscuras.
+                var objetoLuz = new GameObject("Luz");
+                objetoLuz.transform.SetParent(raiz.transform, false);
+                objetoLuz.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+                var luz = objetoLuz.AddComponent<Light2D>();
+                luz.lightType = Light2D.LightType.Point;
+                luz.pointLightOuterRadius = RadioLuzPorDefecto;
+                luz.pointLightInnerRadius = 0f;
+                luz.intensity = 1.5f;
+                luz.color = ColorLuz;
+                luz.shadowsEnabled = false;
+                luz.enabled = false;
+                var luzJugador = raiz.AddComponent<LuzJugador>();
+                Asignar(luzJugador, "luz", p => p.objectReferenceValue = luz);
+                Asignar(luzJugador, "intensidad", p => p.floatValue = 1.5f);
+
                 var visual = raiz.AddComponent<PlayerVisual>();
                 var animacion = raiz.AddComponent<PlayerAnimacion>();
 

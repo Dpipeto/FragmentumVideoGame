@@ -83,6 +83,8 @@ namespace Fragmentum.Tests
             Assert.IsTrue(bd.escenaSelector.EnBuild);
             Assert.IsTrue(bd.niveles[0].Jugable, "El Nivel 1 (Ira) tiene escena.");
             Assert.IsTrue(bd.niveles[1].Jugable, "El Nivel 2 (Tristeza) también.");
+            Assert.IsTrue(bd.niveles[2].Jugable, "Y el Nivel 3 (Miedo), desde su fase A.");
+            Assert.IsFalse(bd.niveles[3].Jugable, "El 4 todavía no.");
             Assert.AreEqual(bd.escenaMenu.Ruta, EditorBuildSettings.scenes[0].path, "El menú es la primera escena de la build.");
         }
 

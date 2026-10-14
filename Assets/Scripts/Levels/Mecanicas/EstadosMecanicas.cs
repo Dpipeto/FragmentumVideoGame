@@ -90,4 +90,33 @@ namespace Fragmentum.Levels.Mecanicas
         /// <summary>Congelada: brotan las púas en lo que estaba inundado y arriba queda la capa de hielo, que se pisa.</summary>
         FROZEN
     }
+
+    /// <summary>
+    /// La antorcha del mundo del Miedo (<see cref="Antorcha"/>). Cada valor será el del parámetro
+    /// <c>Estado</c> de su Animator cuando tenga arte (apagada, encendida y consumida).
+    /// </summary>
+    public enum ESTADOS_ANTORCHA
+    {
+        /// <summary>Apagada: Kael la puede encender con Interactuar (E).</summary>
+        UNLIT,
+
+        /// <summary>Encendida: alumbra su círculo durante su duración; los últimos segundos parpadea.</summary>
+        LIT,
+
+        /// <summary>Consumida: ya ardió. No se vuelve a encender hasta que Kael reaparezca.</summary>
+        SPENT
+    }
+
+    /// <summary>
+    /// El cepo del mundo del Miedo (<see cref="Cepo"/>). Cada valor será el del parámetro
+    /// <c>Estado</c> de su Animator cuando tenga arte (abierto y cerrado).
+    /// </summary>
+    public enum ESTADOS_CEPO
+    {
+        /// <summary>Abierto, escondido entre las hojas: solo se ve de cerca o con luz.</summary>
+        ARMED,
+
+        /// <summary>Cerrado: ya saltó. Inofensivo hasta que Kael reaparezca.</summary>
+        CLOSED
+    }
 }

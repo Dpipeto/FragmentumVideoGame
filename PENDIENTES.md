@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.46 — Propuesta del Mundo 3 (Miedo) y prompts de sus enemigos y su jefe, 2026-10-13.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.48 — Mundo 3, fase B: la oscuridad, las antorchas, los cepos y las ramas que ceden, 2026-10-14.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -10,10 +10,10 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
-| N44 | **Aprueba la propuesta del Mundo 3** (o cámbiala). | Empezamos el Mundo 3 como el 2: primero el mundo, sus enemigos y su jefe. Está en **`Docs/Diseno/Nivel3_Diseno.md`**, con su esquema: la linde con las antorchas (la luz enseña, pero despierta a los Espectros), el bosque cerrado a oscuras con la trinchera, los Centinelas Ciegos y el laberinto de dos rutas, el claro con un mini-jefe nuevo (el Acechador) y la arena del Espectro del Pavor, invisible salvo al avisar, con sus tres sombras en la segunda fase. Mucho de lo que pide ya estaba programado desde la Fase 4 (el sigilo, la detección en la oscuridad y por ruido, la invisibilidad). | Responde a las **nueve decisiones de la sección 9**; con «haz lo que recomiendas» me vale. Cuando la apruebes empiezo la fase A (el recorrido) y escribo la segunda tanda de prompts (escenario, mecánicas, fondo, cinemáticas y puertas). |
-| N45 | **Genera los enemigos y el jefe del Mundo 3.** | Sus prompts ya están en **`Docs/Diseno/Prompts_Mundo3.md`**, con lo que aprendimos en el Mundo 2 (la maestra con todo lo que no puede faltar, que no cambie el píxel, margen alrededor). El Espectro sale editando los 12 fotogramas del Eco, como el Lamento: sus bases ya están en `Tesis/Imagenes/Mundo3/Espectro/Bases/`. | **El Espectro (A1) y el Espectro del Pavor (B y C) se pueden pedir ya.** El Centinela Ciego (A2) y el Acechador (A3) dependen de las decisiones 5 y 6 de N44: si dices que sí, también. Guárdalo todo en `Tesis/Imagenes/Mundo3/<Pieza>/` y avísame por paquetes. |
+| N45 | *En curso.* **Genera las imágenes del Mundo 3.** | Están todos sus prompts en **`Docs/Diseno/Prompts_Mundo3.md`**: la primera tanda (los enemigos y el jefe, apartados A a D) y, desde el 2026-10-14, la segunda (el tileset, las antorchas, los cepos, las ramas, las cintas, el fondo, las cinemáticas y las puertas, apartados E a J). Con lo que aprendimos en el Mundo 2: la maestra con todo lo que no puede faltar, que no cambie el píxel y margen alrededor. | Todo se puede pedir ya: el diseño está aprobado. **Orden:** el Espectro (A1, editando las bases del Eco que están en `Tesis/Imagenes/Mundo3/Espectro/Bases/`) y el Espectro del Pavor (B y C) primero; después el Centinela Ciego y el Acechador; y la segunda tanda, empezando por el tileset (E1), que adjuntan la puerta, la verja y el checkpoint. Guárdalo todo en `Tesis/Imagenes/Mundo3/<Pieza>/` y avísame por paquetes. Las puertas llevan **decisiones mías** (apartado H: el farol que se enciende, la puerta en un árbol muerto, la luz ocre de la Culpa al otro lado, el fragmento violeta en el codo derecho): cámbialas antes de generar si no te convencen. |
+| N46 | **Si quieres, recorre el Nivel 3** (fases A y B). | Ya se juega desde el selector y **ya está a oscuras**: la linde con luna, el bosque cerrado sin más luz que la de Kael (3 u) y las antorchas, el claro con luna y la arena casi negra. Las antorchas se encienden con **E** (sale el aviso encima), duran 15 s y no se vuelven a encender hasta que mueres; los cepos solo se ven de cerca o con luz, y al pisarlos te sujetan 1 s y suenan; las ramas podridas crujen 0,3 s y se parten. Al correr salen anillos de los pies. El Acechador y el sueño de los Espectros son la fase C. | No hace falta para seguir. Si lo juegas, dime sobre todo **cuánta luz hay**: los valores son míos (`DisenoNivel3.Luces`: 0,55 la linde, 0,08 el bosque, 0,45 el claro, 0,03 la arena) y no he podido sacar fotos con las luces (en segundo plano, Unity no dibuja las de Kael ni las de las antorchas). Y si las distancias se sienten bien caminando (Alt): las copas, que piden saltar en cuanto pisas la rama podrida, y la salida del barranco, que pide el doble salto. Los Espectros todavía persiguen siempre: duermen desde la fase C. |
 | N41 | *Para más adelante.* **La portada del menú.** | Lo dejaste en pendientes el 2026-10-13. Mientras tanto, el menú lleva el plano 7 de la cinemática inicial. | El prompt sigue en **`Docs/Diseno/Prompt_Portada.md`**. Cuando la tengas, el menú la usa sola. |
-| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. **Del Mundo 2** hay nueve diferencias más, listadas al final de `Docs/Diseno/Nivel2_Diseno.md` (sección 9). Las tres últimas son del 2026-10-12: el aire dura 10 s y no 15, los checkpoints curan y el nivel mide unos 115 u. **Desde el 2026-10-13 los dos niveles tienen tres secciones y la arena** (el Anexo dice dos y la arena): el Nivel 1 va de 0 a 25, de 25 a 55, de 55 a 100 (la forja) y la arena de 100 a 125, con tres checkpoints (x 43, 57,5 y 94,5); el Nivel 2, de 0 a 40, de 40 a 70, de 70 a 100 (el canal) y la arena de 100 a 133 (139 u en total). Y **el puntaje sustituye a las monedas**: si la tesis habla de monedas o de economía, ahora es puntaje por enemigos, jefe y tiempo. |
+| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. **Del Mundo 2** hay nueve diferencias más, listadas al final de `Docs/Diseno/Nivel2_Diseno.md` (sección 9). Las tres últimas son del 2026-10-12: el aire dura 10 s y no 15, los checkpoints curan y el nivel mide unos 115 u. **Desde el 2026-10-13 los dos niveles tienen tres secciones y la arena** (el Anexo dice dos y la arena): el Nivel 1 va de 0 a 25, de 25 a 55, de 55 a 100 (la forja) y la arena de 100 a 125, con tres checkpoints (x 43, 57,5 y 94,5); el Nivel 2, de 0 a 40, de 40 a 70, de 70 a 100 (el canal) y la arena de 100 a 133 (139 u en total). Y **el puntaje sustituye a las monedas**: si la tesis habla de monedas o de economía, ahora es puntaje por enemigos, jefe y tiempo. **Del Mundo 3**, las diferencias con el Anexo A están al final de `Docs/Diseno/Nivel3_Diseno.md` (sección 9): mide unos 145 u y no 70, con tres secciones, tres checkpoints y un mini-jefe que el Anexo no tiene, entre otras. |
 | N3 | *En curso.* **Clips de Kael que faltan:** daño primero; después wall slide (y, para la Fase 10, nado). El dash ✔, la muerte ✔ y agacharse ✔ ya están. | El daño se ve en cada partida: hoy sigue el clip anterior y parpadea. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Tienen arte los que salen en el Nivel 1 y, desde la v0.42, todos los del Mundo 2. Los del Mundo 3 ya tienen prompts (N45). Faltan los de los mundos 4 en adelante. | Ver «Arte que más necesito», justo debajo. |
 
@@ -43,9 +43,35 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
    (1024 × 572) y con un dibujo más suave que su pareja: se bajó a la misma rejilla y funciona,
    pero si la regeneras a tamaño completo, la cambio.
 8. **La portada del menú** (N41): el prompt está en `Docs/Diseno/Prompt_Portada.md`.
-9. **Los enemigos y el jefe del Mundo 3** (N45): el Espectro (12, editando el Eco), el Centinela
-   Ciego (13), el Acechador (17) y el Espectro del Pavor (26, por AI Studio), con sus hojas, su
-   luciérnaga y el Fragmento del Miedo. Prompts en `Docs/Diseno/Prompts_Mundo3.md`.
+9. **El Mundo 3** (N45): los enemigos y el jefe primero, el Espectro (12, editando el Eco), el
+   Centinela Ciego (13), el Acechador (17) y el Espectro del Pavor (26, por AI Studio), con sus
+   hojas, su luciérnaga y el Fragmento del Miedo. Después, el tileset, las mecánicas, el fondo,
+   las cinemáticas y las puertas. Prompts en `Docs/Diseno/Prompts_Mundo3.md`.
+
+### Resuelto en la v0.48
+
+- **Mundo 3, fase B** («continúa con la fase B»), en la rama `nivel3-recorrido`:
+  - la oscuridad por tramos y la luz de Kael, que aplica el `LevelManager` si el nivel la pide;
+  - las antorchas, que se encienden con E y tienen su aviso en el HUD;
+  - los cepos, que sujetan, quitan 1 y suenan (ya los oyen los Centinelas Ciegos);
+  - las ramas podridas que ceden;
+  - los anillos de ruido y las cintas de la ruta buena.
+
+  Detalle en el CHANGELOG y en `Nivel3_Diseno.md` («Lo que cambió al montarlo (fase B)»).
+
+### Resuelto en la v0.47
+
+- **N44: la propuesta del Mundo 3, aprobada entera** («haz lo que recomiendas»), con sus nueve
+  decisiones. Hechos también los commits que propuse antes de empezar: la v0.45 y la propuesta en
+  `nivel2-recorrido` (17a64dc y d907af5) y, en el repositorio `Tesis`, tu reorganización de las
+  imágenes, las puertas limpias y las bases del Espectro (56d5df1, e7ed60e y bbdcc17). Nada se
+  ha subido.
+- **Mundo 3, fase A** en la rama `nivel3-recorrido`: el recorrido de `DisenoNivel3` montado en
+  `Assets/Scenes/Nivel3.unity`, jugable desde el selector. Todo se cruza caminando. Detalle en el
+  CHANGELOG y en `Nivel3_Diseno.md` («Lo que cambió al montarlo»).
+- **La segunda tanda de prompts del Mundo 3** (N45).
+- `Assets/_Recovery/` es una copia del menú que guardó Unity cuando lo abriste el 2026-10-13: no
+  la he tocado ni la he metido en ningún commit. Si no la necesitas, bórrala.
 
 ### Resuelto en la v0.46
 
@@ -944,7 +970,7 @@ escena, en ese orden. Un nivel sin escena aparece «en construcción» en el sel
 | `Niveles` (selector) | ✔ generada | ✔ (1) | Íconos por mundo (B9) | P3 |
 | `Nivel1` (Ira) | ✔ Montada con su recorrido de diseño (v0.32, `DisenoNivel1`), pintada con el tileset: 10 Ecos y el Golem, las mecánicas, la arena de 25 × 15 con la Centinela y, desde la v0.45, la forja (x 55 a 100), tres checkpoints (x 43, 57,5 y 94,5) y sus puertas, verja y braseros. | ✔ (2) | ✔ Probada por ti (v0.34). Falta que juegues la forja (N42). | P1 |
 | `Nivel2` (Tristeza) | ✔ Montada con su recorrido de diseño (v0.36, `DisenoNivel2`), en bloques de color: agua, hielo, 3 Lamentos, 2 checkpoints y la arena de 25 × 15. ✔ Sus mecánicas (v0.37): tapón rompible, placas flotantes, oxígeno, velo, ecos de intentos y eco de memoria. ✔ Sus enemigos (v0.38 y v0.39): Lamentos que pesan, una Escultura dormida, Medusas y la Plañidera, el mini-jefe. ✔ Su jefe (v0.41): la Doncella, con las tres franjas de la arena que inunda y congela. | ✔ (3) | ✔ Con su arte y sus cinemáticas (v0.42 y v0.43) y probada por ti (v0.44: aire, tapón, plaza, muralla y esquirlas). Probada otra vez por ti (N39). Desde la v0.45 tiene el canal (x 74 a 104) y sus puertas, verja y faroles; falta que juegues el canal (N42) y el sonido. | P1 |
-| Nivel 3 (Miedo) | ✗ | ✗ | idem | P2 |
+| `Nivel3` (Miedo) | ✔ Montada con su recorrido de diseño (v0.47, `DisenoNivel3`) y sus mecánicas (v0.48), en bloques de color: la linde con el barranco, la trinchera (CP1, con el eco de memoria), la bifurcación con las copas y la hondonada que acaba en un callejón de raíces que no agarran, 6 Espectros, 3 Centinelas Ciegos, 3 checkpoints y la arena de 25 × 15 con el Espectro del Pavor (esqueleto). A oscuras por tramos, con la luz de Kael, 4 antorchas, 5 cepos, 3 ramas podridas que ceden y 4 cintas. | ✔ (4) | La fase C (el sueño de los Espectros, el oído del Centinela y el Acechador), la D (el jefe), el arte (N45) y las cinemáticas. | P1 |
 | Nivel 4 (Culpa) | ✗ | ✗ | idem | P2 |
 | Nivel 5 (Esperanza) | ✗ | ✗ | idem | P2 |
 | Nivel final | ✗ | ✗ | idem | P2 |

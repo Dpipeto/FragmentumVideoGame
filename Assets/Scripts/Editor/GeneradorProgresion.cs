@@ -41,6 +41,7 @@ namespace Fragmentum.EditorTools
         public const string RutaEscenaSelector = "Assets/Scenes/Niveles.unity";
         public const string RutaEscenaNivel1 = "Assets/Scenes/Nivel1.unity";
         public const string RutaEscenaNivel2 = "Assets/Scenes/Nivel2.unity";
+        public const string RutaEscenaNivel3 = "Assets/Scenes/Nivel3.unity";
         public const string RutaSistemas = "Assets/Resources/Sistemas.prefab";
         public const string RutaGuiaMecanicas = "Assets/Data/Habilidades/GuiaMecanicas.asset";
 
@@ -110,8 +111,9 @@ namespace Fragmentum.EditorTools
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaMenu) == null) CrearEscenaMenu(false);
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaSelector) == null) CrearEscenaSelector(false);
 
-            // La escena del Nivel 2 se crea vacía (cámara y luz); su recorrido lo monta PreparadorNivel.
+            // Las escenas de los niveles 2 y 3 se crean vacías (cámara y luz); su recorrido lo monta PreparadorNivel.
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaNivel2) == null) CrearEscenaNivel(RutaEscenaNivel2);
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaNivel3) == null) CrearEscenaNivel(RutaEscenaNivel3);
             var bd = GenerarDatos(false);
 
             // Cinemáticas, diálogos y registro emocional (Fase 8): antes del prefab, que los usa.
@@ -185,13 +187,12 @@ namespace Fragmentum.EditorTools
                     new[] { "1E3A5F", "4A7FA5", "2C3E50", "E8EEF4" }, doncella, fTristeza, dash, new ReglasNivel(),
                     SeccionesDelNivel2())),
 
-                Asset<LevelData>("Niveles/L3_Miedo", sobrescribir, n => Nivel(n, 3, null, "Bosque Tenebroso", miedo, 4,
+                // El recorrido montado está en DisenoNivel3 (Docs/Diseno/Nivel3_Diseno.md).
+                Asset<LevelData>("Niveles/L3_Miedo", sobrescribir, n => Nivel(n, 3, RutaEscenaNivel3, "Bosque Tenebroso", miedo, 4,
                     "Ansiedad, inseguridad. Explota la desorientación y la incertidumbre.",
                     new[] { "0A0A0F", "2D1B4E", "1A2E1A", "3A3A4A" }, espectro, fMiedo, invisibilidad,
-                    new ReglasNivel { sigilo = true, oscuridad = true, radioLuzJugador = 3f },
-                    Seccion("Sección 1", 0, 20, "Luz moderada y tutorial de antorchas. 2 Espectros y 3 trampas ocultas."),
-                    Seccion("Sección 2", 20, 50, "Oscuridad completa: laberinto con 2 rutas. 3 Centinelas Ciegos y 4 Espectros."),
-                    Seccion("Arena del jefe", 50, 70, "Oscuridad total; solo la luz del jugador."))),
+                    new ReglasNivel { sigilo = true, oscuridad = true, radioLuzJugador = DisenoNivel3.RadioLuzKael },
+                    SeccionesDelNivel3())),
 
                 Asset<LevelData>("Niveles/L4_Culpa", sobrescribir, n => Nivel(n, 4, null, "Campos de Batalla Arrasados", culpa, 3,
                     "Responsabilidad, remordimiento. Confronta al jugador con consecuencias.",
@@ -219,14 +220,16 @@ namespace Fragmentum.EditorTools
             Completar(niveles[0], "FF6B35", "la rabia consume al que la niega", DisenoNivel1.Checkpoints);
             Completar(niveles[1], "00D4FF", "el dolor también es parte del yo", Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
 
-            // El recorrido de los dos niveles montados cambia con su diseño (el 2 se alargó el
-            // 2026-10-12 y los dos el 2026-10-13): sus tramos, de los que sale lo que enseña la
-            // cámara, y sus checkpoints son siempre los de DisenoNivel1 y DisenoNivel2.
+            // El recorrido de los niveles montados cambia con su diseño (el 2 se alargó el
+            // 2026-10-12 y los dos primeros el 2026-10-13): sus tramos, de los que sale lo que
+            // enseña la cámara, y sus checkpoints son siempre los de su DisenoNivel.
             SeguirElDiseno(niveles[0], SeccionesDelNivel1(), DisenoNivel1.Checkpoints);
             SeguirElDiseno(niveles[1], SeccionesDelNivel2(), Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
+            SeguirElDiseno(niveles[2], SeccionesDelNivel3(), Array.ConvertAll(DisenoNivel3.Checkpoints, c => c.x));
 
             // Los niveles cuya escena llegó después de crear su asset: se les asigna sin tocar lo demás.
             AsignarEscenaSiFalta(niveles[1], RutaEscenaNivel2);
+            AsignarEscenaSiFalta(niveles[2], RutaEscenaNivel3);
             Completar(niveles[2], "7FE0B0", "lo que ocultas en la sombra crece");
             Completar(niveles[3], "C9A567", "el peso del ayer no define el mañana");
             Completar(niveles[4], "FFE4A0", "respira. el camino continúa");
@@ -397,6 +400,10 @@ namespace Fragmentum.EditorTools
         private static SeccionNivel[] SeccionesDelNivel2() =>
             DisenoNivel2.Secciones.Select((tramo, i) => Seccion(DisenoNivel2.TextosDeLasSecciones[i].nombre, tramo.x, tramo.y,
                 DisenoNivel2.TextosDeLasSecciones[i].contenido)).ToArray();
+
+        private static SeccionNivel[] SeccionesDelNivel3() =>
+            DisenoNivel3.Secciones.Select((tramo, i) => Seccion(DisenoNivel3.TextosDeLasSecciones[i].nombre, tramo.x, tramo.y,
+                DisenoNivel3.TextosDeLasSecciones[i].contenido)).ToArray();
 
         // Pone en el nivel los tramos y los checkpoints de su diseño, si no son ya esos: cuántos
         // son, de dónde a dónde van y qué dicen.

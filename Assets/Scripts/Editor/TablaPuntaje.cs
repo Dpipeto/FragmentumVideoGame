@@ -54,15 +54,17 @@ namespace Fragmentum.EditorTools
         };
 
         /// <summary>
-        /// Segundos de juego con bono de cada nivel, por su id. Los de los dos niveles montados salen
-        /// de lo que miden (<see cref="DisenoNivel1"/> y <see cref="DisenoNivel2"/>): el doble,
-        /// más o menos, de lo que tarda quien los conoce. Los demás llevan 12 minutos hasta que existan.
+        /// Segundos de juego con bono de cada nivel, por su id. Los de los niveles montados salen de lo
+        /// que miden (<see cref="DisenoNivel1"/>, <see cref="DisenoNivel2"/> y <see cref="DisenoNivel3"/>):
+        /// el doble, más o menos, de lo que tarda quien los conoce. El Nivel 3, que se cruza caminando
+        /// para no hacer ruido, lleva 15 minutos (Nivel3_Diseno.md, decisión 9). Los demás llevan 12
+        /// hasta que existan.
         /// </summary>
         public static readonly (int nivel, float tiempoConBono)[] Niveles =
         {
             (1, 600f),
             (2, 780f),
-            (3, 720f),
+            (3, 900f),
             (4, 720f),
             (5, 720f),
             (6, 720f),

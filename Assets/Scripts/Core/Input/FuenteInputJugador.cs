@@ -71,6 +71,9 @@ namespace Fragmentum.Core.Input
         /// <summary>La fracción que se aplica a la dirección al caminar.</summary>
         public float FactorCaminar => factorCaminar;
 
+        /// <summary>El asset de acciones: de él salen las teclas que enseña la interfaz.</summary>
+        public InputActionAsset Acciones => acciones;
+
         /// <summary>La dirección horizontal, rebajada a <paramref name="factor"/> si se camina.</summary>
         public static float ConCaminar(float eje, bool caminando, float factor) => caminando ? eje * factor : eje;
 

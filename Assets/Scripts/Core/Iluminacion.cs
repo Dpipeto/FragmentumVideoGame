@@ -15,8 +15,9 @@ namespace Fragmentum.Core
 
     /// <summary>
     /// Registro de las fuentes de luz activas. Responde a una sola pregunta: ¿este punto está
-    /// iluminado? La usan los enemigos del mundo del Miedo, que solo se acercan en la
-    /// oscuridad, y la usarán las antorchas del Nivel 3 (Fase 10).
+    /// iluminado? Se registran en él las antorchas del Nivel 3, y lo preguntan los enemigos del
+    /// mundo del Miedo, que solo se acercan en la oscuridad, y los cepos y las ramas podridas, que
+    /// se delatan con luz.
     ///
     /// La luz propia del jugador no se registra aquí: si contara, el jugador estaría siempre
     /// iluminado y esos enemigos no se acercarían nunca.

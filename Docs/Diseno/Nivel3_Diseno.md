@@ -1,19 +1,29 @@
-# Nivel 3 · Miedo · Bosque Tenebroso: propuesta
+# Nivel 3 · Miedo · Bosque Tenebroso: el recorrido
 
-> **Estado:** propuesta del 2026-10-13, **pendiente de aprobar** (PENDIENTES N44). No hay nada
-> montado todavía. Se hizo como la del Mundo 2: primero el mundo, sus enemigos (el básico es el
-> Eco de este mundo) y su jefe; después, por fases, el recorrido, las mecánicas, los enemigos, el
-> jefe, el arte y la narrativa. Las decisiones que necesito están en la sección 9.
+> **Estado:** aprobado el 2026-10-14, con las nueve decisiones de la sección 9 («haz lo que
+> recomiendas»). **Fases A y B montadas** en `Assets/Scenes/Nivel3.unity`:
 >
-> Los prompts de los enemigos y del jefe ya están en `Prompts_Mundo3.md`, para que puedas ir
-> generando mientras se monta. Los del escenario, el fondo, las cinemáticas y las puertas irán en
-> una segunda tanda, cuando el diseño esté aprobado: dependen de lo que decidas aquí.
+> - **Fase A, el recorrido:** los bloques, las ramas, las raíces del callejón que no agarran, los
+>   Espectros y los Centinelas Ciegos con su ruta, los tres checkpoints, la salida y la arena con el
+>   Espectro del Pavor.
+> - **Fase B, las mecánicas:** la oscuridad por tramos, la luz de Kael, las antorchas (se encienden
+>   con E), los cepos, las ramas podridas que ceden, los anillos de ruido y las cintas de la ruta
+>   buena.
+>
+> Los números de abajo son los de `Assets/Scripts/Editor/DisenoNivel3.cs`, que monta
+> `PreparadorNivel` y comprueban las pruebas (`DisenoNivel3Tests`, `EscenaNivel3Tests`,
+> `MecanicasMiedoTests`, `Nivel3PlayModeTests` y `MecanicasMiedoPlayModeTests`). Si cambias el
+> recorrido, cámbialo allí y sube su `Version`: la escena se vuelve a montar entera.
+>
+> Los prompts de todas las imágenes están en `Prompts_Mundo3.md`: los enemigos y el jefe (primera
+> tanda) y el escenario, las mecánicas, el fondo, las cinemáticas y las puertas (segunda tanda).
 
 ![Esquema del recorrido](Nivel3_Diseno.png)
 
 *El esquema se regenera con `python Herramientas/esquema_nivel3.py`. Es un dibujo de diseño, a
-escala (1 u = 1 tile), no una captura del juego. Los círculos son la luz de cada antorcha (8 u) y
-la de Kael (3 u).*
+escala (1 u = 1 tile), no una captura del juego. Dibuja también lo que todavía no está en la escena
+(el Acechador y sus árboles). Los círculos son la luz de cada antorcha (8 u) y la de Kael (3 u); las
+rayas blancas de las copas, las cintas.*
 
 ---
 
@@ -60,13 +70,13 @@ Fase 4**, sin nivel donde usarla; lo marco con ✔.
 
 | Mecánica | Qué hace | En el código |
 |---|---|---|
-| **Oscuridad** | Cada sección tiene su luz: la linde, luz de luna; el bosque cerrado, oscuridad completa; el claro, luna otra vez; la arena, oscuridad total (Anexo A). La oscuridad no es negro puro: las siluetas del fondo se adivinan contra un cielo violeta muy oscuro, para no perder la orientación. | Por hacer. Con luces 2D de URP, como pide el Anexo A: una luz global por sección, muy baja, y las luces de Kael y de las antorchas. El proyecto ya usa el renderizador 2D y los sprites ya llevan el material que reacciona a la luz. `LevelData.reglas.oscuridad` y `radioLuzJugador` (3 u) ya están en el `L3_Miedo` ✔, pero nada los aplica todavía. |
-| **La luz de Kael** | Un círculo de 3 u de radio alrededor de Kael (Anexo A: intensidad 1,5). | Por hacer: una luz 2D en el prefab de Kael, encendida solo si el nivel tiene oscuridad. No cuenta como «iluminado» para los Espectros: `Iluminacion` ✔ ya deja fuera la luz del jugador. |
-| **Antorcha** | Se enciende con **E** (Interactuar) a 1,5 u de ella. Ilumina **8 u durante 15 s** (Anexo A) y parpadea los 3 últimos. Mientras arde se ven las trampas, las ramas podridas y los Espectros, y **los Espectros no se acercan a Kael si está dentro de su luz**. Pero al encenderse **despierta a todos los Espectros dormidos en su radio** (Anexo A): esperan en el borde de la luz y, cuando se apaga, van a por él. **Se enciende una vez por vida**: al reaparecer en un checkpoint vuelve a estar lista. | Por hacer, sobre lo que ya hay: `ZonaIluminada` ✔ es el círculo de luz que se registra en `Iluminacion` ✔ (el comentario del código ya dice que la antorcha de la Fase 10 la completa). Falta el encendido, el tiempo y el despertar. |
-| **Sigilo** | Correr por encima del 60 % de la velocidad (3,6 u/s) hace ruido cada 0,4 s, que se oye a 6 u. **Caminar con Alt (2,1 u/s) o agachado (2 u/s) es silencioso.** El dash también hace ruido. Al correr salen de los pies de Kael unos anillos pálidos: el jugador **ve** que hace ruido (son las «partículas de ruido» del Anexo A). | ✔ `PlayerModoMovimiento` (STEALTH, NORMAL y RUN, como pide el Anexo A), que `GameManager` enciende si `LevelData.reglas.sigilo`; caminar con Alt ✔ (v0.31). Faltan los anillos. |
-| **Cepo** (trampa oculta) | Un cepo de caza oculto entre las hojas. **Solo se ve a 1 u de Kael** (Anexo A) **o bajo la luz de una antorcha.** Si Kael lo pisa: 1 de daño, **lo sujeta 1 s** (puede atacar, pero no andar ni saltar) y **suena**: el chasquido se oye a 8 u. Después se queda cerrado, inofensivo, hasta reaparecer. Caminando, se ve 0,5 s antes de pisarlo; corriendo, 0,17 s: a oscuras, quien corre cae. | Por hacer: `Cepo`, con su propio ruido para los Centinelas. |
-| **Rama podrida** | Las «plataformas que ceden» del Anexo A (`FalsePlatform`). A oscuras es igual que las demás ramas; bajo una antorcha se ve gris y agrietada. Al pisarla cruje 0,3 s y se parte; vuelve a los 4 s. | Por hacer. Sale de la `PlataformaInestable` del Nivel 1 ✔ con otros tiempos y un dibujo que cambia con la luz. |
-| **La bifurcación** | El laberinto de dos rutas del Anexo A: **arriba, las copas (la buena)**; **abajo, la hondonada (la trampa)**, que acaba en un callejón cubierto de raíces. La buena está marcada con **cintas blancas** atadas a las ramas, que solo se ven con luz (o a 3 u, con la de Kael). Caer de las copas es caer a la hondonada: la trampa es también el castigo de un mal salto. | Por hacer: cintas en el atrezo; la hondonada es recorrido (fase A). |
+| **Oscuridad** | Cada sección tiene su luz: la linde, luz de luna; el bosque cerrado, oscuridad completa; el claro, luna otra vez; la arena, oscuridad total (Anexo A). La oscuridad no es negro puro: las siluetas del fondo se adivinan contra un cielo violeta muy oscuro, para no perder la orientación. | ✔ Fase B. `LuzDelNivel` lleva la luz global de la escena y la cambia según el tramo en que esté Kael, poco a poco (1,5 s). La activa el `LevelManager` si `LevelData.reglas.oscuridad`: en el Editor la escena sigue con luz. Los valores, en `DisenoNivel3.Luces`. |
+| **La luz de Kael** | Un círculo de 3 u de radio alrededor de Kael (Anexo A: intensidad 1,5). | ✔ Fase B. `LuzJugador`: una luz 2D hija de Kael, apagada en el prefab; el `LevelManager` la enciende con `reglas.radioLuzJugador`. Pálida y un poco fría. No se registra en `Iluminacion`. |
+| **Antorcha** | Se enciende con **E** (Interactuar) a 1,5 u de ella. Ilumina **8 u durante 15 s** (Anexo A) y parpadea los 3 últimos. Mientras arde se ven las trampas, las ramas podridas y los Espectros, y **los Espectros no se acercan a Kael si está dentro de su luz**. Pero al encenderse **despierta a todos los Espectros dormidos en su radio** (Anexo A): esperan en el borde de la luz y, cuando se apaga, van a por él. **Se enciende una vez por vida**: al reaparecer en un checkpoint vuelve a estar lista. | ✔ Fase B. `Antorcha` (prefab en `Assets/Prefabs/Mecanicas`): se registra en `Iluminacion` mientras arde, su círculo sale de la llama (1,5 u sobre el pie) y anuncia que se encendió (`Antorcha.AlEncenderse`). Despertar a los Espectros con ese aviso es la fase C. E la lee Kael (`InteraccionJugador`), y el HUD pone «E · Encender» sobre la antorcha que tiene al alcance. |
+| **Sigilo** | Correr por encima del 60 % de la velocidad (3,6 u/s) hace ruido cada 0,4 s, que se oye a 6 u. **Caminar con Alt (2,1 u/s) o agachado (2 u/s) es silencioso.** El dash también hace ruido. Al correr salen de los pies de Kael unos anillos pálidos: el jugador **ve** que hace ruido (son las «partículas de ruido» del Anexo A). | ✔ `PlayerModoMovimiento` (STEALTH, NORMAL y RUN, como pide el Anexo A), que `GameManager` enciende si `LevelData.reglas.sigilo`; caminar con Alt ✔ (v0.31). ✔ Fase B: los anillos (`AnillosDeRuido`, líneas sin imagen que se ven a oscuras), que crecen hasta donde se oye cada ruido. |
+| **Cepo** (trampa oculta) | Un cepo de caza oculto entre las hojas. **Solo se ve a 1 u de Kael** (Anexo A) **o bajo la luz de una antorcha.** Si Kael lo pisa: 1 de daño, **lo sujeta 1 s** (puede atacar, pero no andar ni saltar) y **suena**: el chasquido se oye a 8 u. Después se queda cerrado, inofensivo, hasta reaparecer. Caminando, se ve 0,5 s antes de pisarlo; corriendo, 0,17 s: a oscuras, quien corre cae. | ✔ Fase B. `Cepo` (prefab): no tiene collider, nota a Kael con una caja en el suelo. Su chasquido sale por el mismo canal que la carrera (`PlayerModoMovimiento.HacerRuido`), así que ya lo oyen los Centinelas Ciegos de la Fase 4. Se rearma cuando Kael reaparece tras morir. |
+| **Rama podrida** | Las «plataformas que ceden» del Anexo A (`FalsePlatform`). A oscuras es igual que las demás ramas; bajo una antorcha se ve gris y agrietada. Al pisarla cruje 0,3 s y se parte; vuelve a los 4 s. | ✔ Fase B. El prefab `RamaPodrida`: una `PlataformaInestable` con estos tiempos y `RamaPodrida`, que la pinta como las sanas a oscuras, gris bajo una antorcha, y la hace temblar mientras cruje. |
+| **La bifurcación** | El laberinto de dos rutas del Anexo A: **arriba, las copas (la buena)**; **abajo, la hondonada (la trampa)**, que acaba en un callejón cubierto de raíces. La buena está marcada con **cintas blancas** atadas a las ramas, que solo se ven con luz (o a 3 u, con la de Kael). Caer de las copas es caer a la hondonada: la trampa es también el castigo de un mal salto. | ✔ La hondonada (fase A). ✔ Las cintas (fase B): cuatro rectángulos blancos que cuelgan de las ramas sanas de las copas, con el material que reacciona a la luz. |
 | **Eco de memoria** | En el primer checkpoint, en la trinchera. | ✔ `Checkpoint.ecoDeMemoria` (v0.37). |
 | **Checkpoints que curan** | Tres: la trinchera, tras las copas y la antesala. | ✔ `Checkpoint.cura` (v0.44). |
 
@@ -84,18 +94,18 @@ al montarlo»).
 |---|---|---|---|---|
 | **Inicio** | −6 a 6 | tierra, y 0 | Kael aparece en x 2. Luz de luna. | **Apertura:** «No veo mis propios pasos. Algo respira entre los árboles… o soy yo». |
 | **La primera antorcha** | 6 a 17 | tierra | Antorcha en x 7. A su alrededor, un cepo (x 11) y un Espectro dormido (x 14). Sobre la antorcha, «E». | **El tutorial de la antorcha** (Anexo A). Al encenderla aparecen el cepo y el Espectro, que despierta y espera en el borde de la luz. Lo que enseña la luz lo despierta ella misma. |
-| **El barranco** | 17 a 27 | hondonada a y −3 | Tres ramas cruzan a ras del suelo (huecos de 1 u); **la del medio está podrida**. En el fondo, un cepo (x 22). Se sale por un escalón al otro lado. | Caer no mata, pero duele y retrasa. La rama podrida se delata con luz: en la linde todavía hay luna para adivinarla. |
+| **El barranco** | 17 a 27 | hondonada a y −2,5 | Tres ramas cruzan a ras del suelo (huecos de 1 u); **la del medio está podrida**. En el fondo, un cepo (x 22). Se sale con el doble salto, por cualquiera de los dos lados. | Caer no mata, pero duele y retrasa. La rama podrida se delata con luz: en la linde todavía hay luna para adivinarla. |
 | **La segunda antorcha** | 27 a 36 | tierra | Antorcha en x 30; un Espectro dormido en x 33 y el tercer cepo (x 34). | Ya se sabe lo que pasa al encender: ahora es una decisión. Se puede pasar a oscuras, con cuidado. |
 | **La trinchera** | 38 a 46 | trinchera a y −2 | **CP1** (x 41) y **eco de memoria**. Empieza la oscuridad completa. | Respirar. Dentro de la trinchera no te oyen. |
 | **Salir sin ruido** | 46 a 56 | tierra | El primer **Centinela Ciego** patrulla de x 47 a x 55; un Espectro dormido en x 52. | Salir caminando. Si corres, te oye; si te pegas, te nota. O acercarse por la espalda y golpear primero. |
 | **La bifurcación** | 55 a 58 | tierra | Antorcha en x 55. El suelo se acaba en x 58. | Encenderla enseña las cintas de las copas, pero despierta al Espectro de x 52 si no lo ha hecho ya. |
-| **Arriba: las copas** (la buena) | 57 a 79 | ramas, y 2 a 4,5 | Se sube por dos ramas (y 2 e y 4). Huecos de 0,5 a 1,5 u, que se cruzan caminando. **Una rama podrida** sobre la hondonada (x 63,5). **El puesto del vigía**, una plataforma de 5 u a y 4,5 con el segundo **Centinela Ciego**. Encima de las raíces, otra rama podrida que solo asusta: debajo hay suelo. Se baja por una rama a y 2,5, con un Espectro. | Pasar junto al vigía sin que te oiga, o cazarlo. Las ramas crujen. |
-| **Abajo: la hondonada** (la trampa) | 58 a 72 | hondonada a y −4 | Parece el camino: llana y ancha. El tercer **Centinela Ciego**, dos cepos y dos Espectros dormidos. Desde x 66 la cubre un techo de raíces y en x 72 **se cierra**: un callejón. Sus raíces **no agarran** (como el hielo liso del Mundo 2: sin ellas, el salto de pared sacaba de ahí). Se vuelve por un escalón en x 58. | El camino fácil era el falso. Cuesta tiempo (y puntos), no la vida. |
-| **Tras las copas** | 73 a 84 | tierra | **CP2** en x 81. | Respirar otra vez. |
+| **Arriba: las copas** (la buena) | 59 a 80 | ramas, y 2 a 4,5 | Se sube por dos ramas (y 2 e y 4), cada una a 1 u de la anterior: todo se cruza caminando. **Una rama podrida** sobre la hondonada (x 65 a 67). **El puesto del vigía**, una plataforma de 6 u a y 4,5 (x 68 a 74) con el segundo **Centinela Ciego**, apoyada en las raíces. Pasado el puesto, otra rama podrida que solo asusta: debajo hay suelo. Se baja por una rama a y 3; debajo, un Espectro. | Pasar junto al vigía sin que te oiga, o cazarlo. Las ramas crujen. |
+| **Abajo: la hondonada** (la trampa) | 58 a 73 | hondonada a y −4 | Parece el camino: llana y ancha. El tercer **Centinela Ciego**, dos cepos y dos Espectros dormidos. En x 73 **se cierra**: un muro de raíces de 8 u que sostiene el puesto del vigía. Sus raíces **no agarran** (como el hielo liso del Mundo 2: sin eso, el salto de pared sacaba de ahí). Se vuelve por un escalón en x 58 a 60. | El camino fácil era el falso. Cuesta tiempo (y puntos), no la vida. |
+| **Tras las copas** | 74 a 84 | tierra | **CP2** en x 82,5. | Respirar otra vez. |
 | **La antorcha del claro** | 84 a 89 | tierra | Antorcha en x 86. | Ver al Acechador antes de entrar, a costa de despertarlo. |
 | **El claro** | 89 a 106 | tierra | El único sitio sin copas: entra la luna. **El Acechador**, el mini-jefe, merodea entre tres árboles gruesos (x 93, 98 y 103). Kael pasa por delante de los árboles; el Acechador, que embiste a ciegas, se estrella contra ellos. | Se puede cruzar caminando, sin que se entere. O vencerlo: correr delante de un árbol para que embista y se estrelle. |
 | **La antesala** | 106 a 112 | tierra | **CP3** en x 109. | El respiro antes del jefe. |
-| **La arena** | 112 a 139 | tierra | Sala de 25 × 15 u (interior de x 113 a 138), como las otras dos. **Oscuridad total: solo la luz de Kael** (Anexo A). Dos ramas a y 3,5 (x 116 a 119 y 132 a 135), que se alcanzan con el doble salto. Entrada en x 115; salida en x 136. | La **presentación** al cruzar la verja. |
+| **La arena** | 112 a 139 | tierra | Sala de 25 × 15 u (interior de x 113 a 138), como las otras dos. **Oscuridad total: solo la luz de Kael** (Anexo A). Dos ramas a y 3,5 (x 117 a 120 y 131 a 134), a 7 u del jefe por cada lado, que se alcanzan con el doble salto. Entrada en x 115; salida en x 136. | La **presentación** al cruzar la verja. |
 
 **Recuento frente al Anexo A:**
 
@@ -112,6 +122,57 @@ al montarlo»).
 **El tiempo con bono** sería de 15 min (en el Nivel 1 son 10 y en el Nivel 2, 13): aquí se camina
 mucho. Se ajusta cuando lo juegues.
 
+### Lo que cambió al montarlo (fase A, 2026-10-14)
+
+- **El barranco mide 2,5 u de hondo, no 3, y no tiene escalón.** Con 3 u y un escalón para
+  salir, el escalón quedaba bajo una rama: Kael daba con la cabeza al saltar y no salía. A 2,5 u,
+  bajo las ramas quedan 2 u libres (Kael mide 1,8) y se sale con el doble salto pegado a
+  cualquiera de las dos paredes, donde no hay rama encima. Caer cuesta un doble salto y el cepo.
+- **Las ramas de las copas van a 1 u unas de otras**, y la primera está a 1 u del borde de la
+  bifurcación, no encima: una rama encima del borde le cortaba el paso a Kael (su cabeza llega a
+  1,8 u) y escondía la bajada a la hondonada.
+- **El callejón no tiene techo de raíces.** Lo cierran las raíces, que suben hasta el puesto del
+  vigía (8 u sobre el fondo, más que el doble salto) y no agarran. Un techo no añadía nada.
+- **El puesto del vigía mide 6 u** (de x 68 a 74) y se apoya en las raíces. Las ramas de la
+  bajada están a y 4 y a y 3, para que bajo ellas se ande sin tocarlas.
+- **Ninguna rama por la que se pase por debajo deja menos de 2 u**, y lo comprueban las pruebas.
+- **Las ramas de la arena se corrieron 1 u hacia el centro** (versión 2 del diseño): la de la
+  derecha se montaba sobre la puerta de salida. Ahora quedan a 7 u del jefe por cada lado.
+
+### Lo que cambió al montarlo (fase B, 2026-10-14)
+
+- **La luna del claro empieza en x 89**, donde se abre el claro, y no al empezar la sección 3
+  (x 84). La antorcha del claro (x 86) queda a oscuras: por eso sirve para ver al Acechador antes
+  de entrar. La antesala comparte la luna del claro: es el respiro antes del jefe.
+- **Cuánta luz hay en cada tramo lo he decidido yo**, porque el Anexo A solo dice «moderada»,
+  «completa» y «total». La linde tiene 0,55; el bosque cerrado, 0,08; el claro y la antesala,
+  0,45; y la arena, 0,03. Están en `DisenoNivel3.Luces`: si al jugarlo no se ve lo que debe, se
+  cambian ahí.
+- **El cepo no empuja: sujeta.** Quita la vida sin retroceso ni invulnerabilidad, como el ahogo
+  del Mundo 2: si lo empujara, el golpe lo sacaría del cepo. Mientras lo sujeta, Kael tampoco sale
+  con el dash.
+- **Una rama podrida se pisa y se salta en seguida.** Caminando se tarda casi 1 s en cruzarla y
+  cruje 0,3 s: hay que apoyarse en ella y saltar ya, sin pararse. Las pruebas de los pasos ya
+  comprobaban que la siguiente rama se alcanza caminando.
+- **«Una vez por vida» es literal.** La antorcha y el cepo vuelven a estar listos cuando Kael
+  reaparece **tras morir**; tocar otro checkpoint no los repone.
+- **No hay fotos de la oscuridad.** Al renderizarla en segundo plano, Unity dibuja la luz global,
+  pero no las luces de Kael ni las de las antorchas. Hay que verla en el Editor, jugando.
+
+### Cómo se ve hoy
+
+Fotos de la escena montada en la fase A: bloques de color y cápsulas, con luz y sin Kael. Así
+se ve en el Editor; jugando, la oscuridad de la fase B la cubre. Los bloques están más claros
+que la paleta del Anexo A, que es casi negra, para que se lean con la luz de la luna y la de Kael.
+
+![El Nivel 3 entero](Nivel3_Montado.png)
+
+![La linde](Nivel3_Montado_Seccion1.png)
+
+![El bosque cerrado: la trinchera, la bifurcación, las copas y la hondonada](Nivel3_Montado_Seccion2.png)
+
+![El claro, la antesala y la arena](Nivel3_Montado_Arena.png)
+
 ## 4. Medidas de Kael, para que todo se pueda cruzar
 
 | | Caminando (Alt) | Corriendo |
@@ -121,8 +182,9 @@ mucho. Se ajusta cuando lo juegues.
 | Doble salto | 4,1 u de alto; avanza ~2,5 u | 4,1 u; avanza más de 6 u |
 | Un cepo aparece a 1 u | 0,5 s para frenar | 0,17 s: no da tiempo |
 
-- **Ningún hueco obliga a correr.** Los de las copas miden de 0,5 a 1,5 u y se cruzan caminando.
-  Quien corre llega antes, pero se oye.
+- **Ningún hueco obliga a correr.** Los de las copas miden 1 u y se cruzan caminando.
+  Quien corre llega antes (y, con el doble salto, se puede saltar la rama podrida), pero se oye.
+  `DisenoNivel3Tests` comprueba cada salto con la velocidad de caminar.
 - **Lo más alto** son las ramas de la arena (3,5 u): solo con el doble salto, como la capa de hielo
   de la Doncella. Las pruebas usarán el mismo margen que en el Nivel 2 (el 90 % de lo que salta
   Kael).
@@ -186,8 +248,8 @@ cápsulas, sin sprites inventados.
 
 | Fase | Qué | Piezas |
 |---|---|---|
-| **A · Recorrido** | La escena `Nivel3`, montada desde una tabla de medidas, todavía con luz | `DisenoNivel3` y `PreparadorNivel` para el Miedo; el `LevelData` con su escena, sus secciones y sus checkpoints; pruebas de alcance (caminando y corriendo) |
-| **B · Mecánicas** | La oscuridad, la luz de Kael, las antorchas, el ruido, los cepos, las ramas podridas y las cintas | Luces 2D por sección y en Kael (`ReglasNivel.oscuridad`); `Antorcha` sobre `ZonaIluminada`; los anillos de ruido; `Cepo`; `RamaPodrida`; las cintas; el eco de memoria en la trinchera |
+| **A · Recorrido** ✔ | La escena `Nivel3`, montada desde una tabla de medidas, todavía con luz | `DisenoNivel3` y `PreparadorNivel` para el Miedo; el `LevelData` con su escena, sus secciones y sus checkpoints; pruebas de alcance (caminando y corriendo) |
+| **B · Mecánicas** ✔ | La oscuridad, la luz de Kael, las antorchas, el ruido, los cepos, las ramas podridas y las cintas | Luces 2D por sección y en Kael (`ReglasNivel.oscuridad`); `Antorcha` sobre `ZonaIluminada`; los anillos de ruido; `Cepo`; `RamaPodrida`; las cintas; el eco de memoria en la trinchera |
 | **C · Enemigos** | El Espectro, el Centinela Ciego y el Acechador | El sueño y la casi invisibilidad del Espectro; el cono y la estocada del Centinela; `Acechador`, con su embestida y los árboles |
 | **D · Jefe** | El Espectro del Pavor completo, sin arte | Aparecer e intangibilidad en `EspectroDelPavor`; `PatronTajo`, `PatronEmbestidaSombra`, `PatronHojas` y `PatronSombras`; la arena a oscuras; un verificador |
 | **E · Arte** | Vestir lo anterior a medida que llegue | Una sub-fase por paquete, como en el Mundo 2 |
@@ -267,9 +329,9 @@ El chasquido del cepo. El jefe: percusión irregular y frecuencias bajas.
 
 Nada de esto bloquea las fases A a D: el nivel se puede montar y jugar mientras dibujas.
 
-## 9. Decisiones que necesito
+## 9. Decisiones (respondidas el 2026-10-14: «haz lo que recomiendas»)
 
-Con «haz lo que recomiendas» me vale para todas. Cada una lleva mi recomendación.
+Todas aprobadas tal como las recomendé:
 
 1. **Las antorchas se encienden una vez por vida** y vuelven a estar listas al reaparecer.
    *Recomendado:* si se pudieran volver a encender, quedarse junto a una sería estar a salvo para
@@ -296,4 +358,9 @@ Con «haz lo que recomiendas» me vale para todas. Cada una lleva mi recomendaci
 9. **El nivel mide unos 145 u, con tres secciones, la arena y tres checkpoints**, como los otros
    dos alargados, y 15 min de tiempo con bono. *Recomendado.*
 
-Lo que difiera del Anexo A irá a N19, para corregirlo en la tesis, como con los otros dos mundos.
+Lo que difiere del Anexo A va a N19, para corregirlo en la tesis, como con los otros dos mundos:
+el nivel mide unos 145 u y no 70, con tres secciones y la arena (el Anexo dice dos y la arena);
+tiene tres checkpoints (el Anexo no dice ninguno) y el primero en una trinchera; la arena mide
+25 × 15 u como las otras; el Acechador, el mini-jefe, no está en el Anexo; los Espectros
+despiertan también con el roce o un golpe, no solo con la luz; las trampas son cepos que
+sujetan y hacen ruido; y golpear a una sombra del jefe encoge la luz de Kael.
