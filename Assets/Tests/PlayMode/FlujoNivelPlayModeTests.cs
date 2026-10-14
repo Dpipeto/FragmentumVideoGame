@@ -22,7 +22,8 @@ namespace Fragmentum.Tests.PlayMode
     {
         private static LevelManager Nivel => Object.FindAnyObjectByType<LevelManager>();
 
-        private static Checkpoint PrimerCheckpoint => Nivel.Checkpoints.Checkpoints[0];
+        // El primero del recorrido: desde que el nivel tiene tres (2026-10-13), la lista no va en orden.
+        private static Checkpoint PrimerCheckpoint => Nivel.Checkpoints.Buscar("L1_CP1");
 
         [UnityTest]
         public IEnumerator EntrarEnElNivel_ApareceUnSoloJugadorEnElInicio_ConHudYCamara()

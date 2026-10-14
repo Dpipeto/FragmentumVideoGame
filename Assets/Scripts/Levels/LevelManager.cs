@@ -24,6 +24,8 @@ namespace Fragmentum.Levels
     ///   (<see cref="EventosJuego.ReintentoSolicitado"/>) y el jugador vuelve al checkpoint
     ///   activo. Fuera de los niveles del juego (escenas de prueba) no hay Game Over: el jugador
     ///   reaparece solo tras una espera. Sustituye a la <c>ReaparicionSimple</c> provisional.
+    /// - <b>Puntaje:</b> crea el <see cref="MarcadorNivel"/> de la escena y lo cierra en la
+    ///   victoria, antes de que se guarde la partida.
     /// - <b>Victoria:</b> <see cref="Completar"/>, que llama la <see cref="SalidaNivel"/>. La FSM
     ///   global muestra el fin de nivel. En los niveles con jefe, la salida solo se abre al
     ///   derrotarlo, y el fragmento y la habilidad llegan en ese momento (<see cref="JefeDerrotado"/>).
@@ -65,6 +67,7 @@ namespace Fragmentum.Levels
         [SerializeField] private float volumenMusica = 0.6f;
 
         private CheckpointManager _checkpoints;
+        private MarcadorNivel _marcador;
         private PlayerController _jugador;
         private CameraMovement _camara;
         private bool _completado;
@@ -85,6 +88,9 @@ namespace Fragmentum.Levels
 
         public CheckpointManager Checkpoints => _checkpoints;
 
+        /// <summary>El puntaje y el reloj de este intento.</summary>
+        public MarcadorNivel Marcador => _marcador;
+
         public bool Completado => _completado;
 
         // En un nivel del juego la muerte la lleva la FSM global (Game Over → reintentar).
@@ -102,6 +108,7 @@ namespace Fragmentum.Levels
             }
 
             PrepararJugador();
+            PrepararMarcador();
             PrepararCamara();
             PrepararMusica();
         }
@@ -195,6 +202,13 @@ namespace Fragmentum.Levels
             {
                 Debug.Log("[Nivel] Salida alcanzada. Esta escena no es un nivel de la LevelDatabase, así que no hay fin de nivel.", this);
                 return false;
+            }
+
+            // El puntaje se anota antes: completar el nivel guarda la partida y abre el fin de
+            // nivel, que lo enseña.
+            if (juego.PuedeCompletarNivel)
+            {
+                _marcador.Cerrar();
             }
 
             if (!juego.CompletarNivel())
@@ -293,6 +307,18 @@ namespace Fragmentum.Levels
             {
                 _jugador.Vida.OnMuerte += AlMorir;
             }
+        }
+
+        // Si se empieza en un checkpoint guardado, el marcador sigue como estaba al activarlo.
+        private void PrepararMarcador()
+        {
+            _marcador = GetComponent<MarcadorNivel>();
+            if (_marcador == null)
+            {
+                _marcador = gameObject.AddComponent<MarcadorNivel>();
+            }
+
+            _marcador.Empezar(nivel, this, _checkpoints.Activo != null);
         }
 
         private void PrepararCamara()

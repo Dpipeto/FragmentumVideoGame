@@ -41,7 +41,7 @@ namespace Fragmentum.Tests
             var problemas = VerificadorNivel2.Problemas();
             CollectionAssert.IsEmpty(problemas, Lista(problemas));
 
-            LogAssert.Expect(LogType.Log, new Regex(@"\[Nivel 2\] Verificación correcta: 115 sprites, 37 clips, 8 Animators, 10 prefabs"));
+            LogAssert.Expect(LogType.Log, new Regex(@"\[Nivel 2\] Verificación correcta: 117 sprites, 37 clips, 8 Animators, 10 prefabs"));
             Assert.IsTrue(VerificadorNivel2.Verificar());
         }
 
@@ -499,7 +499,7 @@ namespace Fragmentum.Tests
                     Assert.AreEqual(esLamento ? DisenoNivel2.EscalaLamento.y : 1f, enemigo.localScale.y, 1e-4f, guardia.Nombre);
                 }
 
-                Assert.AreEqual(3, DisenoNivel2.Enemigos.Count(e => e.Tipo == DisenoNivel2.TIPOS_ENEMIGO.LAMENTO));
+                Assert.AreEqual(5, DisenoNivel2.Enemigos.Count(e => e.Tipo == DisenoNivel2.TIPOS_ENEMIGO.LAMENTO), "Tres en la sección 1 y dos en el canal.");
             }
             finally
             {

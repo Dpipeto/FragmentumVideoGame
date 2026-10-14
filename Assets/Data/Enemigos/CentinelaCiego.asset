@@ -18,6 +18,7 @@ MonoBehaviour:
   danio: 2
   danioContacto: 1
   invulnerabilidad: 0.3
+  puntos: 150
   velocidadPatrulla: 1
   velocidadPersecucion: 4
   toleranciaWaypoint: 0.2
@@ -33,6 +34,7 @@ MonoBehaviour:
   duracionAtaque: 0.6
   inicioVentanaGolpe: 0.3
   finVentanaGolpe: 0.45
+  hiperarmadura: 0
   damagedDuration: 0.3
   retroceso: {x: 4, y: 3}
   resistenciaRetroceso: 0.4

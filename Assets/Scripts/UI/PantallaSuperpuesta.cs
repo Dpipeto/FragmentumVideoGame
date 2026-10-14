@@ -135,10 +135,16 @@ namespace Fragmentum.UI
         /// </summary>
         protected virtual Selectable PrimeraSeleccion() => null;
 
-        /// <summary>Texto que toma el color de acento del mundo.</summary>
-        protected Text TextoAcento(Transform columna, string nombre, int tamano, float alfa = 1f)
+        /// <summary>
+        /// Texto que toma el color de acento del mundo. <paramref name="deTitulo"/>: con la letra
+        /// de los títulos (el nombre del mundo, el de un fragmento) y no la de lectura (una cita).
+        /// </summary>
+        protected Text TextoAcento(Transform columna, string nombre, int tamano, float alfa = 1f, bool deTitulo = false)
         {
-            var texto = FabricaUI.Texto(columna, nombre, string.Empty, tamano, new Color(1f, 1f, 1f, alfa));
+            var color = new Color(1f, 1f, 1f, alfa);
+            var texto = deTitulo
+                ? FabricaUI.Titulo(columna, nombre, string.Empty, tamano, color)
+                : FabricaUI.Texto(columna, nombre, string.Empty, tamano, color);
             _acentos.Add(texto);
             return texto;
         }

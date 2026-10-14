@@ -9,6 +9,123 @@
 
 ---
 
+## Puntaje, menú con letra e imagen, niveles más largos y las puertas de cada mundo (2026-10-13)
+
+El autor dio por buenos el Nivel 2 tal como quedó (N39) y las decisiones de diseño de las
+puertas, que ya generó (N40), y pidió tres cosas: cambiar las monedas por **puntaje** (los
+enemigos valen distinto, los mini-jefes más, y tardar menos da más), poner en el menú **los
+nombres de quienes hicieron el juego**, una **letra más llamativa** (consejo del director) y una
+**imagen de fondo**, y **alargar los dos niveles** antes de empezar el tercero: bien jugados, se
+pasaban en diez minutos. Eligió Cinzel y Alegreya, una portada nueva (mientras llega, el plano 7
+de la cinemática inicial), quitar del todo el código de las monedas y los nombres completos.
+
+### Puntaje en lugar de monedas
+
+- **Problema:** las monedas de la v1 no medían nada del juego. No había monedas en ningún nivel:
+  el HUD enseñaba «Monedas: 0» para siempre.
+- **Causa:** venían de la v1 (`Moneda`, `EconomyManager`, `ContadorMonedas` y la migración de los
+  PlayerPrefs), donde tampoco se usaban.
+- **Solución:** fuera las monedas (en `GameManager.cs` solo cambian las seis líneas que las
+  nombraban; el autor lo aprobó) y un marcador por nivel:
+  - `Levels/MarcadorNivel`, junto al `LevelManager`, que lo crea si la escena no lo trae. Suma lo
+    que vale cada enemigo al morir (escucha su `Health`: `EnemyController` no sabe que existe el
+    puntaje) y lo que vale el jefe cuando el `LevelManager` lo da por caído. Cada enemigo cuenta
+    una vez por intento. El reloj corre solo jugando: ni en pausa, ni en cinemáticas, ni en el
+    Game Over, y morir no lo para.
+  - Al activar un checkpoint guarda una foto del intento (`DatosIntento`: puntos, reloj y a quién
+    se derrotó). Si se sale y se continúa desde él, el intento sigue donde iba: salir no pone el
+    reloj a cero ni deja cobrar dos veces al mismo enemigo. Reiniciar el nivel es otro intento.
+  - Al cruzar la salida, `Cerrar` suma el **bono por tiempo** (`Core/Puntuacion/ReglasPuntaje`: 5
+    puntos por cada segundo que sobre de `LevelData.tiempoConBono`, 10 min en el Nivel 1 y 13 en
+    el 2; pasado, no hay bono, pero tampoco se resta) y anota el mejor de cada nivel en la partida
+    (`DatosGuardado.puntajes`; a igualdad de puntos, el más rápido).
+  - `Editor/TablaPuntaje` pone los valores en los assets en cada regeneración: un enemigo común
+    vale 100, la Escultura 250, el Golem 500 y la Plañidera 600 (los mini-jefes); la Centinela
+    1500, la Doncella 2000 y cada jefe siguiente más. Correr y pelear compiten: cruzar el Nivel 1
+    en la mitad de su tiempo da un bono del orden de su jefe.
+  - Lo enseñan el HUD (puntaje, reloj y, un momento, lo que se acaba de ganar: «+100»), el fin de
+    nivel (el desglose y si es récord), el selector (el mejor puntaje y tiempo de cada mundo) y el
+    menú (la suma de todos).
+  - El guardado ya no migra nada de la v1: las partidas con monedas se cargan igual, sin ellas.
+
+### El menú y la letra
+
+- **Problema:** el director pidió una letra más llamativa; el menú era un color plano con seis
+  rectángulos de color y no decía quién hizo el juego.
+- **Causa:** toda la interfaz usaba la fuente integrada de Unity (`LegacyRuntime.ttf`).
+- **Solución:** dos letras de Google Fonts con licencia OFL, que va con ellas en
+  `Resources/Fuentes`: **Cinzel** (capitales talladas) para títulos, menús, botones, nombres y el
+  HUD (`FabricaUI.FuenteTitulos`, `FabricaUI.Titulo`), y **Alegreya** (serifa de lectura con
+  cursiva propia) para los diálogos y el texto corrido (`FabricaUI.Fuente`). La línea de los
+  diálogos sube de 26 a 30 px: Alegreya tiene el ojo más pequeño que la integrada. El menú lleva
+  de fondo una imagen del juego (`UI/FondoMenu`: la imagen y un velo en la escena, y la viñeta y
+  un degradado oscuro a la izquierda, que se generan al arrancar), el título y las opciones a la
+  izquierda, y al pie «Creado por David Felipe Garzón Barbosa · Juan Diego Romero Jiménez»
+  (`MainMenu.Autores`). La imagen es la portada (`Assets/Sprites/Interfaz/FondoMenu.png`) cuando
+  exista; mientras, el plano 7 de la cinemática inicial (Kael ante los cinco fragmentos). El
+  selector lleva la misma imagen, más velada.
+
+### Los niveles, más largos
+
+- **Problema:** bien jugados, los dos niveles se pasaban en diez minutos: el puntaje por tiempo
+  no tenía recorrido.
+- **Solución:** una sección nueva en cada uno, entre lo que había y la arena, que es el examen de
+  lo aprendido:
+  - **Nivel 1, «la forja» (x 55 a 100, +45 u; el nivel mide 126 u):** una inestable sobre lava
+    para subir a la almena, dos Ecos bajo el fuego de una segunda torreta, un lago de 12 u con una
+    inestable entre dos de combustión (sobre la inestable no se puede esperar: se mira la segunda
+    desde la primera), una cornisa con otro Eco y la antesala. Dos checkpoints más: tras el Golem
+    (x 57,5) y ante la arena (x 94,5), así que morir ante la Centinela ya no obliga a repetir el
+    Golem. `DisenoNivel1.Version` (2) hace que `PreparadorNivel` vuelva a montar la escena entera,
+    como ya hacía con el Nivel 2.
+  - **Nivel 2, «el canal» (x 74 a 104, +30 u; mide 139 u):** la azotea al salir de la torre, con
+    un Lamento; un canal de 12 u con tres placas que suben 2 u a la contra (hay que medir el
+    momento; las primeras se cruzaban sin esperar) y dos Medusas debajo para quien se caiga; y un
+    patio de hielo con las dos Esculturas del Anexo entre dos estatuas de piedra y otro Lamento: lo
+    que enseñó la primera estatua (son decorado) aquí ya no vale. `DisenoNivel2.Version` 13.
+  - Los tramos y los checkpoints de los dos `LevelData` siguen siempre al diseño
+    (`GeneradorProgresion.SeguirElDiseno`, que ahora rehace la lista entera si cambia).
+- **Problema encontrado al montarlos:** al volver a montar el Nivel 1, el pintor no ponía ni la
+  estatua ni los braseros. **Causa:** reserva el sitio de todo lo que tiene dibujo o zona de golpe,
+  y lo recién colocado (los enemigos y las mecánicas se instancian en el origen y después se
+  mueven) aún tenía su caja de física en el origen: en edición, Unity no la mueve hasta
+  sincronizar. Esas cajas ocupaban el inicio del nivel, donde va la estatua, y sin estatua no se
+  pone lo demás. **Solución:** `PintorEscenario` sincroniza la física antes de mirar
+  (`Physics2D.SyncTransforms`) y no cuenta ni lo apagado ni el fondo con parallax.
+
+### Las puertas de cada mundo
+
+- **Problema:** la salida de cada nivel era un rectángulo translúcido que aparecía de golpe, la
+  puerta de la arena un bloque de color, el checkpoint un mástil con un paño, y el cierre de cada
+  mundo, tres frases sobre negro.
+- **Solución:** el arte de la tanda N40, limpiado con `limpiar_puertas.py` (motor de
+  `limpiar_mundo2.py`) y traído con `Herramientas/traer_arte_puertas.py`, se monta con
+  `Editor/ConstructorPuertas`:
+  - **La puerta de salida** (`Levels/PuertaDeSalida`, unas 4 u de alto): se ve cerrada desde que
+    se entra en la arena y, al recoger el fragmento, se entreabre y se abre, alternando sus dos
+    dibujos de abierta. `SalidaNivel` le dice cuándo.
+  - **La verja** que cierra la arena tras Kael: la de la Ira se repite hasta el techo; la de la
+    Tristeza va abajo, con un muro de hielo encima. La colisión sigue siendo la del bloque.
+  - **El checkpoint:** el brasero (Ira) y el farol (Tristeza), apagados y encendidos; cada estado
+    con el pivote en su pie, para que no salte al encenderse.
+  - **La cinemática de salida** de cada mundo: el plano general con las dos primeras frases del
+    cierre y Kael ante la puerta con la tercera, en la rejilla de 480 × 268 (14 s, se puede
+    saltar). Cada frase va sobre una zona oscura de su plano: en el general de la Tristeza, todo
+    hielo blanco, va sobre la losa que lleva a la puerta.
+- La carpeta `limpios` quedó dentro de `Tesis/Imagenes/Mundo1` al reorganizar las imágenes: los
+  scripts la buscan ahí y en `Tesis/Imagenes`.
+
+### Pruebas
+
+Nuevas: `PuntajeTests` (bono, reloj, récord, tabla y letras), `PuertasTests` (arte importado,
+salidas, checkpoints, verjas y cinemáticas de salida), `PuntajePlayModeTests` (sumar en el
+Nivel 1, reloj y pausa, fin de nivel, récord, continuar desde un checkpoint, reiniciar y el menú)
+y `PuertasPlayModeTests` (el checkpoint se enciende, la puerta se abre al recoger el fragmento).
+Puestas al día las del diseño y las escenas de los dos niveles, el guardado y las cinemáticas de
+cierre. 497 EditMode y 207 PlayMode en verde.
+
+---
+
 ## Mundo 2: lo que salió de jugarlo (2026-10-12)
 
 Misma rama, `nivel2-recorrido`. El autor jugó el Nivel 2 de principio a fin (PENDIENTES N31). Dio

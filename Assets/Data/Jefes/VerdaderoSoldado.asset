@@ -20,6 +20,7 @@ MonoBehaviour:
   invulnerabilidad: 0.15
   danioContacto: 1
   velocidad: 2
+  puntos: 5000
   fases:
   - nombre: Combate espejo
     umbralVida: 1

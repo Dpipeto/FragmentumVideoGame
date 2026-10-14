@@ -424,6 +424,7 @@ namespace Fragmentum.EditorTools
             var colorPuerta = DePaleta(nivel, 1, Color.gray);
             var puerta = Bloque(arena, "Puerta", DisenoNivel2.PuertaDesde, DisenoNivel2.PuertaHasta, DisenoNivel2.SueloArena, DisenoNivel2.TechoArena,
                 Capa(Capas.Wall), colorPuerta, SpriteCuadrado);
+            ConstructorPuertas.VestirVerja(puerta, nivel, DisenoNivel2.PuertaDesde, DisenoNivel2.PuertaHasta, DisenoNivel2.SueloArena, DisenoNivel2.TechoArena);
             puerta.SetActive(false);
 
             GameObject jefe = null;

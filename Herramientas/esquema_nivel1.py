@@ -14,7 +14,7 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 SALIDA = os.path.join(AQUI, '..', 'Docs', 'Diseno', 'Nivel1_Diseno.png')
 
 U = 16                      # px por unidad
-X0, X1, Y0, Y1 = -2, 82, -3, 21
+X0, X1, Y0, Y1 = -2, 127, -3, 21
 MARGEN_IZQ, MARGEN_SUP, MARGEN_INF = 40, 70, 150
 ANCHO = (X1 - X0) * U + MARGEN_IZQ + 20
 ALTO = (Y1 - Y0) * U + MARGEN_SUP + MARGEN_INF
@@ -60,23 +60,25 @@ f, fb, fp, ft = fuente(13), fuente(13, True), fuente(11), fuente(20, True)
 # Secciones
 for desde, hasta, nombre, color in ((0, 25, 'SECCIÓN 1 · El despertar', (40, 26, 20)),
                                     (25, 55, 'SECCIÓN 2 · La fortaleza arde', (48, 24, 16)),
-                                    (55, 80, 'ARENA · La Centinela', (58, 22, 14))):
+                                    (55, 100, 'SECCIÓN 3 · La forja', (52, 28, 16)),
+                                    (100, 125, 'ARENA · La Centinela', (58, 22, 14))):
     rect(d, desde, Y0, hasta, Y1, color)
     a, b = px(desde, Y1)
     d.text((a + 6, b + 4), nombre, font=fb, fill=TEXTO)
 
 # Suelo (basalto) por tramos: (desde, hasta, altura)
-SUELOS = [(-2, 12, 0), (12, 17, -2), (17, 27, 2), (27, 36, 0), (36, 39, 2), (39, 42, 0), (42, 52, 5), (52, 55, 3), (55, 82, 5)]
+SUELOS = [(-2, 12, 0), (12, 17, -2), (17, 27, 2), (27, 36, 0), (36, 39, 2), (39, 42, 0), (42, 52, 5), (52, 55, 3),
+          (55, 60, 5), (60, 64, 3), (64, 75, 7), (75, 87, 5), (87, 92, 7), (92, 97, 5), (97, 100, 3), (100, 127, 5)]
 for x0, x1, y in SUELOS:
     rect(d, x0, Y0, x1, y, SUELO, BORDE_SUELO)
 rect(d, 4, 0, 6, 1, SUELO, BORDE_SUELO)                         # escalón de enseñanza
 # Lava (letal), apoyada en su cuenca
-for x0, x1, y in ((27, 36, 4 / 3), (39, 42, 4 / 3), (52, 55, 13 / 3)):
+for x0, x1, y in ((27, 36, 4 / 3), (39, 42, 4 / 3), (52, 55, 13 / 3), (60, 64, 13 / 3), (75, 87, 19 / 3), (97, 100, 13 / 3)):
     rect(d, x0, y - 4 / 3, x1, y, LAVA)
 # Paredes de la arena
-rect(d, 55, 5, 56, 20, (90, 70, 66))                             # puerta (se cierra tras entrar)
-rect(d, 81, 5, 82, 20.6, (90, 70, 66))
-rect(d, 55, 20, 82, 20.6, (90, 70, 66))
+rect(d, 100, 5, 101, 20, (90, 70, 66))                           # verja (se cierra tras entrar)
+rect(d, 126, 5, 127, 20.6, (90, 70, 66))
+rect(d, 100, 20, 127, 20.6, (90, 70, 66))
 
 # Plataformas
 rect(d, 14.5 - 1.92, -0.875, 14.5 + 1.92, 0, INESTABLE, (210, 170, 130))   # inestable sobre un foso que no mata
@@ -84,7 +86,13 @@ for x, y in ((29.43, 2), (33.57, 2)):                            # combustión s
     rect(d, x - 1.71, y - 1.29, x + 1.71, y, COMBUSTION, (230, 120, 60))
     d.text(px(x - 0.3, y + 1.1), '≈', font=f, fill=ACENTO)
 rect(d, 40.5 - 1.92, 3.5 - 0.875, 40.5 + 1.92, 3.5, INESTABLE, (210, 170, 130))   # inestable sobre la lava
-for x0, x1, y in ((59, 63, 8), (73, 77, 8), (65, 70, 11), (61, 64, 14), (72, 75, 14)):   # arena, 3 alturas
+# La forja: la inestable de la escalera y, en el lago, una inestable entre dos de combustión.
+rect(d, 62 - 1.92, 6 - 0.875, 62 + 1.92, 6, INESTABLE, (210, 170, 130))
+rect(d, 81 - 1.92, 7 - 0.875, 81 + 1.92, 7, INESTABLE, (210, 170, 130))
+for x, y in ((77.2, 7), (84.8, 7)):
+    rect(d, x - 1.71, y - 1.29, x + 1.71, y, COMBUSTION, (230, 120, 60))
+    d.text(px(x - 0.3, y + 1.1), '≈', font=f, fill=ACENTO)
+for x0, x1, y in ((104, 108, 8), (118, 122, 8), (110, 115, 11), (106, 109, 14), (117, 120, 14)):   # arena, 3 alturas
     rect(d, x0, y - 0.5, x1, y, (110, 90, 84), (170, 140, 130))
 
 # Torreta: en el suelo de la terraza, mirando a la izquierda (la bola va a la altura de Kael)
@@ -92,6 +100,10 @@ rect(d, 22.42, 2, 24.34, 3.62, TORRETA, (180, 170, 200))
 a, b = px(22.1, 2.9)
 d.polygon([(a, b), (a + 10, b - 5), (a + 10, b + 5)], fill=ACENTO)
 d.text(px(21.4, 5.6), 'torreta ←', font=fp, fill=TEXTO)
+rect(d, 71.42, 7, 73.34, 8.62, TORRETA, (180, 170, 200))          # la segunda, en la almena, hacia los dos Ecos
+a, b = px(71.1, 7.9)
+d.polygon([(a, b), (a + 10, b - 5), (a + 10, b + 5)], fill=ACENTO)
+d.text(px(70.4, 10.6), 'torreta ←', font=fp, fill=TEXTO)
 
 
 def punto(x, y, color, letra, r=7):
@@ -101,27 +113,28 @@ def punto(x, y, color, letra, r=7):
     d.text((a - w / 2, b - 2 * r + 1), letra, font=fp, fill=(255, 255, 255))
 
 
-for x, y in ((10, 0), (18.8, 2), (21, 2), (26, 2), (37.5, 2), (45.5, 5), (51, 5)):
+for x, y in ((10, 0), (18.8, 2), (21, 2), (26, 2), (37.5, 2), (45.5, 5), (51, 5), (66.5, 7), (69.5, 7), (89.5, 7)):
     punto(x, y, ECO, 'E')
 punto(48.5, 5, GOLEM, 'G', r=11)
-punto(70, 5, JEFE, 'C', r=16)
+punto(115, 5, JEFE, 'C', r=16)
 
 # Inicio, checkpoint, salida, entradas de diálogo
 a, b = px(2, 0)
 d.rectangle([a - 4, b - 22, a + 4, b], fill=(240, 236, 216))
 d.text((a - 14, b - 40), 'Kael', font=fb, fill=TEXTO)
-a, b = px(43, 5)
-d.line([a, b, a, b - 44], fill=(200, 200, 205), width=3)
-d.polygon([(a, b - 44), (a + 16, b - 38), (a, b - 32)], fill=ACENTO)
-d.text((a - 18, b - 62), 'checkpoint', font=fp, fill=TEXTO)
-a, b = px(79.5, 5)
-d.rectangle([a - 12, b - 90, a + 12, b], outline=ACENTO, width=2)
-d.text((a - 18, b - 108), 'salida', font=fp, fill=TEXTO)
-a, b = px(55.5, 5)
-d.text((a + 8, b - 74), 'puerta', font=fp, fill=TEXTO)
+for x, y in ((43, 5), (57.5, 5), (94.5, 5)):                  # checkpoints: antes del Golem, tras él y ante la arena
+    a, b = px(x, y)
+    d.line([a, b, a, b - 44], fill=(200, 200, 205), width=3)
+    d.polygon([(a, b - 44), (a + 16, b - 38), (a, b - 32)], fill=ACENTO)
+    d.text((a - 18, b - 62), 'checkpoint', font=fp, fill=TEXTO)
+a, b = px(124, 5)
+d.rectangle([a - 30, b - 64, a + 30, b], outline=ACENTO, width=2)
+d.text((a - 18, b - 82), 'salida', font=fp, fill=TEXTO)
+a, b = px(100.5, 5)
+d.text((a + 8, b - 74), 'verja', font=fp, fill=TEXTO)
 
 # Cotas
-for x in range(0, 81, 5):
+for x in range(0, 126, 5):
     a, b = px(x, Y0)
     d.line([a, b, a, b + 6], fill=TENUE)
     d.text((a - 6, b + 8), str(x), font=fp, fill=TENUE)
@@ -141,9 +154,9 @@ for color, nombre in items:
     d.rectangle([lx, ly, lx + 14, ly + 14], fill=color)
     d.text((lx + 20, ly), nombre, font=f, fill=TEXTO)
     lx += 26 + d.textlength(nombre, font=f) + 18
-d.text((MARGEN_IZQ, ly + 30), 'Diálogos: apertura al aparecer (x 2) · eco de memoria en el checkpoint (x 43) · presentación del jefe al cruzar la entrada (x 58) · cierre al recoger el fragmento.',
+d.text((MARGEN_IZQ, ly + 30), 'Diálogos: apertura al aparecer (x 2) · eco de memoria en el primer checkpoint (x 43) · presentación del jefe al cruzar la entrada (x 103) · cierre al recoger el fragmento.',
        font=f, fill=TENUE)
-d.text((MARGEN_IZQ, ly + 50), 'Alturas: el suelo sube de 0 a 5 hacia la fortaleza; la arena va de 5 a 20 (15 u de alto), como pide el Anexo A.',
+d.text((MARGEN_IZQ, ly + 50), 'Alturas: el suelo sube de 0 a 5 hacia la fortaleza y a 7 en la forja; la arena va de 5 a 20 (15 u de alto), como pide el Anexo A. La forja (55-100) se añadió el 2026-10-13.',
        font=f, fill=TENUE)
 
 os.makedirs(os.path.dirname(SALIDA), exist_ok=True)

@@ -26,11 +26,15 @@ namespace Fragmentum.Levels
         [Tooltip("Dónde reaparece el jugador. Vacío = en la base del propio checkpoint.")]
         [SerializeField] private Transform puntoReaparicion;
 
-        [Tooltip("Opcional: se tiñe al activarse (bandera provisional hasta que haya arte, PENDIENTES B10).")]
+        [Tooltip("Opcional: se tiñe al activarse o, con sus dos dibujos, cambia de dibujo.")]
         [SerializeField] private SpriteRenderer indicador;
 
         [SerializeField] private Color colorInactivo = new Color(0.55f, 0.55f, 0.6f, 1f);
         [SerializeField] private Color colorActivo = new Color(1f, 0.75f, 0.3f, 1f);
+
+        [Tooltip("Con arte: el checkpoint apagado y encendido (el brasero, el farol). Con los dos, el indicador no se tiñe.")]
+        [SerializeField] private Sprite spriteInactivo;
+        [SerializeField] private Sprite spriteActivo;
 
         [Tooltip("Al tocarlo por primera vez, Kael dice la línea «eco de memoria» de los diálogos del nivel.")]
         [SerializeField] private bool ecoDeMemoria;
@@ -60,16 +64,19 @@ namespace Fragmentum.Levels
         /// <summary>¿Cura a Kael al tocarlo?</summary>
         public bool Cura => cura;
 
+        /// <summary>¿Tiene sus dos dibujos (apagado y encendido)?</summary>
+        public bool TieneDibujos => spriteInactivo != null && spriteActivo != null;
+
+        /// <summary>El dibujo que enseña ahora el indicador, o null.</summary>
+        public Sprite DibujoActual => indicador != null ? indicador.sprite : null;
+
         internal void Vincular(CheckpointManager gestor) => _gestor = gestor;
 
         internal void MarcarActivo(bool activo)
         {
             var estaba = Activo;
             Activo = activo;
-            if (indicador != null)
-            {
-                indicador.color = activo ? colorActivo : colorInactivo;
-            }
+            Pintar();
 
             if (activo && !estaba)
             {
@@ -81,9 +88,28 @@ namespace Fragmentum.Levels
 
         private void Awake()
         {
-            if (indicador != null && !Activo)
+            if (!Activo)
             {
-                indicador.color = colorInactivo;
+                Pintar();
+            }
+        }
+
+        // Con sus dos dibujos cambia de dibujo; sin ellos, el paño provisional cambia de color.
+        private void Pintar()
+        {
+            if (indicador == null)
+            {
+                return;
+            }
+
+            if (TieneDibujos)
+            {
+                indicador.sprite = Activo ? spriteActivo : spriteInactivo;
+                indicador.color = Color.white;
+            }
+            else
+            {
+                indicador.color = Activo ? colorActivo : colorInactivo;
             }
         }
 

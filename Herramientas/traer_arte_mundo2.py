@@ -18,7 +18,11 @@ import sys
 from pathlib import Path
 
 PROYECTO = Path(__file__).resolve().parent.parent
-ORIGEN = PROYECTO.parent / "Tesis" / "Imagenes" / "limpios" / "Mundo2"
+# La carpeta limpios está en Tesis/Imagenes; pasó un día dentro de Tesis/Imagenes/Mundo1 (2026-10-13),
+# así que también se busca ahí.
+_IMAGENES = PROYECTO.parent / "Tesis" / "Imagenes"
+ORIGEN = next((c for c in (_IMAGENES / "limpios" / "Mundo2", _IMAGENES / "Mundo1" / "limpios" / "Mundo2") if c.is_dir()),
+              _IMAGENES / "limpios" / "Mundo2")
 
 # Carpeta del set limpio -> carpeta del proyecto. Todos los PNG de la carpeta van juntos.
 DESTINOS = {

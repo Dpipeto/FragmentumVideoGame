@@ -90,6 +90,26 @@ la de combustión mide 3,42 u (no 1,8) y la inestable, 3,83 (no 1,6). Por eso:
 - **La arena no lleva decoración** (braseros, cadenas…): el combate se lee mejor sin nada detrás.
 - **Los Ecos llevan la escala que les diste a mano** (1,8 × 1,5) y están de pie en su suelo.
 
+### La sección 3, «la forja» (2026-10-13)
+
+Bien jugados, los dos niveles se pasaban en diez minutos, y con el puntaje por tiempo pediste
+alargarlos. Entre el Golem y la arena hay ahora **45 u más** (el nivel mide 126 u): la forja, el
+examen de lo aprendido. Cada mecánica sale por tercera vez, ya junta con las otras:
+
+| Tramo | x | Qué hay |
+|---|---|---|
+| Rellano | 55-60 | Se llega con el salto de la vieja puerta de la arena (3 u). **Checkpoint en x 57,5**: morir en la forja ya no obliga a repetir el Golem. |
+| Escalera | 60-64 | Una inestable sobre lava, entre el rellano (y 5) y la almena (y 7): se sube pisándola, sin pararse. |
+| Almena | 64-75 | Dos Ecos y, al fondo, **la segunda torreta**, que dispara a lo largo de la almena: se pelea esquivando el fuego. Detrás de la torreta quedan 2 u para mirar el lago antes de saltar. |
+| Lago de la forja | 75-87 | 12 u de lava con **una inestable entre dos de combustión**. Sobre la inestable no se puede esperar (se rompe al segundo), así que se espera en la primera de combustión mirando la segunda: con medio ciclo de desfase, la segunda se apaga 0,9 s antes de que la primera empiece a quemar. |
+| Cornisa | 87-92 | Un Eco más. |
+| Antesala | 92-97 | **Checkpoint en x 94,5**, ante la arena: morir ante la Centinela ya no obliga a repetir el nivel. |
+| Puerta de la arena | 97-100 | El mismo salto de 3 u sobre lava que antes llevaba a la arena. |
+
+La arena entera se corrió 45 u (va de 101 a 126) y no cambia por dentro. `DisenoNivel1.Version`
+(2) hace que la escena se vuelva a montar entera, como la del Nivel 2. Las secciones del
+`LevelData` son ahora cuatro: el Anexo A preveía dos y la arena (N19).
+
 ## 4. Medidas de Kael, para que todo se pueda cruzar
 
 Estos valores salen de `ParametrosJugador` (los comprueba `DisenoNivel1Tests`):

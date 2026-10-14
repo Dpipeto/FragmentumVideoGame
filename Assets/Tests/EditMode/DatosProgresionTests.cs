@@ -96,7 +96,6 @@ namespace Fragmentum.Tests
             Assert.IsNotNull(gestor);
             Assert.IsNotNull(sistemas.GetComponent<GameStateMachine>());
             Assert.IsNotNull(sistemas.GetComponent<SceneLoader>());
-            Assert.IsNotNull(sistemas.GetComponent<EconomyManager>());
             Assert.AreSame(BaseDeDatos(), gestor.BaseDeDatos);
         }
 
@@ -118,12 +117,24 @@ namespace Fragmentum.Tests
         }
 
         [Test]
-        public void ElNivel1_PreveElCheckpointDelDisenoEnX43()
+        public void ElNivel1_PreveLosCheckpointsYLosTramosDeSuDiseno()
         {
-            // El Anexo A lo pone en x 40; con las plataformas reales el lago creció y la bandera va
-            // tras la subida, antes del Golem (Docs/Diseno/Nivel1_Diseno.md).
-            CollectionAssert.AreEqual(new[] { DisenoNivel1.Checkpoint }, BaseDeDatos().niveles[0].puntosDeControl);
-            Assert.AreEqual(43f, DisenoNivel1.Checkpoint);
+            // El Anexo A pone un checkpoint en x 40; con las plataformas reales el lago creció y la
+            // bandera va tras la subida, antes del Golem. Al alargar el nivel (2026-10-13) se
+            // añadieron dos: tras el Golem y ante la arena (Docs/Diseno/Nivel1_Diseno.md).
+            var nivel = BaseDeDatos().niveles[0];
+            CollectionAssert.AreEqual(DisenoNivel1.Checkpoints, nivel.puntosDeControl);
+            Assert.AreEqual(43f, DisenoNivel1.Checkpoints[0]);
+
+            Assert.AreEqual(DisenoNivel1.Secciones.Length, nivel.secciones.Count);
+            for (var i = 0; i < nivel.secciones.Count; i++)
+            {
+                Assert.AreEqual(DisenoNivel1.Secciones[i].Nombre, nivel.secciones[i].nombre);
+                Assert.AreEqual(DisenoNivel1.Secciones[i].Desde, nivel.secciones[i].desdeX, 1e-4f);
+                Assert.AreEqual(DisenoNivel1.Secciones[i].Hasta, nivel.secciones[i].hastaX, 1e-4f);
+            }
+
+            Assert.AreEqual(new Vector2(0f, DisenoNivel1.LimitesArena.y - 1f), nivel.Extension, "De ahí sale lo que enseña la cámara.");
         }
 
         [Test]
@@ -154,7 +165,7 @@ namespace Fragmentum.Tests
         {
             var nivel = BaseDeDatos().niveles[0];
             Assert.AreEqual("1A0800", ColorUtility.ToHtmlStringRGB(nivel.ColorOscuro), "Ira: #1A0800 es el más oscuro del Anexo A.");
-            Assert.AreEqual(new Vector2(0f, 80f), nivel.Extension, "Las secciones del Nivel 1 cubren de 0 a 80 u.");
+            Assert.AreEqual(new Vector2(0f, 125f), nivel.Extension, "Las secciones del Nivel 1 cubren de 0 a 125 u (80 antes de la forja).");
         }
 
         private static List<string> RutasDe(InputAction accion)

@@ -424,7 +424,7 @@ namespace Fragmentum.Tests.PlayMode
             yield return EntrarEnNivel2();
             ApagarLamentos();
             var esculturas = Object.FindObjectsByType<EsculturaDormida>(FindObjectsInactive.Exclude);
-            Assert.AreEqual(1, esculturas.Length, "La segunda dejó su sitio a la Plañidera.");
+            Assert.AreEqual(3, esculturas.Length, "Una en la sección 1 (la segunda dejó su sitio a la Plañidera) y las dos del canal.");
             foreach (var dormida in esculturas)
             {
                 Assert.AreEqual(ESTADOS_ESCULTURA.DORMIDA, dormida.Estado, $"{dormida.name}: de lejos, una estatua más.");

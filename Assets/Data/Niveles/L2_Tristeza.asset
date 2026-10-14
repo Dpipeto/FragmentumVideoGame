@@ -45,17 +45,23 @@ MonoBehaviour:
   - nombre: "Secci\xF3n 1"
     desdeX: 0
     hastaX: 40
-    contenido: 'Sobre el hielo: suelo resbaladizo y plataformas flotantes. 3 Lamentos y 2 Esculturas Vivientes.'
+    contenido: "Sobre el hielo: suelo resbaladizo y plataformas flotantes. 3 Lamentos, 1 Escultura Viviente y la Pla\xF1idera."
   - nombre: "Secci\xF3n 2"
     desdeX: 40
     hastaX: 70
     contenido: "Bajo el agua, con ox\xEDgeno limitado. 4 Medusas de Hielo."
-  - nombre: Arena del jefe
+  - nombre: "Secci\xF3n 3"
     desdeX: 70
-    hastaX: 103
+    hastaX: 100
+    contenido: 'El canal: placas flotantes que hay que medir, sobre 2 Medusas, y un patio helado con 2 Esculturas Vivientes y 2 Lamentos.'
+  - nombre: Arena del jefe
+    desdeX: 100
+    hastaX: 133
     contenido: Superficie helada sobre agua.
   puntosDeControl:
   - 62.4
-  - 78
+  - 108
+  tiempoConBono: 780
+  puntosPorSegundo: 5
   acento: {r: 0, g: 0.83137256, b: 1, a: 1}
   cita: "el dolor tambi\xE9n es parte del yo"

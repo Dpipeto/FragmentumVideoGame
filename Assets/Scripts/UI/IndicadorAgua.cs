@@ -99,7 +99,7 @@ namespace Fragmentum.UI
             _relleno.rectTransform.offsetMin = new Vector2(2f, 2f);
             _relleno.rectTransform.offsetMax = new Vector2(-2f, -2f);
 
-            var etiqueta = FabricaUI.Texto(fondo.transform, "Etiqueta", "AIRE", 16, new Color(1f, 1f, 1f, 0.75f), TextAnchor.MiddleLeft);
+            var etiqueta = FabricaUI.Titulo(fondo.transform, "Etiqueta", "AIRE", 16, new Color(1f, 1f, 1f, 0.75f), TextAnchor.MiddleLeft);
             FabricaUI.Colocar(etiqueta.rectTransform, new Vector2(1f, 0.5f), new Vector2(10f, 0f), new Vector2(80f, 20f), new Vector2(0f, 0.5f));
             _barra.SetActive(false);
         }

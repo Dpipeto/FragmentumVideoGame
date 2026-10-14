@@ -147,7 +147,7 @@ namespace Fragmentum.EditorTools
 
             // 0. El recorrido de diseño (DisenoNivel1), en lugar del provisional. Pone también el
             //    checkpoint, la salida y la arena en su sitio: los pasos de abajo ya no los crean.
-            if (DisenoNivel1.EsDe(nivel) && RaizRecorrido(escena) == null)
+            if (DisenoNivel1.EsDe(nivel) && !RecorridoNivel1AlDia(escena))
             {
                 MontarRecorridoNivel1(escena, nivel, raiz);
                 cambios = true;
@@ -324,6 +324,16 @@ namespace Fragmentum.EditorTools
         /// meterse bajo las orillas sin taparlas, y las plataformas de combustión se ven en pie dentro de ella.</summary>
         public const int OrdenLavaEnHueco = -3;
 
+        /// <summary>Hijo del recorrido del Nivel 1 que dice qué versión del diseño está montada.</summary>
+        public static string MarcaVersionNivel1 => $"Diseño v{DisenoNivel1.Version}";
+
+        /// <summary>¿La escena tiene montado el recorrido de la versión actual de <see cref="DisenoNivel1"/>?</summary>
+        public static bool RecorridoNivel1AlDia(Scene escena)
+        {
+            var recorrido = RaizRecorrido(escena);
+            return recorrido != null && recorrido.Find(MarcaVersionNivel1) != null;
+        }
+
         /// <summary>El recorrido de diseño de la escena (<see cref="NombreRecorrido"/>), o null.</summary>
         public static Transform RaizRecorrido(Scene escena)
         {
@@ -339,16 +349,17 @@ namespace Fragmentum.EditorTools
         }
 
         /// <summary>
-        /// Monta el recorrido de <see cref="DisenoNivel1"/>. Borra lo provisional y lo que se colocó
-        /// para él (su escenario pintado, el checkpoint, la salida y la arena); levanta los bloques,
-        /// la lava, las mecánicas y los enemigos; pone el inicio, el checkpoint, la salida y la arena
-        /// del diseño, y lo viste con el tileset.
+        /// Monta el recorrido de <see cref="DisenoNivel1"/>. Borra lo provisional, un montaje de una
+        /// versión anterior del diseño y lo que se colocó para ellos (su escenario pintado, los
+        /// checkpoints, la salida y la arena); levanta los bloques, la lava, las mecánicas y los
+        /// enemigos; pone el inicio, los checkpoints, la salida y la arena del diseño, lo viste
+        /// con el tileset y reparte otra vez los hitos del fondo, que van por fracciones del nivel.
         /// </summary>
         private static void MontarRecorridoNivel1(Scene escena, LevelData nivel, Transform raiz)
         {
             foreach (var objeto in escena.GetRootGameObjects())
             {
-                if (objeto.name == NombreProvisional || objeto.name == PintorEscenario.NombreRaiz)
+                if (objeto.name == NombreRecorrido || objeto.name == NombreProvisional || objeto.name == PintorEscenario.NombreRaiz)
                 {
                     Object.DestroyImmediate(objeto);
                 }
@@ -365,6 +376,7 @@ namespace Fragmentum.EditorTools
 
             var recorrido = new GameObject(NombreRecorrido).transform;
             SceneManager.MoveGameObjectToScene(recorrido.gameObject, escena);
+            Hijo(recorrido, MarcaVersionNivel1);
 
             var colorSuelo = nivel.paleta != null && nivel.paleta.Length > 3 ? nivel.paleta[3] : new Color(0.36f, 0.25f, 0.2f);
             var colorPared = FabricaColor(colorSuelo, 0.6f);
@@ -415,6 +427,10 @@ namespace Fragmentum.EditorTools
             CrearSalida(raiz, DisenoNivel1.Salida, nivel, DisenoNivel1.SueloArena);
             CrearArenaNivel1(escena, raiz, nivel, plataformas);
             PintorEscenario.Pintar(escena, recorrido, true);
+
+            // Si el fondo ya estaba puesto, sus hitos (la fortaleza, el muro y la catarata) siguen
+            // repartidos para lo que medía el nivel: se reparten para lo que mide ahora.
+            ConstructorFondoMundo1.RepartirEn(escena, nivel);
         }
 
         private static GameObject Instanciar(Scene escena, Transform padre, string prefab, string nombre, float x, float y)
@@ -508,7 +524,7 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// La arena del diseño: la entrada justo después de la puerta, la puerta en el borde de la sala
-        /// (se cierra detrás del jugador), la Centinela en x 70 y las plataformas que ella atraviesa.
+        /// (se cierra detrás del jugador), la Centinela en el centro y las plataformas que ella atraviesa.
         /// </summary>
         private static void CrearArenaNivel1(Scene escena, Transform raiz, LevelData nivel, List<Collider2D> plataformas)
         {
@@ -525,6 +541,7 @@ namespace Fragmentum.EditorTools
             var colorPuerta = nivel.paleta != null && nivel.paleta.Length > 1 ? nivel.paleta[1] : Color.gray;
             var puerta = Bloque(arena, "Puerta", DisenoNivel1.PuertaDesde, DisenoNivel1.PuertaHasta, DisenoNivel1.SueloArena, DisenoNivel1.TechoArena,
                 Capa(Capas.Wall), colorPuerta, SpriteCuadrado);
+            ConstructorPuertas.VestirVerja(puerta, nivel, DisenoNivel1.PuertaDesde, DisenoNivel1.PuertaHasta, DisenoNivel1.SueloArena, DisenoNivel1.TechoArena);
             puerta.SetActive(false);
 
             GameObject jefe = null;
@@ -668,6 +685,9 @@ namespace Fragmentum.EditorTools
             Asignar(checkpoint, "id", p => p.stringValue = id);
             Asignar(checkpoint, "indicador", p => p.objectReferenceValue = pano.GetComponent<SpriteRenderer>());
             Asignar(checkpoint, "colorActivo", p => p.colorValue = nivel.ColorAcento);
+
+            // Con el arte del mundo, el brasero o el farol en lugar de la bandera provisional.
+            ConstructorPuertas.VestirCheckpoint(checkpoint, nivel);
             return checkpoint;
         }
 
@@ -708,6 +728,9 @@ namespace Fragmentum.EditorTools
             var acento = nivel.ColorAcento;
             Visual(objeto.transform, "Portal", new Vector2(0f, 3f), new Vector2(2f, 6f), new Color(acento.r, acento.g, acento.b, 0.35f), -2);
             objeto.AddComponent<SalidaNivel>();
+
+            // Con el arte del mundo, la puerta dibujada en lugar del rectángulo translúcido.
+            ConstructorPuertas.VestirSalida(objeto, nivel);
         }
 
         /// <summary>

@@ -347,6 +347,10 @@ namespace Fragmentum.EditorTools
         /// <summary>Tramos en x (desde, hasta) donde hay algo del juego que la decoración no debe tapar.</summary>
         private static List<Vector2> ZonasOcupadas(Scene escena, Transform raizBloques)
         {
+            // Lo recién colocado (los enemigos y las mecánicas se instancian en el origen y luego se
+            // mueven) aún tiene la caja de física donde nació hasta que se sincroniza: sin esto,
+            // sus zonas de golpe ocupaban el inicio del nivel y la estatua no cabía.
+            Physics2D.SyncTransforms();
             var ocupado = new List<Vector2>();
             foreach (var raiz in escena.GetRootGameObjects())
             {
@@ -355,10 +359,25 @@ namespace Fragmentum.EditorTools
                     continue;
                 }
 
+                // El fondo con parallax tampoco estorba: está detrás de todo. Al montar el nivel por
+                // primera vez aún no existe; al volver a montarlo sí, y sus capas (anchas como la
+                // pantalla) dejaban el nivel entero sin sitio para la decoración.
+                if (raiz.GetComponentInChildren<Levels.Escenario.ParallaxMovement>(true) != null ||
+                    raiz.GetComponentInChildren<Levels.Escenario.RepartoHitos>(true) != null)
+                {
+                    continue;
+                }
+
                 // Solo sprites: lo del juego lo es. Una malla suelta (el plano que quedó del proyecto
                 // original junto al inicio) no es nada que tapar.
                 foreach (var renderer2d in raiz.GetComponentsInChildren<SpriteRenderer>(true))
                 {
+                    // Lo apagado no se ve, y recién creado da una caja vacía en el origen.
+                    if (!renderer2d.enabled || !renderer2d.gameObject.activeInHierarchy || renderer2d.bounds.size.x <= 0f)
+                    {
+                        continue;
+                    }
+
                     if (renderer2d.transform.IsChildOf(raizBloques) && renderer2d.GetComponent<BoxCollider2D>() != null &&
                         PrefabUtility.GetOutermostPrefabInstanceRoot(renderer2d.gameObject) == null)
                     {
@@ -374,6 +393,11 @@ namespace Fragmentum.EditorTools
 
                 foreach (var colision in raiz.GetComponentsInChildren<Collider2D>(true))
                 {
+                    if (!colision.enabled || !colision.gameObject.activeInHierarchy)
+                    {
+                        continue;
+                    }
+
                     if (colision.isTrigger && colision.bounds.size.x < 30f)
                     {
                         ocupado.Add(new Vector2(colision.bounds.min.x, colision.bounds.max.x));

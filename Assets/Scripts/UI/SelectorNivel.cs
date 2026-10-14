@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Fragmentum.Core;
+using Fragmentum.Core.Puntuacion;
 using Fragmentum.Data;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,6 +26,9 @@ namespace Fragmentum.UI
         [SerializeField] private RectTransform contenedor;
 
         [SerializeField] private Button botonVolver;
+
+        [Tooltip("Opcional: la suma de los mejores puntajes de los mundos superados.")]
+        [SerializeField] private Text textoPuntaje;
 
         [SerializeField] private float altoBoton = 84f;
 
@@ -66,6 +70,11 @@ namespace Fragmentum.UI
                     Crear(nivel, gestor);
                 }
             }
+
+            if (textoPuntaje != null)
+            {
+                textoPuntaje.text = $"PUNTAJE  {ReglasPuntaje.Puntos(gestor.Datos.PuntajeTotal)}";
+            }
         }
 
         private void Crear(LevelData nivel, GameManager gestor)
@@ -79,6 +88,13 @@ namespace Fragmentum.UI
             else if (!jugable) detalle = "En construcción";
             else if (completado) detalle = nivel.fragmento != null ? $"Fragmento integrado · {nivel.fragmento.nombre}" : "Completado";
             else detalle = $"Dificultad {new string('*', nivel.dificultad)}";
+
+            // El mejor puntaje del mundo y lo que se tardó: lo que invita a volver a jugarlo.
+            var mejor = gestor.Datos.PuntajeDe(nivel.id);
+            if (mejor != null && desbloqueado && jugable)
+            {
+                detalle += $" · Mejor: {ReglasPuntaje.Puntos(mejor.puntos)} en {ReglasPuntaje.Tiempo(mejor.segundos)}";
+            }
 
             var titulo = $"{nivel.id}. {nivel.Titulo}";
             var etiqueta = $"<b>{titulo}</b>\n<size=20>{detalle}</size>";

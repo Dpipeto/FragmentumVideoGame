@@ -58,16 +58,23 @@ namespace Fragmentum.Tests
         }
 
         [Test]
-        public void ElNivel1_TieneElCheckpointDelDiseno_SobreElSueloDelPatio()
+        public void ElNivel1_TieneLosCheckpointsDelDiseno_CadaUnoSobreSuSuelo()
         {
-            var checkpoints = Todos<Checkpoint>(_nivel1);
-            Assert.AreEqual(1, checkpoints.Count);
-            Assert.AreEqual("L1_CP1", checkpoints[0].Id);
-            Assert.AreEqual(DisenoNivel1.Checkpoint, checkpoints[0].transform.position.x, 0.01f, "Tras la subida y antes del Golem.");
-            Assert.AreEqual(DisenoNivel1.SueloEn(DisenoNivel1.Checkpoint) + 0.05f, checkpoints[0].transform.position.y, 0.01f, "De pie en el suelo, no en el aire.");
-            Assert.IsTrue(checkpoints[0].CompareTag(GameTags.Checkpoint));
-            Assert.IsTrue(checkpoints[0].GetComponent<Collider2D>().isTrigger);
-            Assert.IsTrue(checkpoints[0].EcoDeMemoria, "Ahí suena el eco de memoria de la Ira («Una voz grita órdenes…»).");
+            var checkpoints = Todos<Checkpoint>(_nivel1).OrderBy(c => c.transform.position.x).ToList();
+            Assert.AreEqual(DisenoNivel1.Checkpoints.Length, checkpoints.Count);
+            for (var i = 0; i < checkpoints.Count; i++)
+            {
+                var x = DisenoNivel1.Checkpoints[i];
+                Assert.AreEqual($"L1_CP{i + 1}", checkpoints[i].Id);
+                Assert.AreEqual(x, checkpoints[i].transform.position.x, 0.01f);
+                Assert.AreEqual(DisenoNivel1.SueloEn(x) + 0.05f, checkpoints[i].transform.position.y, 0.01f, "De pie en el suelo, no en el aire.");
+                Assert.IsTrue(checkpoints[i].CompareTag(GameTags.Checkpoint));
+                Assert.IsTrue(checkpoints[i].GetComponent<Collider2D>().isTrigger);
+                Assert.IsTrue(checkpoints[i].Cura, "Los checkpoints curan (decisión del 2026-10-12).");
+            }
+
+            Assert.IsTrue(checkpoints[0].EcoDeMemoria, "En el primero suena el eco de memoria de la Ira («Una voz grita órdenes…»).");
+            Assert.IsFalse(checkpoints.Skip(1).Any(c => c.EcoDeMemoria), "Y solo en él.");
         }
 
         [Test]
@@ -115,7 +122,8 @@ namespace Fragmentum.Tests
             Assert.AreEqual(3, ecos.Count(e => e.transform.position.x < 25f), "Tres Ecos en la sección 1.");
             Assert.AreEqual(4, ecos.Count(e => e.transform.position.x >= 25f && e.transform.position.x < 55f), "Cuatro Ecos en la sección 2.");
             Assert.AreEqual(1, golems.Count);
-            Assert.Greater(golems[0].transform.position.x, DisenoNivel1.Checkpoint, "El checkpoint va antes del Golem.");
+            Assert.Greater(golems[0].transform.position.x, DisenoNivel1.Checkpoints[0], "El primer checkpoint va antes del Golem.");
+            Assert.AreEqual(3, ecos.Count(e => e.transform.position.x >= 55f), "Tres Ecos en la forja.");
 
             foreach (var eco in ecos)
             {
@@ -178,17 +186,19 @@ namespace Fragmentum.Tests
             }
 
             // Anexo A: plataformas inestables y torreta en la sección 1; plataformas de combustión y lava en la 2.
-            var torretas = Todos<TorretaFuego>(_nivel1);
-            Assert.AreEqual(1, torretas.Count);
-            Assert.That(torretas[0].transform.position.x, Is.InRange(0f, 25f), "La torreta es de la sección 1.");
-            Assert.AreEqual(-1, torretas[0].Mirando, "Dispara hacia el jugador que llega.");
+            var torretas = Todos<TorretaFuego>(_nivel1).OrderBy(t => t.transform.position.x).ToList();
+            Assert.AreEqual(2, torretas.Count);
+            Assert.That(torretas[0].transform.position.x, Is.InRange(0f, 25f), "La primera torreta es de la sección 1.");
+            Assert.That(torretas[1].transform.position.x, Is.InRange(55f, DisenoNivel1.PuertaDesde), "La segunda, de la forja.");
+            Assert.IsTrue(torretas.All(t => t.Mirando == -1), "Disparan hacia el jugador que llega.");
 
             var combustion = Todos<PlataformaCombustion>(_nivel1).OrderBy(c => c.transform.position.x).ToList();
-            Assert.AreEqual(2, combustion.Count);
-            Assert.IsTrue(combustion.All(c => c.transform.position.x > 25f && c.transform.position.x < DisenoNivel1.Checkpoint), "Antes del checkpoint.");
+            Assert.AreEqual(4, combustion.Count);
+            Assert.IsTrue(combustion.Take(2).All(c => c.transform.position.x > 25f && c.transform.position.x < DisenoNivel1.Checkpoints[0]), "Las dos primeras, antes del primer checkpoint.");
             Assert.AreNotEqual(combustion[0].desfase, combustion[1].desfase, "Desfasadas: hay que esperar el momento de cada una.");
+            Assert.AreNotEqual(combustion[2].desfase, combustion[3].desfase, "Las de la forja, también.");
 
-            Assert.AreEqual(2, Todos<PlataformaInestable>(_nivel1).Count, "Una sobre el foso que no mata y otra sobre la lava.");
+            Assert.AreEqual(4, Todos<PlataformaInestable>(_nivel1).Count, "Una sobre el foso que no mata y tres sobre la lava.");
 
             var lavas = Todos<Lava>(_nivel1);
             Assert.AreEqual(DisenoNivel1.Lavas.Length, lavas.Count);

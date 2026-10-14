@@ -96,18 +96,51 @@ namespace Fragmentum.Tests
         }
 
         [Test]
-        public void LaArena_Mide25Por15_YElCheckpointVaEnLaSeccion2AntesDelGolem()
+        public void LaArena_Mide25Por15_YLosCheckpointsVanAntesDelGolem_TrasEl_YAnteLaArena()
         {
             var limites = DisenoNivel1.LimitesArena;
-            Assert.AreEqual(25f, limites.y - limites.x, 0.01f, "Decisión del diseño: el tramo de 55 a 80 da 25 u, no 60.");
+            Assert.AreEqual(25f, limites.y - limites.x, 0.01f, "Decisión del diseño: una sala de 25 u, no de 60.");
             Assert.AreEqual(15f, DisenoNivel1.TechoArena - DisenoNivel1.SueloArena, 0.01f, "Anexo A: 15 u de alto.");
             Assert.That(DisenoNivel1.Jefe, Is.InRange(limites.x, limites.y));
             Assert.That(DisenoNivel1.Salida, Is.InRange(limites.x, limites.y));
+            Assert.AreEqual((limites.x + limites.y) * 0.5f, DisenoNivel1.Jefe + 1.5f, 3f, "La Centinela espera hacia el centro de la sala.");
 
-            Assert.That(DisenoNivel1.Checkpoint, Is.InRange(25f, 55f));
-            Assert.Less(DisenoNivel1.Checkpoint, DisenoNivel1.Enemigos.Single(e => e.Golem).X);
-            Assert.AreEqual(DisenoNivel1.SueloEn(DisenoNivel1.Checkpoint), DisenoNivel1.SueloEn(DisenoNivel1.Checkpoint + 0.5f), "La bandera no queda en un borde.");
-            Assert.IsFalse(DisenoNivel1.Enemigos.Any(e => Mathf.Abs(e.X - DisenoNivel1.Checkpoint) < 2f), "Sin enemigos encima del checkpoint.");
+            var puntos = DisenoNivel1.Checkpoints;
+            var golem = DisenoNivel1.Enemigos.Single(e => e.Golem).X;
+            Assert.AreEqual(3, puntos.Length, "Antes del Golem, tras él y ante la arena.");
+            Assert.That(puntos[0], Is.InRange(25f, 55f));
+            Assert.Less(puntos[0], golem, "El primero, antes del Golem.");
+
+            Assert.Greater(puntos[1], golem, "El segundo, pasado el Golem: morir en la forja no obliga a repetirlo.");
+            Assert.Less(puntos[1], DisenoNivel1.Lavas.Single(l => l.Nombre == "LavaDeLaEscalera").Desde, "Y antes del primer peligro de la forja.");
+
+            var antesala = DisenoNivel1.Suelos.Single(b => b.Nombre == "Antesala");
+            Assert.That(puntos[2], Is.InRange(antesala.Desde, antesala.Hasta), "El tercero, en la antesala.");
+            Assert.Greater(puntos[2], DisenoNivel1.Lavas.Single(l => l.Nombre == "LavaDeLaForja").Hasta, "Pasado el lago de la forja.");
+            Assert.Less(puntos[2], DisenoNivel1.PuertaDesde, "Y antes de la arena: morir ante la Centinela no obliga a repetir el nivel.");
+
+            foreach (var punto in puntos)
+            {
+                Assert.AreEqual(DisenoNivel1.SueloEn(punto), DisenoNivel1.SueloEn(punto + 0.5f), $"La bandera de x {punto} no queda en un borde.");
+                Assert.AreEqual(DisenoNivel1.SueloEn(punto), DisenoNivel1.SueloEn(punto - 0.5f), $"La bandera de x {punto} no queda en un borde.");
+                Assert.IsFalse(DisenoNivel1.Enemigos.Any(e => Mathf.Abs(e.X - punto) < 2f), $"Sin enemigos encima del checkpoint de x {punto}.");
+            }
+        }
+
+        [Test]
+        public void LasSecciones_SonCuatro_YLlevanLaCamaraHastaElFondoDeLaArena()
+        {
+            var secciones = DisenoNivel1.Secciones;
+            Assert.AreEqual(4, secciones.Length, "Las dos del Anexo A, la forja (2026-10-13) y la arena.");
+            Assert.AreEqual(0f, secciones[0].Desde);
+            for (var i = 1; i < secciones.Length; i++)
+            {
+                Assert.AreEqual(secciones[i - 1].Hasta, secciones[i].Desde, 1e-4f, "Cada una empieza donde acaba la anterior.");
+            }
+
+            Assert.AreEqual(DisenoNivel1.PuertaDesde, secciones[3].Desde, 1e-4f, "La última es la arena.");
+            Assert.AreEqual(DisenoNivel1.LimitesArena.y - 1f, secciones[3].Hasta, 1e-4f, "Y acaba 1 u antes de la pared, como antes de alargar el nivel.");
+            Assert.GreaterOrEqual(secciones[2].Hasta - secciones[2].Desde, 40f, "La forja alarga el nivel de verdad.");
         }
 
         [Test]
@@ -152,24 +185,59 @@ namespace Fragmentum.Tests
             Assert.AreEqual(3, DisenoNivel1.Enemigos.Count(e => !e.Golem && e.X < 25f));
             Assert.AreEqual(4, DisenoNivel1.Enemigos.Count(e => !e.Golem && e.X >= 25f && e.X < 55f));
             Assert.AreEqual(1, DisenoNivel1.Enemigos.Count(e => e.Golem));
+            Assert.That(DisenoNivel1.Enemigos.Single(e => e.Golem).X, Is.InRange(25f, 55f), "El mini-jefe cierra la sección 2.");
+
+            // La forja: tres Ecos más, y ninguno pasada la puerta de la arena.
+            Assert.AreEqual(3, DisenoNivel1.Enemigos.Count(e => !e.Golem && e.X >= 55f && e.X < DisenoNivel1.PuertaDesde));
+            Assert.IsFalse(DisenoNivel1.Enemigos.Any(e => e.X >= DisenoNivel1.PuertaDesde), "En la arena, solo la Centinela.");
+            Assert.AreEqual(DisenoNivel1.Enemigos.Length, DisenoNivel1.Enemigos.Select(e => e.Nombre).Distinct().Count(), "Cada enemigo, con su nombre: el marcador los distingue por él.");
         }
 
         [Test]
         public void LasMecanicas_EnsenanEnTresTiempos()
         {
             var inestables = DisenoNivel1.Mecanicas.Where(p => p.Prefab == GeneradorMecanicas.PlataformaInestable).OrderBy(p => p.X).ToList();
-            Assert.AreEqual(2, inestables.Count);
+            Assert.AreEqual(4, inestables.Count);
             Assert.Greater(DisenoNivel1.SueloEn(inestables[0].X), -3f, "La primera, sobre un foso que no mata: se sale con un salto.");
-            Assert.IsTrue(DisenoNivel1.Lavas.Any(l => inestables[1].X > l.Desde && inestables[1].X < l.Hasta), "La segunda, sobre la lava.");
+            foreach (var inestable in inestables.Skip(1))
+            {
+                Assert.IsTrue(DisenoNivel1.Lavas.Any(l => inestable.X > l.Desde && inestable.X < l.Hasta), $"{inestable.Nombre}: las demás, sobre la lava.");
+            }
 
-            var combustion = DisenoNivel1.Mecanicas.Where(p => p.Prefab == GeneradorMecanicas.PlataformaCombustion).ToList();
-            Assert.AreEqual(2, combustion.Count);
-            Assert.IsTrue(combustion.All(c => DisenoNivel1.Lavas.Any(l => c.X > l.Desde && c.X < l.Hasta)), "Sobre el lago de lava.");
+            var combustion = DisenoNivel1.Mecanicas.Where(p => p.Prefab == GeneradorMecanicas.PlataformaCombustion).OrderBy(p => p.X).ToList();
+            Assert.AreEqual(4, combustion.Count);
+            Assert.IsTrue(combustion.All(c => DisenoNivel1.Lavas.Any(l => c.X > l.Desde && c.X < l.Hasta)), "Sobre los lagos de lava.");
             Assert.AreNotEqual(combustion[0].Desfase, combustion[1].Desfase, "Desfasadas: hay que esperar.");
+            Assert.AreNotEqual(combustion[2].Desfase, combustion[3].Desfase, "Las de la forja, también.");
 
-            var torreta = DisenoNivel1.Mecanicas.Single(p => p.Prefab == GeneradorMecanicas.TorretaFuego);
-            Assert.IsTrue(torreta.MiraIzquierda, "Dispara hacia el jugador que llega por la izquierda.");
-            Assert.Less(torreta.X, 25f, "Sección 1.");
+            var torretas = DisenoNivel1.Mecanicas.Where(p => p.Prefab == GeneradorMecanicas.TorretaFuego).OrderBy(p => p.X).ToList();
+            Assert.AreEqual(2, torretas.Count);
+            Assert.IsTrue(torretas.All(t => t.MiraIzquierda), "Disparan hacia el jugador que llega por la izquierda.");
+            Assert.Less(torretas[0].X, 25f, "La primera, en la sección 1.");
+            Assert.That(torretas[1].X, Is.InRange(55f, DisenoNivel1.PuertaDesde), "La segunda, en la forja.");
+        }
+
+        [Test]
+        public void LaForja_EsElExamen_UnaInestableEntreDosDeCombustion_YDosEcosBajoLaTorreta()
+        {
+            // El lago de la forja: la inestable no deja esperar, así que la espera es en la primera de combustión.
+            var lago = DisenoNivel1.Lavas.Single(l => l.Nombre == "LavaDeLaForja");
+            var sobreElLago = DisenoNivel1.Mecanicas.Where(p => p.X > lago.Desde && p.X < lago.Hasta).OrderBy(p => p.X).ToList();
+            CollectionAssert.AreEqual(
+                new[] { GeneradorMecanicas.PlataformaCombustion, GeneradorMecanicas.PlataformaInestable, GeneradorMecanicas.PlataformaCombustion },
+                sobreElLago.Select(p => p.Prefab).ToArray());
+            Assert.Greater(lago.Hasta - lago.Desde, DisenoNivel1.Lavas.Single(l => l.Nombre == "LavaDelLago").Hasta - DisenoNivel1.Lavas.Single(l => l.Nombre == "LavaDelLago").Desde,
+                "Más largo que el primer lago.");
+            Assert.IsTrue(sobreElLago.All(p => Mathf.Approximately(p.Y, DisenoNivel1.SueloEn(lago.Desde - 0.5f))), "A ras de las orillas, como en el primer lago.");
+
+            // La almena: dos Ecos delante de la torreta, en su línea de fuego, y sitio detrás de ella para esperar.
+            var torreta = DisenoNivel1.Mecanicas.Where(p => p.Prefab == GeneradorMecanicas.TorretaFuego).OrderBy(p => p.X).Last();
+            var almena = DisenoNivel1.Suelos.Single(b => torreta.X >= b.Desde && torreta.X < b.Hasta && b.Arriba == torreta.Y);
+            Assert.AreEqual("Almena", almena.Nombre);
+            Assert.AreEqual(2, DisenoNivel1.Enemigos.Count(e => e.Y == torreta.Y && e.X > almena.Desde && e.X < torreta.X),
+                "La tercera vez de la torreta es junto a enemigos.");
+            Assert.GreaterOrEqual(almena.Hasta - torreta.X, 2f, "Detrás de la torreta queda suelo para mirar el lago antes de saltar.");
+            Assert.Greater(almena.Arriba, DisenoNivel1.SueloArena, "La forja sube por encima de la arena y vuelve a bajar a ella.");
         }
     }
 }

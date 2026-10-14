@@ -20,6 +20,7 @@ MonoBehaviour:
   invulnerabilidad: 0.15
   danioContacto: 1
   velocidad: 2
+  puntos: 2500
   fases:
   - nombre: Ataques con destello
     umbralVida: 1

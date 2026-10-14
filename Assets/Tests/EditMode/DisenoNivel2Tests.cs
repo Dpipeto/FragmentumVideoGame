@@ -117,6 +117,67 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void LasPlacasDelCanal_HayQueMedirlas_YDebajoNadanDosMedusas()
+        {
+            var agua = Agua("AguaDelCanal");
+            var placas = DisenoNivel2.Placas.Where(p => p.Nombre.StartsWith("PlacaDelCanal")).OrderBy(p => p.X).ToList();
+            var primeras = DisenoNivel2.Placas.Where(p => p.Nombre.StartsWith("PlacaFlotante")).ToList();
+            Assert.AreEqual(3, placas.Count);
+            foreach (var placa in placas)
+            {
+                Assert.Greater(placa.Y - placa.Amplitud, agua.Arriba, $"{placa.Nombre}: en lo más bajo sigue fuera del agua.");
+                Assert.That(placa.Desde, Is.GreaterThanOrEqualTo(agua.Desde), placa.Nombre);
+                Assert.That(placa.Hasta, Is.LessThanOrEqualTo(agua.Hasta), placa.Nombre);
+                Assert.Greater(placa.Amplitud, primeras.Max(p => p.Amplitud), "Suben más que las primeras: es la segunda vez.");
+            }
+
+            for (var i = 1; i < placas.Count; i++)
+            {
+                Assert.AreEqual(DisenoNivel2.PeriodoPlaca * 0.5f, Mathf.Abs(placas[i].Desfase - placas[i - 1].Desfase), 1e-4f, "Cada una, a la contra de la anterior.");
+            }
+
+            // En el peor momento, pasar de una a otra es subir casi todo lo que da un salto (y se
+            // puede); en el mejor, es dejarse caer. Por eso aquí sí conviene esperar.
+            var peor = placas[0].Amplitud + placas[1].Amplitud;
+            Assert.Greater(peor, AlturaSalto(MEDIOS.SECO) * 0.75f, "En el peor momento el salto es exigente.");
+            Assert.LessOrEqual(peor, AlturaSalto(MEDIOS.SECO) * MargenAltura, "Pero se llega con un salto normal: nunca es imposible.");
+            var hueco = placas[1].Desde - placas[0].Hasta;
+            Assert.LessOrEqual(hueco, Alcance(peor, MEDIOS.SECO) * MargenAlcance, "También a lo largo.");
+
+            // Las Medusas van bajo los huecos y no asoman: son para quien se cae.
+            var medusas = DisenoNivel2.Enemigos.Where(e => e.Tipo == TIPOS.MEDUSA && e.X > agua.Desde && e.X < agua.Hasta).ToList();
+            Assert.AreEqual(2, medusas.Count);
+            foreach (var medusa in medusas)
+            {
+                Assert.IsTrue(medusa.Vertical);
+                Assert.IsFalse(placas.Any(p => medusa.X > p.Desde && medusa.X < p.Hasta), $"{medusa.Nombre} sube por un hueco, no bajo una placa.");
+                Assert.Less(medusa.Y + medusa.Amplitud + DisenoNivel2.RadioMedusa, agua.Arriba, $"{medusa.Nombre} no asoma del agua.");
+                Assert.Greater(medusa.Y - medusa.Amplitud - DisenoNivel2.RadioMedusa, agua.Abajo, $"{medusa.Nombre} no se mete en el fondo.");
+            }
+        }
+
+        [Test]
+        public void ElPatioDeLasEstatuas_AlternaLasDePiedraConLasQueDespiertan_SobreHielo()
+        {
+            var patio = DisenoNivel2.PisadaDe("PatioDeLasEstatuas");
+            var dePiedra = DisenoNivel2.Decorados.Where(d => d.Pieza.Nombre == ConstructorEscenarioMundo2.Estatua.Nombre && d.X > patio.Desde && d.X < patio.Hasta)
+                .Select(d => (x: d.X, viva: false));
+            var vivas = DisenoNivel2.Enemigos.Where(e => e.Tipo == TIPOS.ESCULTURA && e.X > patio.Desde && e.X < patio.Hasta)
+                .Select(e => (x: e.X, viva: true));
+            var fila = dePiedra.Concat(vivas).OrderBy(e => e.x).ToList();
+
+            CollectionAssert.AreEqual(new[] { false, true, false, true }, fila.Select(e => e.viva).ToArray(),
+                "Piedra, viva, piedra, viva: lo que enseñó la primera estatua (son decorado) aquí ya no vale.");
+            for (var i = 1; i < fila.Count; i++)
+            {
+                Assert.GreaterOrEqual(fila[i].x - fila[i - 1].x, 2.5f, "Separadas: se ve cada una.");
+            }
+
+            Assert.IsTrue(DisenoNivel2.Hielos.Any(h => h.Desde <= patio.Desde && h.Hasta >= patio.Hasta && Mathf.Abs(h.Abajo - patio.Y) < 1e-4f), "El patio resbala.");
+            Assert.AreEqual(DisenoNivel2.PisadaDe("Antesala").Desde, patio.Hasta, 1e-4f, "Y da a la antesala, que es de piedra.");
+        }
+
+        [Test]
         public void ElTapon_TapaElAgujero_YAsomaParaQueLaEspadaLoAlcance()
         {
             var tapon = DisenoNivel2.HieloRompible;
@@ -177,7 +238,7 @@ namespace Fragmentum.Tests
                 comprobadas++;
             }
 
-            Assert.AreEqual(3, comprobadas, "Se sale del agua tres veces: del agua de las placas, a la campana y al campanario.");
+            Assert.AreEqual(4, comprobadas, "Se sale del agua cuatro veces: del agua de las placas, a la campana, al campanario y del canal.");
         }
 
         [Test]
@@ -205,6 +266,8 @@ namespace Fragmentum.Tests
             Assert.AreEqual(DisenoNivel2.PisadaDe("Plaza").Y - bajo, Agua("AguaDeLasPlacas").Arriba, 1e-4f, "Las placas flotan a ras del agua.");
             Assert.AreEqual(DisenoNivel2.PisadaDe("RepisaDeLaCampana").Y - bajo, Agua("AguaBajoLaCampana").Arriba, 1e-4f, "La repisa queda seca, en la bolsa de aire.");
             Assert.AreEqual(DisenoNivel2.PisadaDe("Rellano3").Y - bajo, Agua("AguaDeLaTorre").Arriba, 1e-4f);
+            Assert.AreEqual(DisenoNivel2.PisadaDe("PatioDeLasEstatuas").Y - bajo, Agua("AguaDelCanal").Arriba, 1e-4f, "El canal, a ras del patio y de la azotea.");
+            Assert.AreEqual(DisenoNivel2.PisadaDe("Azotea").Y, DisenoNivel2.PisadaDe("PatioDeLasEstatuas").Y, 1e-4f);
             foreach (var placa in DisenoNivel2.Placas.Where(p => p.Y == 0f))
             {
                 Assert.Greater(placa.Y, Agua("AguaDeLasPlacas").Arriba, $"De pie en {placa.Nombre}, Kael está en seco.");
@@ -282,7 +345,7 @@ namespace Fragmentum.Tests
             Assert.LessOrEqual(planidera.Hasta + medioAncho, DisenoNivel2.Agujero.Desde, "Ni en el tapón de hielo.");
             Assert.Greater(planidera.Hasta, planidera.Desde, "Flota de un lado a otro: tiene ruta.");
             Assert.AreEqual(DisenoNivel2.PisadaDe("Plaza").Y, planidera.Y, 1e-4f, "En el suelo de la plaza.");
-            Assert.IsFalse(DisenoNivel2.Enemigos.Any(e => e.Tipo == TIPOS.ESCULTURA && e.X > puente.Hasta),
+            Assert.IsFalse(DisenoNivel2.Enemigos.Any(e => e.Tipo == TIPOS.ESCULTURA && e.X > puente.Hasta && e.X < DisenoNivel2.Agujero.Desde),
                 "Ocupa el sitio de la segunda Escultura: en la plaza este no queda ninguna.");
             Assert.GreaterOrEqual(DisenoNivel2.Agujero.Desde - puente.Hasta, 14f,
                 "La plaza este da sitio para pelear con ella: medía 6 u y al probarla quedaba corta (2026-10-12).");
@@ -331,7 +394,8 @@ namespace Fragmentum.Tests
         public void LasSecciones_LlevanLaCamara_DeLaParedDeLaIzquierdaALaDelFondoDeLaArena()
         {
             var secciones = DisenoNivel2.Secciones;
-            Assert.AreEqual(3, secciones.Length, "Las del Anexo A: dos secciones y la arena.");
+            Assert.AreEqual(4, secciones.Length, "Las dos del Anexo A, el canal (2026-10-13) y la arena.");
+            Assert.AreEqual(secciones.Length, DisenoNivel2.TextosDeLasSecciones.Length, "Cada tramo, con su nombre y su contenido.");
             for (var i = 1; i < secciones.Length; i++)
             {
                 Assert.AreEqual(secciones[i - 1].y, secciones[i].x, 1e-4f, "Cada una empieza donde acaba la anterior.");
@@ -401,7 +465,17 @@ namespace Fragmentum.Tests
             Assert.AreEqual(1, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.ESCULTURA && e.X < agujero),
                 "El Anexo dice 2 Esculturas Vivientes: la segunda dejó su sitio a la Plañidera (PENDIENTES N32).");
             Assert.AreEqual(1, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.PLANIDERA), "Un mini-jefe, como el Golem del Mundo 1.");
-            Assert.AreEqual(4, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.MEDUSA && e.X >= agujero && e.X < antesala), "4 Medusas de Hielo bajo el agua.");
+            var azotea = DisenoNivel2.PisadaDe("Azotea").Desde;
+            Assert.AreEqual(4, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.MEDUSA && e.X >= agujero && e.X < azotea), "4 Medusas de Hielo bajo el agua.");
+
+            // El canal (2026-10-13): otra vez la superficie, con dos Lamentos, las dos Esculturas del
+            // Anexo (la segunda había cedido su sitio a la Plañidera) y dos Medusas bajo las placas.
+            Assert.AreEqual(2, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.LAMENTO && e.X >= azotea && e.X < antesala));
+            Assert.AreEqual(2, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.ESCULTURA && e.X >= azotea && e.X < antesala));
+            var canal = Agua("AguaDelCanal");
+            Assert.AreEqual(2, DisenoNivel2.Enemigos.Count(e => e.Tipo == TIPOS.MEDUSA && e.X > canal.Desde && e.X < canal.Hasta));
+            Assert.IsFalse(DisenoNivel2.Enemigos.Any(e => e.X >= antesala), "De la antesala en adelante, solo la Doncella.");
+            Assert.AreEqual(DisenoNivel2.Enemigos.Length, DisenoNivel2.Enemigos.Select(e => e.Nombre).Distinct().Count(), "Cada enemigo, con su nombre: el marcador los distingue por él.");
 
             foreach (var enemigo in DisenoNivel2.Enemigos.Where(e => e.Tipo != TIPOS.MEDUSA))
             {
@@ -439,7 +513,7 @@ namespace Fragmentum.Tests
             }
 
             // Las de la calle y las de la torre, por parejas: cuando una está en un extremo, la otra en el contrario.
-            foreach (var pareja in new[] { ("Medusa_1", "Medusa_2"), ("Medusa_3", "Medusa_4") })
+            foreach (var pareja in new[] { ("Medusa_1", "Medusa_2"), ("Medusa_3", "Medusa_4"), ("Medusa_5", "Medusa_6") })
             {
                 var a = medusas.Single(m => m.Nombre == pareja.Item1);
                 var b = medusas.Single(m => m.Nombre == pareja.Item2);
@@ -511,7 +585,7 @@ namespace Fragmentum.Tests
                 Assert.AreEqual(hielo.Abajo, DisenoNivel2.SueloBajo((hielo.Desde + hielo.Hasta) * 0.5f, hielo.Abajo), 1e-4f, $"{hielo.Nombre} apoya en su suelo.");
             }
 
-            foreach (var piedra in new[] { "SueloInicio", "Puente", "Antesala" })
+            foreach (var piedra in new[] { "SueloInicio", "Puente", "Azotea", "Antesala" })
             {
                 var pisada = DisenoNivel2.PisadaDe(piedra);
                 Assert.IsFalse(DisenoNivel2.Hielos.Any(h => h.Desde < pisada.Hasta - 0.01f && h.Hasta > pisada.Desde + 0.01f && Mathf.Abs(h.Abajo - pisada.Y) < 0.01f),

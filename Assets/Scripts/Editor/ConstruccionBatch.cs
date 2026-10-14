@@ -54,6 +54,8 @@ namespace Fragmentum.EditorTools
             // Los enemigos del Mundo 2: también después del Eco, por sus materiales.
             ok &= ArteMundo2.Enemigos();
             ok &= ConstructorCinematicasNivel2.Construir();
+            // Las cinemáticas de salida de cada mundo (sus planos y las frases del cierre).
+            ok &= ConstructorPuertas.Construir();
             // El arte de la Centinela va antes que los prefabs de jefes, que lo usan (y usan el
             // material de destello del Eco).
             ok &= ConstructorCentinela.Construir();
@@ -65,6 +67,8 @@ namespace Fragmentum.EditorTools
             // ola) y que los prefabs de las mecánicas (la placa y el tapón).
             ok &= ArteMundo2.Mecanicas();
             ok &= GeneradorJefes.Construir();
+            // Lo que vale cada enemigo, cada jefe y el tiempo de cada nivel, ya con todos sus assets.
+            ok &= TablaPuntaje.Aplicar();
             // Si algo del arte de la Centinela no cuadra (un sprite reimportado sin sus ajustes,
             // un clip o el prefab tocados a mano), la regeneración falla con su nombre.
             ok &= VerificadorCentinela.Verificar();

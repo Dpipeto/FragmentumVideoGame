@@ -164,8 +164,14 @@ namespace Fragmentum.Tests
         {
             foreach (var nivel in BaseDeDatos().niveles.Where(n => n.emocion.id != EMOCIONES.INTEGRACION))
             {
+                // Con sus planos (la salida de la Ira y la de la Tristeza, desde el 2026-10-13), las
+                // frases van en carteles sobre ellos; sin planos, cada una en su diapositiva negra.
                 var guion = GuionMundos.De(nivel.emocion.id);
-                CollectionAssert.AreEqual(guion.CinematicaCierre, nivel.cinematicaCierre.diapositivas.Select(d => d.texto).ToArray(), nivel.name);
+                var conPlanos = nivel.cinematicaCierre.diapositivas.Any(d => d.imagen != null);
+                var dichas = conPlanos
+                    ? nivel.cinematicaCierre.diapositivas.SelectMany(d => d.carteles).Select(c => c.texto).ToArray()
+                    : nivel.cinematicaCierre.diapositivas.Select(d => d.texto).ToArray();
+                CollectionAssert.AreEqual(guion.CinematicaCierre, dichas, nivel.name);
             }
 
             var final = BaseDeDatos().niveles[5];

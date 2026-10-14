@@ -220,7 +220,8 @@ namespace Fragmentum.Tests
             Assert.AreEqual(2, ruta.arraySize);
             Assert.AreEqual(esperada.Desde, (ruta.GetArrayElementAtIndex(0).objectReferenceValue as Transform).position.x, 0.01f);
             Assert.AreEqual(esperada.Hasta, (ruta.GetArrayElementAtIndex(1).objectReferenceValue as Transform).position.x, 0.01f);
-            Assert.IsFalse(Todos<EsculturaDormida>(_nivel2).Any(e => e.name == "Escultura_2"), "La segunda Escultura ya no está.");
+            Assert.IsFalse(Todos<EsculturaDormida>(_nivel2).Any(e => e.transform.position.x > esperada.Desde - 8f && e.transform.position.x < DisenoNivel2.Agujero.Desde),
+                "En su plaza no queda ninguna Escultura: las dos del canal están mucho más allá.");
         }
 
         [Test]

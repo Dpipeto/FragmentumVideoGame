@@ -231,12 +231,31 @@ Escultura, la torre y la Doncella con sus dos fases, y pidió esto:
   secciones del `LevelData` (de las que sale lo que enseña la cámara) y la torre del fondo siguen
   al diseño.
 
+### La sección 3, «el canal» (2026-10-13)
+
+Con el puntaje por tiempo pediste alargar los dos niveles. Entre la torre y la antesala hay ahora
+**30 u más** (el nivel mide 139 u): la superficie otra vez, con lo aprendido arriba y abajo.
+
+| Tramo | x | Qué hay |
+|---|---|---|
+| Azotea | 74-80 | De piedra. Se llega saliendo por la ventana del campanario. Un Lamento: el primer enemigo tras el agua, en suelo firme. |
+| Canal | 80-92 | 12 u de agua (caer no mata, como en el primer agua) con **tres placas que suben de ras del hielo a y 2, cada una a la contra de la anterior**. Se cruzan siempre, pero según el momento el salto es dejarse caer o subir 2 u con el hueco delante: aquí sí conviene esperar (las primeras placas se cruzaban sin mirar). Debajo, **dos Medusas** suben y bajan por los huecos, para quien se caiga; se sale por un escalón al otro lado. |
+| Patio de las estatuas | 92-104 | De hielo, resbala. **Las dos Esculturas del Anexo**, entre dos estatuas de piedra, y un Lamento. La primera estatua del nivel enseñó que las estatuas son decorado; la Escultura lo desmintió; aquí ya no se sabe cuál despierta. |
+| Antesala | 104-112 | De piedra. **Checkpoint en x 108.** |
+
+Todo lo que había de la antesala en adelante se corrió 30 u: la arena va de 113 a 138.
+`DisenoNivel2.Version` sube a 13. Las secciones del `LevelData` son cuatro (N19).
+
+### Las puertas (2026-10-13)
+
+La salida es la puerta del ojo (cerrada hasta recoger el fragmento, abierta a un bosque verde y
+violeta), la verja de la arena es la de hielo con un muro helado encima, el checkpoint es el
+farol con su paño, y el cierre del mundo es su cinemática de salida: el lago helado con la ciudad
+y la puerta, y Kael ante ella.
+
 ### Lo que falta
 
 - **El sonido:** no hay ningún audio en el proyecto.
-- **Las puertas:** la salida, la verja de la arena y la bandera del checkpoint son rectángulos
-  de color, y el cierre del mundo, tres frases sobre negro. Los prompts de sus imágenes están en
-  `Prompts_Puertas.md`.
 
 ## 4. Medidas de Kael, para que todo se pueda cruzar
 

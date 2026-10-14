@@ -29,6 +29,15 @@ namespace Fragmentum.EditorTools
     {
         public const string RutaBaseDeDatos = "Assets/Data/Niveles/LevelDatabase.asset";
         public const string RutaEscenaMenu = "Assets/Scenes/Menu_Inicial.unity";
+
+        /// <summary>
+        /// La portada del menú, cuando exista (PENDIENTES N41: el autor pidió una imagen nueva).
+        /// Mientras no esté, el fondo es <see cref="RutaFondoMenuProvisional"/>.
+        /// </summary>
+        public const string RutaFondoMenu = "Assets/Sprites/Interfaz/FondoMenu.png";
+
+        /// <summary>Plano 7 de la cinemática inicial: Kael ante el páramo y los cinco fragmentos hacia sus mundos.</summary>
+        public const string RutaFondoMenuProvisional = "Assets/Sprites/Cinematicas/Inicial/Plano_07.png";
         public const string RutaEscenaSelector = "Assets/Scenes/Niveles.unity";
         public const string RutaEscenaNivel1 = "Assets/Scenes/Nivel1.unity";
         public const string RutaEscenaNivel2 = "Assets/Scenes/Nivel2.unity";
@@ -168,17 +177,13 @@ namespace Fragmentum.EditorTools
                     "Impulsividad, rabia reprimida. El jugador siente urgencia y presión constante.",
                     new[] { "8B1A1A", "CC4400", "1A0800", "5C4033" }, centinela, fIra, cargado, new ReglasNivel(),
                     // El recorrido montado está en DisenoNivel1 (Docs/Diseno/Nivel1_Diseno.md).
-                    Seccion("Sección 1", 0, 25, "Terreno abierto. Plataformas inestables. 3 Ecos de la Ira y 1 torreta de fuego fija."),
-                    Seccion("Sección 2", 25, 55, "Plataformeo sobre lava y plataformas de combustión. 4 Ecos de la Ira y el Golem de Ceniza. Checkpoint en x = 43."),
-                    Seccion("Arena del jefe", 55, 80, "Sala cerrada de 25 × 15 u con plataformas a 3 alturas. La lava brota en las erupciones; el suelo es firme."))),
+                    SeccionesDelNivel1())),
 
                 // El recorrido montado está en DisenoNivel2 (Docs/Diseno/Nivel2_Diseno.md).
                 Asset<LevelData>("Niveles/L2_Tristeza", sobrescribir, n => Nivel(n, 2, RutaEscenaNivel2, "Ciudad Sumergida", tristeza, 3,
                     "Pérdida, melancolía. El nivel es deliberadamente lento y pesado.",
                     new[] { "1E3A5F", "4A7FA5", "2C3E50", "E8EEF4" }, doncella, fTristeza, dash, new ReglasNivel(),
-                    Seccion("Sección 1", DisenoNivel2.Secciones[0].x, DisenoNivel2.Secciones[0].y, "Sobre el hielo: suelo resbaladizo y plataformas flotantes. 3 Lamentos y 2 Esculturas Vivientes."),
-                    Seccion("Sección 2", DisenoNivel2.Secciones[1].x, DisenoNivel2.Secciones[1].y, "Bajo el agua, con oxígeno limitado. 4 Medusas de Hielo."),
-                    Seccion("Arena del jefe", DisenoNivel2.Secciones[2].x, DisenoNivel2.Secciones[2].y, "Superficie helada sobre agua."))),
+                    SeccionesDelNivel2())),
 
                 Asset<LevelData>("Niveles/L3_Miedo", sobrescribir, n => Nivel(n, 3, null, "Bosque Tenebroso", miedo, 4,
                     "Ansiedad, inseguridad. Explota la desorientación y la incertidumbre.",
@@ -211,12 +216,14 @@ namespace Fragmentum.EditorTools
             // Interfaz de cada mundo según la maqueta de los menús (Referencias/Menus) y
             // checkpoints previstos por el Anexo A. Son campos de la Fase 6: en los assets que ya
             // existían se completan sin pisar lo que se haya editado a mano.
-            Completar(niveles[0], "FF6B35", "la rabia consume al que la niega", DisenoNivel1.Checkpoint);
+            Completar(niveles[0], "FF6B35", "la rabia consume al que la niega", DisenoNivel1.Checkpoints);
             Completar(niveles[1], "00D4FF", "el dolor también es parte del yo", Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
 
-            // El recorrido del Nivel 2 cambia con su diseño (se alargó el 2026-10-12): sus tramos, de
-            // los que sale lo que enseña la cámara, y sus checkpoints son siempre los de DisenoNivel2.
-            SeguirElDiseno(niveles[1], DisenoNivel2.Secciones, Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
+            // El recorrido de los dos niveles montados cambia con su diseño (el 2 se alargó el
+            // 2026-10-12 y los dos el 2026-10-13): sus tramos, de los que sale lo que enseña la
+            // cámara, y sus checkpoints son siempre los de DisenoNivel1 y DisenoNivel2.
+            SeguirElDiseno(niveles[0], SeccionesDelNivel1(), DisenoNivel1.Checkpoints);
+            SeguirElDiseno(niveles[1], SeccionesDelNivel2(), Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
 
             // Los niveles cuya escena llegó después de crear su asset: se les asigna sin tocar lo demás.
             AsignarEscenaSiFalta(niveles[1], RutaEscenaNivel2);
@@ -384,22 +391,28 @@ namespace Fragmentum.EditorTools
             }
         }
 
-        // Pone en el nivel los tramos y los checkpoints de su diseño, si no son ya esos. Los nombres
-        // y los textos de las secciones no se tocan.
-        private static void SeguirElDiseno(LevelData n, Vector2[] tramos, float[] puntosDeControl)
+        private static SeccionNivel[] SeccionesDelNivel1() =>
+            Array.ConvertAll(DisenoNivel1.Secciones, t => Seccion(t.Nombre, t.Desde, t.Hasta, t.Contenido));
+
+        private static SeccionNivel[] SeccionesDelNivel2() =>
+            DisenoNivel2.Secciones.Select((tramo, i) => Seccion(DisenoNivel2.TextosDeLasSecciones[i].nombre, tramo.x, tramo.y,
+                DisenoNivel2.TextosDeLasSecciones[i].contenido)).ToArray();
+
+        // Pone en el nivel los tramos y los checkpoints de su diseño, si no son ya esos: cuántos
+        // son, de dónde a dónde van y qué dicen.
+        private static void SeguirElDiseno(LevelData n, SeccionNivel[] tramos, float[] puntosDeControl)
         {
-            var cambio = false;
-            for (var i = 0; n.secciones != null && i < n.secciones.Count && i < tramos.Length; i++)
+            var cambio = n.secciones == null || n.secciones.Count != tramos.Length;
+            for (var i = 0; !cambio && i < tramos.Length; i++)
             {
-                // SeccionNivel es un struct: se cambia la copia y se vuelve a guardar en la lista.
                 var seccion = n.secciones[i];
-                if (!Mathf.Approximately(seccion.desdeX, tramos[i].x) || !Mathf.Approximately(seccion.hastaX, tramos[i].y))
-                {
-                    seccion.desdeX = tramos[i].x;
-                    seccion.hastaX = tramos[i].y;
-                    n.secciones[i] = seccion;
-                    cambio = true;
-                }
+                cambio = seccion.nombre != tramos[i].nombre || seccion.contenido != tramos[i].contenido ||
+                         !Mathf.Approximately(seccion.desdeX, tramos[i].desdeX) || !Mathf.Approximately(seccion.hastaX, tramos[i].hastaX);
+            }
+
+            if (cambio)
+            {
+                n.secciones = new List<SeccionNivel>(tramos);
             }
 
             if (n.puntosDeControl == null || !n.puntosDeControl.SequenceEqual(puntosDeControl))
@@ -504,7 +517,6 @@ namespace Fragmentum.EditorTools
             var raiz = new GameObject(Bootstrap.RutaRecurso);
             try
             {
-                raiz.AddComponent<EconomyManager>();
                 var gestor = raiz.AddComponent<GameManager>();
                 Asignar(gestor, "baseDeDatos", p => p.objectReferenceValue = bd);
                 raiz.AddComponent<SceneLoader>();
@@ -533,23 +545,32 @@ namespace Fragmentum.EditorTools
             if (creada == null) return;
 
             var lienzo = Lienzo("MenuPrincipal");
-            var titulo = FabricaUI.Texto(lienzo, "Titulo", "FRAGMENTUM", 110, Hex("F0EED8"));
-            Colocar(titulo.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -170f), new Vector2(1200f, 140f));
-            var subtitulo = FabricaUI.Texto(lienzo, "Subtitulo", "Ecos de la Identidad", 44, Hex("C8A44A"));
-            Colocar(subtitulo.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -270f), new Vector2(1200f, 60f));
+            Fondo(lienzo, velo: 0.35f, sombraIzquierda: 0.85f);
+
+            // Todo a la izquierda, sobre el degradado: la imagen del fondo se ve en el resto.
+            var arribaIzquierda = new Vector2(0f, 1f);
+            var titulo = FabricaUI.Titulo(lienzo, "Titulo", "FRAGMENTUM", 104, Hex("F0EED8"), TextAnchor.MiddleLeft);
+            FabricaUI.Colocar(titulo.rectTransform, arribaIzquierda, new Vector2(120f, -110f), new Vector2(1100f, 130f), arribaIzquierda);
+            var subtitulo = FabricaUI.Titulo(lienzo, "Subtitulo", "Ecos de la Identidad", 40, Hex("C8A44A"), TextAnchor.MiddleLeft);
+            FabricaUI.Colocar(subtitulo.rectTransform, arribaIzquierda, new Vector2(126f, -240f), new Vector2(1100f, 56f), arribaIzquierda);
 
             var columna = FabricaUI.Objeto("Botones", lienzo);
-            Colocar(columna, new Vector2(0.5f, 0.5f), new Vector2(0f, -140f), new Vector2(520f, 600f));
-            FabricaUI.Columna(columna, 18f);
-            var continuar = FabricaUI.Boton(columna, "Continuar", "Continuar", Hex("8B1A1A"), 78f);
-            var nueva = FabricaUI.Boton(columna, "NuevaPartida", "Nueva partida", Hex("5C4033"), 78f);
-            var selector = FabricaUI.Boton(columna, "Selector", "Seleccionar mundo", Hex("2C3E50"), 78f);
-            var yo = FabricaUI.Boton(columna, "YoReconstruido", "Yo reconstruido", Hex("2D1B4E"), 78f);
-            var mecanicas = FabricaUI.Boton(columna, "Mecanicas", "Mecánicas", Hex("1F3D3A"), 78f);
-            var salir = FabricaUI.Boton(columna, "Salir", "Salir", Hex("3A3A4A"), 78f);
+            FabricaUI.Colocar(columna, new Vector2(0f, 0.5f), new Vector2(120f, -110f), new Vector2(460f, 502f), new Vector2(0f, 0.5f));
+            FabricaUI.Columna(columna, 14f);
+            var continuar = FabricaUI.Boton(columna, "Continuar", "Continuar", Hex("8B1A1A"), 72f);
+            var nueva = FabricaUI.Boton(columna, "NuevaPartida", "Nueva partida", Hex("5C4033"), 72f);
+            var selector = FabricaUI.Boton(columna, "Selector", "Seleccionar mundo", Hex("2C3E50"), 72f);
+            var yo = FabricaUI.Boton(columna, "YoReconstruido", "Yo reconstruido", Hex("2D1B4E"), 72f);
+            var mecanicas = FabricaUI.Boton(columna, "Mecanicas", "Mecánicas", Hex("1F3D3A"), 72f);
+            var salir = FabricaUI.Boton(columna, "Salir", "Salir", Hex("3A3A4A"), 72f);
 
-            var progreso = FabricaUI.Texto(lienzo, "Progreso", string.Empty, 26, new Color(1f, 1f, 1f, 0.7f));
-            Colocar(progreso.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 60f), new Vector2(1200f, 40f));
+            var progreso = FabricaUI.Texto(lienzo, "Progreso", string.Empty, 26, new Color(1f, 1f, 1f, 0.75f), TextAnchor.MiddleLeft);
+            FabricaUI.Colocar(progreso.rectTransform, Vector2.zero, new Vector2(124f, 96f), new Vector2(1100f, 40f), Vector2.zero);
+
+            // Quienes lo hicieron, al pie.
+            var creditos = FabricaUI.Titulo(lienzo, "Creditos",
+                $"<color=#C8A44A>Creado por</color>   {MainMenu.Autores}", 22, new Color(0.94f, 0.93f, 0.85f, 0.85f), TextAnchor.MiddleLeft);
+            FabricaUI.Colocar(creditos.rectTransform, Vector2.zero, new Vector2(124f, 44f), new Vector2(1500f, 36f), Vector2.zero);
 
             var menu = lienzo.gameObject.AddComponent<MainMenu>();
             Asignar(menu, "botonContinuar", p => p.objectReferenceValue = continuar);
@@ -569,7 +590,8 @@ namespace Fragmentum.EditorTools
             if (creada == null) return;
 
             var lienzo = Lienzo("Selector");
-            var titulo = FabricaUI.Texto(lienzo, "Titulo", "Selecciona un mundo", 64, Hex("F0EED8"));
+            Fondo(lienzo, velo: 0.7f, sombraIzquierda: 0f);
+            var titulo = FabricaUI.Titulo(lienzo, "Titulo", "Selecciona un mundo", 64, Hex("F0EED8"));
             Colocar(titulo.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -90f), new Vector2(1200f, 90f));
 
             var contenedor = FabricaUI.Objeto("Niveles", lienzo);
@@ -579,15 +601,45 @@ namespace Fragmentum.EditorTools
             var volver = FabricaUI.Boton(lienzo, "Volver", "Volver", Hex("3A3A4A"), 70f);
             Colocar((RectTransform)volver.transform, new Vector2(0f, 0f), new Vector2(170f, 70f), new Vector2(260f, 70f));
 
-            var monedas = FabricaUI.Texto(lienzo, "Monedas", string.Empty, 30, Hex("C8A44A"), TextAnchor.MiddleRight);
-            Colocar(monedas.rectTransform, new Vector2(1f, 1f), new Vector2(-220f, -60f), new Vector2(380f, 50f));
-            monedas.gameObject.AddComponent<ContadorMonedas>();
+            var puntaje = FabricaUI.Titulo(lienzo, "Puntaje", string.Empty, 30, Hex("C8A44A"), TextAnchor.MiddleRight);
+            Colocar(puntaje.rectTransform, new Vector2(1f, 1f), new Vector2(-280f, -60f), new Vector2(500f, 50f));
 
             var selector = lienzo.gameObject.AddComponent<SelectorNivel>();
             Asignar(selector, "contenedor", p => p.objectReferenceValue = contenedor);
             Asignar(selector, "botonVolver", p => p.objectReferenceValue = volver);
+            Asignar(selector, "textoPuntaje", p => p.objectReferenceValue = puntaje);
 
             Guardar(creada.Value, RutaEscenaSelector);
+        }
+
+        // El fondo de una escena de menú: la portada (o, mientras no exista, el plano 7 de la
+        // cinemática inicial) cubriendo la pantalla, un velo que la apaga y las sombras que
+        // FondoMenu genera al arrancar. Va primero: todo lo demás se dibuja encima.
+        private static void Fondo(RectTransform lienzo, float velo, float sombraIzquierda)
+        {
+            var portada = AssetDatabase.LoadAssetAtPath<Sprite>(RutaFondoMenu);
+            if (portada == null)
+            {
+                portada = AssetDatabase.LoadAssetAtPath<Sprite>(RutaFondoMenuProvisional);
+            }
+
+            var raiz = FabricaUI.Objeto("Fondo", lienzo);
+            FabricaUI.Estirar(raiz);
+            if (portada != null)
+            {
+                var imagen = FabricaUI.Panel(raiz, "Imagen", Color.white, false);
+                imagen.sprite = portada;
+                var encuadre = imagen.gameObject.AddComponent<AspectRatioFitter>();
+                encuadre.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                encuadre.aspectRatio = portada.rect.width / portada.rect.height;
+            }
+            else
+            {
+                Debug.LogWarning($"[Fragmentum] El menú se queda sin imagen de fondo: no existe {RutaFondoMenu} ni {RutaFondoMenuProvisional}.");
+            }
+
+            FabricaUI.Panel(raiz, "Velo", new Color(0.03f, 0.02f, 0.03f, velo), false);
+            raiz.gameObject.AddComponent<FondoMenu>().Fijar(0.7f, sombraIzquierda);
         }
 
         private static RectTransform Lienzo(string nombre)

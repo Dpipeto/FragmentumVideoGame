@@ -31,7 +31,7 @@ namespace Fragmentum.UI
 
         protected override void ConstruirContenido(RectTransform columna)
         {
-            FabricaUI.Texto(columna, "Titulo", FabricaUI.Espaciar("YO RECONSTRUIDO"), 34, new Color(1f, 1f, 1f, 0.85f));
+            FabricaUI.Titulo(columna, "Titulo", FabricaUI.Espaciar("YO RECONSTRUIDO"), 34, new Color(1f, 1f, 1f, 0.85f));
             _cuenta = TextoAcento(columna, "Cuenta", 22);
             FabricaUI.Hueco(columna, 6f);
             SeparadorAcento(columna);
@@ -101,7 +101,7 @@ namespace Fragmentum.UI
                 rombo.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
                 _rombos.Add(rombo);
 
-                var nombre = FabricaUI.Texto(_constelacion, $"Nombre{i}", string.Empty, 19, new Color(1f, 1f, 1f, 0.85f));
+                var nombre = FabricaUI.Titulo(_constelacion, $"Nombre{i}", string.Empty, 19, new Color(1f, 1f, 1f, 0.85f));
                 nombre.rectTransform.sizeDelta = new Vector2(260f, 60f);
                 _nombres.Add(nombre);
             }

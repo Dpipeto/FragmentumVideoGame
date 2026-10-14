@@ -15,14 +15,13 @@ namespace Fragmentum.Core
     /// Qué corrige respecto de la v1 (auditoría, sección 3.4):
     /// - No tenía <c>DontDestroyOnLoad</c>: se destruía en cada cambio de escena y no
     ///   persistía nada. Ahora vive en los sistemas que crea <see cref="Bootstrap"/>.
-    /// - Mezclaba UI de Game Over, monedas y navegación. Ahora solo lleva la progresión; las
-    ///   monedas están en <see cref="EconomyManager"/>, la navegación en
-    ///   <see cref="GameStateMachine"/> y la pantalla de Game Over en la UI (<c>UIManager</c>).
+    /// - Mezclaba UI de Game Over, monedas y navegación. Ahora solo lleva la progresión; la
+    ///   navegación está en <see cref="GameStateMachine"/>, la pantalla de Game Over en la UI
+    ///   (<c>UIManager</c>) y, en lugar de monedas, hay puntaje (<c>MarcadorNivel</c>).
     /// - El progreso se guarda en JSON (<see cref="SaveSystem"/>): al completar un nivel, al
     ///   activar un checkpoint, al volver al menú y al cerrar el juego.
     /// </summary>
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(EconomyManager))]
     public class GameManager : MonoBehaviour
     {
         [Tooltip("Fuente única de niveles y escenas.")]
@@ -46,8 +45,6 @@ namespace Fragmentum.Core
 
         /// <summary>La partida en curso. Nunca es null.</summary>
         public DatosGuardado Datos { get; private set; } = new DatosGuardado();
-
-        public EconomyManager Economia { get; private set; }
 
         /// <summary>Nivel de la escena actual, o null si la escena no es un nivel (menú, pruebas).</summary>
         public LevelData NivelActual { get; private set; }
@@ -77,7 +74,6 @@ namespace Fragmentum.Core
                 DontDestroyOnLoad(gameObject);
             }
 
-            Economia = GetComponent<EconomyManager>();
             if (baseDeDatos == null)
             {
                 Debug.LogWarning("[GameManager] Falta la LevelDatabase: no habrá menú, selector ni progresión. Ejecuta Fragmentum → Regenerar todo.", this);
@@ -121,7 +117,6 @@ namespace Fragmentum.Core
             Guardado = new SaveSystem(carpeta);
             Registro = new RegistroEmocional(carpeta);
             Datos = Guardado.Cargar();
-            Economia.Vincular(Datos);
             OnProgresoCambiado?.Invoke();
         }
 
@@ -130,8 +125,7 @@ namespace Fragmentum.Core
         /// <summary>Empieza una partida desde cero. La anterior queda en la copia de seguridad.</summary>
         public void NuevaPartida()
         {
-            Datos = new DatosGuardado { migradoDePlayerPrefs = true };
-            Economia.Vincular(Datos);
+            Datos = new DatosGuardado();
             Guardar();
             AplicarProgresoAlJugador();
             OnProgresoCambiado?.Invoke();

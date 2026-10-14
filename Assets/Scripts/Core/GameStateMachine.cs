@@ -283,6 +283,9 @@ namespace Fragmentum.Core
         /// Victoria: registra el nivel como completado y pasa a LEVEL_COMPLETE, o antes a la
         /// cinemática de cierre del mundo si la tiene.
         /// </summary>
+        /// <summary>¿Se puede declarar ahora la victoria del nivel?</summary>
+        public bool PuedeCompletarNivel => Puede(ESTADOS_JUEGO.LEVEL_COMPLETE);
+
         public bool CompletarNivel()
         {
             if (!Puede(ESTADOS_JUEGO.LEVEL_COMPLETE))

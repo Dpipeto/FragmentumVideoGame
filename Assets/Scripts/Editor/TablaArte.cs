@@ -151,6 +151,8 @@ namespace Fragmentum.EditorTools
                     "Centinela, idle frontal: dibujado más grande; a 58 mide lo mismo que en combate.")))
             // Mundo 2 (Tristeza): cada constructor lleva las reglas de su arte.
             .Concat(ArteMundo2.Reglas)
+            // Las puertas de salida, las verjas, los checkpoints y los planos de salida de cada mundo.
+            .Concat(ConstructorPuertas.Reglas)
             .ToArray();
 
         public static IReadOnlyList<Regla> Reglas => Tabla;

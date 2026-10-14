@@ -163,16 +163,16 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator Monedas_SeGuardanAlVolverAlMenu()
+        public IEnumerator ElProgreso_SeGuardaAlVolverAlMenu()
         {
             yield return EntrarEnNivel1();
 
-            Gestor.Economia.Sumar(5);
+            Gestor.Datos.AnotarPuntaje(Nivel1.id, 1234, 60f);
             Assert.IsTrue(Juego.Pausar());
             Assert.IsTrue(Juego.IrAlMenu());
             yield return EsperarEstado(ESTADOS_JUEGO.MAIN_MENU, 5f);
 
-            Assert.AreEqual(5, new SaveSystem(CarpetaGuardado).Cargar().monedas, "En la v1 las monedas no se guardaban nunca.");
+            Assert.AreEqual(1234, new SaveSystem(CarpetaGuardado).Cargar().PuntajeTotal, "En la v1 las monedas no se guardaban nunca.");
         }
 
         [UnityTest]
