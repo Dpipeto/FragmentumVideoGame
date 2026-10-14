@@ -1,8 +1,11 @@
 # Prompt de la portada del menú principal
 
 > Pedido el 2026-10-13: el menú tenía un fondo plano. Elegiste una **imagen nueva**; mientras no
-> llegue, el menú usa el plano 7 de la cinemática inicial (Kael ante el páramo y los cinco
+> llegó, el menú usó el plano 7 de la cinemática inicial (Kael ante el páramo y los cinco
 > fragmentos volando hacia sus mundos).
+>
+> **✔ Montada el 2026-10-14 (v0.49):** el menú principal y el selector ya la llevan. Ver «Cuando
+> la tengas», al final.
 >
 > Las reglas son las de siempre (`Prompts_Mundo2.md`, apartado 0): una imagen por mensaje, todo
 > guardado en disco y el prompt en inglés. Esta va **opaca**: sin magenta, es un fondo entero.
@@ -57,5 +60,20 @@ no bright lights, no details that draw the eye, so that a title and a menu can b
 ## Cuando la tengas
 
 Pásamela (o dime que está en `Tesis/Imagenes/Portada/`). Yo la limpio a su rejilla y la pongo en
-`Assets/Sprites/Interfaz/FondoMenu.png`: el menú y el selector la usan solos en cuanto existe, en
-lugar del plano 7 (`GeneradorProgresion.RutaFondoMenu`).
+`Assets/Sprites/Interfaz/FondoMenu.png`: el menú y el selector la usan en lugar del plano 7
+(`GeneradorProgresion.RutaFondoMenu`).
+
+**Así se hizo (2026-10-14).**
+
+1. `Tesis/Imagenes/limpios/script/limpiar_portada.py` la baja a la rejilla de 480 a lo ancho
+   (bloque de 5,733 px), la de las cinemáticas de salida y de la Doncella. El dibujo mezcla
+   bloques de varios tamaños (el suelo va en bloques de unos 7 px); es la rejilla que conserva el
+   detalle de Kael. El lienzo da 268 filas: se repiten la de arriba (cielo liso) y la de abajo
+   → **480 × 270**, 16:9 exacto, ×4 en 1920 × 1080. Sale en `limpios/Portada/FondoMenu.png`
+   (y ampliada en `limpios/_vista/FondoMenu_x4.png`).
+2. `Herramientas/traer_arte_puertas.py` la copia a `Assets/Sprites/Interfaz/FondoMenu.png`.
+   `TablaArte` la importa como pixel art (Point, sin compresión).
+3. Las escenas del menú y del selector se vuelven a montar: **Fragmentum → Progresión → Crear
+   escenas de menú y selector**. Solo cambian la imagen y su proporción.
+
+Si la cambias, repite los tres pasos con el mismo nombre (`Portada/Portada.jpg`).

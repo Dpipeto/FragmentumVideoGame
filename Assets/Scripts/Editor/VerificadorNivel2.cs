@@ -47,12 +47,15 @@ namespace Fragmentum.EditorTools
         [MenuItem("Fragmentum/Niveles/Verificar el arte del Nivel 2", priority = 136)]
         public static void MenuVerificar() => Verificar();
 
-        /// <summary>Las carpetas con los PNG del mundo (sin el fondo ni el tileset, que no siguen <see cref="TablaArte"/>).</summary>
+        /// <summary>
+        /// Las carpetas con los PNG del mundo (sin el fondo ni el tileset, que no siguen <see cref="TablaArte"/>).
+        /// De la interfaz, solo la burbuja del aire: la portada del menú también está en <c>Interfaz</c>.
+        /// </summary>
         public static readonly string[] Carpetas =
         {
             ConstructorLamento.CarpetaSprites, ConstructorEscultura.CarpetaSprites, ConstructorMedusa.CarpetaSprites,
             ConstructorPlanidera.CarpetaSprites, ConstructorDoncella.CarpetaSprites, ConstructorMecanicasMundo2.CarpetaMecanicas,
-            ConstructorMecanicasMundo2.CarpetaEfectos, ConstructorMecanicasMundo2.CarpetaInterfaz, ConstructorCinematicasNivel2.Carpeta,
+            ConstructorMecanicasMundo2.CarpetaEfectos, ConstructorMecanicasMundo2.CarpetaInterfaz + "/Oxigeno", ConstructorCinematicasNivel2.Carpeta,
         };
 
         /// <summary>¿Está en el proyecto el arte del mundo?</summary>

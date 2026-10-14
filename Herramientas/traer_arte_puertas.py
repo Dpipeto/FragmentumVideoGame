@@ -1,9 +1,11 @@
-"""Trae al proyecto las puertas de salida, las verjas, los checkpoints y los planos de salida.
+"""Trae al proyecto las puertas de salida, las verjas, los checkpoints, los planos de salida y la
+portada del menú.
 
-Copia, byte a byte, los PNG que limpia `limpiar_puertas.py` en `Tesis/Imagenes/.../limpios` (el
-repositorio de al lado) a su carpeta de `Assets`. No reescala, no recorta y no cambia nombres:
-lo único que decide es en qué carpeta va cada grupo. Los ajustes de importación (píxeles por
-unidad y pivote) los pone Unity al importarlos, según `ConstructorPuertas.Reglas`.
+Copia, byte a byte, los PNG que limpian `limpiar_puertas.py` y `limpiar_portada.py` en
+`Tesis/Imagenes/.../limpios` (el repositorio de al lado) a su carpeta de `Assets`. No reescala, no
+recorta y no cambia nombres: lo único que decide es en qué carpeta va cada grupo. Los ajustes de
+importación (píxeles por unidad y pivote) los pone Unity al importarlos, según
+`ConstructorPuertas.Reglas` y `TablaArte` (la portada).
 
 La carpeta `limpios` está en `Tesis/Imagenes`. Pasó un día dentro de `Tesis/Imagenes/Mundo1`
 (2026-10-13), así que también se busca ahí.
@@ -41,6 +43,8 @@ COPIAS = [
     ("Mundo2/Verja", "*", "Assets/Sprites/Mecanicas/Puertas/Tristeza/Verja"),
     ("Mundo2/Checkpoint", "*", "Assets/Sprites/Mecanicas/Puertas/Tristeza/Checkpoint"),
     ("Mundo2/Cinematicas", ["SalidaTristeza1.png", "SalidaTristeza2.png"], "Assets/Sprites/Cinematicas/Nivel2"),
+    # La portada del menú (N41). Después, en Unity: Fragmentum → Progresión → Crear escenas de menú y selector.
+    ("Portada", ["FondoMenu.png"], "Assets/Sprites/Interfaz"),
 ]
 
 

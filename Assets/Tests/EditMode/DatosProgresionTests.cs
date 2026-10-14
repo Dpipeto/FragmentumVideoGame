@@ -6,8 +6,10 @@ using Fragmentum.Player;
 using Fragmentum.UI;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Fragmentum.Tests
 {
@@ -168,6 +170,39 @@ namespace Fragmentum.Tests
             var nivel = BaseDeDatos().niveles[0];
             Assert.AreEqual("1A0800", ColorUtility.ToHtmlStringRGB(nivel.ColorOscuro), "Ira: #1A0800 es el más oscuro del Anexo A.");
             Assert.AreEqual(new Vector2(0f, 125f), nivel.Extension, "Las secciones del Nivel 1 cubren de 0 a 125 u (80 antes de la forja).");
+        }
+
+        [Test]
+        public void ElMenuYElSelector_LlevanLaPortada_EnPixelArt()
+        {
+            var portada = AssetDatabase.LoadAssetAtPath<Sprite>(GeneradorProgresion.RutaFondoMenu);
+            Assert.IsNotNull(portada, "Falta la portada (N41): Herramientas/traer_arte_puertas.py.");
+            Assert.AreEqual(new Vector2(480f, 270f), portada.rect.size, "16:9 exacto: ×4 en 1920 × 1080.");
+            var importador = (TextureImporter)AssetImporter.GetAtPath(GeneradorProgresion.RutaFondoMenu);
+            Assert.AreEqual(FilterMode.Point, importador.filterMode);
+            Assert.AreEqual(TextureImporterCompression.Uncompressed, importador.textureCompression);
+
+            foreach (var ruta in new[] { GeneradorProgresion.RutaEscenaMenu, GeneradorProgresion.RutaEscenaSelector })
+            {
+                var escena = EditorSceneManager.OpenScene(ruta, OpenSceneMode.Additive);
+                try
+                {
+                    FondoMenu fondo = null;
+                    foreach (var raiz in escena.GetRootGameObjects())
+                    {
+                        fondo = fondo != null ? fondo : raiz.GetComponentInChildren<FondoMenu>(true);
+                    }
+
+                    Assert.IsNotNull(fondo, ruta);
+                    var imagen = fondo.transform.Find("Imagen").GetComponent<Image>();
+                    Assert.AreSame(portada, imagen.sprite, $"{ruta}: la portada, no el plano 7 de la cinemática inicial.");
+                    Assert.AreEqual(480f / 270f, imagen.GetComponent<AspectRatioFitter>().aspectRatio, 0.001f, ruta);
+                }
+                finally
+                {
+                    EditorSceneManager.CloseScene(escena, true);
+                }
+            }
         }
 
         private static List<string> RutasDe(InputAction accion)

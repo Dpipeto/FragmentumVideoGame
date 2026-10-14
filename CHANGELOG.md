@@ -9,6 +9,44 @@
 
 ---
 
+## La portada del menú (2026-10-14)
+
+Misma rama `nivel3-recorrido`. El autor pidió poner la portada que había generado (PENDIENTES N41).
+
+- **Problema.** El menú principal y el selector llevaban de fondo, provisionalmente, el plano 7
+  de la cinemática inicial. La portada nueva llegó como un JPG de 2752 × 1536, sin una rejilla
+  limpia de pixel art.
+- **Causa.** El generador dibuja un número redondo de píxeles de arte a lo ancho del lienzo y
+  luego lo reescala. Además, esta imagen mezcla bloques de varios tamaños: el suelo va en bloques
+  de unos 7 px y Kael, en bloques más finos.
+- **Solución.**
+  - **`limpiar_portada.py`** (en `Tesis/Imagenes/limpios/script`) la baja a la rejilla de 480 a
+    lo ancho, con el motor de las cinemáticas de salida (periodo y fase reales). Es la de las
+    cinemáticas de la Doncella y la única que conserva el detalle de Kael. Salen 268 filas, y se
+    repiten la de arriba (cielo liso) y la de abajo para que quede en **480 × 270**: 16:9 exacto,
+    que en 1920 × 1080 se ve a ×4 sin interpolar.
+  - **`traer_arte_puertas.py`** la copia al proyecto como `Assets/Sprites/Interfaz/FondoMenu.png`,
+    la ruta que el generador del menú ya buscaba (`GeneradorProgresion.RutaFondoMenu`).
+  - **`TablaArte`** tiene una regla para ella: pixel art (filtro Point, sin compresión) y su
+    lienzo de 480 × 270.
+  - Las escenas del menú y del selector se volvieron a montar. Comparadas con las de antes, solo
+    cambian la imagen y su proporción.
+  - **El verificador del Nivel 2** revisaba toda la carpeta `Interfaz`, y contaba la portada como
+    arte del Mundo 2 (118 sprites en vez de 117). Ahora mira solo `Interfaz/Oxigeno`, la burbuja
+    del aire.
+
+### Pruebas
+
+- **Nueva:** `DatosProgresionTests.ElMenuYElSelector_LlevanLaPortada_EnPixelArt` comprueba que la
+  portada mide 480 × 270, que se importa en pixel art y que el menú y el selector la llevan con
+  su proporción.
+- **La pasada completa queda para la siguiente vez que Unity esté cerrado.** La de esta entrada
+  dio 534 de 535 en EditMode (la que fallaba era el recuento del verificador del Nivel 2, ya
+  corregido) y se cortó en PlayMode, al volver a abrir el Editor. El código compila sin errores ni
+  avisos.
+
+---
+
 ## Mundo 3, fase B: la oscuridad, las antorchas, los cepos y las ramas que ceden (2026-10-14)
 
 Misma rama `nivel3-recorrido`, sobre la fase A. El autor pidió seguir con la

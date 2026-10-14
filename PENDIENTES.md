@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.48 — Mundo 3, fase B: la oscuridad, las antorchas, los cepos y las ramas que ceden, 2026-10-14.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.49 — La portada del menú (N41), 2026-10-14.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -12,7 +12,6 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 |---|---|---|---|
 | N45 | *En curso.* **Genera las imágenes del Mundo 3.** | Están todos sus prompts en **`Docs/Diseno/Prompts_Mundo3.md`**: la primera tanda (los enemigos y el jefe, apartados A a D) y, desde el 2026-10-14, la segunda (el tileset, las antorchas, los cepos, las ramas, las cintas, el fondo, las cinemáticas y las puertas, apartados E a J). Con lo que aprendimos en el Mundo 2: la maestra con todo lo que no puede faltar, que no cambie el píxel y margen alrededor. | Todo se puede pedir ya: el diseño está aprobado. **Orden:** el Espectro (A1, editando las bases del Eco que están en `Tesis/Imagenes/Mundo3/Espectro/Bases/`) y el Espectro del Pavor (B y C) primero; después el Centinela Ciego y el Acechador; y la segunda tanda, empezando por el tileset (E1), que adjuntan la puerta, la verja y el checkpoint. Guárdalo todo en `Tesis/Imagenes/Mundo3/<Pieza>/` y avísame por paquetes. Las puertas llevan **decisiones mías** (apartado H: el farol que se enciende, la puerta en un árbol muerto, la luz ocre de la Culpa al otro lado, el fragmento violeta en el codo derecho): cámbialas antes de generar si no te convencen. |
 | N46 | **Si quieres, recorre el Nivel 3** (fases A y B). | Ya se juega desde el selector y **ya está a oscuras**: la linde con luna, el bosque cerrado sin más luz que la de Kael (3 u) y las antorchas, el claro con luna y la arena casi negra. Las antorchas se encienden con **E** (sale el aviso encima), duran 15 s y no se vuelven a encender hasta que mueres; los cepos solo se ven de cerca o con luz, y al pisarlos te sujetan 1 s y suenan; las ramas podridas crujen 0,3 s y se parten. Al correr salen anillos de los pies. El Acechador y el sueño de los Espectros son la fase C. | No hace falta para seguir. Si lo juegas, dime sobre todo **cuánta luz hay**: los valores son míos (`DisenoNivel3.Luces`: 0,55 la linde, 0,08 el bosque, 0,45 el claro, 0,03 la arena) y no he podido sacar fotos con las luces (en segundo plano, Unity no dibuja las de Kael ni las de las antorchas). Y si las distancias se sienten bien caminando (Alt): las copas, que piden saltar en cuanto pisas la rama podrida, y la salida del barranco, que pide el doble salto. Los Espectros todavía persiguen siempre: duermen desde la fase C. |
-| N41 | *Para más adelante.* **La portada del menú.** | Lo dejaste en pendientes el 2026-10-13. Mientras tanto, el menú lleva el plano 7 de la cinemática inicial. | El prompt sigue en **`Docs/Diseno/Prompt_Portada.md`**. Cuando la tengas, el menú la usa sola. |
 | N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. **Del Mundo 2** hay nueve diferencias más, listadas al final de `Docs/Diseno/Nivel2_Diseno.md` (sección 9). Las tres últimas son del 2026-10-12: el aire dura 10 s y no 15, los checkpoints curan y el nivel mide unos 115 u. **Desde el 2026-10-13 los dos niveles tienen tres secciones y la arena** (el Anexo dice dos y la arena): el Nivel 1 va de 0 a 25, de 25 a 55, de 55 a 100 (la forja) y la arena de 100 a 125, con tres checkpoints (x 43, 57,5 y 94,5); el Nivel 2, de 0 a 40, de 40 a 70, de 70 a 100 (el canal) y la arena de 100 a 133 (139 u en total). Y **el puntaje sustituye a las monedas**: si la tesis habla de monedas o de economía, ahora es puntaje por enemigos, jefe y tiempo. **Del Mundo 3**, las diferencias con el Anexo A están al final de `Docs/Diseno/Nivel3_Diseno.md` (sección 9): mide unos 145 u y no 70, con tres secciones, tres checkpoints y un mini-jefe que el Anexo no tiene, entre otras. |
 | N3 | *En curso.* **Clips de Kael que faltan:** daño primero; después wall slide (y, para la Fase 10, nado). El dash ✔, la muerte ✔ y agacharse ✔ ya están. | El daño se ve en cada partida: hoy sigue el clip anterior y parpadea. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Tienen arte los que salen en el Nivel 1 y, desde la v0.42, todos los del Mundo 2. Los del Mundo 3 ya tienen prompts (N45). Faltan los de los mundos 4 en adelante. | Ver «Arte que más necesito», justo debajo. |
@@ -42,11 +41,19 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
    y los checkpoints de los dos mundos. `SalidaTristeza2` llegó como la copia pequeña del chat
    (1024 × 572) y con un dibujo más suave que su pareja: se bajó a la misma rejilla y funciona,
    pero si la regeneras a tamaño completo, la cambio.
-8. **La portada del menú** (N41): el prompt está en `Docs/Diseno/Prompt_Portada.md`.
+8. **La portada del menú** (N41): ✔ *recibida y montada* (v0.49) en el menú y en el selector.
 9. **El Mundo 3** (N45): los enemigos y el jefe primero, el Espectro (12, editando el Eco), el
    Centinela Ciego (13), el Acechador (17) y el Espectro del Pavor (26, por AI Studio), con sus
    hojas, su luciérnaga y el Fragmento del Miedo. Después, el tileset, las mecánicas, el fondo,
    las cinemáticas y las puertas. Prompts en `Docs/Diseno/Prompts_Mundo3.md`.
+
+### Resuelto en la v0.49
+
+- **N41: la portada del menú** («actualiza la imagen con la portada»). Llegó a 2752 × 1536 y se
+  bajó a su rejilla de 480 × 270 con `Tesis/Imagenes/limpios/script/limpiar_portada.py`; la trae
+  al proyecto `Herramientas/traer_arte_puertas.py`, como `Assets/Sprites/Interfaz/FondoMenu.png`.
+  El menú principal y el selector la llevan en lugar del plano 7 de la cinemática inicial. En la
+  misma rama `nivel3-recorrido`.
 
 ### Resuelto en la v0.48
 

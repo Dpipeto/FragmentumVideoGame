@@ -31,8 +31,10 @@ namespace Fragmentum.EditorTools
         public const string RutaEscenaMenu = "Assets/Scenes/Menu_Inicial.unity";
 
         /// <summary>
-        /// La portada del menú, cuando exista (PENDIENTES N41: el autor pidió una imagen nueva).
-        /// Mientras no esté, el fondo es <see cref="RutaFondoMenuProvisional"/>.
+        /// La portada del menú (PENDIENTES N41): 480 × 270, limpia con
+        /// <c>Tesis/Imagenes/limpios/script/limpiar_portada.py</c> y traída con
+        /// <c>Herramientas/traer_arte_puertas.py</c>. Si faltara, el fondo es
+        /// <see cref="RutaFondoMenuProvisional"/>.
         /// </summary>
         public const string RutaFondoMenu = "Assets/Sprites/Interfaz/FondoMenu.png";
 
@@ -619,7 +621,7 @@ namespace Fragmentum.EditorTools
             Guardar(creada.Value, RutaEscenaSelector);
         }
 
-        // El fondo de una escena de menú: la portada (o, mientras no exista, el plano 7 de la
+        // El fondo de una escena de menú: la portada (o, si faltara, el plano 7 de la
         // cinemática inicial) cubriendo la pantalla, un velo que la apaga y las sombras que
         // FondoMenu genera al arrancar. Va primero: todo lo demás se dibuja encima.
         private static void Fondo(RectTransform lienzo, float velo, float sombraIzquierda)
