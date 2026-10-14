@@ -262,6 +262,37 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void ElClaro_TieneTresArboles_YElAcechadorMerodeaEntreEllos()
+        {
+            var claro = DisenoNivel3.PisadaDe("Claro");
+            var acechador = DisenoNivel3.Enemigos.Single(e => e.Tipo == TIPOS.ACECHADOR);
+            Assert.That(acechador.X, Is.InRange(DisenoNivel3.Secciones[2].x, DisenoNivel3.Secciones[2].y), "El mini-jefe, en la sección 3.");
+            Assert.AreEqual(claro.Y, acechador.Y, 1e-4f, "En el claro.");
+            Assert.AreEqual(new Vector2(claro.Desde, claro.Hasta), DisenoNivel3.LimitesAcechador, "Su territorio es el claro: embistiendo, no sale de él.");
+
+            Assert.AreEqual(3, DisenoNivel3.Arboles.Length, "Tres árboles gruesos.");
+            var mitad = DisenoNivel3.TamanoArbol.x * 0.5f;
+            var largo = GeneradorEnemigos.TamanoAcechador.x;
+            foreach (var x in DisenoNivel3.Arboles)
+            {
+                Assert.Greater(x - mitad, claro.Desde, $"El árbol de x {x}, dentro del claro.");
+                Assert.Less(x + mitad, claro.Hasta, $"El árbol de x {x}, dentro del claro.");
+                Assert.AreEqual(claro.Y, DisenoNivel3.SueloBajo(x, claro.Y), 1e-4f, $"El árbol de x {x}, de pie en su suelo.");
+                Assert.That(x, Is.InRange(acechador.Desde, acechador.Hasta), "Merodea entre ellos.");
+            }
+
+            for (var i = 1; i < DisenoNivel3.Arboles.Length; i++)
+            {
+                var hueco = DisenoNivel3.Arboles[i] - DisenoNivel3.Arboles[i - 1] - 2f * mitad;
+                Assert.Greater(hueco, largo + 1f, "Entre dos árboles caben el Acechador y su carrera.");
+            }
+
+            Assert.IsFalse(DisenoNivel3.Arboles.Any(x => Mathf.Abs(x - acechador.X) < mitad + largo * 0.5f), "Empieza entre dos árboles, sin tocarlos.");
+            Assert.Less(Mathf.Abs(DisenoNivel3.Antorchas[3].x - DisenoNivel3.Arboles[0]), DisenoNivel3.RadioAntorcha,
+                "La antorcha del claro alumbra el primer árbol: deja ver al Acechador antes de entrar.");
+        }
+
+        [Test]
         public void LosCheckpoints_EstanEnLaTrinchera_TrasLasCopas_YEnLaAntesala()
         {
             var puntos = DisenoNivel3.Checkpoints;

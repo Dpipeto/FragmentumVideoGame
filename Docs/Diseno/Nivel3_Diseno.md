@@ -1,7 +1,7 @@
 # Nivel 3 · Miedo · Bosque Tenebroso: el recorrido
 
 > **Estado:** aprobado el 2026-10-14, con las nueve decisiones de la sección 9 («haz lo que
-> recomiendas»). **Fases A y B montadas** en `Assets/Scenes/Nivel3.unity`:
+> recomiendas»). **Fases A, B y C montadas** en `Assets/Scenes/Nivel3.unity`:
 >
 > - **Fase A, el recorrido:** los bloques, las ramas, las raíces del callejón que no agarran, los
 >   Espectros y los Centinelas Ciegos con su ruta, los tres checkpoints, la salida y la arena con el
@@ -9,11 +9,15 @@
 > - **Fase B, las mecánicas:** la oscuridad por tramos, la luz de Kael, las antorchas (se encienden
 >   con E), los cepos, las ramas podridas que ceden, los anillos de ruido y las cintas de la ruta
 >   buena.
+> - **Fase C, los enemigos:** el sueño, la casi invisibilidad y la espera en el borde de la luz del
+>   Espectro; el oído en cono, el aviso y la estocada del Centinela Ciego; y el Acechador, que
+>   embiste y se estrella contra los árboles del claro.
 >
 > Los números de abajo son los de `Assets/Scripts/Editor/DisenoNivel3.cs`, que monta
 > `PreparadorNivel` y comprueban las pruebas (`DisenoNivel3Tests`, `EscenaNivel3Tests`,
-> `MecanicasMiedoTests`, `Nivel3PlayModeTests` y `MecanicasMiedoPlayModeTests`). Si cambias el
-> recorrido, cámbialo allí y sube su `Version`: la escena se vuelve a montar entera.
+> `MecanicasMiedoTests`, `EnemigosMiedoTests`, `Nivel3PlayModeTests`, `MecanicasMiedoPlayModeTests`
+> y `EnemigosMiedoPlayModeTests`). Si cambias el recorrido, cámbialo allí y sube su `Version`: la
+> escena se vuelve a montar entera.
 >
 > Los prompts de todas las imágenes están en `Prompts_Mundo3.md`: los enemigos y el jefe (primera
 > tanda) y el escenario, las mecánicas, el fondo, las cinemáticas y las puertas (segunda tanda).
@@ -21,9 +25,8 @@
 ![Esquema del recorrido](Nivel3_Diseno.png)
 
 *El esquema se regenera con `python Herramientas/esquema_nivel3.py`. Es un dibujo de diseño, a
-escala (1 u = 1 tile), no una captura del juego. Dibuja también lo que todavía no está en la escena
-(el Acechador y sus árboles). Los círculos son la luz de cada antorcha (8 u) y la de Kael (3 u); las
-rayas blancas de las copas, las cintas.*
+escala (1 u = 1 tile), no una captura del juego. Los círculos son la luz de cada antorcha (8 u) y la
+de Kael (3 u); las rayas blancas de las copas, las cintas.*
 
 ---
 
@@ -72,7 +75,7 @@ Fase 4**, sin nivel donde usarla; lo marco con ✔.
 |---|---|---|
 | **Oscuridad** | Cada sección tiene su luz: la linde, luz de luna; el bosque cerrado, oscuridad completa; el claro, luna otra vez; la arena, oscuridad total (Anexo A). La oscuridad no es negro puro: las siluetas del fondo se adivinan contra un cielo violeta muy oscuro, para no perder la orientación. | ✔ Fase B. `LuzDelNivel` lleva la luz global de la escena y la cambia según el tramo en que esté Kael, poco a poco (1,5 s). La activa el `LevelManager` si `LevelData.reglas.oscuridad`: en el Editor la escena sigue con luz. Los valores, en `DisenoNivel3.Luces`. |
 | **La luz de Kael** | Un círculo de 3 u de radio alrededor de Kael (Anexo A: intensidad 1,5). | ✔ Fase B. `LuzJugador`: una luz 2D hija de Kael, apagada en el prefab; el `LevelManager` la enciende con `reglas.radioLuzJugador`. Pálida y un poco fría. No se registra en `Iluminacion`. |
-| **Antorcha** | Se enciende con **E** (Interactuar) a 1,5 u de ella. Ilumina **8 u durante 15 s** (Anexo A) y parpadea los 3 últimos. Mientras arde se ven las trampas, las ramas podridas y los Espectros, y **los Espectros no se acercan a Kael si está dentro de su luz**. Pero al encenderse **despierta a todos los Espectros dormidos en su radio** (Anexo A): esperan en el borde de la luz y, cuando se apaga, van a por él. **Se enciende una vez por vida**: al reaparecer en un checkpoint vuelve a estar lista. | ✔ Fase B. `Antorcha` (prefab en `Assets/Prefabs/Mecanicas`): se registra en `Iluminacion` mientras arde, su círculo sale de la llama (1,5 u sobre el pie) y anuncia que se encendió (`Antorcha.AlEncenderse`). Despertar a los Espectros con ese aviso es la fase C. E la lee Kael (`InteraccionJugador`), y el HUD pone «E · Encender» sobre la antorcha que tiene al alcance. |
+| **Antorcha** | Se enciende con **E** (Interactuar) a 1,5 u de ella. Ilumina **8 u durante 15 s** (Anexo A) y parpadea los 3 últimos. Mientras arde se ven las trampas, las ramas podridas y los Espectros, y **los Espectros no se acercan a Kael si está dentro de su luz**. Pero al encenderse **despierta a todos los Espectros dormidos en su radio** (Anexo A): esperan en el borde de la luz y, cuando se apaga, van a por él. **Se enciende una vez por vida**: al reaparecer en un checkpoint vuelve a estar lista. | ✔ Fase B. `Antorcha` (prefab en `Assets/Prefabs/Mecanicas`): se registra en `Iluminacion` mientras arde, su círculo sale de la llama (1,5 u sobre el pie) y anuncia que se encendió (`Antorcha.AlEncenderse`). ✔ Fase C: con ese aviso despiertan los Espectros de su luz. E la lee Kael (`InteraccionJugador`), y el HUD pone «E · Encender» sobre la antorcha que tiene al alcance. |
 | **Sigilo** | Correr por encima del 60 % de la velocidad (3,6 u/s) hace ruido cada 0,4 s, que se oye a 6 u. **Caminar con Alt (2,1 u/s) o agachado (2 u/s) es silencioso.** El dash también hace ruido. Al correr salen de los pies de Kael unos anillos pálidos: el jugador **ve** que hace ruido (son las «partículas de ruido» del Anexo A). | ✔ `PlayerModoMovimiento` (STEALTH, NORMAL y RUN, como pide el Anexo A), que `GameManager` enciende si `LevelData.reglas.sigilo`; caminar con Alt ✔ (v0.31). ✔ Fase B: los anillos (`AnillosDeRuido`, líneas sin imagen que se ven a oscuras), que crecen hasta donde se oye cada ruido. |
 | **Cepo** (trampa oculta) | Un cepo de caza oculto entre las hojas. **Solo se ve a 1 u de Kael** (Anexo A) **o bajo la luz de una antorcha.** Si Kael lo pisa: 1 de daño, **lo sujeta 1 s** (puede atacar, pero no andar ni saltar) y **suena**: el chasquido se oye a 8 u. Después se queda cerrado, inofensivo, hasta reaparecer. Caminando, se ve 0,5 s antes de pisarlo; corriendo, 0,17 s: a oscuras, quien corre cae. | ✔ Fase B. `Cepo` (prefab): no tiene collider, nota a Kael con una caja en el suelo. Su chasquido sale por el mismo canal que la carrera (`PlayerModoMovimiento.HacerRuido`), así que ya lo oyen los Centinelas Ciegos de la Fase 4. Se rearma cuando Kael reaparece tras morir. |
 | **Rama podrida** | Las «plataformas que ceden» del Anexo A (`FalsePlatform`). A oscuras es igual que las demás ramas; bajo una antorcha se ve gris y agrietada. Al pisarla cruje 0,3 s y se parte; vuelve a los 4 s. | ✔ Fase B. El prefab `RamaPodrida`: una `PlataformaInestable` con estos tiempos y `RamaPodrida`, que la pinta como las sanas a oscuras, gris bajo una antorcha, y la hace temblar mientras cruje. |
@@ -159,6 +162,31 @@ mucho. Se ajusta cuando lo juegues.
 - **No hay fotos de la oscuridad.** Al renderizarla en segundo plano, Unity dibuja la luz global,
   pero no las luces de Kael ni las de las antorchas. Hay que verla en el Editor, jugando.
 
+### Lo que cambió al montarlo (fase C, 2026-10-14)
+
+- **El oído va con los anillos de Kael.** El Centinela Ciego oye delante hasta donde llega cada
+  ruido (lo que enseñan los anillos: 6 u corriendo, 8 u un cepo) y detrás, la mitad (3 u y 4 u).
+  La propuesta decía «8 u delante y 3 u detrás»: con 8 u delante, oiría correr más allá de lo que
+  los anillos enseñan, y el jugador no sabría por qué lo ha oído.
+- **El Acechador oye el doble de lo que llega cada ruido**, en todas direcciones: 12 u corriendo,
+  como pedía la propuesta. Ese sí oye más allá de los anillos: es la bestia del claro.
+- **El Centinela va hacia donde oyó, no hacia Kael.** No ve: si Kael sigue allí, o se le pone
+  delante por el camino, la estocada le alcanza; si no, apuñala el aire y escucha 2 s. Su
+  controlador ya solo nota el roce.
+- **El Espectro acude cuando se apaga la luz.** Espera fuera de la luz de la antorcha, a unas 8,5 u
+  de la llama, y desde ahí no ve a Kael (ve a 6 u). Por eso, cuando la luz se apaga, va hacia él
+  hasta tenerlo a tiro y entonces lo caza su controlador.
+- **Los árboles no tienen collider.** El proyecto no tiene una capa que choque solo con los
+  enemigos, y Kael tiene que pasar por delante. El Acechador mira sus troncos mientras embiste.
+- **El Acechador no sale del claro embistiendo:** si no choca con nada, frena pasado el ruido o en
+  el borde del claro (x 89 y 106). Empieza en x 100, entre el segundo árbol y el tercero (el
+  esquema lo tenía encima del segundo).
+- **Aturdido, el golpe vale el doble:** el segundo punto se le quita justo después del golpe, para
+  que su muerte cuente una sola vez.
+- **Los datos de la Fase 4 se ponen al día solos.** El aviso del Espectro (0,2 → 0,5 s) y el tacto
+  del Centinela se aplican a sus datos si siguen como los dejó el generador; si los has tocado a
+  mano, no.
+
 ### Cómo se ve hoy
 
 Fotos de la escena montada en la fase A: bloques de color y cápsulas, con luz y sin Kael. Así
@@ -195,12 +223,12 @@ que la paleta del Anexo A, que es casi negra, para que se lean con la luz de la 
 
 | Enemigo | Cuántos | Cómo se comporta | Qué enseña | En el código |
 |---|---|---|---|---|
-| **Espectro** (el Eco del Miedo) | 6 (2 en la linde y 4 en el bosque cerrado, como el Anexo A) | **Es el Eco de este mundo:** el mismo cuerpo que el Eco de la Ira y el Lamento, el verde que se deshace en polvo negro de `Referencias/Arte/EnemigosNiveles.jpeg`. **Duerme** hasta que una antorcha lo despierta, hasta que Kael pasa a 1,5 u o hasta que le pegan. Despierto, **solo se acerca si Kael está a oscuras**: dentro de la luz de una antorcha no se acerca. **Casi invisible:** a oscuras no se ve; dentro de la luz de Kael se adivina una silueta (una cuarta parte de opaco) con su polvo negro; **cuando ataca, sus ojos se encienden y se ve entero**, y también bajo una antorcha. Rápido (persigue a 3,8 u/s) y frágil (2 de vida, quita 1). A la escala de los Ecos (1,8 × 1,5) y con su ritmo de ataque. | El miedo crece en la incertidumbre y se acerca cuando no miras. | ✔ Sus datos (`Espectro.asset`) y su detección (`DeteccionEnOscuridad`) existen desde la Fase 4. Faltan el sueño, la casi invisibilidad y un aviso de ataque más largo: hoy el golpe llega a los 0,2 s, y si solo se ve al atacar, hace falta medio segundo para verlo venir. Usará el controlador de animación del Eco, como el Lamento. |
-| **Centinela Ciego** | 3, en el bosque cerrado (Anexo A) | Un **centinela de trinchera con una máscara de gas de cristales ciegos**, abrigo largo y fusil con bayoneta. *El Anexo A solo lo nombra; el aspecto es propuesta mía, por la trinchera del eco de memoria.* Patrulla despacio (1 u/s). **No ve: oye** el ruido de Kael en un cono, hasta 8 u delante y 3 u detrás (el «cono de detección sonora» del Anexo), y el chasquido de un cepo. Al oír se detiene, ladea la cabeza (0,6 s: el aviso), va hacia donde oyó (4 u/s) y lanza una estocada (2 de daño, 1,4 u de alcance). Si en 2 s no encuentra a nadie, vuelve a su ronda. Si Kael lo roza (1,2 u), lo nota aunque no haga ruido. 5 de vida. **La Invisibilidad no sirve contra él**, porque no ve. | El silencio protege. Y acercarse en silencio deja golpear primero. | ✔ Sus datos (`CentinelaCiego.asset`) y su detección por ruido (`DeteccionPorRuido`: recuerda el ruido 2 s y nota el roce a 1,2 u) existen desde la Fase 4. Faltan el cono, el aviso y el ruido del cepo. |
-| **El Acechador** (mini-jefe) | 1, en el claro | **No está en el Anexo A**: es el mini-jefe del mundo, como el Golem y la Plañidera. Una **bestia de sombra, como un lobo enorme sin ojos**, que se deshace en polvo negro como los Ecos del Miedo: es lo que «respira entre los árboles» en la línea de apertura. 10 de vida e hiperarmadura, como el Golem. Merodea despacio, olfateando. **Oye como el Centinela, pero más lejos (12 u).** Al oír se agazapa y gruñe (0,7 s: el aviso) y **embiste en línea recta** hacia donde oyó el ruido, a 10 u/s, hasta chocar: **contra un árbol, se queda aturdido 2,5 s y los golpes valen el doble** (como la espada clavada de la Centinela); contra Kael, quita 2; si no choca con nada, frena y vuelve a escuchar. Si Kael se le pega (1,5 u), echa la cabeza atrás (0,5 s) y muerde (quita 1). | **Hacerse oír a propósito.** Es el único sitio del juego donde correr es la estrategia: el miedo se enfrenta, no solo se esquiva. | Por hacer: `EnemyController` y `EnemyData` con hiperarmadura, como el Golem, para merodear y morder; un componente propio (`Acechador`) apaga el controlador mientras embiste o está aturdido, como la Plañidera con sus esquirlas. Los árboles chocan con los enemigos y no con Kael. |
+| **Espectro** (el Eco del Miedo) | 6 (2 en la linde y 4 en el bosque cerrado, como el Anexo A) | **Es el Eco de este mundo:** el mismo cuerpo que el Eco de la Ira y el Lamento, el verde que se deshace en polvo negro de `Referencias/Arte/EnemigosNiveles.jpeg`. **Duerme** hasta que una antorcha lo despierta, hasta que Kael pasa a 1,5 u o hasta que le pegan. Despierto, **solo se acerca si Kael está a oscuras**: dentro de la luz de una antorcha no se acerca. **Casi invisible:** a oscuras no se ve; dentro de la luz de Kael se adivina una silueta (una cuarta parte de opaco) con su polvo negro; **cuando ataca, sus ojos se encienden y se ve entero**, y también bajo una antorcha. Rápido (persigue a 3,8 u/s) y frágil (2 de vida, quita 1). A la escala de los Ecos (1,8 × 1,5) y con su ritmo de ataque. | El miedo crece en la incertidumbre y se acerca cuando no miras. | ✔ Sus datos (`Espectro.asset`) y su detección (`DeteccionEnOscuridad`), desde la Fase 4. ✔ Fase C: `Espectro` (en su prefab) lleva el sueño, la espera en el borde de la luz y la casi invisibilidad, y su golpe avisa 0,5 s (antes, 0,2). Usará el controlador de animación del Eco, como el Lamento. |
+| **Centinela Ciego** | 3, en el bosque cerrado (Anexo A) | Un **centinela de trinchera con una máscara de gas de cristales ciegos**, abrigo largo y fusil con bayoneta. *El Anexo A solo lo nombra; el aspecto es propuesta mía, por la trinchera del eco de memoria.* Patrulla despacio (1 u/s). **No ve: oye** el ruido de Kael en un cono, hasta 8 u delante y 3 u detrás (el «cono de detección sonora» del Anexo), y el chasquido de un cepo. Al oír se detiene, ladea la cabeza (0,6 s: el aviso), va hacia donde oyó (4 u/s) y lanza una estocada (2 de daño, 1,4 u de alcance). Si en 2 s no encuentra a nadie, vuelve a su ronda. Si Kael lo roza (1,2 u), lo nota aunque no haga ruido. 5 de vida. **La Invisibilidad no sirve contra él**, porque no ve. | El silencio protege. Y acercarse en silencio deja golpear primero. | ✔ Sus datos (`CentinelaCiego.asset`), desde la Fase 4; el ruido del cepo, desde la fase B. ✔ Fase C: `CentinelaCiego` (en su prefab) lleva el cono, el aviso, ir hacia el ruido y la estocada. Su controlador ya solo nota el roce (`DeteccionPorTacto`, 1,2 u). |
+| **El Acechador** (mini-jefe) | 1, en el claro | **No está en el Anexo A**: es el mini-jefe del mundo, como el Golem y la Plañidera. Una **bestia de sombra, como un lobo enorme sin ojos**, que se deshace en polvo negro como los Ecos del Miedo: es lo que «respira entre los árboles» en la línea de apertura. 10 de vida e hiperarmadura, como el Golem. Merodea despacio, olfateando. **Oye como el Centinela, pero más lejos (12 u).** Al oír se agazapa y gruñe (0,7 s: el aviso) y **embiste en línea recta** hacia donde oyó el ruido, a 10 u/s, hasta chocar: **contra un árbol, se queda aturdido 2,5 s y los golpes valen el doble** (como la espada clavada de la Centinela); contra Kael, quita 2; si no choca con nada, frena y vuelve a escuchar. Si Kael se le pega (1,5 u), echa la cabeza atrás (0,5 s) y muerde (quita 1). | **Hacerse oír a propósito.** Es el único sitio del juego donde correr es la estrategia: el miedo se enfrenta, no solo se esquiva. | ✔ Fase C. `Acechador.asset` (10 de vida, hiperarmadura, muerde con `DeteccionPorTacto`) y el componente `Acechador`, que apaga el controlador mientras se agazapa, embiste, está aturdido o frena. Los árboles (`Arbol`) no tienen collider: Kael pasa por delante y el Acechador los nota al embestir. |
 
-Los puntos que darían (`TablaPuntaje`): el Espectro y el Centinela Ciego, 150 ✔ (ya están); el
-Acechador, 700 (entre la Plañidera, 600, y el jefe); el Espectro del Pavor, 2500 ✔.
+Los puntos (`TablaPuntaje`): el Espectro y el Centinela Ciego, 150 ✔; el Acechador, 700 ✔ (entre
+la Plañidera, 600, y el jefe); el Espectro del Pavor, 2500 ✔.
 
 ## 6. El jefe: el Espectro del Pavor
 
@@ -250,7 +278,7 @@ cápsulas, sin sprites inventados.
 |---|---|---|
 | **A · Recorrido** ✔ | La escena `Nivel3`, montada desde una tabla de medidas, todavía con luz | `DisenoNivel3` y `PreparadorNivel` para el Miedo; el `LevelData` con su escena, sus secciones y sus checkpoints; pruebas de alcance (caminando y corriendo) |
 | **B · Mecánicas** ✔ | La oscuridad, la luz de Kael, las antorchas, el ruido, los cepos, las ramas podridas y las cintas | Luces 2D por sección y en Kael (`ReglasNivel.oscuridad`); `Antorcha` sobre `ZonaIluminada`; los anillos de ruido; `Cepo`; `RamaPodrida`; las cintas; el eco de memoria en la trinchera |
-| **C · Enemigos** | El Espectro, el Centinela Ciego y el Acechador | El sueño y la casi invisibilidad del Espectro; el cono y la estocada del Centinela; `Acechador`, con su embestida y los árboles |
+| **C · Enemigos** ✔ | El Espectro, el Centinela Ciego y el Acechador | El sueño y la casi invisibilidad del Espectro; el cono y la estocada del Centinela; `Acechador`, con su embestida y los árboles |
 | **D · Jefe** | El Espectro del Pavor completo, sin arte | Aparecer e intangibilidad en `EspectroDelPavor`; `PatronTajo`, `PatronEmbestidaSombra`, `PatronHojas` y `PatronSombras`; la arena a oscuras; un verificador |
 | **E · Arte** | Vestir lo anterior a medida que llegue | Una sub-fase por paquete, como en el Mundo 2 |
 | **F · Narrativa y sonido** | Presentación, derrota y cierre con planos; las puertas | El sistema de cinemáticas, sin cambios; la puerta, la verja y el checkpoint de este mundo |

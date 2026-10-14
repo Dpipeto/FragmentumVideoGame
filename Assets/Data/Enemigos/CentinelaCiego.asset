@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CentinelaCiego
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.EnemyData
   nombreCanonico: Centinela Ciego
-  descripcion: 'Miedo: no ve. Oye al jugador cuando corre; caminar despacio es seguro.'
+  descripcion: "Miedo: no ve, oye. Delante, hasta donde llega el ruido; detr\xE1s, la mitad. Al o\xEDr se para y ladea la cabeza (0,6 s), va hacia donde oy\xF3 y lanza una estocada; si en 2 s no oye nada, vuelve a su ronda. Si Kael lo roza, lo nota. Caminar despacio es seguro."
   vidaMaxima: 5
   danio: 2
   danioContacto: 1
@@ -25,8 +25,8 @@ MonoBehaviour:
   esperaEnWaypoint: 1
   evitarBordes: 1
   inmuneALava: 0
-  deteccion: {fileID: 11400000, guid: b1e0e1334e75ff74fa0d1d8343061636, type: 2}
-  detectionRadius: 8
+  deteccion: {fileID: 11400000, guid: ca29ef759138b9748bdfd65218277662, type: 2}
+  detectionRadius: 1.2
   factorHisteresis: 1.5
   attackRadius: 1.4
   alturaAtaque: 1.5

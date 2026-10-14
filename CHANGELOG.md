@@ -9,6 +9,107 @@
 
 ---
 
+## Mundo 3, fase C: el sueño de los Espectros, el oído del Centinela Ciego y el Acechador (2026-10-14)
+
+Misma rama `nivel3-recorrido`, sobre las fases A y B (commit `0f6a15d`). El autor pidió empezar la
+fase C después de los commits. Es la fase de los enemigos del Miedo, sin arte: cápsulas y bloques
+de color.
+
+### 1. El Espectro: duerme, espera en el borde de la luz y casi no se ve
+
+- **Problema.** El Espectro de la Fase 4 solo sabía una cosa: no acercarse a Kael si está en la
+  luz. El diseño pide más:
+  - que duerma hasta que una antorcha lo despierte (así encenderla es una decisión);
+  - que espere en el borde de la luz y vaya a por Kael cuando se apague;
+  - que a oscuras casi no se vea.
+- **Causa.** Todo eso es comportamiento, no datos, y el `EnemyController` no se toca.
+- **Solución.**
+  - **El componente `Espectro`**, en su prefab, apaga y enciende el controlador, como ya hacían la
+    Escultura dormida y la Plañidera:
+    - **Duerme** con el controlador apagado. Lo despiertan tres cosas: una antorcha que se
+      enciende con él dentro de su luz (`Antorcha.AlEncenderse`, de la fase B), Kael a 1,5 u o un
+      golpe (que cuenta).
+    - **Espera en el borde de la luz.** Despierto, si Kael está en la luz de una antorcha, sale de
+      ella por el lado contrario y espera fuera. Cuando se apaga, **acude**: va hacia Kael hasta
+      tenerlo a tiro, porque desde el borde (8,5 u) no lo ve (ve a 6 u).
+    - **Casi invisible.** A oscuras no se ve; en la luz de Kael se adivina (una cuarta parte de
+      opaco); bajo una antorcha o al atacar, se ve entero. En los niveles con luz, siempre.
+  - **Su golpe avisa 0,5 s** (antes, 0,2 s): solo se le ve entero al atacar, y hace falta tiempo
+    para verlo venir.
+  - `Iluminacion.FuenteEn` dice qué luz ilumina un punto, para saber por dónde salir de ella.
+
+### 2. El Centinela Ciego: oye en un cono, avisa, va al ruido y apuñala
+
+- **Problema.** El Centinela de la Fase 4 oía en todas direcciones y perseguía a Kael en el acto,
+  sin aviso. El diseño pide un cono («detección sonora» del Anexo A), un aviso y que vaya hacia
+  donde oyó, porque no ve.
+- **Causa.** La detección por ruido del controlador no sabe hacia dónde mira el enemigo, y su
+  persecución va hacia Kael, no hacia el ruido.
+- **Solución.**
+  - **El componente `CentinelaCiego`**, en su prefab, escucha el ruido de Kael:
+    - **El cono:** delante oye hasta donde llega cada ruido, lo mismo que enseñan los anillos
+      de Kael (6 u corriendo, 8 u un cepo). Detrás oye la mitad, así que por la espalda se le
+      puede sorprender.
+    - **El aviso:** al oír se para y ladea la cabeza 0,6 s.
+    - **El ataque:** va hacia donde oyó (4 u/s) y lanza la estocada allí (2 de daño). Si en 2 s
+      no oye nada más, vuelve a su ronda.
+  - **Su controlador solo nota el roce:** la nueva `DeteccionPorTacto` (1,2 u, sin que le valga la
+    invisibilidad).
+
+### 3. El Acechador, el mini-jefe del claro, y sus árboles
+
+- **Problema.** El claro tenía sitio para un mini-jefe que se vence haciéndose oír a propósito, pero
+  no existía.
+- **Solución.**
+  - **`Acechador.asset`:** 10 de vida e hiperarmadura; muerde (quita 1) si Kael se le pega.
+  - **El componente `Acechador`:**
+    - Oye el doble de lejos que el Centinela (12 u corriendo), en todas direcciones.
+    - Al oír se agazapa 0,7 s (el aviso) y embiste a 10 u/s hacia el ruido.
+    - Contra un árbol se queda aturdido 2,5 s, y los golpes valen el doble.
+    - Contra Kael, le quita 2 y frena.
+    - Si no choca con nada, frena pasado el ruido o en el borde del claro.
+  - **`Arbol`:** los tres árboles del claro, sin collider. Kael pasa por delante y el Acechador
+    mira sus troncos mientras embiste: el proyecto no tiene una capa que choque solo con los
+    enemigos.
+  - **`DisenoNivel3`, versión 4:** el Acechador en x 100 (entre el segundo árbol y el tercero),
+    los árboles en x 93, 98 y 103, y el claro como su territorio.
+  - **`TablaPuntaje`:** el Acechador vale 700, entre la Plañidera (600) y el jefe.
+
+### 4. Los datos de la Fase 4 y una pieza común
+
+- **Los datos se ponen al día solos.** Los del Espectro y el Centinela Ciego existían desde la
+  Fase 4, y el generador no pisa los assets que ya existen. Sus cambios se aplican si siguen como
+  los dejó el generador; si se tocaron a mano, no.
+- **`RelevoDelControlador`** es lo que comparten las tres piezas: apagar y encender el
+  controlador, moverlo y girarlo mientras está apagado, encontrar a Kael (su centro, su ruido y su
+  luz) y que el enemigo muera por el camino de siempre si el golpe lo mata con el controlador
+  apagado. Usa lo que el controlador ya ofrece a sus estados; el `EnemyController` no cambia.
+
+### Pruebas
+
+- **Nuevas:**
+  - `EnemigosMiedoTests` (9): los tres prefabs y sus datos; el cono del Centinela; el oído del
+    Acechador; cuánto se ve un Espectro; la detección por tacto; qué luz ilumina un punto; y el
+    tronco de un árbol.
+  - `EnemigosMiedoPlayModeTests` (13):
+    - El Espectro duerme y despierta (Kael cerca, una antorcha solo a los de su luz, un golpe que
+      cuenta). Espera en el borde de la luz y acude cuando se apaga. Se ve según dónde está.
+    - El Centinela solo oye de cerca por detrás. Se para, va al ruido y apuñala, y vuelve a su
+      ronda.
+    - El Acechador se estrella contra un árbol (golpes al doble, una sola muerte), arrolla a Kael,
+      frena en el borde de su territorio y muerde.
+- **Ampliadas:**
+  - `DisenoNivel3Tests` (+1): los árboles y el Acechador del claro.
+  - `EscenaNivel3Tests` (+2): los árboles sin collider, el territorio del Acechador, los Espectros
+    dormidos y el oído de los Centinelas, en la escena.
+  - `Nivel3PlayModeTests` (+1): la primera antorcha despierta al primer Espectro, que no se acerca a
+    Kael en la luz.
+- **Cambiadas:** `DatosEnemigosTests` (el Centinela ya detecta por tacto) y la prueba del cepo de la
+  fase B (el Centinela que lo oye lo tiene delante).
+- **547 EditMode y 234 PlayMode en verde.**
+
+---
+
 ## La portada del menú (2026-10-14)
 
 Misma rama `nivel3-recorrido`. El autor pidió poner la portada que había generado (PENDIENTES N41).
@@ -40,10 +141,9 @@ Misma rama `nivel3-recorrido`. El autor pidió poner la portada que había gener
 - **Nueva:** `DatosProgresionTests.ElMenuYElSelector_LlevanLaPortada_EnPixelArt` comprueba que la
   portada mide 480 × 270, que se importa en pixel art y que el menú y el selector la llevan con
   su proporción.
-- **La pasada completa queda para la siguiente vez que Unity esté cerrado.** La de esta entrada
-  dio 534 de 535 en EditMode (la que fallaba era el recuento del verificador del Nivel 2, ya
-  corregido) y se cortó en PlayMode, al volver a abrir el Editor. El código compila sin errores ni
-  avisos.
+- La primera pasada dio 534 de 535 en EditMode (la que fallaba era el recuento del verificador del
+  Nivel 2, ya corregido) y se cortó en PlayMode, al volver a abrir el Editor. **La pasada completa,
+  hecha con la de la fase C del Mundo 3, quedó en verde** (547 EditMode y 234 PlayMode).
 
 ---
 

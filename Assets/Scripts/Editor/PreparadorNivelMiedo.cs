@@ -27,6 +27,10 @@ namespace Fragmentum.EditorTools
     /// Fase B: la oscuridad (<see cref="LuzDelNivel"/> en la luz global de la escena, con la luz de
     /// cada tramo), las antorchas, los cepos, las ramas podridas que ceden (prefabs de
     /// <see cref="GeneradorMecanicas"/>) y las cintas blancas de la ruta buena.
+    ///
+    /// Fase C: el Acechador, con el claro como territorio, y los tres árboles contra los que se
+    /// estrella (<see cref="Arbol"/>). El sueño de los Espectros y el oído de los Centinelas Ciegos
+    /// van en sus prefabs (<see cref="GeneradorEnemigos"/>).
     /// </summary>
     public static partial class PreparadorNivel
     {
@@ -116,6 +120,7 @@ namespace Fragmentum.EditorTools
                 plataformasArena.Add(Suelo(contenedorArena, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorRama).GetComponent<Collider2D>());
             }
 
+            ColocarArbolesNivel3(recorrido);
             ColocarEnemigosNivel3(escena, recorrido);
 
             var gestor = Buscar<LevelManager>(escena);
@@ -241,7 +246,27 @@ namespace Fragmentum.EditorTools
             });
         }
 
-        // Los Espectros y los Centinelas Ciegos, cada uno con su ruta de patrulla.
+        /// <summary>Lo que se ve de un árbol del claro mientras no llega su arte: un tronco oscuro, por detrás de todo.</summary>
+        public static readonly Color ColorArbolSinArte = new Color(0.22f, 0.18f, 0.16f, 1f);
+
+        // Los árboles del claro: de pie en su suelo, sin collider (Kael pasa por delante).
+        private static void ColocarArbolesNivel3(Transform recorrido)
+        {
+            var arboles = Hijo(recorrido, "Arboles");
+            var tamano = DisenoNivel3.TamanoArbol;
+            for (var i = 0; i < DisenoNivel3.Arboles.Length; i++)
+            {
+                var x = DisenoNivel3.Arboles[i];
+                var arbol = new GameObject($"Arbol_{i + 1}").transform;
+                arbol.SetParent(arboles, false);
+                arbol.position = new Vector3(x, DisenoNivel3.SueloBajo(x), 0f);
+                var componente = arbol.gameObject.AddComponent<Arbol>();
+                Asignar(componente, "tamano", p => p.vector2Value = tamano);
+                Visual(arbol, "Tronco", new Vector2(0f, tamano.y * 0.5f), tamano, ColorArbolSinArte, -1);
+            }
+        }
+
+        // Los Espectros, los Centinelas Ciegos y el Acechador, cada uno con su ruta de patrulla.
         private static void ColocarEnemigosNivel3(Scene escena, Transform recorrido)
         {
             var enemigos = Hijo(recorrido, "Enemigos");
@@ -250,6 +275,7 @@ namespace Fragmentum.EditorTools
             {
                 [DisenoNivel3.TIPOS_ENEMIGO.ESPECTRO] = GeneradorEnemigos.CargarPrefab("Espectro"),
                 [DisenoNivel3.TIPOS_ENEMIGO.CENTINELA_CIEGO] = GeneradorEnemigos.CargarPrefab("CentinelaCiego"),
+                [DisenoNivel3.TIPOS_ENEMIGO.ACECHADOR] = GeneradorEnemigos.CargarPrefab("Acechador"),
             };
 
             foreach (var guardia in DisenoNivel3.Enemigos)
@@ -276,6 +302,13 @@ namespace Fragmentum.EditorTools
                     p.GetArrayElementAtIndex(0).objectReferenceValue = a;
                     p.GetArrayElementAtIndex(1).objectReferenceValue = b;
                 });
+
+                // El Acechador embiste dentro del claro: en un extremo, frena.
+                var acechador = enemigo.GetComponent<Acechador>();
+                if (acechador != null)
+                {
+                    Asignar(acechador, "limites", p => p.vector2Value = DisenoNivel3.LimitesAcechador);
+                }
             }
         }
 

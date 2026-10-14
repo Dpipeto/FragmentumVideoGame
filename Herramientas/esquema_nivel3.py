@@ -3,8 +3,8 @@ Esquema del Nivel 3 (Docs/Diseno/Nivel3_Diseno.png): vista lateral a escala, 1 u
 
 Es un dibujo de diseño, no una captura del juego. Las medidas son las del recorrido montado
 (Assets/Scripts/Editor/DisenoNivel3.cs y Docs/Diseno/Nivel3_Diseno.md): si cambias una, cambia
-las otras (la luz de cada tramo está en DisenoNivel3.Luces). Lo que todavía no está en la escena
-(el Acechador y sus árboles) se dibuja igual, porque es el diseño.
+las otras (la luz de cada tramo está en DisenoNivel3.Luces; los árboles y el Acechador, en
+DisenoNivel3.Arboles y DisenoNivel3.Enemigos).
 
 Uso:  python Herramientas/esquema_nivel3.py
 """
@@ -122,7 +122,7 @@ d.text((a, b - 2), 'la trinchera', font=fp, fill=TENUE)
 
 # Los árboles del claro: Kael pasa por delante; el Acechador, que embiste a ciegas, se estrella
 for x in (93, 98, 103):
-    rect(d, x - 0.5, 0, x + 0.5, 6, (60, 50, 40), (100, 84, 64))
+    rect(d, x - 0.6, 0, x + 0.6, 6, (60, 50, 40), (100, 84, 64))
 a, b = px(91.4, 7.8)
 d.text((a, b), 'tres árboles: el Acechador se estrella', font=fp, fill=TENUE)
 
@@ -153,7 +153,7 @@ for x, y in ((14, 0), (33, 0), (56.5, 0), (78, 0), (69, -4), (71.5, -4)):
     punto(x, y, ESPECTRO, 'E')
 for x, y in ((51, 0), (71, 4.5), (63.5, -4)):
     punto(x, y, CENTINELA, 'C', r=8)
-punto(98, 0, ACECHADOR, 'A', r=13)
+punto(100, 0, ACECHADOR, 'A', r=13)
 punto(125.5, 0, JEFE, 'P', r=16)
 a, b = px(125.5, 6.6)
 d.text((a - 92, b), 'invisible salvo al avisar y atacar', font=fp, fill=TEXTO)

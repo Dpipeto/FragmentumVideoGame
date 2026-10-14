@@ -39,8 +39,16 @@ namespace Fragmentum.Core
         public static void Quitar(IFuenteLuz fuente) => Fuentes.Remove(fuente);
 
         /// <summary>¿Cae el punto dentro de alguna fuente de luz encendida?</summary>
-        public static bool EstaIluminado(Vector2 punto)
+        public static bool EstaIluminado(Vector2 punto) => FuenteEn(punto) != null;
+
+        /// <summary>
+        /// La fuente encendida que ilumina el punto (la de centro más cercano, si son varias), o
+        /// null. La usan los Espectros, que salen de la luz por el lado contrario a ella.
+        /// </summary>
+        public static IFuenteLuz FuenteEn(Vector2 punto)
         {
+            IFuenteLuz mejor = null;
+            var menor = float.MaxValue;
             for (var i = 0; i < Fuentes.Count; i++)
             {
                 var fuente = Fuentes[i];
@@ -49,13 +57,15 @@ namespace Fragmentum.Core
                     continue;
                 }
 
-                if ((punto - fuente.Posicion).sqrMagnitude <= fuente.Radio * fuente.Radio)
+                var distancia = (punto - fuente.Posicion).sqrMagnitude;
+                if (distancia <= fuente.Radio * fuente.Radio && distancia < menor)
                 {
-                    return true;
+                    mejor = fuente;
+                    menor = distancia;
                 }
             }
 
-            return false;
+            return mejor;
         }
 
         /// <summary>Vacía el registro. Lo usan las pruebas y el arranque sin recarga de dominio.</summary>

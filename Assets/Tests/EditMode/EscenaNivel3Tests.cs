@@ -20,9 +20,10 @@ namespace Fragmentum.Tests
     /// <summary>
     /// La escena del Nivel 3 está montada con el recorrido de <see cref="DisenoNivel3"/>: bloques,
     /// ramas, raíces que no agarran, Espectros y Centinelas Ciegos, checkpoints, salida y la arena del
-    /// Espectro del Pavor (fase A); y la oscuridad por tramos, las antorchas, los cepos, las ramas
-    /// podridas que ceden y las cintas (fase B). Y la herramienta que la monta no cambia nada al
-    /// prepararla otra vez.
+    /// Espectro del Pavor (fase A); la oscuridad por tramos, las antorchas, los cepos, las ramas
+    /// podridas que ceden y las cintas (fase B); y el Acechador con los árboles del claro, los
+    /// Espectros dormidos y el oído de los Centinelas (fase C). Y la herramienta que la monta no
+    /// cambia nada al prepararla otra vez.
     /// </summary>
     public class EscenaNivel3Tests
     {
@@ -118,15 +119,17 @@ namespace Fragmentum.Tests
         }
 
         [Test]
-        public void ElNivel3_TieneLosEspectrosYLosCentinelasCiegos_ConSuRuta()
+        public void ElNivel3_TieneLosEspectrosLosCentinelasCiegosYElAcechador_ConSuRuta()
         {
             var enemigos = Todos<EnemyController>(_nivel3);
-            Assert.AreEqual(DisenoNivel3.Enemigos.Length, enemigos.Count, "Los Espectros y los Centinelas Ciegos; el Acechador llega en la fase C.");
+            Assert.AreEqual(DisenoNivel3.Enemigos.Length, enemigos.Count, "Los Espectros, los Centinelas Ciegos y el Acechador.");
             foreach (var esperado in DisenoNivel3.Enemigos)
             {
                 var enemigo = enemigos.SingleOrDefault(e => e.name == esperado.Nombre);
                 Assert.IsNotNull(enemigo, $"Falta {esperado.Nombre}.");
-                var variante = esperado.Tipo == DisenoNivel3.TIPOS_ENEMIGO.ESPECTRO ? "Espectro" : "CentinelaCiego";
+                var variante = esperado.Tipo == DisenoNivel3.TIPOS_ENEMIGO.ESPECTRO ? "Espectro"
+                    : esperado.Tipo == DisenoNivel3.TIPOS_ENEMIGO.CENTINELA_CIEGO ? "CentinelaCiego"
+                    : "Acechador";
                 Assert.AreEqual(RutaPrefab(variante), PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(enemigo.gameObject), esperado.Nombre);
                 Assert.AreEqual(new Vector2(esperado.X, esperado.Y + 0.05f), (Vector2)enemigo.transform.position, esperado.Nombre);
 
@@ -281,6 +284,38 @@ namespace Fragmentum.Tests
                 Assert.AreEqual(DisenoNivel3.Cintas[i].y + 0.05f, cinta.position.y + cinta.lossyScale.y * 0.5f, 1e-3f, "Cuelga de lo alto de su rama.");
                 Assert.AreEqual(ConstructorEcoIra.RutaMaterialSprite, AssetDatabase.GetAssetPath(dibujo.sharedMaterial), "Solo se ve con luz.");
             }
+        }
+
+        [Test]
+        public void ElClaro_TieneSusTresArboles_SinCollider_YElAcechadorEmbisteDentroDeEl()
+        {
+            var arboles = Todos<Arbol>(_nivel3).OrderBy(a => a.transform.position.x).ToList();
+            Assert.AreEqual(DisenoNivel3.Arboles.Length, arboles.Count);
+            for (var i = 0; i < arboles.Count; i++)
+            {
+                var arbol = arboles[i];
+                Assert.AreEqual(new Vector2(DisenoNivel3.Arboles[i], DisenoNivel3.PisadaDe("Claro").Y), (Vector2)arbol.transform.position, "De pie en el claro.");
+                Assert.AreEqual(DisenoNivel3.TamanoArbol, arbol.Tamano);
+                Assert.IsEmpty(arbol.GetComponentsInChildren<Collider2D>(), "Kael pasa por delante: no tiene collider.");
+                var tronco = arbol.GetComponentInChildren<SpriteRenderer>();
+                Assert.IsNotNull(tronco, "Un tronco provisional, hasta que llegue su arte.");
+                Assert.Less(tronco.sortingOrder, 0, "Por detrás de Kael y de los enemigos.");
+            }
+
+            var acechador = Todos<Acechador>(_nivel3).Single();
+            Assert.AreEqual(DisenoNivel3.LimitesAcechador, acechador.limites, "Embiste dentro del claro.");
+        }
+
+        [Test]
+        public void LosEspectrosEmpiezanDormidos_YLosCentinelasCiegosOyenConSuCono()
+        {
+            var espectros = Todos<Espectro>(_nivel3);
+            Assert.AreEqual(DisenoNivel3.Enemigos.Count(e => e.Tipo == DisenoNivel3.TIPOS_ENEMIGO.ESPECTRO), espectros.Count);
+            Assert.IsTrue(espectros.All(e => e.empiezaDormido), "Duermen hasta que una antorcha, Kael o un golpe los despierta.");
+            Assert.IsTrue(espectros.All(e => !e.GetComponent<EnemyController>().enabled), "Dormidos, su controlador está apagado.");
+
+            var centinelas = Todos<CentinelaCiego>(_nivel3);
+            Assert.AreEqual(DisenoNivel3.Enemigos.Count(e => e.Tipo == DisenoNivel3.TIPOS_ENEMIGO.CENTINELA_CIEGO), centinelas.Count);
         }
 
         [Test]

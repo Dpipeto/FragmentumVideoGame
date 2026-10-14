@@ -17,7 +17,8 @@ namespace Fragmentum.Tests.PlayMode
     /// - La antorcha se enciende con Interactuar solo al alcance, alumbra su tiempo, parpadea al
     ///   final, no se vuelve a encender y vuelve a estar lista cuando Kael reaparece.
     /// - El cepo solo se ve de cerca o con luz; al pisarlo quita 1, sujeta 1 s (ni andar, ni saltar,
-    ///   ni el dash) y suena: lo oye un Centinela Ciego, que no oye caminar. Al reaparecer, se rearma.
+    ///   ni el dash) y suena: lo oye un Centinela Ciego que lo tiene delante, que no oye caminar. Al
+    ///   reaparecer, se rearma.
     /// - La rama podrida cruje 0,3 s, se parte, vuelve a los 4 s y se delata con luz.
     /// - Los anillos de ruido salen al correr, no al caminar, y llegan hasta donde se oye.
     /// - La luz de Kael se enciende con su radio y no cuenta como luz para los Espectros.
@@ -197,15 +198,16 @@ namespace Fragmentum.Tests.PlayMode
             yield return CrearJugadorEnSuelo(new Vector2(-3f, 0f));
             Jugador.GetComponent<PlayerModoMovimiento>().EmitirRuido = true;
 
-            var objeto = Object.Instantiate(CargarPrefab(RutaCentinela), new Vector3(6f, 0.05f, 0f), Quaternion.identity);
+            // Detrás de Kael y mirando hacia el cepo: el chasquido le llega por delante (fase C: oye en un cono).
+            var objeto = Object.Instantiate(CargarPrefab(RutaCentinela), new Vector3(-7f, 0.05f, 0f), Quaternion.identity);
             Creados.Add(objeto);
-            var centinela = objeto.GetComponent<EnemyController>();
+            var centinela = objeto.GetComponent<CentinelaCiego>();
             yield return new WaitForSeconds(0.3f);
 
             Input.EjeHorizontal = 0.35f;
-            yield return ComprobarQueNunca(() => centinela.EstadoActual == ESTADOS_ENEMIGO.CHASE, 0.7f, "Caminando, el Centinela no oye a Kael.");
+            yield return ComprobarQueNunca(() => centinela.Alerta, 0.7f, "Caminando, el Centinela no oye a Kael.");
             yield return EsperarHasta(() => cepo.Estado == ESTADOS_CEPO.CLOSED, 3f, "que Kael pise el cepo");
-            yield return EsperarHasta(() => centinela.EstadoActual == ESTADOS_ENEMIGO.CHASE, 0.5f, "que el Centinela oiga el chasquido, a 6 u");
+            yield return EsperarHasta(() => centinela.Estado == ESTADOS_CENTINELA_CIEGO.ESCUCHA, 0.5f, "que el Centinela oiga el chasquido, a 7 u");
         }
 
         // --- Rama podrida ---

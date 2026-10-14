@@ -31,7 +31,7 @@ namespace Fragmentum.EditorTools
         public const string RutaEscena = "Assets/Scenes/Pruebas/PruebaEnemigos.unity";
 
         /// <summary>Variantes con prefab propio (la genérica usa el prefab base).</summary>
-        public static readonly string[] Variantes = { "SoldadoLava", "GolemCeniza", "Lamento", "Escultura", "Planidera", "Espectro", "CentinelaCiego" };
+        public static readonly string[] Variantes = { "SoldadoLava", "GolemCeniza", "Lamento", "Escultura", "Planidera", "Espectro", "CentinelaCiego", "Acechador" };
 
         /// <summary>La Medusa de Hielo no es un <see cref="EnemyController"/>: tiene su propio prefab.</summary>
         public const string Medusa = "MedusaHielo";
@@ -40,6 +40,9 @@ namespace Fragmentum.EditorTools
 
         /// <summary>El cuerpo de la Plañidera: del capuchón al borde de la túnica (la cola de agua no cuenta).</summary>
         public static readonly Vector2 TamanoPlanidera = new Vector2(1.2f, 2.8f);
+
+        /// <summary>El cuerpo del Acechador, un lobo enorme de sombra: de la cola al hocico y de las patas al lomo.</summary>
+        public static readonly Vector2 TamanoAcechador = new Vector2(2f, 1.4f);
 
         /// <summary>Radio de la Medusa (su campana mide ~1 u).</summary>
         public const float RadioMedusa = 0.45f;
@@ -97,6 +100,8 @@ namespace Fragmentum.EditorTools
                 "Miedo (Espectro): solo va a por el jugador cuando está a oscuras.");
             var ruido = Deteccion<DeteccionPorRuido>("PorRuido", sobrescribir,
                 "Miedo (Centinela Ciego): no ve; oye al jugador cuando corre.");
+            var tacto = Deteccion<DeteccionPorTacto>("PorTacto", sobrescribir,
+                "Miedo (Centinela Ciego y Acechador): solo nota al jugador si lo tiene encima. Su oído lo lleva su propia pieza.");
 
             Datos("Generico", sobrescribir, d =>
             {
@@ -218,31 +223,55 @@ namespace Fragmentum.EditorTools
                 d.tinte = Hex("3D5A8A");
             });
 
+            // Mundo 3 (Nivel3_Diseno.md, sección 5): duerme y es casi invisible (el componente Espectro).
             Datos("Espectro", sobrescribir, d =>
             {
                 d.nombreCanonico = "Espectro";
-                d.descripcion = "Miedo: solo se acerca si el jugador está a oscuras; la luz de una antorcha lo mantiene a raya.";
                 d.vidaMaxima = 2; d.danio = 1; d.danioContacto = 1;
                 d.velocidadPatrulla = 1.5f; d.velocidadPersecucion = 3.8f; d.esperaEnWaypoint = 0.8f;
                 d.deteccion = oscuridad; d.detectionRadius = 6f;
                 d.attackRadius = 1.2f; d.attackCooldown = 1f;
-                d.duracionAtaque = 0.45f; d.inicioVentanaGolpe = 0.2f; d.finVentanaGolpe = 0.35f;
                 d.damagedDuration = 0.3f; d.resistenciaRetroceso = 0f;
                 d.tinte = new Color(0.23f, 0.23f, 0.29f, 0.8f);
+                AvisoDelEspectro(d);
             });
 
+            // Mundo 3: no ve; oye en un cono (el componente CentinelaCiego). Su controlador solo nota el roce.
             Datos("CentinelaCiego", sobrescribir, d =>
             {
                 d.nombreCanonico = "Centinela Ciego";
-                d.descripcion = "Miedo: no ve. Oye al jugador cuando corre; caminar despacio es seguro.";
                 d.vidaMaxima = 5; d.danio = 2; d.danioContacto = 1;
                 d.velocidadPatrulla = 1f; d.velocidadPersecucion = 4f; d.esperaEnWaypoint = 1f;
-                d.deteccion = ruido; d.detectionRadius = 8f;
                 d.attackRadius = 1.4f; d.attackCooldown = 1.5f;
                 d.duracionAtaque = 0.6f; d.inicioVentanaGolpe = 0.3f; d.finVentanaGolpe = 0.45f;
                 d.damagedDuration = 0.3f; d.resistenciaRetroceso = 0.4f;
                 d.tinte = Hex("2D1B4E");
+                OidoDelCentinela(d, tacto);
             });
+
+            // Mundo 3 (Nivel3_Diseno.md, sección 5): el mini-jefe. De cerca es un EnemyController más
+            // (merodea y muerde, con hiperarmadura); el oído y la embestida los lleva Acechador.
+            Datos("Acechador", sobrescribir, d =>
+            {
+                d.nombreCanonico = "El Acechador";
+                d.descripcion = "Miedo (mini-jefe, vida 10): merodea por el claro, olfateando. Oye el doble de lejos que el " +
+                                "Centinela, en todas direcciones; al oír se agazapa 0,7 s y embiste hacia el ruido a 10 u/s. " +
+                                "Contra un árbol se queda aturdido 2,5 s y los golpes valen el doble; contra Kael, quita 2. Si " +
+                                "Kael se le pega, echa la cabeza atrás 0,5 s y muerde. Los golpes no lo interrumpen. Tocarlo " +
+                                "no hace daño.";
+                d.vidaMaxima = 10; d.danio = 1; d.danioContacto = 0;
+                d.velocidadPatrulla = 1f; d.velocidadPersecucion = 1.5f; d.esperaEnWaypoint = 1.5f;
+                d.deteccion = tacto; d.detectionRadius = 2.5f;
+                d.attackRadius = 2.1f; d.alturaAtaque = 1.5f; d.attackCooldown = 1.2f;
+                d.duracionAtaque = 0.9f; d.inicioVentanaGolpe = 0.5f; d.finVentanaGolpe = 0.65f;
+                d.hiperarmadura = true;
+                d.damagedDuration = 0.2f; d.resistenciaRetroceso = 1f; d.deathDelay = 1.5f;
+                d.tinte = Hex("5A4E6E");
+            });
+
+            // Los datos del Espectro y del Centinela Ciego existen desde la Fase 4: lo que cambió en la fase C
+            // del Mundo 3 se les aplica si siguen como los dejó el generador. Si los ajustaste a mano, no.
+            ActualizarDatosDelMiedo(tacto);
 
             AssetDatabase.SaveAssets();
             Debug.Log($"[Fragmentum] Datos de enemigos {(sobrescribir ? "restablecidos" : "comprobados")} en {CarpetaDatos}.");
@@ -250,6 +279,48 @@ namespace Fragmentum.EditorTools
 
         public static EnemyData CargarDatos(string nombre) =>
             AssetDatabase.LoadAssetAtPath<EnemyData>($"{CarpetaDatos}/{nombre}.asset");
+
+        /// <summary>
+        /// El golpe del Espectro avisa medio segundo: como solo se le ve entero al atacar, con los 0,2 s
+        /// de la Fase 4 no daba tiempo a verlo venir.
+        /// </summary>
+        private static void AvisoDelEspectro(EnemyData d)
+        {
+            d.descripcion = "Miedo: duerme hasta que una antorcha lo despierta, Kael pasa a 1,5 u o le pegan. Despierto, solo " +
+                            "se acerca si el jugador está a oscuras; si está en la luz de una antorcha, espera en su borde. Casi " +
+                            "invisible: se le ve entero bajo una antorcha y al atacar, que avisa medio segundo.";
+            d.duracionAtaque = 0.8f; d.inicioVentanaGolpe = 0.5f; d.finVentanaGolpe = 0.65f;
+        }
+
+        /// <summary>
+        /// El Centinela Ciego oye con su propia pieza (el cono, el aviso, ir hacia el ruido): su
+        /// controlador ya no persigue al oír, solo nota el roce (1,2 u).
+        /// </summary>
+        private static void OidoDelCentinela(EnemyData d, DeteccionData tacto)
+        {
+            d.descripcion = "Miedo: no ve, oye. Delante, hasta donde llega el ruido; detrás, la mitad. Al oír se para y ladea la " +
+                            "cabeza (0,6 s), va hacia donde oyó y lanza una estocada; si en 2 s no oye nada, vuelve a su ronda. " +
+                            "Si Kael lo roza, lo nota. Caminar despacio es seguro.";
+            d.deteccion = tacto;
+            d.detectionRadius = 1.2f;
+        }
+
+        private static void ActualizarDatosDelMiedo(DeteccionData tacto)
+        {
+            var espectro = CargarDatos("Espectro");
+            if (espectro != null && Mathf.Approximately(espectro.inicioVentanaGolpe, 0.2f) && Mathf.Approximately(espectro.duracionAtaque, 0.45f))
+            {
+                AvisoDelEspectro(espectro);
+                EditorUtility.SetDirty(espectro);
+            }
+
+            var centinela = CargarDatos("CentinelaCiego");
+            if (centinela != null && centinela.deteccion is DeteccionPorRuido)
+            {
+                OidoDelCentinela(centinela, tacto);
+                EditorUtility.SetDirty(centinela);
+            }
+        }
 
         private static T Deteccion<T>(string nombre, bool sobrescribir, string descripcion) where T : DeteccionData
         {
@@ -438,6 +509,18 @@ namespace Fragmentum.EditorTools
                 {
                     PrepararPlanidera(instancia, controlador);
                 }
+                else if (nombre == "Espectro")
+                {
+                    PrepararEspectro(instancia, controlador);
+                }
+                else if (nombre == "CentinelaCiego")
+                {
+                    PrepararCentinelaCiego(instancia, controlador);
+                }
+                else if (nombre == "Acechador")
+                {
+                    PrepararAcechador(instancia, controlador);
+                }
 
                 PrefabUtility.SaveAsPrefabAsset(instancia, $"{CarpetaPrefabs}/Enemigo_{nombre}.prefab");
             }
@@ -572,6 +655,88 @@ namespace Fragmentum.EditorTools
             Asignar(planidera, "arco", p => p.objectReferenceValue = arco);
             Asignar(planidera, "pivote", p => p.objectReferenceValue = pivote);
             Asignar(planidera, "sprite", p => p.objectReferenceValue = sprite);
+        }
+
+        /// <summary>
+        /// El Espectro: el cuerpo de los Ecos y su sueño, su casi invisibilidad y su espera en el borde
+        /// de la luz. Empieza dormido: el controlador, apagado (como el de la Escultura).
+        /// </summary>
+        private static void PrepararEspectro(GameObject instancia, EnemyController controlador)
+        {
+            var serializado = new SerializedObject(controlador);
+            controlador.enabled = false;
+            var espectro = instancia.AddComponent<Espectro>();
+            Asignar(espectro, "pivote", p => p.objectReferenceValue = serializado.FindProperty("pivote").objectReferenceValue);
+            Asignar(espectro, "sprite", p => p.objectReferenceValue = serializado.FindProperty("sprite").objectReferenceValue);
+        }
+
+        /// <summary>El Centinela Ciego: su oído y una bayoneta que llega a 1,4 u de su centro.</summary>
+        private static void PrepararCentinelaCiego(GameObject instancia, EnemyController controlador)
+        {
+            var serializado = new SerializedObject(controlador);
+            if (serializado.FindProperty("arma").objectReferenceValue is Hitbox arma)
+            {
+                arma.transform.localPosition = new Vector3(0.9f, 0.9f, 0f);
+                arma.GetComponent<BoxCollider2D>().size = new Vector2(1.1f, 0.6f);
+            }
+
+            var oido = instancia.AddComponent<CentinelaCiego>();
+            Asignar(oido, "pivote", p => p.objectReferenceValue = serializado.FindProperty("pivote").objectReferenceValue);
+            Asignar(oido, "sprite", p => p.objectReferenceValue = serializado.FindProperty("sprite").objectReferenceValue);
+        }
+
+        /// <summary>
+        /// El Acechador: un cuerpo largo y bajo (<see cref="TamanoAcechador"/>), el mordisco delante,
+        /// sin daño por contacto, y la zona de daño de la embestida, apagada hasta que embiste.
+        /// </summary>
+        private static void PrepararAcechador(GameObject instancia, EnemyController controlador)
+        {
+            var serializado = new SerializedObject(controlador);
+            var sprite = serializado.FindProperty("sprite").objectReferenceValue as SpriteRenderer;
+            var arma = serializado.FindProperty("arma").objectReferenceValue as Hitbox;
+            var contacto = serializado.FindProperty("contacto").objectReferenceValue as Hitbox;
+            var pivote = serializado.FindProperty("pivote").objectReferenceValue as Transform;
+            var mitad = TamanoAcechador.y * 0.5f;
+
+            var cuerpo = instancia.GetComponent<CapsuleCollider2D>();
+            cuerpo.direction = CapsuleDirection2D.Horizontal;
+            cuerpo.size = TamanoAcechador;
+            cuerpo.offset = new Vector2(0f, mitad);
+
+            if (sprite != null)
+            {
+                // La cápsula provisional mide 1 × 2: tumbada a lo largo del cuerpo.
+                sprite.transform.localPosition = new Vector3(0f, mitad, 0f);
+                sprite.transform.localScale = new Vector3(TamanoAcechador.x, mitad, 1f);
+            }
+
+            if (arma != null)
+            {
+                arma.transform.localPosition = new Vector3(1.3f, mitad, 0f);
+                arma.GetComponent<BoxCollider2D>().size = new Vector2(1.2f, 1f);
+            }
+
+            if (contacto != null)
+            {
+                contacto.gameObject.SetActive(false);
+            }
+
+            // La embestida: todo el cuerpo y un poco por delante. Solo encendida mientras embiste.
+            var objeto = new GameObject("Embestida") { layer = Capa(Capas.EnemyWeapon) };
+            objeto.transform.SetParent(pivote != null ? pivote : instancia.transform, false);
+            objeto.transform.localPosition = new Vector3(0.2f, mitad, 0f);
+            var zona = objeto.AddComponent<BoxCollider2D>();
+            zona.isTrigger = true;
+            zona.size = new Vector2(TamanoAcechador.x + 0.2f, TamanoAcechador.y - 0.1f);
+            var embestida = objeto.AddComponent<Hitbox>();
+            Asignar(embestida, "danio", p => p.intValue = 2);
+            Asignar(embestida, "objetivos", p => p.intValue = Capas.Mascara(Capas.Player));
+            objeto.SetActive(false);
+
+            var acechador = instancia.AddComponent<Acechador>();
+            Asignar(acechador, "embestida", p => p.objectReferenceValue = embestida);
+            Asignar(acechador, "pivote", p => p.objectReferenceValue = pivote);
+            Asignar(acechador, "sprite", p => p.objectReferenceValue = sprite);
         }
 
         /// <summary>
@@ -717,8 +882,8 @@ namespace Fragmentum.EditorTools
                 "<b>Pista de enemigos</b> (F2 muestra u oculta su estado)\n" +
                 "x = 14 Genérico · 30 Soldado de lava (rápido, no ve a través de muros)\n" +
                 "x = 46 Golem de Ceniza (lento, pesado, vida 10) · 62 Lamento (Tristeza, lento)\n" +
-                "x = 78 Espectro: en el círculo de luz (x = 71) no se acerca\n" +
-                "x = 94 Centinela Ciego: te oye si corres; con mando, camina despacio\n" +
+                "x = 78 Espectro: duerme hasta que pasas a 1,5 u; despierto, en el círculo de luz (x = 71) no se acerca\n" +
+                "x = 94 Centinela Ciego: te oye si corres delante de él (detrás, solo de cerca); se para, va al ruido y apuñala\n" +
                 "x = 110 enemigo sin ruta en una plataforma: no se tira por el borde\n" +
                 "x = 128 Eco de la Ira (con arte): patrulla con pausas en Idle; el golpe solo hace daño en a2 y a3\n" +
                 "Acércate por la izquierda y por la derecha: debe atacar por ambos lados.");

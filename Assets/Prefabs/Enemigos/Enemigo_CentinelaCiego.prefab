@@ -12,6 +12,14 @@ PrefabInstance:
       propertyPath: datos
       value: 
       objectReference: {fileID: 11400000, guid: a61cda9b25fdd6b47b5bf18aeb71d3bb, type: 2}
+    - target: {fileID: 2708979108300169923, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2708979108300169923, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 5836579621604681419, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
       propertyPath: m_Name
       value: Enemigo_CentinelaCiego
@@ -56,8 +64,57 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8782597778118767508, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+      propertyPath: m_Size.x
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8782597778118767508, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+      propertyPath: m_Size.y
+      value: 0.6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5836579621604681419, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 233400036470583232}
   m_SourcePrefab: {fileID: 100100000, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+--- !u!212 &5695830090212595616 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7357180718059526174, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 2959519886630506430}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8726433626968085242 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5767095229146733892, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 2959519886630506430}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8785926482789083509 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5836579621604681419, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 2959519886630506430}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &233400036470583232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8785926482789083509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27736ec994cf9c44ab3d340b29c30b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Enemies.CentinelaCiego
+  oidoDelante: 1
+  oidoDetras: 0.5
+  tiempoEscucha: 0.6
+  velocidadIr: 4
+  distanciaEstocada: 1
+  tiempoMaximoIr: 4
+  tiempoBusqueda: 2
+  pivote: {fileID: 8726433626968085242}
+  sprite: {fileID: 5695830090212595616}
+  ladeo: 14
+  colorAviso: {r: 0.72, g: 0.66, b: 0.86, a: 1}

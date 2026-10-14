@@ -19,7 +19,8 @@ namespace Fragmentum.Tests.PlayMode
     /// El Nivel 3 montado, jugándose: correr hace ruido y caminar no, la trinchera guarda la
     /// partida, las raíces del callejón no agarran y el puesto del vigía se sostiene (fase A); y la
     /// oscuridad cambia por tramos con Kael llevando su luz, y la primera antorcha, con su aviso, se
-    /// enciende y enseña el primer cepo (fase B). El Nivel 1 sigue con luz. Las medidas las
+    /// enciende y enseña el primer cepo (fase B); y esa antorcha despierta al primer Espectro, que
+    /// espera en el borde de su luz (fase C). El Nivel 1 sigue con luz. Las medidas las
     /// comprueban <c>DisenoNivel3Tests</c> y <c>EscenaNivel3Tests</c>; aquí, que funcionan en el
     /// juego.
     /// </summary>
@@ -181,6 +182,30 @@ namespace Fragmentum.Tests.PlayMode
             yield return new WaitForSeconds(0.2f);
             Assert.IsTrue(cepo.SeVe, "Y su luz enseña el primer cepo.");
             Assert.IsFalse(Interfaz.Hud.Interaccion.Visible, "Encendida, el aviso se va.");
+        }
+
+        [UnityTest]
+        public IEnumerator LaPrimeraAntorcha_DespiertaAlPrimerEspectro_QueNoSeAcercaAKaelEnLaLuz()
+        {
+            yield return EntrarEnNivel3();
+            var espectros = Object.FindObjectsByType<Espectro>(FindObjectsInactive.Exclude).OrderBy(e => e.transform.position.x).ToList();
+            Assert.AreEqual(6, espectros.Count);
+            Assert.IsTrue(espectros.All(e => e.Dormido), "Al empezar, todos duermen.");
+
+            var antorcha = Object.FindObjectsByType<Antorcha>(FindObjectsInactive.Exclude).OrderBy(a => a.transform.position.x).First();
+            yield return LlevarJugadorA(new Vector2(antorcha.transform.position.x - 1f, antorcha.transform.position.y + 0.05f));
+            Assert.IsTrue(antorcha.Encender());
+            yield return null;
+            Assert.IsFalse(espectros[0].Dormido, "La primera antorcha despierta al primer Espectro…");
+            Assert.IsTrue(espectros.Skip(1).All(e => e.Dormido), "…y a ninguno más.");
+
+            for (var fin = Time.time + 2f; Time.time < fin;)
+            {
+                Assert.GreaterOrEqual(Vector2.Distance(espectros[0].transform.position, Jugador.transform.position), 3f, "Con Kael en la luz, no se le acerca.");
+                yield return null;
+            }
+
+            Assert.AreEqual(ESTADOS_ESPECTRO.AL_BORDE, espectros[0].Estado, "Espera en el borde de la luz.");
         }
 
         [UnityTest]

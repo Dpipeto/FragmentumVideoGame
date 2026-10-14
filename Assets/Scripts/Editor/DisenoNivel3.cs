@@ -35,9 +35,11 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// Sube al cambiar el recorrido: <see cref="PreparadorNivel"/> lo vuelve a montar entero. La 3
-        /// es la fase B: la oscuridad, las antorchas, los cepos, las ramas que ceden y las cintas.
+        /// es la fase B: la oscuridad, las antorchas, los cepos, las ramas que ceden y las cintas. La 4,
+        /// la fase C: el Acechador y los árboles del claro (el sueño de los Espectros y el oído de los
+        /// Centinelas van en sus prefabs).
         /// </summary>
-        public const int Version = 3;
+        public const int Version = 4;
 
         /// <summary>Base de todos los bloques: por debajo de lo que enseña la cámara (−7).</summary>
         public const float Fondo = -8f;
@@ -105,7 +107,8 @@ namespace Fragmentum.EditorTools
         public enum TIPOS_ENEMIGO
         {
             ESPECTRO,
-            CENTINELA_CIEGO
+            CENTINELA_CIEGO,
+            ACECHADOR
         }
 
         /// <summary>Un enemigo de pie en (X, Y), con su ruta de patrulla de Desde a Hasta.</summary>
@@ -336,8 +339,8 @@ namespace Fragmentum.EditorTools
         /// Los enemigos. En la linde, dos Espectros (Anexo A); en el bosque cerrado, tres Centinelas
         /// Ciegos y cuatro Espectros (Anexo A): uno de cada en la salida de la trinchera, un
         /// Centinela en el puesto del vigía, un Espectro en la bajada y, en la hondonada, la
-        /// trampa, un Centinela y dos Espectros. El Acechador, el mini-jefe del claro, llega en la
-        /// fase C.
+        /// trampa, un Centinela y dos Espectros. En el claro, el Acechador, el mini-jefe, que merodea
+        /// entre sus tres árboles.
         /// </summary>
         public static readonly Enemigo[] Enemigos =
         {
@@ -350,7 +353,21 @@ namespace Fragmentum.EditorTools
             new Enemigo("CentinelaCiego_3", TIPOS_ENEMIGO.CENTINELA_CIEGO, 63.5f, -4f, 61.5f, 66f),
             new Enemigo("Espectro_5", TIPOS_ENEMIGO.ESPECTRO, 69f, -4f, 68f, 70f),
             new Enemigo("Espectro_6", TIPOS_ENEMIGO.ESPECTRO, 71.5f, -4f, 70.5f, 72.5f),
+            new Enemigo("Acechador", TIPOS_ENEMIGO.ACECHADOR, 100f, 0f, 91f, 105f),
         };
+
+        /// <summary>
+        /// Los tres árboles gruesos del claro, por la x de su pie. Kael pasa por delante; el Acechador,
+        /// que embiste a ciegas hacia el ruido, se estrella contra ellos. Entre uno y otro caben él
+        /// (2 u de largo) y la carrera para embestir.
+        /// </summary>
+        public static readonly float[] Arboles = { 93f, 98f, 103f };
+
+        /// <summary>Lo que mide el tronco de un árbol del claro: de ancho y de alto.</summary>
+        public static readonly Vector2 TamanoArbol = new Vector2(1.2f, 6f);
+
+        /// <summary>El territorio del Acechador: el claro. Embistiendo, frena al llegar a un extremo.</summary>
+        public static Vector2 LimitesAcechador => new Vector2(PisadaDe("Claro").Desde, PisadaDe("Claro").Hasta);
 
         public const float Inicio = 2f;
 

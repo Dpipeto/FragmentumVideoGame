@@ -12,8 +12,9 @@ namespace Fragmentum.EditorTools
     /// valor de diseño nuevo no llegaría a ellos de otra forma).
     ///
     /// <b>El criterio.</b> Un enemigo común vale 100. El que aguanta más o pega más fuerte, algo
-    /// más. Un mini-jefe (el Golem de Ceniza, la Plañidera) vale varias veces un enemigo común:
-    /// es la pelea que el jugador puede saltarse corriendo, y el puntaje paga por no saltársela.
+    /// más. Un mini-jefe (el Golem de Ceniza, la Plañidera, el Acechador) vale varias veces un
+    /// enemigo común: es la pelea que el jugador puede saltarse corriendo (o caminando, en el
+    /// claro del Miedo), y el puntaje paga por no saltársela.
     /// Un jefe vale más que todo lo demás de su mundo junto a su mini-jefe, y cada mundo, más que
     /// el anterior. El bono por tiempo da 5 puntos por segundo que sobre: cruzar un nivel en la
     /// mitad de su tiempo con bono vale más o menos lo que su jefe, así que correr y pelear
@@ -38,10 +39,11 @@ namespace Fragmentum.EditorTools
             ("Escultura", 250),
             ("GolemCeniza", 500),
             ("Planidera", 600),
+            ("Acechador", 700),
         };
 
         /// <summary>Los que son mini-jefes: valen varias veces un enemigo común.</summary>
-        public static readonly string[] MiniJefes = { "GolemCeniza", "Planidera" };
+        public static readonly string[] MiniJefes = { "GolemCeniza", "Planidera", "Acechador" };
 
         /// <summary>Los jefes, por el nombre de su asset en <c>Assets/Data/Jefes</c>.</summary>
         public static readonly (string asset, int puntos)[] Jefes =

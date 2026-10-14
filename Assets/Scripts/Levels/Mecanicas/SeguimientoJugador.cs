@@ -9,7 +9,8 @@ namespace Fragmentum.Levels.Mecanicas
     /// Lo que una pieza del escenario necesita de Kael: encontrarlo (por su tag, sin buscarlo en
     /// cada fotograma) y enterarse de cuándo reaparece en un checkpoint tras morir (su
     /// <c>Health.OnRevivir</c>). Lo usan las antorchas y los cepos del mundo del Miedo, que vuelven a
-    /// estar listos «una vez por vida».
+    /// estar listos «una vez por vida», y los enemigos de ese mundo que oyen y miran a Kael por su
+    /// cuenta (<c>RelevoDelControlador</c>), que no necesitan el aviso.
     /// </summary>
     internal sealed class SeguimientoJugador
     {
