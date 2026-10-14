@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.44 — Mundo 2: lo que salió de jugarlo (aire, tapón, plaza, muralla, esquirlas y checkpoints que curan), 2026-10-12.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.46 — Propuesta del Mundo 3 (Miedo) y prompts de sus enemigos y su jefe, 2026-10-13.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -10,18 +10,22 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
-| N39 | **Vuelve a jugar el Nivel 2 con lo que pediste** (rama `nivel2-recorrido`), y pasa por el checkpoint del Nivel 1. | Son tus respuestas a N31, y cambian cómo se juega: **el aire dura 10 s** (eran 15; cada tramo sin aire se hace en unos 8); **ante el tapón Kael dice** «Este hielo no cede a un golpe cualquiera. Hace falta el Ataque Cargado: contener el golpe… y soltarlo.» (al llegar a 4 u de él, y otra vez si lo agrietas con un golpe normal sin haberla oído); **la plaza de la Plañidera mide 16 u** y no 6, con ella en el centro; **sus esquirlas son vez y media más grandes**; **la muralla es de hielo liso y no agarra** (ya no se sube con el salto de pared); y **los checkpoints curan** toda la vida cada vez que los tocas, también los del Nivel 1. | Dime si 10 s se quedan cortos o siguen sobrando (es un número de `OxigenoJugador`), si la línea de Kael te vale tal cual (la escribí yo: está en `GuionMundos` y en `Docs/Diseno/Guion.md`), si 16 u son demasiadas para la Plañidera y si las esquirlas ya se ven. **El atrezo lo decidí yo, como dijiste:** una estatua en el inicio y otra en la plaza este, faroles en el inicio, el puente y la antesala, estandartes sobre el puente y bajo el balcón de la arena, rocas y una columna rota en la plaza, la mesa junto a la silla vacía (la campana es 3 u más ancha para que quepa), algas, la campana caída, otra columna y rocas en la calle hundida, y dos cadenas junto a la campana del campanario. Lo que no te guste se quita borrando su línea de `DisenoNivel2.Decorados`. El nivel mide ahora 115 u (medía 102): todo lo que hay del tapón en adelante se corrió. |
-| N40 | **Genera las imágenes de las puertas, de sus cinemáticas y lo que le falta a la Centinela.** | Me pediste los prompts. La salida de cada nivel es un rectángulo translúcido y el cierre de cada mundo, tres frases sobre negro. A la Centinela le faltan el dibujo de la caída del salto y, opcional, `R2`. | Los prompts están en **`Docs/Diseno/Prompts_Puertas.md`** (las dos puertas de salida, con cuatro imágenes cada una; las dos cinemáticas de salida, con dos planos cada una; y, opcionales, la verja de la arena y la bandera del checkpoint) y al final de **`Docs/Diseno/Prompts_Gemini.md`** (la caída del salto, tres imágenes, y `R2`). **Antes de generar, mira las decisiones que tomé yo** (arriba del primer archivo): cada puerta lleva un emblema que cambia al abrirse (el puño que se abre; el ojo que se abre), por la puerta abierta se ve la luz del mundo siguiente, miden 3 × 4 u, y al salir de la Tristeza el fragmento azul le tapa a Kael el hueco del antebrazo izquierdo. Primero las puertas: cada cinemática adjunta la suya. |
-| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. **Del Mundo 2** hay nueve diferencias más, listadas al final de `Docs/Diseno/Nivel2_Diseno.md` (sección 9). Las tres últimas son del 2026-10-12: el aire dura 10 s y no 15, los checkpoints curan y el nivel mide unos 115 u (las secciones van de 0 a 46, de 46 a 74 y de 74 a 109). |
+| N44 | **Aprueba la propuesta del Mundo 3** (o cámbiala). | Empezamos el Mundo 3 como el 2: primero el mundo, sus enemigos y su jefe. Está en **`Docs/Diseno/Nivel3_Diseno.md`**, con su esquema: la linde con las antorchas (la luz enseña, pero despierta a los Espectros), el bosque cerrado a oscuras con la trinchera, los Centinelas Ciegos y el laberinto de dos rutas, el claro con un mini-jefe nuevo (el Acechador) y la arena del Espectro del Pavor, invisible salvo al avisar, con sus tres sombras en la segunda fase. Mucho de lo que pide ya estaba programado desde la Fase 4 (el sigilo, la detección en la oscuridad y por ruido, la invisibilidad). | Responde a las **nueve decisiones de la sección 9**; con «haz lo que recomiendas» me vale. Cuando la apruebes empiezo la fase A (el recorrido) y escribo la segunda tanda de prompts (escenario, mecánicas, fondo, cinemáticas y puertas). |
+| N45 | **Genera los enemigos y el jefe del Mundo 3.** | Sus prompts ya están en **`Docs/Diseno/Prompts_Mundo3.md`**, con lo que aprendimos en el Mundo 2 (la maestra con todo lo que no puede faltar, que no cambie el píxel, margen alrededor). El Espectro sale editando los 12 fotogramas del Eco, como el Lamento: sus bases ya están en `Tesis/Imagenes/Mundo3/Espectro/Bases/`. | **El Espectro (A1) y el Espectro del Pavor (B y C) se pueden pedir ya.** El Centinela Ciego (A2) y el Acechador (A3) dependen de las decisiones 5 y 6 de N44: si dices que sí, también. Guárdalo todo en `Tesis/Imagenes/Mundo3/<Pieza>/` y avísame por paquetes. |
+| N41 | *Para más adelante.* **La portada del menú.** | Lo dejaste en pendientes el 2026-10-13. Mientras tanto, el menú lleva el plano 7 de la cinemática inicial. | El prompt sigue en **`Docs/Diseno/Prompt_Portada.md`**. Cuando la tengas, el menú la usa sola. |
+| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. **Del Mundo 2** hay nueve diferencias más, listadas al final de `Docs/Diseno/Nivel2_Diseno.md` (sección 9). Las tres últimas son del 2026-10-12: el aire dura 10 s y no 15, los checkpoints curan y el nivel mide unos 115 u. **Desde el 2026-10-13 los dos niveles tienen tres secciones y la arena** (el Anexo dice dos y la arena): el Nivel 1 va de 0 a 25, de 25 a 55, de 55 a 100 (la forja) y la arena de 100 a 125, con tres checkpoints (x 43, 57,5 y 94,5); el Nivel 2, de 0 a 40, de 40 a 70, de 70 a 100 (el canal) y la arena de 100 a 133 (139 u en total). Y **el puntaje sustituye a las monedas**: si la tesis habla de monedas o de economía, ahora es puntaje por enemigos, jefe y tiempo. |
 | N3 | *En curso.* **Clips de Kael que faltan:** daño primero; después wall slide (y, para la Fase 10, nado). El dash ✔, la muerte ✔ y agacharse ✔ ya están. | El daño se ve en cada partida: hoy sigue el clip anterior y parpadea. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
-| N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Tienen arte los que salen en el Nivel 1 y, desde la v0.42, todos los del Mundo 2. Faltan los de los mundos 3 en adelante. | Ver «Arte que más necesito», justo debajo. |
+| N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Tienen arte los que salen en el Nivel 1 y, desde la v0.42, todos los del Mundo 2. Los del Mundo 3 ya tienen prompts (N45). Faltan los de los mundos 4 en adelante. | Ver «Arte que más necesito», justo debajo. |
 
 ### Arte que más necesito, por urgencia
 
 1. **Centinela Ardiente:** ✔ *recibida.* Los 29 sprites ya están importados y la integración
    sigue por fases (B5). Opcional, según su LEEME: rehacer `R2`, que salió sobreexpuesto. Basta
    con sustituir el PNG en `Assets/Sprites/Jefes/Centinela`: los ajustes se aplican solos.
-   **El prompt está al final de `Docs/Diseno/Prompts_Gemini.md`** (N40).
+   **Llegó el `R2` nuevo** (`Jefe1 animaciones/Rugido/R2.jpg`), y está pendiente de meter: el
+   script de la Centinela (`Jefe1 animaciones/script/limpiar_centinela.py`) se escribió en otra
+   máquina y lee imágenes que no están en este disco, así que no se puede volver a pasar entero.
+   Hay que limpiar solo `R2` y encajarlo en el lienzo común de los otros 28. Lo hago en la próxima.
 2. **Kael: daño** (N3). Se ve en cada partida. La muerte ✔ y agacharse ✔ ya están (v0.33).
 3. **Golem de Ceniza:** ✔ *recibido* (15 fotogramas), en integración por fases en la rama
    `golem-mecanicas`. Opcional: rehacer **A2** (el LEEME trae el prompt); el ataque funciona sin él.
@@ -32,10 +36,45 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 6. **Efectos de la Centinela:** **la onda** ✔ (v0.32) y **la erupción** entera ✔ (v0.34): la
    grieta que avisa, el brote, la columna que arde y el derrumbe. **Falta la caída del salto:**
    la marca que avisa mientras vuela, el golpe y lo que queda (3 imágenes). Hoy la enseñan solo
-   J4 y J5. El prompt, editando la onda, está al final de `Docs/Diseno/Prompts_Gemini.md` (N40).
-7. **Las puertas de salida y sus cinemáticas** (N40): 4 imágenes por puerta (Ira y Tristeza) y
-   2 planos por cinemática. Prompts en `Docs/Diseno/Prompts_Puertas.md`, que trae también, por
-   si los quieres, los de la verja de la arena y la bandera del checkpoint.
+   J4 y J5. El prompt, editando la onda, está al final de `Docs/Diseno/Prompts_Gemini.md`. No
+   estaba en la tanda del 2026-10-13: no he encontrado `Caida1`-`Caida3`.
+7. **Las puertas de salida y sus cinemáticas:** ✔ *recibidas y montadas* (v0.45), con las verjas
+   y los checkpoints de los dos mundos. `SalidaTristeza2` llegó como la copia pequeña del chat
+   (1024 × 572) y con un dibujo más suave que su pareja: se bajó a la misma rejilla y funciona,
+   pero si la regeneras a tamaño completo, la cambio.
+8. **La portada del menú** (N41): el prompt está en `Docs/Diseno/Prompt_Portada.md`.
+9. **Los enemigos y el jefe del Mundo 3** (N45): el Espectro (12, editando el Eco), el Centinela
+   Ciego (13), el Acechador (17) y el Espectro del Pavor (26, por AI Studio), con sus hojas, su
+   luciérnaga y el Fragmento del Miedo. Prompts en `Docs/Diseno/Prompts_Mundo3.md`.
+
+### Resuelto en la v0.46
+
+- **N42: los dos niveles alargados están perfectos**, con su puntaje, su tiempo y su guardado.
+- **N43: la carpeta `limpios` volvió a `Tesis/Imagenes`.** Los scripts que la traen al proyecto
+  la buscan ahí primero (y, por si acaso, en `Mundo1`); comprobado: todo sigue al día.
+- **N41, la portada del menú,** queda para más adelante.
+- **Empieza el Mundo 3** con su propuesta (N44) y los prompts de sus enemigos y su jefe (N45).
+
+### Resuelto en la v0.45
+
+- **N39: el Nivel 2 está perfecto.** **N40: las imágenes están hechas** y las decisiones de las
+  puertas te valieron. Montadas: la puerta de salida de cada mundo (cerrada hasta recoger el
+  fragmento; luego se entreabre y se abre), la verja que cierra la arena (la de la Ira, repetida
+  hasta el techo; la de la Tristeza, con un muro de hielo encima), el checkpoint (brasero y farol,
+  apagado y encendido) y la cinemática de salida de cada mundo (sus dos planos con las tres frases
+  del cierre, 14 s, se puede saltar). Limpiadas con `limpiar_puertas.py` y traídas con
+  `Herramientas/traer_arte_puertas.py`.
+- **Puntaje en lugar de monedas.** Quité del todo el código de las monedas, como elegiste: en
+  `GameManager.cs` cambiaron **seis líneas, no cuatro** como te dije (las cinco que nombraban a
+  `EconomyManager` y la que marcaba la migración de las monedas de la v1, que también se fue);
+  nada de su lógica. Lo demás va en piezas nuevas (`MarcadorNivel`, `ReglasPuntaje`,
+  `TablaPuntaje`, `ContadorPuntaje`). Se ve en el HUD, en el fin de nivel (el desglose y si es
+  récord), en el selector (el mejor de cada mundo) y en el menú (la suma).
+- **El menú:** Cinzel para títulos, menús y nombres y Alegreya para los diálogos (las elegiste;
+  van con su licencia OFL en `Resources/Fuentes`), la imagen de fondo con el menú a la izquierda,
+  y al pie «Creado por David Felipe Garzón Barbosa · Juan Diego Romero Jiménez».
+- **Los dos niveles, más largos** (N42): la forja (+45 u) y el canal (+30 u). Diseño y razones en
+  `Nivel1_Diseno.md` y `Nivel2_Diseno.md`, con sus esquemas al día.
 
 ### Resuelto en la v0.44
 
@@ -903,8 +942,8 @@ escena, en ese orden. Un nivel sin escena aparece «en construcción» en el sel
 |---|---|---|---|---|
 | `Menu_Inicial` | ✔ generada | ✔ (0) | Fondo y logo (hoy, texto sobre color liso) | P3 |
 | `Niveles` (selector) | ✔ generada | ✔ (1) | Íconos por mundo (B9) | P3 |
-| `Nivel1` (Ira) | ✔ Montada con su recorrido de diseño (v0.32, `DisenoNivel1`): tres secciones pintadas con el tileset, 7 Ecos y el Golem, las mecánicas, checkpoint en x 43 y la arena de 25 × 15 con la Centinela. | ✔ (2) | ✔ Probada por ti (v0.34): solo fallaba la línea del jefe en partida nueva, ya corregida. | P1 |
-| `Nivel2` (Tristeza) | ✔ Montada con su recorrido de diseño (v0.36, `DisenoNivel2`), en bloques de color: agua, hielo, 3 Lamentos, 2 checkpoints y la arena de 25 × 15. ✔ Sus mecánicas (v0.37): tapón rompible, placas flotantes, oxígeno, velo, ecos de intentos y eco de memoria. ✔ Sus enemigos (v0.38 y v0.39): Lamentos que pesan, una Escultura dormida, Medusas y la Plañidera, el mini-jefe. ✔ Su jefe (v0.41): la Doncella, con las tres franjas de la arena que inunda y congela. | ✔ (3) | ✔ Con su arte y sus cinemáticas (v0.42 y v0.43) y probada por ti (v0.44: aire, tapón, plaza, muralla y esquirlas). Falta que la vuelvas a jugar (N39), el sonido y las puertas (N40). | P1 |
+| `Nivel1` (Ira) | ✔ Montada con su recorrido de diseño (v0.32, `DisenoNivel1`), pintada con el tileset: 10 Ecos y el Golem, las mecánicas, la arena de 25 × 15 con la Centinela y, desde la v0.45, la forja (x 55 a 100), tres checkpoints (x 43, 57,5 y 94,5) y sus puertas, verja y braseros. | ✔ (2) | ✔ Probada por ti (v0.34). Falta que juegues la forja (N42). | P1 |
+| `Nivel2` (Tristeza) | ✔ Montada con su recorrido de diseño (v0.36, `DisenoNivel2`), en bloques de color: agua, hielo, 3 Lamentos, 2 checkpoints y la arena de 25 × 15. ✔ Sus mecánicas (v0.37): tapón rompible, placas flotantes, oxígeno, velo, ecos de intentos y eco de memoria. ✔ Sus enemigos (v0.38 y v0.39): Lamentos que pesan, una Escultura dormida, Medusas y la Plañidera, el mini-jefe. ✔ Su jefe (v0.41): la Doncella, con las tres franjas de la arena que inunda y congela. | ✔ (3) | ✔ Con su arte y sus cinemáticas (v0.42 y v0.43) y probada por ti (v0.44: aire, tapón, plaza, muralla y esquirlas). Probada otra vez por ti (N39). Desde la v0.45 tiene el canal (x 74 a 104) y sus puertas, verja y faroles; falta que juegues el canal (N42) y el sonido. | P1 |
 | Nivel 3 (Miedo) | ✗ | ✗ | idem | P2 |
 | Nivel 4 (Culpa) | ✗ | ✗ | idem | P2 |
 | Nivel 5 (Esperanza) | ✗ | ✗ | idem | P2 |
