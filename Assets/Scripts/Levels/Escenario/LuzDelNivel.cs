@@ -34,6 +34,9 @@ namespace Fragmentum.Levels.Escenario
     ///
     /// No hace nada hasta que se activa: lo hace el <c>LevelManager</c> si las reglas del nivel piden
     /// oscuridad (<c>LevelData.reglas.oscuridad</c>). Así la escena se edita con luz.
+    ///
+    /// El Espectro del Pavor la usa en su combate: con su grito la oscuridad late (<see cref="Latir"/>)
+    /// y, al vencerlo, retrocede (<see cref="Retroceder"/>): la luz sube y ya no vuelve a bajar.
     /// </summary>
     [DisallowMultipleComponent]
     public class LuzDelNivel : MonoBehaviour
@@ -50,8 +53,19 @@ namespace Fragmentum.Levels.Escenario
         private Transform _objetivo;
         private float _intensidadInicial;
         private Color _colorInicial;
+        private float _finLatido = float.NegativeInfinity;
+        private bool _retrocedida;
+        private float _luzTrasRetroceder;
+        private Color _colorTrasRetroceder;
+        private float _velocidadRetroceso;
 
         public bool Activa { get; private set; }
+
+        /// <summary>¿Retrocedió ya la oscuridad? (Venció al Espectro del Pavor.)</summary>
+        public bool Retrocedida => _retrocedida;
+
+        /// <summary>¿Está latiendo? (El grito del Espectro del Pavor.)</summary>
+        public bool Latiendo => Time.time < _finLatido;
 
         /// <summary>El tramo en el que está lo que sigue (−1 sin tramos).</summary>
         public int TramoActual { get; private set; } = -1;
@@ -117,6 +131,28 @@ namespace Fragmentum.Levels.Escenario
             }
         }
 
+        /// <summary>La oscuridad late durante <paramref name="segundos"/>: la luz sube y baja a golpes.</summary>
+        public void Latir(float segundos) => _finLatido = Time.time + Mathf.Max(0f, segundos);
+
+        /// <summary>
+        /// La oscuridad retrocede: la luz sube hasta <paramref name="intensidad"/> en
+        /// <paramref name="segundos"/>, con el color de <paramref name="color"/>, y ya no cambia por
+        /// tramos. Es lo que pasa al vencer al Espectro del Pavor: el bosque se ve entero.
+        /// </summary>
+        public void Retroceder(float intensidad, Color color, float segundos)
+        {
+            if (luzGlobal == null)
+            {
+                return;
+            }
+
+            _retrocedida = true;
+            _finLatido = float.NegativeInfinity;
+            _luzTrasRetroceder = intensidad;
+            _colorTrasRetroceder = color;
+            _velocidadRetroceso = Mathf.Abs(intensidad - luzGlobal.intensity) / Mathf.Max(0.01f, segundos);
+        }
+
         /// <summary>Devuelve la luz de la escena (la que tenía al activarse).</summary>
         public void Desactivar()
         {
@@ -138,6 +174,13 @@ namespace Fragmentum.Levels.Escenario
 
         private void Update()
         {
+            if (_retrocedida && luzGlobal != null)
+            {
+                luzGlobal.intensity = Mathf.MoveTowards(luzGlobal.intensity, _luzTrasRetroceder, _velocidadRetroceso * Time.deltaTime);
+                luzGlobal.color = Color.Lerp(luzGlobal.color, _colorTrasRetroceder, Mathf.Clamp01(Time.deltaTime * 2f));
+                return;
+            }
+
             if (!Activa || luzGlobal == null || tramos.Length == 0)
             {
                 return;
@@ -150,7 +193,16 @@ namespace Fragmentum.Levels.Escenario
             // «transicion» segundos.
             var paso = Time.deltaTime / transicion;
             var rango = Mathf.Max(0.05f, RangoDeIntensidad());
-            luzGlobal.intensity = Mathf.MoveTowards(luzGlobal.intensity, tramo.intensidad, rango * paso);
+            if (Latiendo)
+            {
+                // Dos latidos por segundo: la luz sube de golpe y vuelve a caer.
+                luzGlobal.intensity = tramo.intensidad + 0.25f * Mathf.Max(0f, Mathf.Sin(Time.time * Mathf.PI * 4f));
+            }
+            else
+            {
+                luzGlobal.intensity = Mathf.MoveTowards(luzGlobal.intensity, tramo.intensidad, rango * paso);
+            }
+
             luzGlobal.color = Color.Lerp(luzGlobal.color, tramo.color, Mathf.Clamp01(paso * 4f));
         }
 

@@ -1,7 +1,7 @@
 # Nivel 3 · Miedo · Bosque Tenebroso: el recorrido
 
 > **Estado:** aprobado el 2026-10-14, con las nueve decisiones de la sección 9 («haz lo que
-> recomiendas»). **Fases A, B y C montadas** en `Assets/Scenes/Nivel3.unity`:
+> recomiendas»). **Fases A, B, C y D montadas** en `Assets/Scenes/Nivel3.unity`:
 >
 > - **Fase A, el recorrido:** los bloques, las ramas, las raíces del callejón que no agarran, los
 >   Espectros y los Centinelas Ciegos con su ruta, los tres checkpoints, la salida y la arena con el
@@ -12,11 +12,14 @@
 > - **Fase C, los enemigos:** el sueño, la casi invisibilidad y la espera en el borde de la luz del
 >   Espectro; el oído en cono, el aviso y la estocada del Centinela Ciego; y el Acechador, que
 >   embiste y se estrella contra los árboles del claro.
+> - **Fase D, el jefe:** el Espectro del Pavor, invisible e intangible salvo cuando ataca, con su
+>   tajo, su embestida, sus hojas y sus tres sombras; su grito y la oscuridad que retrocede al
+>   vencerlo.
 >
 > Los números de abajo son los de `Assets/Scripts/Editor/DisenoNivel3.cs`, que monta
 > `PreparadorNivel` y comprueban las pruebas (`DisenoNivel3Tests`, `EscenaNivel3Tests`,
-> `MecanicasMiedoTests`, `EnemigosMiedoTests`, `Nivel3PlayModeTests`, `MecanicasMiedoPlayModeTests`
-> y `EnemigosMiedoPlayModeTests`). Si cambias el recorrido, cámbialo allí y sube su `Version`: la
+> `MecanicasMiedoTests`, `EnemigosMiedoTests`, `EspectroDelPavorTests`, `Nivel3PlayModeTests`,
+> `MecanicasMiedoPlayModeTests`, `EnemigosMiedoPlayModeTests` y `EspectroDelPavorPlayModeTests`). Si cambias el recorrido, cámbialo allí y sube su `Version`: la
 > escena se vuelve a montar entera.
 >
 > Los prompts de todas las imágenes están en `Prompts_Mundo3.md`: los enemigos y el jefe (primera
@@ -187,6 +190,28 @@ mucho. Se ajusta cuando lo juegues.
   del Centinela se aplican a sus datos si siguen como los dejó el generador; si los has tocado a
   mano, no.
 
+### Lo que cambió al montarlo (fase D, 2026-10-14)
+
+- **Cuándo se le golpea.** Desde que destella hasta que se recupera, los golpes cuentan; mientras
+  jadea (tras el tajo y tras las sombras: la ventana), valen el doble. Al otro lado de la
+  embestida se queda 1 s a la vista y se le puede golpear, pero sin el doble: la ventana es el
+  jadeo.
+- **Su dibujo no depende de la luz.** En su arena solo hay la luz de Kael (0,03 de luz global): con
+  un dibujo que reacciona a la luz, su destello no se vería desde lejos. Cuando no se deja ver, no
+  se ve nada (opacidad 0). Las franjas de sus hojas y el filo de sus tajos, igual.
+- **Su presentación, sin cinemática.** Antes del combate espera visible en el centro de la arena;
+  al empezar se desvanece y tarda 1,2 s en atacar. La cinemática de presentación llega en la fase F.
+- **La embestida sale de la pared más lejana a Kael**, para cruzar por donde está.
+- **Las hojas:** aparece en el lado de la arena contrario a Kael; las franjas miden 2 u, la
+  primera cae bajo Kael y entre dos franjas siempre queda al menos 1 u libre.
+- **Las sombras:** las figuras salen a 3 u de cada pared y en el centro, y atacan de izquierda a
+  derecha; cuál es la verdadera se elige al azar. Golpear a la verdadera las deshace a todas; si no,
+  se deshacen al acabar de jadear.
+- **El grito:** la luz de Kael parpadea 0,9 s y la oscuridad late (dos latidos por segundo).
+- **La oscuridad retrocede** hasta 0,85 de luz global, con la luz de la luna, en 3 s, y ya no
+  vuelve a cambiar por tramos: el resto del nivel se ve entero. Si al jugarlo es demasiado o
+  demasiado poco, está en el prefab (`luzAlMorir`).
+
 ### Cómo se ve hoy
 
 Fotos de la escena montada en la fase A: bloques de color y cápsulas, con luz y sin Kael. Así
@@ -239,8 +264,8 @@ curva. Funciona tal cual: a oscuras solo se verían sus vetas y su máscara, que
 pide el combate. El prompt de AI Studio está en `Prompts_Mundo3.md`, apartado B (con un paso
 opcional para pedir tres variantes, como con la Doncella).
 
-**Sus datos** (`Assets/Data/Jefes/EspectroDelPavor.asset`, el esqueleto de la Fase 7) ✔: 22 de
-vida y dos fases, la segunda al 50 %. Ya es casi invisible al empezar el combate.
+**Sus datos** (`Assets/Data/Jefes/EspectroDelPavor.asset`) ✔: 22 de vida y dos fases, la
+segunda al 50 %, con sus patrones desde la fase D. Tocarlo no hace daño: lo hacen sus ataques.
 
 **Cómo pelea.** Casi todo el tiempo es **invisible e intangible**: ningún golpe le alcanza (Anexo
 A: «invisible el resto del tiempo»). Se ve, y se le puede golpear, desde que avisa hasta que se
@@ -257,11 +282,13 @@ desde cualquier sitio.
 | | **Sombras** | Aparecen **tres figuras** (a la izquierda, en el centro y a la derecha) y lanzan su tajo una tras otra, cada una con su aviso. Después se quedan las tres 1,5 s jadeando. **Solo la verdadera lleva una luciérnaga dorada** que le da vueltas; las sombras, verdes (la «partícula de luz distinta» del Anexo A). Golpear a la verdadera cuenta y deshace a las sombras. **Golpear a una sombra la deshace en hojas y encoge la luz de Kael a la mitad (1,5 u) durante 3 s.** | Seguir la luz. En el miedo, la figura verdadera es la que tiene luz. |
 | Muerte | — | **La oscuridad retrocede** (Anexo A): la luz sube en 3 s y el bosque se ve entero por primera vez. Después, la cinemática de la derrota y el fragmento. | **Cierre:** «El bosque no era un laberinto: era un lugar donde nadie había encendido una luz». |
 
-**En el código:** `EspectroDelPavor` llevará lo suyo (aparecer, desvanecerse, ser intangible) y
-los ataques serán datos, como los de la Centinela y la Doncella: `PatronTajo`,
-`PatronEmbestidaSombra`, `PatronHojas` y `PatronSombras`. Las sombras son figuras sin vida que se
-deshacen al golpearlas. Un verificador comprobará, al regenerar, que cada fase tiene su ventana:
-sin ella no se le podría vencer.
+**En el código** ✔ (fase D): `EspectroDelPavor` lleva lo suyo (aparecer, desvanecerse, ser
+intangible: `SaludJefe.Intangible`) y los ataques son datos, como los de la Centinela y la Doncella:
+`PatronTajo`, `PatronEmbestidaSombra`, `PatronHojas` y `PatronSombras`. Las sombras
+(`SombraDelPavor`) son figuras sin vida que se deshacen al golpearlas. `VerificadorPavor` comprueba,
+al regenerar, que cada fase tiene su ventana y que su destello se ve a oscuras: sin eso no se le
+podría vencer. La luz de Kael (`LuzJugador`) sabe encogerse y parpadear, y la del nivel
+(`LuzDelNivel`), latir y retroceder.
 
 **Por qué así:** su línea dice «Él aprendió a desaparecer para seguir vivo». Por eso es invisible,
 y por eso se le vence **acercándose cuando avisa**: el destello que asusta es el momento de ir a
@@ -279,7 +306,7 @@ cápsulas, sin sprites inventados.
 | **A · Recorrido** ✔ | La escena `Nivel3`, montada desde una tabla de medidas, todavía con luz | `DisenoNivel3` y `PreparadorNivel` para el Miedo; el `LevelData` con su escena, sus secciones y sus checkpoints; pruebas de alcance (caminando y corriendo) |
 | **B · Mecánicas** ✔ | La oscuridad, la luz de Kael, las antorchas, el ruido, los cepos, las ramas podridas y las cintas | Luces 2D por sección y en Kael (`ReglasNivel.oscuridad`); `Antorcha` sobre `ZonaIluminada`; los anillos de ruido; `Cepo`; `RamaPodrida`; las cintas; el eco de memoria en la trinchera |
 | **C · Enemigos** ✔ | El Espectro, el Centinela Ciego y el Acechador | El sueño y la casi invisibilidad del Espectro; el cono y la estocada del Centinela; `Acechador`, con su embestida y los árboles |
-| **D · Jefe** | El Espectro del Pavor completo, sin arte | Aparecer e intangibilidad en `EspectroDelPavor`; `PatronTajo`, `PatronEmbestidaSombra`, `PatronHojas` y `PatronSombras`; la arena a oscuras; un verificador |
+| **D · Jefe** ✔ | El Espectro del Pavor completo, sin arte | Aparecer e intangibilidad en `EspectroDelPavor`; `PatronTajo`, `PatronEmbestidaSombra`, `PatronHojas` y `PatronSombras`; la arena a oscuras; un verificador |
 | **E · Arte** | Vestir lo anterior a medida que llegue | Una sub-fase por paquete, como en el Mundo 2 |
 | **F · Narrativa y sonido** | Presentación, derrota y cierre con planos; las puertas | El sistema de cinemáticas, sin cambios; la puerta, la verja y el checkpoint de este mundo |
 

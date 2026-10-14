@@ -75,6 +75,9 @@ namespace Fragmentum.EditorTools
             // La Doncella solo se hiere mientras llora: si una fase se queda sin llanto, no se la
             // podría vencer. La regeneración falla antes de que eso llegue al juego.
             ok &= VerificadorDoncella.Verificar();
+            // El Espectro del Pavor solo se hiere cuando se deja ver: si una fase se queda sin su
+            // ventana, o su destello no se viera a oscuras, no se le podría vencer.
+            ok &= VerificadorPavor.Verificar();
             ok &= GeneradorMecanicas.CrearPrefabs();
             // Lo mismo con el arte del Nivel 1 (el Golem, las mecánicas y los planos del jefe), ya
             // con los prefabs de las mecánicas hechos.

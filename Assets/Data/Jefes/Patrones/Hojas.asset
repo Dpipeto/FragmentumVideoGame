@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7df7d6a28b33930419cdaec8d6f93135, type: 3}
+  m_Name: Hojas
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronHojas
+  nombre: Hojas
+  descripcion: Alza el brazo y destella 1 s; en cuatro o cinco franjas el suelo brilla en verde y caen hojas negras afiladas. La primera, bajo Kael. Se sale de lo que brilla.
+  aviso: 1
+  danio: 1
+  color: {r: 0.35, g: 0.85, b: 0.4, a: 1}
+  dibujarZona: 1
+  franjasMinimo: 4
+  franjasMaximo: 5
+  ancho: 2
+  hueco: 1
+  alto: 5
+  duracion: 0.6
+  recuperacion: 0.6
+  margen: 3

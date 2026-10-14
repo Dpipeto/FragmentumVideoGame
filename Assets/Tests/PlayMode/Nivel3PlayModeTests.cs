@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Linq;
+using Fragmentum.Bosses;
 using Fragmentum.Core.Juego;
 using Fragmentum.Data;
 using Fragmentum.Enemies;
@@ -19,8 +20,10 @@ namespace Fragmentum.Tests.PlayMode
     /// El Nivel 3 montado, jugándose: correr hace ruido y caminar no, la trinchera guarda la
     /// partida, las raíces del callejón no agarran y el puesto del vigía se sostiene (fase A); y la
     /// oscuridad cambia por tramos con Kael llevando su luz, y la primera antorcha, con su aviso, se
-    /// enciende y enseña el primer cepo (fase B); y esa antorcha despierta al primer Espectro, que
-    /// espera en el borde de su luz (fase C). El Nivel 1 sigue con luz. Las medidas las
+    /// enciende y enseña el primer cepo (fase B); esa antorcha despierta al primer Espectro, que
+    /// espera en el borde de su luz (fase C); y el Espectro del Pavor espera visible en su arena, se
+    /// desvanece al empezar el combate y, al vencerlo, la oscuridad retrocede (fase D). El Nivel 1
+    /// sigue con luz. Las medidas las
     /// comprueban <c>DisenoNivel3Tests</c> y <c>EscenaNivel3Tests</c>; aquí, que funcionan en el
     /// juego.
     /// </summary>
@@ -206,6 +209,32 @@ namespace Fragmentum.Tests.PlayMode
             }
 
             Assert.AreEqual(ESTADOS_ESPECTRO.AL_BORDE, espectros[0].Estado, "Espera en el borde de la luz.");
+        }
+
+        [UnityTest]
+        public IEnumerator ElPavor_EsperaVisible_SeDesvaneceAlEmpezar_YAlVencerloLaOscuridadRetrocede()
+        {
+            yield return EntrarEnNivel3();
+            ApagarEnemigos();
+            var arena = Object.FindAnyObjectByType<ArenaJefe>();
+            var pavor = arena.Jefe as EspectroDelPavor;
+            Assert.IsNotNull(pavor, "El jefe de la arena es el Espectro del Pavor.");
+            Assert.IsTrue(pavor.Visible, "Antes del combate espera visible en el centro de su arena: su presentación.");
+
+            // Lo mismo que hace la arena cuando Kael cruza su entrada.
+            arena.IniciarCombate(Jugador);
+            yield return new WaitForSeconds(0.5f);
+            Assert.IsTrue(pavor.EnCombate);
+            Assert.IsFalse(pavor.Visible, "Al empezar el combate se desvanece.");
+
+            var oscuridad = Object.FindAnyObjectByType<LuzDelNivel>();
+            Assert.IsFalse(oscuridad.Retrocedida);
+            pavor.Vida.Matar();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsTrue(pavor.Derrotado);
+            Assert.IsTrue(oscuridad.Retrocedida, "Al vencerlo, la oscuridad retrocede…");
+            yield return new WaitForSeconds(pavor.SubidaAlMorir + 0.3f);
+            Assert.AreEqual(pavor.LuzAlMorir, oscuridad.LuzGlobal.intensity, 0.02f, "…y en 3 s el bosque se ve entero.");
         }
 
         [UnityTest]

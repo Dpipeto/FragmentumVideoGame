@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df3364dd585d67340b2dffee9e76d452, type: 3}
+  m_Name: EmbestidaSombra
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronEmbestidaSombra
+  nombre: Embestida de sombra
+  descripcion: "Aparece junto a la pared m\xE1s lejana a Kael, destella 1 s y cruza la arena a ras de suelo (1,6 u de alto, a 11 u/s). Al otro lado se queda 1 s a la vista. Se salta o se espera en una rama."
+  aviso: 1
+  danio: 1
+  color: {r: 0.55, g: 0.9, b: 0.55, a: 1}
+  dibujarZona: 1
+  velocidad: 11
+  alto: 1.6
+  visibleAlFinal: 1

@@ -9,6 +9,91 @@
 
 ---
 
+## Mundo 3, fase D: el Espectro del Pavor (2026-10-14)
+
+Misma rama `nivel3-recorrido`, sobre la fase C (commit `18db435`). El autor pidió seguir con la
+fase D. Es el jefe del Miedo completo, sin arte: una cápsula violeta y zonas de color.
+
+### 1. Invisible e intangible, salvo cuando ataca
+
+- **Problema.** El Espectro del Pavor era un esqueleto de la Fase 7: tenía datos y fases, pero
+  ningún ataque, y solo se volvía algo transparente. El Anexo A lo quiere «invisible el resto del
+  tiempo»: se ve, y se le puede golpear, cuando avisa con su destello de 1 s.
+- **Causa.** El `BossController` no sabía de jefes intangibles: la vida del jefe (`SaludJefe`) solo
+  sabía de la ventana vulnerable y de ser inmune fuera de ella (el Juez Silente).
+- **Solución.**
+  - **`SaludJefe.Intangible`:** mientras el jefe lo diga, los golpes lo atraviesan (salvo los
+    letales, como siempre).
+  - **`EspectroDelPavor`** lleva lo suyo:
+    - **Cuándo se le ve y se le golpea:** desde que destella hasta que se recupera. Mientras
+      jadea (la ventana vulnerable), los golpes valen el doble; el resto del combate no se ve
+      nada.
+    - **Dónde aparece:** es un cuerpo cinemático que sus patrones colocan y mueven.
+    - **Antes del combate** espera visible en el centro de su arena, y al empezar se desvanece.
+    - **Tocarlo no hace daño**, y **su dibujo no depende de la luz**: en su arena, a oscuras, su
+      destello se ve desde cualquier sitio. Las zonas de sus ataques se ven igual.
+
+### 2. Sus cuatro ataques, como datos
+
+- **`PatronTajo`:** aparece a 2,5 u de Kael, a su espalda (o delante, si Kael está contra una
+  pared), destella 1 s y lanza un tajo de 3 u que quita 2. Después jadea 1,5 s: la ventana.
+- **`PatronEmbestidaSombra`:** aparece junto a la pared más lejana a Kael, destella 1 s y cruza la
+  arena a ras de suelo (1,6 u de alto, a 11 u/s); quita 1. Al otro lado se queda 1 s a la vista.
+- **`PatronHojas`:** destella 1 s en el lado contrario a Kael. En cuatro o cinco franjas de 2 u el
+  suelo brilla en verde, y en ellas caen hojas que quitan 1. La primera franja cae bajo Kael y entre
+  dos siempre queda sitio.
+- **`PatronSombras`** (fase 2):
+  - Tres figuras iguales (a 3 u de cada pared y en el centro) lanzan su tajo una tras otra y
+    después jadean las tres.
+  - Solo la verdadera lleva una luciérnaga dorada; las sombras (`SombraDelPavor`), verdes.
+  - Golpear a la verdadera cuenta y deshace a las sombras. Golpear a una sombra la deshace y
+    encoge la luz de Kael a la mitad durante 3 s.
+- **Las fases:**
+  - fase 1: tajo, embestida, tajo y hojas;
+  - fase 2 (50 %): sombras, hojas, sombras y embestida.
+  - Todos avisan 1 s, como pide el Anexo A.
+
+### 3. El grito y la oscuridad que retrocede
+
+- **`LuzJugador`** sabe parpadear y encogerse un rato (y volver a su radio).
+- **`LuzDelNivel`** sabe latir y retroceder.
+- **Al empezar la fase 2**, el Pavor grita: la oscuridad late y la luz de Kael parpadea 0,9 s.
+- **Al vencerlo**, la oscuridad retrocede: la luz sube en 3 s hasta la de la luna y ya no vuelve
+  a bajar. El bosque se ve entero por primera vez.
+- **Si Kael muere en la arena**, el Pavor vuelve a esperar visible, sin sombras, y la luz de Kael
+  vuelve a su radio.
+
+### 4. El verificador
+
+- **`VerificadorPavor`**, como el de la Doncella, falla al regenerar si al Pavor no se le pudiera
+  vencer: una fase sin ventana (ni tajo ni sombras que lo dejen jadeando), un aviso de menos de
+  0,5 s, unas sombras sin tajo, daño por contacto (estando invisible), o un dibujo que dependa de
+  la luz.
+- **Los datos se completan solos:** `GeneradorJefes` rellena los del Pavor la primera vez, porque
+  eran un esqueleto. Después respeta lo que se ajuste a mano.
+
+### Pruebas
+
+- **Nuevas:**
+  - `EspectroDelPavorTests` (6): sus datos y sus ataques con las medidas del diseño; su prefab,
+    que se ve a oscuras; el verificador, que lo da por bueno y se queja de lo que lo haría
+    invencible; y dónde caen las franjas de las hojas.
+  - `EspectroDelPavorPlayModeTests` (9):
+    - Invisible e intangible al empezar.
+    - El tajo: a la espalda de Kael, o delante contra una pared; su aviso, su daño y su ventana
+      al doble.
+    - La embestida, desde la pared más lejana, y lo que se ve al otro lado.
+    - Las hojas, con la primera franja bajo Kael.
+    - Las sombras: la luciérnaga, la luz que se encoge, la verdadera que las deshace, los tres
+      tajos y el jadeo.
+    - El grito.
+    - El reinicio.
+- **Ampliadas:** `Nivel3PlayModeTests` (+1): en la arena del nivel, el Pavor espera visible, se
+  desvanece al empezar y, al vencerlo, la oscuridad retrocede.
+- **553 EditMode y 244 PlayMode en verde.**
+
+---
+
 ## Mundo 3, fase C: el sueño de los Espectros, el oído del Centinela Ciego y el Acechador (2026-10-14)
 
 Misma rama `nivel3-recorrido`, sobre las fases A y B (commit `0f6a15d`). El autor pidió empezar la

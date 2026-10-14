@@ -8,7 +8,9 @@ namespace Fragmentum.Bosses
     /// Vida de un jefe. Añade a <see cref="Health"/> las reglas de la ventana vulnerable:
     /// - Durante la ventana, el daño se multiplica (<c>JefeData.multiplicadorVulnerable</c>).
     /// - Con <c>inmuneFueraDeVulnerable</c> (Juez Silente), fuera de la ventana no recibe daño.
-    /// - Los golpes letales (lava, vacío) atraviesan las dos reglas.
+    /// - Mientras es <see cref="Intangible"/> (el Espectro del Pavor, invisible fuera de sus
+    ///   ataques), los golpes lo atraviesan.
+    /// - Los golpes letales (lava, vacío) atraviesan las tres reglas.
     ///
     /// El jefe le dice cuándo es vulnerable; esta clase no conoce la FSM.
     /// </summary>
@@ -21,7 +23,10 @@ namespace Fragmentum.Bosses
 
         public bool InmuneFueraDeVulnerable { get; set; }
 
-        /// <summary>Un golpe no hizo nada porque el jefe era inmune (para un sonido metálico, por ejemplo).</summary>
+        /// <summary>¿Lo atraviesan ahora los golpes? La fija el jefe (el Espectro del Pavor). Vacía = nunca.</summary>
+        public Func<bool> Intangible { get; set; }
+
+        /// <summary>Un golpe no hizo nada porque el jefe era inmune o intangible (para un sonido, por ejemplo).</summary>
         public event Action<Golpe> OnGolpeBloqueado;
 
         public override bool RecibirGolpe(in Golpe golpe)
@@ -32,7 +37,7 @@ namespace Fragmentum.Bosses
             }
 
             var vulnerable = EsVulnerable != null && EsVulnerable();
-            if (InmuneFueraDeVulnerable && !vulnerable)
+            if ((InmuneFueraDeVulnerable && !vulnerable) || (Intangible != null && Intangible()))
             {
                 OnGolpeBloqueado?.Invoke(golpe);
                 return false;

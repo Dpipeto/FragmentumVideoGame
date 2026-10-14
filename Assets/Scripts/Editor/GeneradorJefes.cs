@@ -26,6 +26,14 @@ namespace Fragmentum.EditorTools
         public const string CarpetaPatrones = "Assets/Data/Jefes/Patrones";
         public const string CarpetaPrefabs = "Assets/Prefabs/Jefes";
 
+        public const string NombrePavor = "EspectroDelPavor";
+
+        /// <summary>
+        /// El material de los sprites que no dependen de la luz: el Espectro del Pavor, en una arena a
+        /// oscuras, tiene que verse desde cualquier sitio cuando destella.
+        /// </summary>
+        public const string RutaMaterialSinLuz = ConstructorFondoMundo1.RutaMaterialSprites;
+
         /// <summary>Cada jefe: nombre de su asset de datos y su controlador.</summary>
         public static readonly (string asset, Type controlador)[] Jefes =
         {
@@ -175,9 +183,9 @@ namespace Fragmentum.EditorTools
             });
 
             GenerarDoncella(sobrescribir);
+            GenerarPavor(sobrescribir);
 
             // Esqueletos: vida y fases del Anexo A, sin patrones todavía (Fase 10).
-            Completar("EspectroDelPavor", sobrescribir, j => Esqueleto(j, 22, "6B4FA0", Fase("Ataques con destello", 1f), Fase("Tres clones (50 %)", 0.5f)));
             Completar("JuezSilente", sobrescribir, j =>
             {
                 Esqueleto(j, 28, "8B3333", Fase("Memorias", 1f), Fase("Memoria real y trampa (50 %)", 0.5f));
@@ -291,6 +299,102 @@ namespace Fragmentum.EditorTools
                     Fase("Olas e inundación", 1f, 0.8f, 1f, ola, inundacion, ola, llanto),
                     // El llanto va justo después de congelar: la capa de hielo sigue ahí para subirse.
                     Fase("Congelamiento (50 %)", 0.5f, 0.6f, 1.2f, olaDoble, inundacion, congelar, llantoSobreElAgua),
+                };
+            }, completarEsqueleto: true);
+        }
+
+        /// <summary>
+        /// Espectro del Pavor (<c>Docs/Diseno/Nivel3_Diseno.md</c>, sección 6): invisible salvo cuando
+        /// ataca, y cada ataque avisa 1 s con su destello. La ventana es el jadeo tras el tajo (fase 1)
+        /// y tras las sombras (fase 2). Sus datos nacieron como esqueleto: se completan aquí la primera
+        /// vez, y después se respeta lo que se haya ajustado a mano.
+        /// </summary>
+        private static void GenerarPavor(bool sobrescribir)
+        {
+            var verdePalido = new Color(0.55f, 0.9f, 0.55f, 1f);
+
+            var tajo = Patron<PatronTajo>("Tajo", sobrescribir, p =>
+            {
+                p.nombre = "Tajo";
+                p.descripcion = "Aparece a 2,5 u de Kael, a su espalda (o delante, contra una pared), destella 1 s y lanza un tajo " +
+                                "de 3 u. Después jadea 1,5 s, visible: la ventana.";
+                p.aviso = 1f;
+                p.danio = 2;
+                p.distancia = 2.5f;
+                p.alcance = 3f;
+                p.alto = 2.6f;
+                p.duracionGolpe = 0.2f;
+                p.jadeo = 1.5f;
+                p.color = verdePalido;
+            });
+
+            var embestida = Patron<PatronEmbestidaSombra>("EmbestidaSombra", sobrescribir, p =>
+            {
+                p.nombre = "Embestida de sombra";
+                p.descripcion = "Aparece junto a la pared más lejana a Kael, destella 1 s y cruza la arena a ras de suelo " +
+                                "(1,6 u de alto, a 11 u/s). Al otro lado se queda 1 s a la vista. Se salta o se espera en una rama.";
+                p.aviso = 1f;
+                p.danio = 1;
+                p.velocidad = 11f;
+                p.alto = 1.6f;
+                p.visibleAlFinal = 1f;
+                p.color = verdePalido;
+            });
+
+            var hojas = Patron<PatronHojas>("Hojas", sobrescribir, p =>
+            {
+                p.nombre = "Hojas";
+                p.descripcion = "Alza el brazo y destella 1 s; en cuatro o cinco franjas el suelo brilla en verde y caen hojas " +
+                                "negras afiladas. La primera, bajo Kael. Se sale de lo que brilla.";
+                p.aviso = 1f;
+                p.danio = 1;
+                p.franjasMinimo = 4;
+                p.franjasMaximo = 5;
+                p.ancho = 2f;
+                p.hueco = 1f;
+                p.alto = 5f;
+                p.duracion = 0.6f;
+                p.recuperacion = 0.6f;
+                p.color = new Color(0.35f, 0.85f, 0.4f, 1f);
+            });
+
+            var sombras = Patron<PatronSombras>("Sombras", sobrescribir, p =>
+            {
+                p.nombre = "Las tres sombras";
+                p.descripcion = "Tres figuras (izquierda, centro y derecha) lanzan su tajo una tras otra, cada una con su destello; " +
+                                "después jadean las tres 1,5 s. Solo la verdadera lleva una luciérnaga dorada. Golpear a una " +
+                                "sombra la deshace y encoge la luz de Kael 3 s.";
+                p.aviso = 1f;
+                p.danio = 2;
+                p.margen = 3f;
+                p.aparicion = 0.4f;
+                p.intervalo = 0.3f;
+                p.jadeo = 1.5f;
+                p.color = verdePalido;
+            });
+
+            // Las sombras lanzan el mismo tajo que él: solo se rellena si está vacío.
+            if (sombras.tajo == null)
+            {
+                sombras.tajo = tajo;
+                EditorUtility.SetDirty(sombras);
+            }
+
+            Completar("EspectroDelPavor", sobrescribir, j =>
+            {
+                j.vidaMaxima = 22;
+                j.velocidad = 2f;
+                // Tocarlo no hace daño: es invisible y lo atravesaría; lo hacen sus ataques.
+                j.danioContacto = 0;
+                j.duracionVulnerable = 1.5f;
+                j.multiplicadorVulnerable = 2f;
+                j.inmuneFueraDeVulnerable = false;
+                j.tinte = Hex("6B4FA0");
+                j.tamano = new Vector2(2f, 3.2f);
+                j.fases = new List<FaseJefe>
+                {
+                    Fase("El acecho: tajo, embestida, tajo y hojas", 1f, 1f, 1f, tajo, embestida, tajo, hojas),
+                    Fase("Las tres sombras (50 %)", 0.5f, 0.9f, 1f, sombras, hojas, sombras, embestida),
                 };
             }, completarEsqueleto: true);
         }
@@ -486,6 +590,12 @@ namespace Fragmentum.EditorTools
                 var sprite = objetoSprite.AddComponent<SpriteRenderer>();
                 sprite.sortingOrder = 5;
                 var animator = objetoSprite.AddComponent<Animator>();
+
+                // El Espectro del Pavor se deja ver a oscuras: su dibujo no depende de la luz.
+                if (nombre == NombrePavor)
+                {
+                    sprite.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(RutaMaterialSinLuz);
+                }
 
                 // Los jefes con arte (la Centinela y la Doncella) llevan sus fotogramas, su Animator
                 // y su fragmento; los demás, la cápsula provisional.
