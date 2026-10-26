@@ -151,6 +151,9 @@ namespace Fragmentum.EditorTools
                 p.dibujarZona = false; // la caída la enseña J4-J5
             });
 
+            VestirOndas(ConstructorEfectos.PrefabOnda, salto, onda, ondaDoble);
+            VestirErupciones(ConstructorEfectos.PrefabErupcion, erupcion, erupcionRafaga);
+
             Completar("CentinelaArdiente", sobrescribir, j =>
             {
                 j.vidaMaxima = 30;
@@ -203,6 +206,55 @@ namespace Fragmentum.EditorTools
             }
 
             return patron;
+        }
+
+        /// <summary>
+        /// Las ondas de la Centinela llevan su dibujo (<see cref="ConstructorEfectos"/>) en vez del
+        /// rectángulo. Solo se rellena el campo vacío: un dibujo puesto a mano se respeta. Sin el
+        /// prefab (sin arte), se quedan como estaban.
+        /// </summary>
+        private static void VestirOndas(GameObject dibujo, PatronSaltoAplastante salto, params PatronOndaSuelo[] ondas)
+        {
+            if (dibujo == null)
+            {
+                return;
+            }
+
+            foreach (var onda in ondas)
+            {
+                if (onda.efecto == null)
+                {
+                    onda.efecto = dibujo;
+                    EditorUtility.SetDirty(onda);
+                }
+            }
+
+            if (salto.efectoOndas == null)
+            {
+                salto.efectoOndas = dibujo;
+                EditorUtility.SetDirty(salto);
+            }
+        }
+
+        /// <summary>
+        /// Las erupciones llevan la columna dibujada mientras queman; el aviso sigue siendo el
+        /// rectángulo. Como con las ondas, solo se rellena el campo vacío.
+        /// </summary>
+        private static void VestirErupciones(GameObject dibujo, params PatronPlataformasErupcion[] erupciones)
+        {
+            if (dibujo == null)
+            {
+                return;
+            }
+
+            foreach (var erupcion in erupciones)
+            {
+                if (erupcion.efecto == null)
+                {
+                    erupcion.efecto = dibujo;
+                    EditorUtility.SetDirty(erupcion);
+                }
+            }
         }
 
         private static void Completar(string asset, bool sobrescribir, Action<JefeData> rellenar)

@@ -32,8 +32,7 @@ namespace Fragmentum.Narrative
     /// mundo, al activar una memoria, antes del jefe y al cerrar. Las líneas deben nombrar la
     /// emoción del mundo; viven aquí y nunca en la escena.
     ///
-    /// Los textos son del guion (PENDIENTES B2). Mientras falten, el generador deja líneas
-    /// marcadas como pendientes que ya nombran la emoción, para que el sistema se vea funcionar.
+    /// Los textos son los del guion (Docs/Diseno/Guion.md), que carga el generador de narrativa.
     /// </summary>
     [CreateAssetMenu(menuName = "Fragmentum/Diálogos", fileName = "Dialogos")]
     public class DialogueData : ScriptableObject

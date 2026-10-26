@@ -202,7 +202,8 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual("Ira", registro.Entradas[0].emocion);
             Assert.AreEqual(1, registro.Entradas[0].nivel);
             StringAssert.Contains(";Ira;4;", File.ReadAllText(registro.RutaCsv), "Se exporta también a CSV.");
-            StringAssert.Contains("Cierre", fin.LineaCierre, "La línea de cierre de Kael acompaña al fragmento.");
+            StringAssert.Contains(Nivel1.dialogos.Del(MOMENTOS_DIALOGO.CIERRE)[0].texto, fin.LineaCierre, "La línea de cierre de Kael acompaña al fragmento.");
+            StringAssert.Contains("Ira", fin.LineaCierre, "Y nombra la emoción del mundo.");
         }
 
         [UnityTest]
@@ -234,30 +235,32 @@ namespace Fragmentum.Tests.PlayMode
             Interfaz.AlternarPausa(); // Esc: saltar la cinemática
             yield return EsperarHasta(() => Interfaz.Hud.LineaActual.Length > 0, 2f, "la línea de apertura");
 
-            StringAssert.Contains("Apertura", Interfaz.Hud.LineaActual);
+            StringAssert.Contains("Este calor no es mío", Interfaz.Hud.LineaActual, "La apertura del guion.");
             StringAssert.Contains("Ira", Interfaz.Hud.LineaActual, "La línea nombra la emoción del mundo.");
             Assert.AreEqual("KAEL", Interfaz.Hud.HablanteActual);
         }
 
         [UnityTest]
-        public IEnumerator AntesDelJefe_LaPresentacionLlevaElTextoDelGuion()
+        public IEnumerator AntesDelJefe_LaPresentacionDiceLoDeKael_YLuegoHablaLaCentinelaEnElHud()
         {
             Gestor.Datos.cinematicasVistas.Add("Inicial");
             yield return EntrarEnNivel1();
             DialogueManager.Instancia.Limpiar();
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
 
-            yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            yield return LlevarJugadorA(EnElSuelo(arena.transform.position));
             Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar en la arena, la presentación del jefe.");
 
             // El guion: Kael habla a los 4 s; el nombre del jefe es el rótulo del final (lo comprueba CinematicaJefe1Tests).
             yield return EsperarHasta(() => Interfaz.Cinematica.TextoActual.Contains("No recuerdo esta sala."), 6f, "el texto de Kael");
             StringAssert.Contains("El calor, sí.", Interfaz.Cinematica.TextoActual, "Las dos líneas juntas.");
 
+            // Es lo que pasa en partida nueva (la presentación sin ver). La presentación de la Ira
+            // solo lleva a Kael: la línea de la Centinela va después, en el HUD, y lo de Kael no se repite.
             Assert.IsTrue(Juego.TerminarCinematica());
-            yield return null;
-            yield return null;
-            Assert.IsEmpty(Interfaz.Hud.LineaActual, "No se repite en el HUD: ya se dijo en la cinemática.");
+            yield return EsperarHasta(() => Interfaz.Hud.LineaActual.Length > 0, 2f, "la línea de la Centinela");
+            Assert.AreEqual("CENTINELA ARDIENTE", Interfaz.Hud.HablanteActual);
+            StringAssert.DoesNotContain("No recuerdo esta sala", Interfaz.Hud.LineaActual);
         }
 
         [UnityTest]

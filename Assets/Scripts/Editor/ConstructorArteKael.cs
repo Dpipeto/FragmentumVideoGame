@@ -72,7 +72,20 @@ namespace Fragmentum.EditorTools
         /// </summary>
         public static readonly Hoja HojaDash = new Hoja { Archivo = "Kael_Dash", Fotogramas = 4, Pivote = new Vector2Int(42, 0) };
 
-        public static readonly Hoja[] Hojas = { HojaIdle, HojaCorrer, HojaSalto, HojaAtaque, HojaDash };
+        /// <summary>
+        /// Agacharse (lienzo de 64×128 como el de correr, exportado a 10× y reducido a 1×): de pie,
+        /// baja en tres fotogramas, se queda agachado (3 y 4) y se levanta (5 y 6). El torso de pie
+        /// cae en la x 40, uno más que el pivote, como en el idle.
+        /// </summary>
+        public static readonly Hoja HojaAgachado = new Hoja { Archivo = "Kael_Agachado", Fotogramas = 7, Pivote = new Vector2Int(39, 0) };
+
+        /// <summary>
+        /// Morir (Morir.pxo, 66×121 a 1×, exportado a 10×): el golpe, se dobla y cae de rodillas. Se
+        /// echa hacia atrás: el pivote va en su torso (x 33), no en el centro del lienzo.
+        /// </summary>
+        public static readonly Hoja HojaMorir = new Hoja { Archivo = "Kael_Morir", Fotogramas = 3, Pivote = new Vector2Int(33, 0) };
+
+        public static readonly Hoja[] Hojas = { HojaIdle, HojaCorrer, HojaSalto, HojaAtaque, HojaDash, HojaAgachado, HojaMorir };
 
         /// <summary>Un clip: qué fotogramas de qué hoja y en qué momento empieza cada uno.</summary>
         public sealed class Clip
@@ -143,6 +156,31 @@ namespace Fragmentum.EditorTools
                 Estado = PlayerAnimacion.Dash, Hoja = HojaDash, Fotogramas = Rango(0, 4),
                 Tiempos = Uniformes(4, 4f),
                 ParametroVelocidad = AnimatorParams.VelocidadDash.Nombre,
+            },
+            // Agacharse: baja en 0,15 s (fotogramas 1 a 3; el 0 es de pie) y se queda agachado
+            // respirando al ritmo del idle. Al soltar, PlayerAnimacion pone Levantarse (5 y 6), que
+            // vuelve solo al idle.
+            new Clip
+            {
+                Estado = PlayerAnimacion.Agacharse, Hoja = HojaAgachado, Fotogramas = new[] { 1, 2, 3 },
+                Tiempos = Uniformes(3, 20f), Siguiente = PlayerAnimacion.AgachadoBucle,
+            },
+            new Clip
+            {
+                Estado = PlayerAnimacion.AgachadoBucle, Hoja = HojaAgachado, Fotogramas = new[] { 3, 4 },
+                Tiempos = Uniformes(2, 2f), Bucle = true,
+            },
+            new Clip
+            {
+                Estado = PlayerAnimacion.Levantarse, Hoja = HojaAgachado, Fotogramas = new[] { 5, 6 },
+                Tiempos = Uniformes(2, 16f), Siguiente = PlayerAnimacion.Idle,
+            },
+            // Morir: los tres fotogramas a 5 fps, como en Morir.pxo (0,6 s). Se queda de rodillas
+            // hasta que Kael reaparece.
+            new Clip
+            {
+                Estado = PlayerAnimacion.Morir, Hoja = HojaMorir, Fotogramas = Rango(0, 3),
+                Tiempos = Uniformes(3, 5f),
             },
         };
 
@@ -385,7 +423,8 @@ namespace Fragmentum.EditorTools
                 maquina.RemoveState(sobrante);
             }
 
-            // La única transición propia: encadenar un clip con su bucle. El resto lo decide la FSM.
+            // Las únicas transiciones propias: encadenar un clip con el siguiente (la caída y agacharse
+            // con su bucle, levantarse con el idle). El resto lo decide la FSM.
             foreach (var definicion in Clips)
             {
                 var estado = estados[definicion.Estado];

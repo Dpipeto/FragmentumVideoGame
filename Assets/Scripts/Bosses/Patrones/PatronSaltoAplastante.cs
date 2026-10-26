@@ -27,9 +27,12 @@ namespace Fragmentum.Bosses.Patrones
         [Tooltip("Al aterrizar suelta una onda baja hacia cada lado (se esquiva saltando).")]
         public bool ondas = true;
 
-        [Tooltip("Dibujar las ondas como rectángulos. Encendido mientras no tengan su propio arte. " +
+        [Tooltip("Dibujar las ondas como rectángulos si no tienen su propio dibujo («efectoOndas»). " +
                  "La marca de la caída sigue a «dibujarZona».")]
         public bool dibujarOndas = true;
+
+        [Tooltip("El dibujo de cada onda (el mismo prefab que la onda de suelo). Con él, no se pintan rectángulos.")]
+        public GameObject efectoOndas;
 
         [Min(0)] public int danioOnda = 1;
 
@@ -49,9 +52,10 @@ namespace Fragmentum.Bosses.Patrones
             jefe.MirarAlJugador();
             yield return jefe.Golpear(AnimatorParams.Salto, aviso);
 
-            // La marca aparece al despegar y empieza a quemar justo al caer.
+            // La marca aparece al despegar y empieza a quemar justo al caer, en el suelo que el jefe
+            // pisa: las plataformas de la arena son del jugador, y subirse a una es esquivar.
             var destino = jefe.Saltar(jefe.CentroJugador.x, tiempoVuelo);
-            var suelo = jefe.SueloEn(destino);
+            var suelo = jefe.SueloPisableEn(destino);
             jefe.CrearZona("Aterrizaje", new Vector2(destino, suelo + tamanoImpacto.y * 0.5f), tamanoImpacto, danio,
                 tiempoVuelo, duracionImpacto, Vector2.zero, color, dibujarZona);
 
@@ -76,11 +80,13 @@ namespace Fragmentum.Bosses.Patrones
             {
                 var y = jefe.SueloY + tamanoOnda.y * 0.5f;
                 var salida = jefe.MedioAncho + tamanoOnda.x * 0.5f;
-                var duracion = alcanceOnda / velocidadOnda;
                 foreach (var direccion in new[] { -1, 1 })
                 {
                     var origen = new Vector2(jefe.Centro.x + direccion * salida, y);
-                    jefe.CrearZona("OndaDelSalto", origen, tamanoOnda, danioOnda, 0f, duracion, new Vector2(direccion * velocidadOnda, 0f), color, dibujarOndas);
+                    var duracion = RecorridoEnArena(jefe, origen.x, direccion, tamanoOnda.x * 0.5f, alcanceOnda) / velocidadOnda;
+                    var zona = jefe.CrearZona("OndaDelSalto", origen, tamanoOnda, danioOnda, 0f, duracion, new Vector2(direccion * velocidadOnda, 0f), color,
+                        dibujarOndas && efectoOndas == null);
+                    zona.Vestir(efectoOndas, direccion);
                 }
             }
 

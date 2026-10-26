@@ -378,7 +378,7 @@ MonoBehaviour:
     duracionAtaqueCargado: 0.5
     damagedDuration: 0.3
     impulsoRetroceso: {x: 5, y: 6}
-    alturaAgachado: 0.5
+    alturaAgachado: 0.6
     velocidadAgachado: 2
   motor: {fileID: 0}
   sensores: {fileID: 0}
@@ -452,7 +452,7 @@ MonoBehaviour:
     estadoAnimator: Correr
     reiniciar: 0
   - estado: 2
-    estadoAnimator: Idle
+    estadoAnimator: Agacharse
     reiniciar: 0
   - estado: 3
     estadoAnimator: Salto
@@ -479,8 +479,8 @@ MonoBehaviour:
     estadoAnimator: 
     reiniciar: 0
   - estado: 11
-    estadoAnimator: Idle
-    reiniciar: 0
+    estadoAnimator: Morir
+    reiniciar: 1
 --- !u!1 &9157643236468704148
 GameObject:
   m_ObjectHideFlags: 0

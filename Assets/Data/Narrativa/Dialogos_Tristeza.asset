@@ -14,18 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.DialogueData
   lineas:
   - hablante: Kael
-    texto: "[Apertura \xB7 Tristeza \xB7 pendiente de guion] Kael nombra la tristeza al entrar en Ciudad Sumergida."
+    texto: "Una ciudad entera bajo el agua y ni una l\xE1grima en la superficie. As\xED de callada es la Tristeza."
     momento: 0
     duracion: 4.5
   - hablante: Kael
-    texto: "[Eco de memoria \xB7 Tristeza \xB7 pendiente de guion]"
+    texto: "Alguien deja una silla vac\xEDa en la mesa. Nadie la quita. Nadie la nombra."
     momento: 1
     duracion: 4.5
   - hablante: Doncella del Lamento
-    texto: "[Antes del jefe \xB7 Tristeza \xB7 pendiente de guion] Doncella del Lamento encarna la tristeza."
+    texto: "\xC9l cerr\xF3 los ojos para no llorar, y la ciudad se hundi\xF3. \xBFVienes a cerrarlos t\xFA tambi\xE9n?"
     momento: 2
     duracion: 4.5
   - hablante: Kael
-    texto: "[Cierre \xB7 Tristeza \xB7 pendiente de guion] Kael reconoce la tristeza como parte de s\xED."
+    texto: "Me dej\xE9 hundir y no me ahogu\xE9. La Tristeza pesa, pero tambi\xE9n sostiene."
     momento: 3
     duracion: 4.5

@@ -22,22 +22,53 @@ MonoBehaviour:
       duracion: 2.8
       posicion: 1
       titulo: 1
-    - texto: "[Presentaci\xF3n \xB7 Miedo \xB7 pendiente de guion]"
+      sinFundido: 0
+      enPunto: 0
+      punto: {x: 0, y: 0}
+      alineacion: 0
+    - texto: Bosque Tenebroso
       inicio: 0.6
       duracion: 2.4
       posicion: 2
       titulo: 0
+      sinFundido: 0
+      enPunto: 0
+      punto: {x: 0, y: 0}
+      alineacion: 0
     duracion: 3
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 0}
-    texto: "Espectro del Pavor: [Antes del combate \xB7 Miedo \xB7 pendiente de guion] Espectro del Pavor encarna el miedo."
+    texto: "Espectro del Pavor: \xC9l aprendi\xF3 a desaparecer para seguir vivo. Yo soy todo lo que dej\xF3 escondido."
     carteles: []
     duracion: 4.5
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   saltable: 1
   soloPrimeraVez: 0
+  llevaDialogoDelJefe: 1
+  montaje: 0
   sobreElJuego: 1
   opacidadVelo: 0.55
+  escalaEntera: 0
+  fuente: {fileID: 0}
+  tamanoFuente: 8
+  interlineado: 0
+  colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
+  temblorPixeles: 1
+  temblorFotogramas: 4
   fundidoImagen: 0.4
   fundidoTexto: 0.4
   margenTexto: 0.8

@@ -9,6 +9,288 @@
 
 ---
 
+## Respuestas a la prueba del Nivel 1 montado (2026-10-08)
+
+Rama `nivel1-montado`. El autor jugó el nivel (N26) y encontró un solo fallo: el diálogo del jefe
+solo salía al entrar con «Continuar partida». Además aprobó subir la altura de Kael agachado (N28),
+descartó retocar la muerte (N29) y dejó en sus carpetas la tercera tanda de las erupciones (N27) y
+el retoque de `CinematicaFinalLvl2` (N25).
+
+### 1. La línea de la Centinela, también en partida nueva
+
+- **Problema.** En partida nueva, al entrar en la arena se veía la presentación del jefe, pero la
+  Centinela no decía su línea del guion («Él me dejó aquí para que nadie tocara su rabia…»). Con
+  «Continuar partida» sí la decía.
+- **Causa.** La presentación del Nivel 1 se ve solo la primera vez: queda anotada como vista en la
+  partida guardada. Cuando se veía, `ArenaJefe` no ponía las líneas «antes del jefe» en el HUD,
+  porque daba por hecho que iban dentro de la presentación. Eso vale para las de los jefes 2 a 4,
+  que las generan con «{jefe}: {línea}». La de la Ira, en cambio, está montada desde el guion de su
+  cinemática y su único texto es de Kael («No recuerdo esta sala. El calor, sí.»). Al continuar, la
+  presentación ya estaba vista y la línea sí salía.
+- **Solución.** `CutsceneData.llevaDialogoDelJefe` dice si una presentación ya lleva las líneas del
+  jefe. `ArenaJefe` solo las calla en ese caso. `GeneradorNarrativa` la marca en las presentaciones
+  que genera; la de la Ira queda sin marcar, así que su línea suena al empezar el combate.
+
+### 2. La erupción, de la grieta al derrumbe
+
+- **Problema.** La erupción solo tenía arte mientras quemaba (E3 y E4). El aviso seguía siendo el
+  rectángulo naranja que late.
+- **Causa.** De la segunda tanda no entraron el aviso, el brote ni el colapso (entrada anterior).
+- **Solución.**
+  - **La tercera tanda cuadra:** Gemini editó E3, como se le pidió, y las cinco imágenes comparten
+    rejilla (10,24 px), fase y fila de base. `limpiar_erupcion.py` ya no alinea nada a mano: las
+    muestrea sobre una rejilla común en un lienzo de 74 × 150, con el pivote en el centro de la
+    base de la columna. El aviso y el derrumbe se extienden por el suelo (unas 3 u). E3 y E4 salen
+    idénticas a las de antes, solo en un lienzo más ancho.
+  - **`DibujoDeZona`**, un componente nuevo del prefab, sigue las fases de su zona de daño: la
+    zona le avisa al quemar (`Quema`) y al acabar (`Apagada`). Al acabar, el dibujo se suelta de
+    la zona, se derrumba 0,25 s ya sin daño y se destruye solo. Sustituye a `trasElAviso` de la
+    entrada anterior, que mostraba el rectángulo mientras avisaba.
+  - **El Animator de la erupción:** `Aviso` en bucle; con `Quema`, `Brota` 0,1 s y pasa sola a
+    `Arde` en bucle; con `Apagada`, desde cualquiera de ellos, `Apaga`.
+  - **Sin rectángulo:** con dibujo, las erupciones ya no pintan su zona, ni al avisar.
+
+### 3. Kael agachado, a la altura de su dibujo
+
+- **Problema.** Agachado, Kael se dibuja con 1,08 u de alto, pero su collider medía 0,9 u: el pelo
+  asomaba por encima de lo que golpean los ataques.
+- **Causa.** `alturaAgachado` (0,5) era anterior al dibujo.
+- **Solución.** `alturaAgachado` = 0,6: 1,8 × 0,6 = 1,08 u. Sigue cabiendo bajo el techo bajo de la
+  escena de prueba (1,2 u). Una prueba compara el collider del prefab con el dibujo.
+
+### 4. `CinematicaFinalLvl2` retocada
+
+Dos retoques del autor. El primero llegó a 2752 × 1536 sin el fragmento que flotaba sobre la
+espada, pero con cinco huecos en vez de cuatro. El segundo, que es el que entra, llegó a 1024 × 572
+con los cuatro huecos y el fragmento solo en el hombro. `cine.py` saca el periodo del ancho
+(4,27 px) y lo baja a 240 × 135 como los demás planos. Al venir más pequeño y en JPEG, el fondo
+oscuro sale algo más ruidoso; se lee bien. N25 queda resuelto.
+
+### Verificación
+
+- **Pruebas EditMode: 370 correctas de 370.**
+  - **Nuevas:** que la presentación de la Ira no lleve la línea del jefe y la de los demás sí; que
+    el collider agachado mida lo que el dibujo; y en `ErupcionArteTests`, los cinco fotogramas, los
+    cuatro clips y el Animator que sigue las fases de la zona.
+- **Pruebas PlayMode: 150 correctas de 150.**
+  - **Reescritas:**
+    - la de la presentación de la Centinela, que exigía que el HUD callara después: ahora exige
+      la línea de la Centinela, y que lo de Kael no se repita;
+    - la de la erupción, que se ve dibujada de la grieta al derrumbe; el derrumbe sobrevive un
+      momento a su zona y desaparece solo.
+  - **Dos pruebas de tiempos fallaron en una primera pasada y pasaron en la segunda, sin cambiar
+    nada:** el coyote time y el ciclo de la torreta. Las dos miden fracciones de segundo y el PC
+    estaba ocupado.
+
+---
+
+## La erupción quema con su columna y Kael se agacha y muere (2026-10-07)
+
+Rama `nivel1-montado`, tras el commit del Nivel 1. El autor dejó en disco la segunda tanda de las
+erupciones (`Tesis/Imagenes/Erupcion`, E1 a E5) y dos hojas nuevas de Kael en Pixelorama:
+agacharse y morir (`Tesis/Imagenes Kael`).
+
+### 1. La erupción, con su columna
+
+- **Problema.** Las erupciones de la fase 2 de la Centinela eran rectángulos naranjas: latían
+  durante el aviso y se volvían opacos al quemar.
+- **Causa.** Faltaba su arte. La primera tanda no entró (entrada anterior) y la segunda solo en
+  parte: Gemini dibujó con bloques de 8 px (E1, E2) y de 10,24 px (E3 a E5), no de 16. Medidas a
+  su rejilla nativa:
+  - **E3 y E4 cuadran:** la columna llena en dos variantes, la misma silueta y la misma base,
+    sin suelo;
+  - **E1 (aviso) y E5 (colapso) no:** traen un montículo de roca en la base, y la erupción brota
+    también sobre las plataformas. E5 además sale cortada por arriba;
+  - **E2 (brote) tampoco:** con su otra rejilla mide 54 px de ancho frente a 44, y casi lo mismo
+    de alto que la llena.
+
+  Ninguna se recortó ni se reescaló para arreglarla. Se pide una tercera tanda editando E3
+  (`Docs/Diseno/Prompts_Gemini.md`).
+- **Solución.**
+  - **`limpiar_erupcion.py`** (en `Tesis/Imagenes/limpios/script`) baja E3 y E4 a su rejilla y
+    las alinea por la base y por su centro: un lienzo común de 44 × 150 con el pivote en el
+    centro de la base.
+  - **A 24 px/u**, el tamaño de píxel del Golem, la torreta y la bola: 1,83 × 5,7 u (6,25 con las
+    gotas), un poco más que su zona de daño (1,6 × 5), así que no quema donde no se ve. Regla
+    nueva en `TablaArte`.
+  - **`ConstructorEfectos`** construye ya los dos efectos por el mismo camino: el clip
+    `Erupcion_Arde` (las dos variantes cada 0,1 s, en bucle), su controlador y el prefab
+    `ErupcionDeLava`. Sin el arte de uno, el otro se construye igual.
+  - **`ZonaDeDanio.Vestir`** admite dos casos nuevos: con dirección 0 el dibujo va centrado y sin
+    espejar, y con `trasElAviso` espera a que la zona queme. Mientras avisa se ve el rectángulo
+    que late; al activarse, la columna lo sustituye.
+  - **`PatronPlataformasErupcion.efecto`**, que `GeneradorJefes` rellena en las dos erupciones de
+    la Centinela solo si está vacío, como con las ondas.
+
+### 2. Kael se agacha y muere
+
+- **Problema.** Agachado, Kael se veía de pie (CROUCH reproducía el idle) aunque su collider se
+  encogía a la mitad. Al morir, también seguía de pie (DEAD reproducía el idle).
+- **Causa.** Faltaban sus clips (PENDIENTES N3, B3).
+- **Solución.**
+  - **Las hojas, a 1×:** `Herramientas/reducir_hoja.py` detecta la exportación a 10× de las dos y
+    las reduce sin pérdida: agacharse, 7 fotogramas de 64 × 128 (el lienzo de correr); morir, 3
+    de 66 × 121. Kael mide lo mismo que en las demás hojas (120 px de pie).
+  - **Los pivotes, en la planta de los pies y en el torso:** x 39 en agacharse (el torso de pie
+    cae en la 40, como en el idle) y x 33 en morir, que se echa hacia atrás.
+  - **Agacharse:** `Agacharse` baja en 0,15 s (fotogramas 1 a 3) y encadena con `AgachadoBucle`
+    (3 y 4, al ritmo del idle). Al soltar, `PlayerAnimacion.ClipDePaso` pone `Levantarse` (5 y 6),
+    que encadena solo con el idle; si Kael corre, salta o cae, pasa directamente a su clip.
+  - **Morir:** los tres fotogramas a 5 fps, como en `Morir.pxo` (0,6 s). Se queda de rodillas
+    hasta que `Revivir` lo devuelve al idle.
+  - **Dos detalles para el autor**, sin cambiar nada:
+    - el dibujo agachado mide 1,08 u y el collider agachado 0,9 u (`alturaAgachado` = 0,5).
+      Cabe igual bajo el techo bajo de la prueba (1,2 u). Se recomienda 0,6 (N28);
+    - la bota de atrás de `Morir` toca el borde izquierdo del lienzo en los tres fotogramas y
+      queda cortada (N29, opcional).
+
+### Verificación
+
+- **Pruebas EditMode: 367 correctas de 367.**
+  - **Nuevas:**
+    - `ErupcionArteTests`: el lienzo y los 24 px/u, la base apoyada en la fila de abajo, que el
+      dibujo cubra su zona de daño, el clip, el prefab y los dos patrones;
+    - en `ArteKaelTests`, agacharse (su tabla, el clip de paso y que agachado cabe bajo 1,2 u) y
+      morir (5 fps, sin bucle, de rodillas).
+  - **Generalizada:** la de las transiciones propias, que ahora son tres cadenas (caer, agacharse
+    y levantarse).
+- **Pruebas PlayMode: 150 correctas de 150.**
+  - **Nuevas:**
+    - la erupción avisa con el rectángulo y quema con su columna, centrada y sin espejar;
+    - Kael se agacha, se queda abajo y se levanta antes del idle;
+    - Kael cae de rodillas, se queda y vuelve de pie al reaparecer.
+
+---
+
+## Nivel 1 montado, guion cargado y la onda de la Centinela (2026-10-07)
+
+Rama `nivel1-montado`, que sale de `ajustes-pendientes`. El autor aprobó el diseño del Nivel 1 y
+el guion («móntalo y carga el guion») con las tres decisiones del Anexo A que se le propusieron, y
+mandó las tres imágenes de la onda. Pidió también el prompt de las erupciones; su primera tanda
+llegó, pero no entró (punto 4).
+
+### 1. El Nivel 1, con su recorrido de diseño
+
+- **Problema.** El Nivel 1 se jugaba sobre el recorrido provisional de la Fase 6: un suelo plano
+  con dos fosos, un Eco y el Golem. No enseñaba nada ni decía nada de la Ira.
+- **Causa.** El diseño del nivel faltaba (PENDIENTES N10). Ya estaba escrito y aprobado
+  (`Docs/Diseno/Nivel1_Diseno.md`): la Ira empuja a correr y el nivel enseña a contenerla; cada
+  peligro sale primero sin riesgo, luego sobre lava y luego junto a enemigos.
+- **Solución.**
+  - **El diseño como datos:** `DisenoNivel1` (suelos, muros, plataformas de la arena, lava,
+    mecánicas, enemigos con su ruta, checkpoint, arena y salida). Lo montan `PreparadorNivel` y
+    lo comprueban las pruebas. Un paso nuevo del preparador sustituye el provisional, y lo que se
+    colocó para él, por el recorrido; solo la primera vez, así que sigue siendo idempotente.
+  - **Las piezas reales no cabían en el esquema.** La plataforma de combustión mide 3,42 u y la
+    inestable, 3,83; el esquema las dibujaba de 1,8 y 1,6. El lago pasa de 6 a 9 u, la subida
+    lleva una inestable y no dos, y el checkpoint queda en x 43 (en la propuesta, 41).
+  - **Todos los bordes, en unidades enteras.** El tileset pinta celdas enteras: un bloque que
+    acababa a media unidad se dibujaba medio tile fuera de su colisión, como un saliente que no
+    se puede pisar.
+  - **La lava, detrás del suelo y apoyada en su cuenca.** Sus franjas miden 3,15 u y los huecos,
+    lo que pide el recorrido; por detrás de las orillas, lo que sobra no se ve. Las plataformas de
+    combustión quedan en pie dentro de ella.
+  - **Los Ecos, a la escala que les dio el autor** (1,8 × 1,5) y de pie en su suelo.
+  - **La torreta, espejada:** dispara hacia el jugador que llega. Las dos de combustión van
+    desfasadas medio ciclo: cuando una se calienta, la otra se apaga.
+  - **El pintor** reconoce el recorrido, decora sobre cualquier suelo grueso y deja la arena sin
+    decoración. La primera regeneración dejó el nivel sin decoración, por dos motivos:
+    - **el paso fijo:** buscaba sitio cada 9 u y, entre tantos enemigos, caía siempre en uno;
+    - **una malla vieja:** contaba como ocupado el plano de malla que quedó del proyecto original
+      junto al inicio.
+
+    Ahora busca unidad a unidad y solo esquiva sprites.
+
+### 2. La Centinela, en una arena con plataformas
+
+- **Problema.** La arena nueva tiene plataformas a tres alturas (Anexo A), la más baja a 3 u del
+  suelo. La Centinela mide 3,4 u: chocando con ellas se habría quedado atascada debajo. Y su salto
+  apuntaba a la superficie bajo el jugador, así que habría saltado encima de las plataformas.
+  Además las erupciones buscaban el suelo desde 2 u por encima del jugador: con el jugador debajo
+  de una plataforma, brotaban encima de ella.
+- **Causa.** El jefe se probó en arenas planas: la provisional tenía una sola plataforma.
+- **Solución.**
+  - **`ArenaJefe.plataformas`:** el jefe ignora su colisión (`Physics2D.IgnoreCollision`).
+  - **`BossController.SueloPisableEn`:** el salto cae en el suelo que el jefe pisa, y por eso
+    subirse a una plataforma es esquivarlo. Es lo que el diseño quería que enseñaran.
+  - **`SueloEn` busca desde el centro del jugador:** las erupciones brotan bajo sus pies, también
+    en una plataforma, y obligan a bajar.
+  - **Las ondas se rompen contra la pared** en lugar de atravesarla (`PatronAtaque.RecorridoEnArena`).
+
+### 3. La onda de la Centinela, con su arte
+
+- **Problema.** La onda de suelo y las del salto se veían como rectángulos naranjas.
+- **Causa.** Faltaba su dibujo. Llegó con dos problemas:
+  - **Escala:** cuatro veces más grande de lo pedido (unos 225 píxeles de arte de ancho, no 60).
+  - **Encuadre:** cada imagen con el suelo y el frente en un sitio distinto. Una era de 1024 px,
+    con otra rejilla.
+- **Solución.**
+  - **Una limpieza nueva,** `Tesis/Imagenes/limpios/script/limpiar_onda.py`, sin scipy. Cada
+    imagen se baja a su rejilla nativa (270 o 256 píxeles a lo ancho, medidos). Luego se alinean
+    por la línea de suelo y por el frente de la roca en un lienzo común de 232 × 119, sin
+    reescalar nada.
+  - **A 98 px/u,** el doble que la Centinela. A 49 la onda mediría 4,7 × 2,4 u, más alta que el
+    salto de Kael. A 98 mide 2,4 × 1,2 u, y la roca de su cresta coincide con su zona de daño
+    (0,9 u), que no cambia: la pelea ya estaba aprobada.
+  - **`ConstructorEfectos`** hace su clip en bucle (sube, se curva, rompe), su controlador y el
+    prefab `OndaDeFuego`. **`ZonaDeDanio.Vestir`** lo pone en la zona con el pivote en su borde
+    delantero, espejado si va a la izquierda.
+  - **Los patrones de la onda** (`efecto`) y del salto (`efectoOndas`) lo llevan. El generador de
+    jefes rellena el campo si está vacío.
+
+### 4. Las erupciones: la primera tanda no entró
+
+- **Problema.** Llegaron cinco imágenes de la erupción, solo por el chat, y no cuadraban:
+  - **dos tamaños de píxel:** el aviso y el colapso, el doble de grandes que las demás;
+  - **suelo en la imagen de la explosión,** y la erupción brota también en las plataformas;
+  - **una columna corta:** para llenar su zona de daño (1,6 × 5 u), sus píxeles tendrían que ser
+    3,5 veces los de la Centinela.
+- **Causa.** El prompt pedía 256 píxeles de arte a lo ancho, y Gemini dibuja con bloques de unos
+  16-20 px.
+- **Solución.** No se integran. Hay un prompt corregido en `Docs/Diseno/Prompts_Gemini.md`:
+  - **128 píxeles a lo ancho,** para entrar a 24 px/u como el Golem y la torreta;
+  - **sin suelo;**
+  - **una imagen cada vez** en el mismo chat (PENDIENTES N27).
+
+### 5. El guion, cargado
+
+- **Problema.** Las cinemáticas de cierre y los diálogos decían «pendiente de guion».
+- **Causa.** El guion faltaba (N11). Ya estaba escrito y aprobado (`Docs/Diseno/Guion.md`).
+- **Solución.**
+  - **`GuionMundos` tiene los textos.**
+  - **El generador de narrativa los pone** en los diálogos, los cierres, la entrada al final, el
+    final y las presentaciones de los jefes 2, 3 y 4. Solo sustituye lo provisional: lo escrito a
+    mano en un asset, o una cinemática con imágenes, se respeta.
+  - **La pregunta final se queda 6 s,** sola y al final.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»:**
+  - monta el Nivel 1 y lo pinta;
+  - importa la onda y crea su clip y su prefab;
+  - carga el guion.
+
+  Volver a ejecutarlo no cambia nada.
+- **Pruebas EditMode: 360 correctas de 360.**
+  - **Nuevas:**
+    - `DisenoNivel1Tests`, con las medidas reales de Kael: que cada pisada se alcanza desde la
+      anterior, el hueco más largo, las plataformas de la arena, los bordes enteros, la lava sobre
+      su cuenca y los recuentos del Anexo A;
+    - `OndaArteTests`: el lienzo, el pivote sobre el frente de la roca, el clip, el prefab y los
+      patrones;
+    - cuatro del guion: ningún placeholder, las líneas de cada mundo, las cinemáticas y las
+      presentaciones.
+  - **Reescritas:** las de la escena del Nivel 1, para el recorrido, los enemigos, las mecánicas y
+    la arena.
+- **Pruebas PlayMode: 147 correctas de 147.**
+  - **Nuevas:** la onda vestida, espejada y rota contra la pared, y el suelo del salto frente al de
+    las erupciones con una plataforma.
+  - **Al día:** las del flujo del nivel, ahora con el suelo a varias alturas, y que la Centinela
+    atraviesa las plataformas de la arena.
+
+---
+
 ## Respuestas a la prueba del Nivel 1 (2026-10-07)
 
 Rama `ajustes-pendientes`, que sale de `menu-mecanicas`. El autor jugó el Nivel 1 y respondió

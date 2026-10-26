@@ -93,6 +93,90 @@ namespace Fragmentum.Tests
             }
         }
 
+        // --- El guion (Docs/Diseno/Guion.md) ---
+
+        [Test]
+        public void ElGuion_EstaCargado_SinNingunTextoPendiente()
+        {
+            var textos = AssetDatabase.FindAssets("t:DialogueData", new[] { GeneradorNarrativa.Carpeta })
+                .Select(g => AssetDatabase.LoadAssetAtPath<DialogueData>(AssetDatabase.GUIDToAssetPath(g)))
+                .SelectMany(d => d.lineas.Select(l => (d.name, l.texto)))
+                .Concat(AssetDatabase.FindAssets("t:CutsceneData", new[] { GeneradorNarrativa.Carpeta })
+                    .Select(g => AssetDatabase.LoadAssetAtPath<CutsceneData>(AssetDatabase.GUIDToAssetPath(g)))
+                    .SelectMany(c => c.diapositivas.SelectMany(d => (d.carteles ?? new System.Collections.Generic.List<Cartel>()).Select(k => k.texto).Append(d.texto)).Select(t => (c.name, t))))
+                .ToList();
+
+            Assert.IsNotEmpty(textos);
+            foreach (var (asset, texto) in textos)
+            {
+                Assert.IsFalse(GeneradorNarrativa.EsProvisional(texto), $"{asset}: queda un placeholder («{texto}»).");
+            }
+        }
+
+        [Test]
+        public void CadaMundo_DiceLasLineasDelGuion()
+        {
+            foreach (var nivel in BaseDeDatos().niveles)
+            {
+                var guion = GuionMundos.De(nivel.emocion.id);
+                Assert.IsNotNull(guion, $"{nivel.name}: el guion no tiene su mundo.");
+                Assert.AreEqual(guion.Apertura, nivel.dialogos.Del(MOMENTOS_DIALOGO.APERTURA).Single().texto, nivel.name);
+                Assert.AreEqual(guion.Cierre, nivel.dialogos.Del(MOMENTOS_DIALOGO.CIERRE).Single().texto, nivel.name);
+                if (nivel.jefe != null)
+                {
+                    var antes = nivel.dialogos.Del(MOMENTOS_DIALOGO.PRE_JEFE).Single();
+                    Assert.AreEqual(guion.AntesDelJefe, antes.texto, nivel.name);
+                    Assert.AreEqual(nivel.jefe.nombreCanonico, antes.hablante, "Habla el Arquitecto, no Kael.");
+                }
+
+                foreach (var linea in nivel.dialogos.lineas)
+                {
+                    Assert.LessOrEqual(linea.texto.Length, 120, $"{nivel.name}: «{linea.texto}» no se lee en {linea.duracion} s.");
+                }
+            }
+        }
+
+        [Test]
+        public void LasCinematicasDeCierre_SonLasDelGuion_YNombranLaHabilidadOElFragmento()
+        {
+            foreach (var nivel in BaseDeDatos().niveles.Where(n => n.emocion.id != EMOCIONES.INTEGRACION))
+            {
+                var guion = GuionMundos.De(nivel.emocion.id);
+                CollectionAssert.AreEqual(guion.CinematicaCierre, nivel.cinematicaCierre.diapositivas.Select(d => d.texto).ToArray(), nivel.name);
+            }
+
+            var final = BaseDeDatos().niveles[5];
+            CollectionAssert.AreEqual(GuionMundos.EntradaFinal, final.cinematicaEntrada.diapositivas.Select(d => d.texto).ToArray());
+            CollectionAssert.AreEqual(GuionMundos.Final, final.cinematicaCierre.diapositivas.Select(d => d.texto).ToArray());
+            Assert.Greater(final.cinematicaCierre.diapositivas.Last().duracion, final.cinematicaCierre.diapositivas[0].duracion,
+                "La pregunta final se queda más tiempo.");
+        }
+
+        [Test]
+        public void LasPresentacionesSinPlanos_LlevanLaLineaDelJefeYSuMundo()
+        {
+            foreach (var nivel in BaseDeDatos().niveles.Where(n => n.cinematicaJefe != null && n.cinematicaJefe.diapositivas.All(d => d.imagen == null)))
+            {
+                var guion = GuionMundos.De(nivel.emocion.id);
+                var textos = nivel.cinematicaJefe.diapositivas.Select(d => d.texto).ToList();
+                CollectionAssert.Contains(textos, $"{nivel.jefe.nombreCanonico}: {guion.AntesDelJefe}", nivel.name);
+                Assert.IsTrue(nivel.cinematicaJefe.diapositivas.SelectMany(d => d.carteles).Any(c => c.texto == nivel.nombreMundo),
+                    $"{nivel.name}: bajo el nombre del jefe, su mundo.");
+                Assert.IsTrue(nivel.cinematicaJefe.llevaDialogoDelJefe, $"{nivel.name}: ya dice la línea del jefe; el HUD no la repite.");
+            }
+        }
+
+        [Test]
+        public void LaPresentacionDeLaIra_NoDiceLaLineaDelJefe_AsiQueLaDiceElHud()
+        {
+            // Su texto es de Kael («No recuerdo esta sala…»): la línea de la Centinela va en el HUD
+            // al empezar el combate, también en partida nueva, cuando la presentación se ve.
+            var ira = BaseDeDatos().niveles.Single(n => n.emocion != null && n.emocion.id == EMOCIONES.IRA);
+            Assert.IsNotNull(ira.cinematicaJefe);
+            Assert.IsFalse(ira.cinematicaJefe.llevaDialogoDelJefe);
+            Assert.IsTrue(ira.dialogos.Del(MOMENTOS_DIALOGO.PRE_JEFE).Any(), "La Centinela tiene su línea antes del combate.");
+        }
+
         [Test]
         public void ElRegistroEmocional_NoPideCodigoDeParticipante()
         {

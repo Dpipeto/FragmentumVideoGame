@@ -216,6 +216,73 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator LaOnda_LlevaSuDibujo_MirandoHaciaDondeVa_YSeRompeContraLaPared()
+        {
+            var jefe = CrearJefe("CentinelaArdiente");
+            SoloPatron(jefe, "OndaDeSuelo");
+            yield return CrearJugadorEnSuelo(new Vector2(-8f, 0f));
+            var paredDerecha = 10f;
+            jefe.Activar(Jugador.transform, new Vector2(-15f, paredDerecha));
+
+            ZonaDeDanio[] ondas = null;
+            yield return EsperarHasta(() => (ondas = Object.FindObjectsByType<ZonaDeDanio>().Where(z => z.name.EndsWith("OndaDeSuelo")).ToArray()).Length == 2,
+                3f, "las dos ondas");
+
+            foreach (var onda in ondas)
+            {
+                Assert.IsFalse(onda.GetComponent<SpriteRenderer>().enabled, $"{onda.name}: con dibujo, sin rectángulo.");
+                var dibujo = onda.transform.Find("OndaDeFuego");
+                Assert.IsNotNull(dibujo, "La zona lleva dentro la onda animada.");
+                Assert.IsNotNull(dibujo.GetComponent<SpriteRenderer>().sprite);
+                Assert.IsNotNull(dibujo.GetComponent<Animator>().runtimeAnimatorController);
+
+                var haciaLaDerecha = onda.transform.position.x > jefe.Centro.x;
+                Assert.AreEqual(haciaLaDerecha, dibujo.localScale.x > 0f, "Mira hacia donde avanza: la de la izquierda va espejada.");
+                Assert.AreEqual(haciaLaDerecha ? 0.4f : -0.4f, dibujo.localPosition.x, 1e-4f, "Su frente cae en el borde delantero de la zona.");
+            }
+
+            // La de la derecha no atraviesa la pared: desaparece cuando su frente llega a ella.
+            var derecha = ondas.Single(o => o.transform.position.x > jefe.Centro.x);
+            var frente = float.MinValue;
+            yield return Durante(2f, () =>
+            {
+                if (derecha != null)
+                {
+                    frente = Mathf.Max(frente, derecha.transform.position.x + derecha.Tamano.x * 0.5f);
+                }
+            });
+            Assert.IsTrue(derecha == null, "La onda se rompe contra la pared.");
+            Assert.LessOrEqual(frente, paredDerecha + 0.25f, "Su frente no pasa de la pared.");
+        }
+
+        [UnityTest]
+        public IEnumerator LasPlataformasQueElJefeAtraviesa_NoSonDondeCae_PeroLasErupcionesSiBrotanEnEllas()
+        {
+            // Como en la arena del Nivel 1: el jefe atraviesa la plataforma (ArenaJefe.plataformas).
+            var jefe = CrearJefe("CentinelaArdiente");
+            SinPatrones(jefe, 1f);
+            var plataforma = Bloque("Plataforma", 4f, 8f, 3f, 3.5f, Fragmentum.Core.Capas.Suelo).GetComponent<Collider2D>();
+            foreach (var parte in jefe.GetComponentsInChildren<Collider2D>(true))
+            {
+                Physics2D.IgnoreCollision(parte, plataforma, true);
+            }
+
+            yield return CrearJugadorEnSuelo(new Vector2(6f, 3.5f));
+            jefe.Activar(Jugador.transform, LimitesArena);
+            yield return new WaitForFixedUpdate();
+            Assert.AreEqual(0f, jefe.SueloPisableEn(6f), 0.05f, "El salto cae en el suelo, no en la plataforma del jugador.");
+            Assert.AreEqual(3.5f, jefe.SueloEn(6f), 0.05f, "La erupción brota bajo los pies del jugador, en su plataforma.");
+
+            Jugador.Revivir(new Vector2(5f, 0.05f));
+            for (var i = 0; i < 3; i++)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+
+            Assert.AreEqual(0f, jefe.SueloEn(5f), 0.05f, "Con el jugador debajo de la plataforma, la erupción brota a sus pies, no encima de ella.");
+        }
+
+        [UnityTest]
         public IEnumerator PlataformasEnErupcion_BrotanBajoElJugador_ConAvisoPrevio()
         {
             var jefe = CrearJefe("CentinelaArdiente");
@@ -231,6 +298,42 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual(vidaJugador, Jugador.Vida.Vida);
 
             yield return EsperarHasta(() => Jugador.Vida.Vida < vidaJugador, 2f, "que la erupción queme al jugador quieto");
+        }
+
+        [UnityTest]
+        public IEnumerator LaErupcion_SeVeDibujada_DeLaGrietaAlDerrumbe()
+        {
+            var jefe = CrearJefe("CentinelaArdiente");
+            SoloPatron(jefe, "PlataformasEnErupcion");
+            yield return CrearJugadorEnSuelo(new Vector2(-6f, 0f));
+            jefe.Activar(Jugador.transform, LimitesArena);
+
+            ZonaDeDanio primera = null;
+            yield return EsperarHasta(() => (primera = Object.FindObjectsByType<ZonaDeDanio>().FirstOrDefault(z => z.name.EndsWith("Erupcion"))) != null, 3f, "la primera erupción");
+            var dibujo = primera.transform.Find("ErupcionDeLava");
+            Assert.IsNotNull(dibujo, "La zona lleva dentro la erupción animada.");
+            Assert.IsFalse(primera.GetComponent<SpriteRenderer>().enabled, "Con dibujo, sin rectángulo, también mientras avisa.");
+            Assert.AreEqual(0f, dibujo.localPosition.x, 1e-4f, "Centrada en su zona.");
+            Assert.AreEqual(-primera.Tamano.y * 0.5f, dibujo.localPosition.y, 1e-4f, "Brota de la base de la zona.");
+            Assert.Greater(dibujo.localScale.x, 0f, "Sin espejar.");
+
+            var animator = dibujo.GetComponent<Animator>();
+            yield return null;
+            Assert.IsFalse(primera.Activa);
+            Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Aviso"), "Mientras avisa, la grieta.");
+
+            yield return EsperarHasta(() => primera.Activa, 2f, "que la erupción queme");
+            yield return new WaitForSeconds(0.25f);
+            Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Arde"), "Al quemar brota y arde.");
+
+            // Al acabar la zona, el dibujo se queda un momento, ya sin daño, y se derrumba.
+            yield return EsperarHasta(() => primera == null, 2f, "que la zona acabe");
+            yield return null;
+            Assert.IsTrue(dibujo != null, "Sobrevive a su zona para derrumbarse.");
+            Assert.IsNull(dibujo.parent);
+            Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Apaga"), "Se derrumba.");
+            yield return new WaitForSeconds(0.4f);
+            Assert.IsTrue(dibujo == null, "Y desaparece solo.");
         }
 
         // --- Derrota y reinicio ---

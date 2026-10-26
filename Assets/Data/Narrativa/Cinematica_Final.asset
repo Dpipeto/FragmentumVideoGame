@@ -15,16 +15,70 @@ MonoBehaviour:
   id: Final
   diapositivas:
   - imagen: {fileID: 0}
-    texto: El Soldado Original se fragmenta en luz. Kael absorbe los fragmentos.
+    texto: El soldado se fragmenta en luz.
+    carteles: []
     duracion: 4
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 0}
-    texto: El mundo se reconstruye.
+    texto: 'Kael no la esquiva: la recibe.'
+    carteles: []
     duracion: 4
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
+  - imagen: {fileID: 0}
+    texto: El mundo se reconstruye, pieza a pieza.
+    carteles: []
+    duracion: 4
+    audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 0}
     texto: "\xBFEres un error\u2026 o una nueva identidad?"
-    duracion: 4
+    carteles: []
+    duracion: 6
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   saltable: 1
   soloPrimeraVez: 0
+  montaje: 0
+  sobreElJuego: 0
+  opacidadVelo: 0.55
+  escalaEntera: 0
+  fuente: {fileID: 0}
+  tamanoFuente: 8
+  interlineado: 0
+  colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
+  temblorPixeles: 1
+  temblorFotogramas: 4
+  fundidoImagen: 0.6
+  fundidoTexto: 0.4
+  margenTexto: 0.8
+  bloqueoSalto: 2
+  avisoSaltar: Pulsa cualquier tecla para saltar
+  finAviso: 5
+  opacidadAviso: 0.45
+  musica: {fileID: 0}

@@ -117,9 +117,12 @@ namespace Fragmentum.Tests
         }
 
         [Test]
-        public void ElNivel1_PreveElCheckpointDelAnexoEnX40()
+        public void ElNivel1_PreveElCheckpointDelDisenoEnX43()
         {
-            CollectionAssert.AreEqual(new[] { 40f }, BaseDeDatos().niveles[0].puntosDeControl);
+            // El Anexo A lo pone en x 40; con las plataformas reales el lago creció y la bandera va
+            // tras la subida, antes del Golem (Docs/Diseno/Nivel1_Diseno.md).
+            CollectionAssert.AreEqual(new[] { DisenoNivel1.Checkpoint }, BaseDeDatos().niveles[0].puntosDeControl);
+            Assert.AreEqual(43f, DisenoNivel1.Checkpoint);
         }
 
         [Test]

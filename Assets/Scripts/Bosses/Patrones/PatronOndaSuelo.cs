@@ -28,6 +28,10 @@ namespace Fragmentum.Bosses.Patrones
         [Tooltip("Tamaño de la onda: baja, para poder saltarla.")]
         public Vector2 tamanoOnda = new Vector2(0.8f, 0.9f);
 
+        [Tooltip("El dibujo de la onda (prefab con su animación, mirando a la derecha y con el pivote en su frente). " +
+                 "Con él, la zona no se pinta como rectángulo.")]
+        public GameObject efecto;
+
         [Tooltip("Una onda a cada lado, o solo hacia el jugador.")]
         public bool haciaAmbosLados = true;
 
@@ -47,7 +51,6 @@ namespace Fragmentum.Bosses.Patrones
             // Con arte, las ondas salen con G3, el fotograma de la onda en el suelo.
             yield return jefe.Golpear(AnimatorParams.GolpeSuelo, aviso);
 
-            var duracion = alcance / velocidadOnda;
             for (var i = 0; i < repeticiones; i++)
             {
                 if (i > 0)
@@ -66,22 +69,25 @@ namespace Fragmentum.Bosses.Patrones
                 var salida = jefe.MedioAncho + tamanoOnda.x * 0.5f;
                 if (haciaAmbosLados)
                 {
-                    Lanzar(jefe, -1, salida, y, duracion);
-                    Lanzar(jefe, 1, salida, y, duracion);
+                    Lanzar(jefe, -1, salida, y);
+                    Lanzar(jefe, 1, salida, y);
                 }
                 else
                 {
-                    Lanzar(jefe, jefe.Mirando, salida, y, duracion);
+                    Lanzar(jefe, jefe.Mirando, salida, y);
                 }
             }
 
             yield return new WaitForSeconds(recuperacion);
         }
 
-        private void Lanzar(BossController jefe, int direccion, float salida, float y, float duracion)
+        private void Lanzar(BossController jefe, int direccion, float salida, float y)
         {
             var origen = new Vector2(jefe.Centro.x + direccion * salida, y);
-            jefe.CrearZona("OndaDeSuelo", origen, tamanoOnda, danio, 0f, duracion, new Vector2(direccion * velocidadOnda, 0f), color, dibujarZona);
+            var duracion = RecorridoEnArena(jefe, origen.x, direccion, tamanoOnda.x * 0.5f, alcance) / velocidadOnda;
+            var zona = jefe.CrearZona("OndaDeSuelo", origen, tamanoOnda, danio, 0f, duracion, new Vector2(direccion * velocidadOnda, 0f), color,
+                dibujarZona && efecto == null);
+            zona.Vestir(efecto, direccion);
         }
     }
 }

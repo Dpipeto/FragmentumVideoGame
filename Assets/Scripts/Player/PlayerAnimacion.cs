@@ -10,12 +10,14 @@ namespace Fragmentum.Player
     /// <see cref="PlayerController.OnStateChanged"/>).
     ///
     /// La FSM del código es la única que decide. El Animator no repite la lógica con
-    /// transiciones propias (salvo encadenar un clip con su bucle): solo guarda los clips, y este
-    /// componente reproduce el que corresponde al entrar en cada estado. Así no hay dos máquinas
+    /// transiciones propias (salvo encadenar un clip con el siguiente): solo guarda los clips, y
+    /// este componente reproduce el que corresponde al entrar en cada estado. Así no hay dos máquinas
     /// de estados que puedan contradecirse, que era el problema del prototipo.
     ///
     /// La tabla <see cref="clips"/> se edita en el Inspector. Un estado sin arte propio apunta
-    /// al clip más parecido (por ejemplo, CROUCH reproduce el idle) hasta que exista el suyo.
+    /// al clip más parecido (por ejemplo, WALL_SLIDE reproduce la caída) hasta que exista el suyo.
+    /// Entre dos estados puede sonar además un clip de paso (<see cref="ClipDePaso"/>): al
+    /// levantarse, los fotogramas en que Kael se incorpora antes del idle.
     /// </summary>
     [DisallowMultipleComponent]
     public class PlayerAnimacion : MonoBehaviour
@@ -48,6 +50,10 @@ namespace Fragmentum.Player
         public const string CaidaBucle = "CaidaBucle";
         public const string Ataque = "Ataque";
         public const string Dash = "Dash";
+        public const string Agacharse = "Agacharse";
+        public const string AgachadoBucle = "AgachadoBucle";
+        public const string Levantarse = "Levantarse";
+        public const string Morir = "Morir";
 
         [SerializeField] private PlayerController jugador;
 
@@ -61,14 +67,15 @@ namespace Fragmentum.Player
         private string _ultimo;
 
         /// <summary>
-        /// Tabla con el arte que existe hoy: idle, correr, salto (subida y caída), ataque y dash.
-        /// Los estados sin clip propio usan el más parecido; están en PENDIENTES.md (apartado B3).
+        /// Tabla con el arte que existe hoy: idle, correr, salto (subida y caída), ataque, dash,
+        /// agacharse y morir. Los estados sin clip propio usan el más parecido; están en
+        /// PENDIENTES.md (apartado B3).
         /// </summary>
         public static List<ClipDeEstado> TablaPorDefecto() => new List<ClipDeEstado>
         {
             new ClipDeEstado(ESTADOS_JUGADOR.IDLE, Idle),
             new ClipDeEstado(ESTADOS_JUGADOR.RUN, Correr),
-            new ClipDeEstado(ESTADOS_JUGADOR.CROUCH, Idle),
+            new ClipDeEstado(ESTADOS_JUGADOR.CROUCH, Agacharse),
             new ClipDeEstado(ESTADOS_JUGADOR.JUMP, Salto, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.DOUBLE_JUMP, Salto, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.FALL, Caida),
@@ -77,8 +84,16 @@ namespace Fragmentum.Player
             new ClipDeEstado(ESTADOS_JUGADOR.DASH, Dash, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.ATTACK, Ataque, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.DAMAGED, string.Empty),
-            new ClipDeEstado(ESTADOS_JUGADOR.DEAD, Idle),
+            new ClipDeEstado(ESTADOS_JUGADOR.DEAD, Morir, reiniciar: true),
         };
+
+        /// <summary>
+        /// Clip de paso entre dos estados, o null si no hay: de CROUCH a IDLE, Levantarse, que
+        /// encadena solo con el idle. A cualquier otro estado (correr, saltar, atacar) Kael pasa
+        /// directamente a su clip.
+        /// </summary>
+        public static string ClipDePaso(ESTADOS_JUGADOR anterior, ESTADOS_JUGADOR nuevo) =>
+            anterior == ESTADOS_JUGADOR.CROUCH && nuevo == ESTADOS_JUGADOR.IDLE ? Levantarse : null;
 
         /// <summary>Estado del Animator que reproduce <paramref name="estado"/>; vacío si no cambia de clip.</summary>
         public string EstadoAnimatorDe(ESTADOS_JUGADOR estado) =>
@@ -137,6 +152,14 @@ namespace Fragmentum.Player
                 // Igual con el dash: su clip dura 1 s y ocupa el dash entero, dure lo que dure.
                 var duracion = Mathf.Max(0.05f, jugador.Parametros.dashDuration);
                 AnimatorParams.FijarFloat(animator, AnimatorParams.VelocidadDash, 1f / duracion);
+            }
+
+            var paso = ClipDePaso(anterior, nuevo);
+            if (paso != null && animator.HasState(0, Animator.StringToHash(paso)))
+            {
+                animator.Play(paso, 0, 0f);
+                _ultimo = paso;
+                return;
             }
 
             if (_porEstado.TryGetValue(nuevo, out var clip))

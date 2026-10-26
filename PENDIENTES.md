@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.31 — Respuestas a la prueba del Nivel 1: bola de fuego, segundo plano del final y caminar con Alt, 2026-10-07.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.34 — Respuestas a la prueba del Nivel 1 montado, 2026-10-08.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -10,11 +10,8 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
-| N10 | **Revisa el diseño propuesto del Nivel 1** y dime si lo monto. | Me pediste que lo diseñara a partir de la tesis. Está en `Docs/Diseno/Nivel1_Diseno.md`, con su esquema a escala (`Nivel1_Diseno.png`): la Ira empuja a correr y el nivel enseña a contener el impulso; cada mecánica aparece primero sin riesgo, luego sobre lava y luego con enemigos. | Dime «móntalo» o qué cambias. Decide también las tres cosas del Anexo A que no cuadran (sección 6): arena de 25 × 15, suelo de la arena sin lava y checkpoint en x 41. |
-| N11 | **Revisa el guion propuesto** para los seis mundos. | Me pediste que lo escribiera a partir de la tesis. Está en `Docs/Diseno/Guion.md`: apertura, eco de memoria, antes del jefe y cierre de cada mundo, y los textos de sus cinemáticas de cierre, de la entrada al final y del final. | Corrige lo que no suene a ti (es tu tesis) y dime «cárgalo»: lo paso a los assets de `Assets/Data/Narrativa`. |
-| N25 | *Opcional.* **Retoca `CinematicaFinalLvl2`.** | La que entró funciona: a 240 × 135 se leen los huecos y el hombro que brilla. Pero sigue flotando un fragmento sobre la espada y tiene cinco huecos vacíos en vez de cuatro. | El prompt de edición está en `Docs/Diseno/Prompts_Gemini.md`. Guárdala encima de la de ahora, mejor a 2752 × 1536, y se reprocesa sola con `cine.py`. |
-| N19 | **Corrige el Anexo A de `Tesis.docx`:** la plataforma de combustión ya no quema por estar encima. | Aceptaste el ciclo fijo del nuevo encargo: apagada → calienta → encendida, sin depender del jugador. El Anexo A dice que quema si te quedas encima más de 2 s. | Yo no toco `Tesis.docx`. Basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». |
-| N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después wall slide y agacharse (y, para la Fase 10, nado). El dash ✔ ya está. | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
+| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. |
+| N3 | *En curso.* **Clips de Kael que faltan:** daño primero; después wall slide (y, para la Fase 10, nado). El dash ✔, la muerte ✔ y agacharse ✔ ya están. | El daño se ve en cada partida: hoy sigue el clip anterior y parpadea. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Solo el Eco de la Ira tiene arte. | Ver «Arte que más necesito», justo debajo. |
 
 ### Arte que más necesito, por urgencia
@@ -22,16 +19,48 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 1. **Centinela Ardiente:** ✔ *recibida.* Los 29 sprites ya están importados y la integración
    sigue por fases (B5). Opcional, según su LEEME: rehacer `R2`, que salió sobreexpuesto. Basta
    con sustituir el PNG en `Assets/Sprites/Jefes/Centinela`: los ajustes se aplican solos.
-2. **Kael: daño y muerte** (N3). Se ven en cada partida.
+2. **Kael: daño** (N3). Se ve en cada partida. La muerte ✔ y agacharse ✔ ya están (v0.33).
 3. **Golem de Ceniza:** ✔ *recibido* (15 fotogramas), en integración por fases en la rama
    `golem-mecanicas`. Opcional: rehacer **A2** (el LEEME trae el prompt); el ataque funciona sin él.
 4. **Mecánicas:** ✔ *completas.* La lava, la torreta, la plataforma inestable, la de combustión
    y, desde la v0.31, la bola de fuego (dos fotogramas de vuelo y uno de chispas).
 5. **Cinemáticas del jefe:** ✔ *completas.* `CinematicaJefe1`, `CinematicaJefe2`,
-   `CinematicaFinalLvl1` y `CinematicaFinalLvl2` (con un retoque opcional, N25).
-6. **Efectos de la Centinela:** **la onda** (prompt listo en `Docs/Diseno/Prompts_Gemini.md`) y
-   **las erupciones**. Mientras no lleguen se ven como rectángulos naranjas, para que no hagan
-   daño invisible. El espadazo y la caída del salto ya no pintan el suyo: los enseña su animación.
+   `CinematicaFinalLvl1` y `CinematicaFinalLvl2`, retocada en la v0.34.
+6. **Efectos de la Centinela:** ✔ *completos.* **La onda** (v0.32) y **la erupción** entera
+   (v0.34): la grieta que avisa, el brote, la columna que arde y el derrumbe. Solo la caída del
+   salto sigue sin VFX propio (la enseñan J4 y J5 de la Centinela).
+
+### Resuelto en la v0.34
+
+- **N26:** jugaste el Nivel 1 montado. El único fallo: en partida nueva, la Centinela no decía su
+  línea antes del combate (con «Continuar», sí). Era la presentación: se ve solo la primera vez y,
+  cuando se veía, el HUD callaba la línea creyendo que ya iba en ella, pero la de la Ira lleva la
+  frase de Kael. Ahora la línea suena tras la presentación también en partida nueva.
+- **N27:** las tres erupciones que faltaban entraron. La erupción se ve dibujada de principio a fin
+  y ya no queda ningún rectángulo naranja en el combate de la Centinela.
+- **N28:** el collider agachado mide 1,08 u (`alturaAgachado` = 0,6), lo mismo que el dibujo.
+- **N29:** la muerte se queda como está.
+- **N25:** `CinematicaFinalLvl2` ya está como querías: sin el fragmento flotante y con cuatro
+  huecos. Llegó a 1024 × 572; a 240 × 135 se ve bien, con el fondo un poco más ruidoso.
+
+### Resuelto en la v0.33
+
+- **Kael se agacha y muere con su arte** (N3, a falta del daño). Agacharse: baja, se queda
+  agachado respirando y, al soltar, se incorpora antes del idle. Morir: el golpe, se dobla y cae
+  de rodillas; ahí se queda hasta reaparecer. Quedan dos detalles: N28 y N29.
+- **La erupción quema con su columna dibujada** (E3 y E4 de la segunda tanda). El resto, en N27.
+
+### Resuelto en la v0.32
+
+- **N10:** el Nivel 1 está montado con el recorrido diseñado y tus tres decisiones del Anexo A
+  (arena de 25 × 15, suelo firme, checkpoint tras la subida). Las piezas reales son más anchas que
+  en el esquema: el lago creció, la subida lleva una inestable y el checkpoint queda en x 43.
+  Pruébalo en N26.
+- **N11:** el guion está cargado: líneas del HUD, cierres de los cuatro mundos con jefe, cierre del
+  Jardín, entrada al final, final y presentaciones de los jefes 2, 3 y 4. Se corrige desde el
+  inspector de cada asset: lo escrito a mano no se pisa.
+- **La onda de la Centinela** tiene su arte: la de suelo, la doble y las del salto. Se rompe
+  contra la pared de la arena en lugar de atravesarla.
 
 ### Resuelto en la v0.31
 
@@ -80,6 +109,38 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.34: qué cambió respecto de la v0.33
+
+- **La línea de la Centinela en partida nueva** (N26): `CutsceneData.llevaDialogoDelJefe` dice si
+  una presentación ya lleva las líneas «antes del jefe». La de la Ira no, así que el HUD las dice
+  al empezar el combate; las de los jefes 2 a 4 sí, y no se repiten.
+- **La erupción completa** (N27): aviso, brote, arde y derrumbe, que sigue un momento tras acabar
+  la zona y ya sin daño.
+- **Kael agachado, a la altura de su dibujo** (N28). **N29** descartado.
+- **`CinematicaFinalLvl2` retocada** (N25): sin el fragmento flotante y con cuatro huecos.
+
+## Revisión 0.33: qué cambió respecto de la v0.32
+
+- **El trabajo de la v0.32, confirmado** en la rama `nivel1-montado` (360 EditMode y 147 PlayMode
+  correctas).
+- **Erupciones:** entran E3 y E4 como bucle mientras quema, a 24 px/u; el aviso sigue siendo el
+  rectángulo. N27 pide la tercera tanda.
+- **Kael:** agacharse (7 fotogramas) y morir (3, a 5 fps como en `Morir.pxo`). Nuevos N28 (altura
+  agachado) y N29 (pie de `Morir`, opcional). N3 y B3, al día.
+
+## Revisión 0.32: qué cambió respecto de la v0.31
+
+- **El Nivel 1 tiene su recorrido de diseño** (`DisenoNivel1`), que sustituye al provisional:
+  tres secciones, lava en cuencas, dos plataformas inestables, dos de combustión desfasadas, la
+  torreta mirando al jugador, 7 Ecos a tu escala y el Golem, y la arena de 25 × 15 con plataformas
+  a tres alturas.
+- **La Centinela atraviesa las plataformas de la arena** y su salto cae al suelo: subirse a una es
+  esquivarlo. Las erupciones brotan bajo los pies de Kael, también en una plataforma.
+- **El guion, cargado** en `Assets/Data/Narrativa`.
+- **La onda, con arte.** Las erupciones no: la primera tanda no cuadraba (N27).
+- **N10 y N11 resueltos.** Nuevos N26 (juega el nivel montado) y N27 (erupciones). N19 incluye ahora
+  las tres decisiones del Nivel 1.
 
 ## Revisión 0.31: qué cambió respecto de la v0.30
 
@@ -436,14 +497,14 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 | Cinemática (asset) | Dónde suena | Falta | Prioridad |
 |---|---|---|---|
 | `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | ✔ 12 planos y guion (80 s). Falta, opcional, la música o el sonido (campo `musica` del asset, o `audio` de cada plano) | P2 |
-| `Cinematica_Jefe_Ira` (~7,5 s, con sus planos y a escala entera) | Al entrar en la arena de la Centinela, antes del combate (una vez por carga del nivel) | ✔ Planos `CinematicaJefe1` y `CinematicaJefe2`. Falta el guion del diálogo (N17) | P1 |
-| `Cinematica_Derrota_Ira` (a escala entera) | Cuando la Centinela termina de caer, antes de recoger el fragmento | ✔ `CinematicaFinalLvl1` y `CinematicaFinalLvl2` (retoque opcional, N25) | — |
-| `Cinematica_Jefe_Tristeza`, `_Miedo`, `_Culpa` | Al entrar en la arena de cada jefe | Guion; imágenes opcionales | P2 |
-| `Cinematica_Cierre_Ira` | Al superar el mundo de la Ira | Guion propuesto en `Docs/Diseno/Guion.md` (N11); faltan las imágenes | P1 |
-| `Cinematica_Cierre_Tristeza`, `_Miedo`, `_Culpa` | Al superar cada mundo | Guion e imágenes | P2 |
-| `Cinematica_Cierre_Jardin` (~30 s: Kael ve al Soldado) | Al superar el Jardín | Guion e imágenes (la idea, del Anexo A, ya está) | P2 |
-| `Cinematica_Entrada_Final` (~45 s) | Antes del final | Guion e imágenes (la idea, del Anexo A, ya está) | P2 |
-| `Cinematica_Final` y créditos («¿Eres un error… o una nueva identidad?») | Al terminar el juego | Imágenes; texto del Anexo A ya incluido | P2 |
+| `Cinematica_Jefe_Ira` (~9,6 s, con sus planos y a escala entera) | Al entrar en la arena de la Centinela, antes del combate (una vez por carga del nivel) | ✔ Planos `CinematicaJefe1` y `CinematicaJefe2` y su guion «El que ya estaba aquí» | — |
+| `Cinematica_Derrota_Ira` (a escala entera) | Cuando la Centinela termina de caer, antes de recoger el fragmento | ✔ `CinematicaFinalLvl1` y `CinematicaFinalLvl2`, retocada (v0.34) | — |
+| `Cinematica_Jefe_Tristeza`, `_Miedo`, `_Culpa` | Al entrar en la arena de cada jefe | ✔ Guion (nombre, mundo y la línea del jefe). Imágenes opcionales | P2 |
+| `Cinematica_Cierre_Ira` | Al superar el mundo de la Ira | ✔ Guion. Faltan las imágenes | P1 |
+| `Cinematica_Cierre_Tristeza`, `_Miedo`, `_Culpa` | Al superar cada mundo | ✔ Guion. Faltan las imágenes | P2 |
+| `Cinematica_Cierre_Jardin` (~30 s: Kael ve al Soldado) | Al superar el Jardín | ✔ Guion (cinco textos de 6 s). Faltan las imágenes | P2 |
+| `Cinematica_Entrada_Final` (~45 s) | Antes del final | ✔ Guion (siete textos de 6 s). Faltan las imágenes | P2 |
+| `Cinematica_Final` y créditos («¿Eres un error… o una nueva identidad?») | Al terminar el juego | ✔ Guion (la pregunta, sola y al final). Faltan las imágenes | P2 |
 | Memorias de los Niveles 4 y 5 (4 + 4, ~5 s) | Al activar cada memoria (`MemoryObject`, Fase 10) | Todo: se crearán con la mecánica | P2 |
 
 > **Presentación del jefe.** Lleva `sobreElJuego` marcado: detrás se ve la escena congelada, con
@@ -456,14 +517,15 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 
 ### B2. Diálogos — `DialogueData` + `DialogueManager` (Fase 8)
 
-**Estado en la v2.** Cada mundo tiene su `Dialogos_<Emoción>` en `Assets/Data/Narrativa`, con una
-línea pendiente por momento: apertura, eco de memoria, antes del jefe (si hay jefe) y cierre.
-Todas nombran ya la emoción del mundo. Se muestran abajo en el HUD (el cierre, en el fin de
-nivel).
+**Estado en la v2 (v0.32).** Cada mundo tiene su `Dialogos_<Emoción>` en `Assets/Data/Narrativa`
+con las líneas del guion (`Docs/Diseno/Guion.md`): apertura, eco de memoria, antes del jefe (si hay
+jefe) y cierre. La apertura y el cierre nombran la emoción del mundo. Se muestran abajo en el HUD
+(el cierre, en el fin de nivel). Los ecos de memoria ya tienen texto y sonarán con las memorias
+de la Fase 10.
 
 | Asset | Dónde | Formato | Prioridad |
 |---|---|---|---|
-| Líneas de Kael y de los Arquitectos, **×6 mundos**. Pueden ser varias por momento: se muestran en orden. Las de «antes del jefe» solo se usan en un nivel sin presentación del jefe (B1). | `Dialogos_*` → `lineas` (hablante, texto, momento, duración) | Texto | Ira P1, resto P2 |
+| Líneas de Kael y de los Arquitectos, **×6 mundos**. Pueden ser varias por momento: se muestran en orden. Las de «antes del jefe» solo se usan en un nivel sin presentación del jefe (B1). | `Dialogos_*` → `lineas` (hablante, texto, momento, duración) | ✔ Guion cargado. Se corrige desde el inspector | — |
 | Pregunta y escala del registro emocional | `Assets/Data/Narrativa/RegistroEmocional.asset` | ✔ Revisadas (N12). Sin código de participante (`pedirParticipante` apagado) | — |
 | Retratos opcionales (Kael, los 5 Arquitectos y el Soldado) | Pendiente de campo (hoy solo se muestra el nombre) | PNG 256×256 | P3 |
 
@@ -471,7 +533,8 @@ nivel).
 
 **Estado en la v2 (arte de Kael, 2026-09-30).** El jugador está completo en lógica (prefab
 `Assets/Prefabs/Player.prefab`, FSM de 12 estados) y **ya tiene arte**: quieto, correr, salto con
-caída, ataque y dash, dibujados en Pixelorama. El detalle está en el CHANGELOG, entrada «Arte de Kael».
+caída, ataque, dash, agacharse y morir, dibujados en Pixelorama. El detalle está en el CHANGELOG,
+entrada «Arte de Kael» (y las del dash y de agacharse y morir).
 
 - **Dónde está el arte:**
   - las hojas, en `Assets/Sprites/Kael`, a escala 1× y 64 PPU;
@@ -500,10 +563,10 @@ caída, ataque y dash, dibujados en Pixelorama. El detalle está en el CHANGELOG
 | Ataque básico | `ATTACK` | P1 | ✔ 7 fotogramas, estirados a la duración del golpe. Ver N13 sobre la hitbox |
 | Carga y ataque cargado (Ira) | modificador de `ATTACK` | P1 | ✔ El mismo clip, más lento, con el tinte rojizo de la carga |
 | Daño | `DAMAGED` | P1 | Sigue el clip anterior y parpadea. Falta un fotograma de golpe |
-| Muerte | `DEAD` | P1 | Usa Idle. Falta su clip |
+| Muerte | `DEAD` | P1 | ✔ 3 fotogramas a 5 fps, como en `Morir.pxo`: se queda de rodillas hasta reaparecer |
 | Dash | `DASH` | P2 | ✔ 4 fotogramas, estirados a la duración del dash (0,18 s) |
 | Wall slide / wall jump | `WALL_SLIDE`, `WALL_JUMP` | P2 | Usan Caida y Salto. Falta el de wall slide (pegado a la pared) |
-| Agacharse | `CROUCH` | P2 | Usa Idle, así que el sprite no se encoge con el collider. Falta su clip |
+| Agacharse | `CROUCH` | P2 | ✔ 7 fotogramas: baja (1 a 3), agachado en bucle (3 y 4) y, al soltar, se levanta (5 y 6) antes del idle. Avanzar agachado usa el mismo bucle. El collider agachado mide lo que el dibujo: 1,08 u |
 | Nado (Tristeza) | modificador de movimiento `BajoElAgua` | P2 | Usa Correr, más lento en el agua |
 | Invisibilidad parcial (Miedo) | habilidad | — | Opacidad al 40 % (no necesita arte) |
 | Defensa reforzada (Culpa) | escudo de `PlayerHealth` | P2 | Sin efecto visual: falta un VFX de escudo |
@@ -608,7 +671,7 @@ rectángulos de color: avisan translúcidos y queman casi opacos.
 
 | Jefe | Estado | Falta | Prioridad |
 |---|---|---|---|
-| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Arte integrado en la rama `centinela-arte`, pendiente de tu prueba y de fusionar: los 29 sprites, los 8 clips, su Animator, el combate por eventos del dibujo, la ceniza de D4 con el fragmento que recoge Kael y el menú *Verificar Centinela*. Falta: los VFX de la onda, las erupciones y la caída del salto, y, si quieres, rehacer R2. | P1 |
+| **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Arte integrado en la rama `centinela-arte`, pendiente de tu prueba y de fusionar: los 29 sprites, los 8 clips, su Animator, el combate por eventos del dibujo, la ceniza de D4 con el fragmento que recoge Kael y el menú *Verificar Centinela*. La onda ✔ (v0.32) y la erupción entera ✔ (v0.34) ya tienen arte. Falta: el VFX de la caída del salto y, si quieres, rehacer R2. | P1 |
 | **Doncella del Lamento** (Tristeza) | Esqueleto: datos, prefab y dos fases sin patrones | Patrones de olas, inundación y congelamiento (Fase 10); todas las animaciones. Concepto: `Jefe2 (2).png` en la v1. | P2 |
 | **Espectro del Pavor** (Miedo) | Esqueleto: casi invisible en combate | Patrón de ataque con destello y clones (Fase 10); animaciones; la partícula que distingue al real. Concepto: `Jefe3 (2).png` en la v1. | P2 |
 | **Juez Silente** (Culpa) | Esqueleto: inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()` | Proyectar las memorias y conectarlas (`MemoryObject`, Fase 10); todo el arte. | P2 |
@@ -682,7 +745,7 @@ escena, en ese orden. Un nivel sin escena aparece «en construcción» en el sel
 |---|---|---|---|---|
 | `Menu_Inicial` | ✔ generada | ✔ (0) | Fondo y logo (hoy, texto sobre color liso) | P3 |
 | `Niveles` (selector) | ✔ generada | ✔ (1) | Íconos por mundo (B9) | P3 |
-| `Nivel1` (Ira) | ✔ Preparada (Fase 6): `LevelManager`, checkpoint en x = 40, salida en x = 78, zona mortal y recorrido provisional con un Soldado de lava y el Golem de Ceniza. Fase 9: plataforma inestable, dos plataformas de combustión, lava y torreta sobre el recorrido provisional. Solo tiene 2 tiles pintados. | ✔ (2) | Pintar el layout de ~80 u del Anexo A (N10) y recolocar en él las mecánicas. | P1 |
+| `Nivel1` (Ira) | ✔ Montada con su recorrido de diseño (v0.32, `DisenoNivel1`): tres secciones pintadas con el tileset, 7 Ecos y el Golem, las mecánicas, checkpoint en x 43 y la arena de 25 × 15 con la Centinela. | ✔ (2) | ✔ Probada por ti (v0.34): solo fallaba la línea del jefe en partida nueva, ya corregida. | P1 |
 | Nivel 2 (Tristeza) | ✗ | ✗ | Escena esqueleto (Fase 10) | P2 |
 | Nivel 3 (Miedo) | ✗ | ✗ | idem | P2 |
 | Nivel 4 (Culpa) | ✗ | ✗ | idem | P2 |
@@ -779,6 +842,9 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.34 (2026-10-08)** — Respuestas a la prueba del Nivel 1 montado: la línea de la Centinela en partida nueva, la erupción completa, Kael agachado a 1,08 u y `CinematicaFinalLvl2` retocada. Resueltos N25, N26, N27, N28 y N29.
+- **0.33 (2026-10-07)** — La v0.32, confirmada en `nivel1-montado`. La erupción quema con su columna dibujada (E3 y E4); N27 pide el aviso, el brote y el colapso. Kael se agacha y muere con su arte; nuevos N28 (altura agachado) y N29 (pie de `Morir`). N3 y B3 al día.
+- **0.32 (2026-10-07)** — Nivel 1 montado con su recorrido de diseño, guion cargado y la onda de la Centinela con arte. N10 y N11 resueltos; nuevos N26 (juega el nivel) y N27 (erupciones); N19 ampliado.
 - **0.31 (2026-10-07)** — Respuestas a la prueba del Nivel 1: bola de fuego, `CinematicaFinalLvl2`, zonas sin rectángulo, caminar con Alt y propuestas de diseño del Nivel 1 y del guion (N10 y N11). Nuevo N25.
 - **0.30 (2026-10-07)** — Guía de mecánicas en el menú principal y en la pausa, en la rama `menu-mecanicas`. Nuevos N23 (textos de la guía) y N24 (sigilo con teclado).
 - **0.29 (2026-10-06)** — Cinemáticas en pixel art, fase C: la presentación del jefe según su guion. N17 resuelto, N21 opcional, nuevo N22 (encuadre del ojo).

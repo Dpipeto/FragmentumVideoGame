@@ -160,6 +160,10 @@ namespace Fragmentum.Narrative
         [Tooltip("Solo se reproduce la primera vez (la cinemática inicial).")]
         public bool soloPrimeraVez;
 
+        [Tooltip("Presentación de un jefe que ya dice sus líneas «antes del jefe»: al terminar, el HUD no las repite. " +
+                 "Sin marcar (la de la Ira, que dice Kael), suenan en el HUD al empezar el combate.")]
+        public bool llevaDialogoDelJefe;
+
         [Tooltip("Fundidos cruzados entre imágenes (la cinemática inicial) o beats, cada uno con sus fundidos desde y hacia negro.")]
         public MONTAJES_CINEMATICA montaje = MONTAJES_CINEMATICA.FUNDIDOS_CRUZADOS;
 

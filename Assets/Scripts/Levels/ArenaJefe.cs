@@ -19,7 +19,9 @@ namespace Fragmentum.Levels
     ///   antes del combate se cierran las puertas, la cámara se desliza hasta el jefe y se
     ///   reproduce la cinemática, que lleva el diálogo. Al terminar (o al saltarla) empieza el
     ///   combate. Se ve una sola vez cada vez que se carga el nivel: al reintentar, no se repite.
-    ///   Con cinemática, las líneas «antes del jefe» del HUD no se muestran: el diálogo va en ella.
+    ///   Las líneas «antes del jefe» suenan en el HUD al empezar el combate, salvo que la
+    ///   presentación ya las diga (<c>CutsceneData.llevaDialogoDelJefe</c>, las de los jefes 2 a
+    ///   4). La de la Ira no las dice: su texto es de Kael.
     ///
     /// - <b>Derrota del jefe:</b> el <see cref="LevelManager"/> otorga el fragmento y la
     ///   habilidad; tras una breve pausa se abren las puertas y aparece la salida del nivel. Si
@@ -43,6 +45,10 @@ namespace Fragmentum.Levels
         [Tooltip("Bordes horizontales de la arena (mínimo, máximo): el jefe no los cruza y sus ataques tampoco.")]
         [SerializeField] private Vector2 limites = new Vector2(55f, 80f);
 
+        [Tooltip("Plataformas de la arena. Son del jugador: el jefe pasa por debajo y a través de ellas, y su salto cae " +
+                 "siempre al suelo. Subirse a una es esquivar el salto y las ondas; las erupciones sí brotan en ellas.")]
+        [SerializeField] private Collider2D[] plataformas = new Collider2D[0];
+
         [Tooltip("Segundos entre la recompensa (al derrotar al jefe o al recoger su fragmento) y la apertura de la arena.")]
         [SerializeField] private float esperaTrasDerrota = 2f;
 
@@ -54,6 +60,7 @@ namespace Fragmentum.Levels
 
         private LevelManager _nivel;
         private bool _presentado;
+        private CutsceneData _presentacion;
         private PlayerController _jugadorEnEspera;
 
         /// <summary>Empezó la cinemática de presentación del jefe.</summary>
@@ -79,6 +86,9 @@ namespace Fragmentum.Levels
         public bool Superada { get; private set; }
 
         public Vector2 Limites => limites;
+
+        /// <summary>Las plataformas de la arena, que el jefe atraviesa.</summary>
+        public System.Collections.Generic.IReadOnlyList<Collider2D> Plataformas => plataformas;
 
         /// <summary>¿Están cerradas las puertas? (Solo durante el combate.)</summary>
         public bool PuertasCerradas
@@ -121,6 +131,7 @@ namespace Fragmentum.Levels
             {
                 jefe.OnJefeDerrotado += AlDerrotarJefe;
                 jefe.OnCaidaTerminada += AlTerminarCaida;
+                IgnorarPlataformas();
             }
             else
             {
@@ -183,6 +194,7 @@ namespace Fragmentum.Levels
             }
 
             _presentado = true;
+            _presentacion = cinematica;
             Presentando = true;
             _jugadorEnEspera = jugador;
             FijarPuertas(true);
@@ -215,8 +227,9 @@ namespace Fragmentum.Levels
             }
 
             EventosJuego.NotificarJefeEnCombate(jefe.Datos != null ? jefe.Datos.nombreCanonico : jefe.name, jefe.Vida);
-            // Con presentación, el diálogo ya fue en la cinemática.
-            if (!_presentado && _nivel != null && _nivel.Nivel != null && DialogueManager.Instancia != null)
+            // Si la presentación ya dijo el diálogo del jefe, el HUD no lo repite.
+            var dialogoDicho = _presentacion != null && _presentacion.llevaDialogoDelJefe;
+            if (!dialogoDicho && _nivel != null && _nivel.Nivel != null && DialogueManager.Instancia != null)
             {
                 DialogueManager.Instancia.Reproducir(_nivel.Nivel.dialogos, MOMENTOS_DIALOGO.PRE_JEFE);
             }
@@ -356,6 +369,25 @@ namespace Fragmentum.Levels
             }
 
             EventosJuego.NotificarJefeFueraDeCombate();
+        }
+
+        // El jefe mide 3,4 u y las plataformas más bajas están a 3 u del suelo: chocando con ellas se
+        // quedaría atascado debajo. Las atraviesa y su salto cae al suelo (BossController.SueloPisableEn).
+        private void IgnorarPlataformas()
+        {
+            var cuerpo = jefe.GetComponentsInChildren<Collider2D>(true);
+            foreach (var plataforma in plataformas)
+            {
+                if (plataforma == null)
+                {
+                    continue;
+                }
+
+                foreach (var parte in cuerpo)
+                {
+                    Physics2D.IgnoreCollision(parte, plataforma, true);
+                }
+            }
         }
 
         private void FijarPuertas(bool cerradas)

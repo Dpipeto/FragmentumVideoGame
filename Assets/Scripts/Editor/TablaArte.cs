@@ -32,6 +32,7 @@ namespace Fragmentum.EditorTools
         public const string CarpetaGolem = CarpetaSprites + "/Enemigos/GolemCeniza";
         public const string CarpetaMecanicas = CarpetaSprites + "/Mecanicas";
         public const string CarpetaCinematicasNivel1 = CarpetaSprites + "/Cinematicas/Nivel1";
+        public const string CarpetaEfectos = CarpetaSprites + "/Efectos";
 
         public const int TamanoMaximo = 2048;
 
@@ -122,6 +123,18 @@ namespace Fragmentum.EditorTools
                 new Regla(CarpetaCinematicasNivel1 + "/", UI.CamaraCinematica.PixelesPorUnidad, null,
                     "Planos del Nivel 1: 240×135 (16:9 exacto), a 1 píxel por unidad como la cámara de cinemáticas: " +
                     "un píxel del plano es un píxel de su rejilla.", LienzoCinematica),
+
+                // Efectos de los ataques de los jefes.
+                new Regla(CarpetaEfectos + "/Onda_", ConstructorEfectos.PixelesPorUnidadOnda, ConstructorEfectos.PivoteOnda,
+                    "Onda de la Centinela: 232×119 (Imagenes/limpios/script/limpiar_onda.py), el pivote en su frente sobre el suelo. " +
+                    "A 98 px/u, el doble que la Centinela: llegó dibujada cuatro veces más grande de lo pedido y a 49 mediría 2,4 u de " +
+                    "alto, más que el salto de Kael. Así la roca de la cresta mide lo que su zona de daño (0,9 u).",
+                    ConstructorEfectos.LienzoOnda),
+                new Regla(CarpetaEfectos + "/Erupcion_", ConstructorEfectos.PixelesPorUnidadErupcion, ConstructorEfectos.PivoteErupcion,
+                    "Erupción de la Centinela: 74×150 (Imagenes/limpios/script/limpiar_erupcion.py), los cinco fotogramas en la " +
+                    "misma rejilla, el pivote en el centro de la base de la columna. A 24 px/u, como el Golem y la torreta: la " +
+                    "columna mide 1,83 × 5,7 u, un poco más que su zona de daño (1,6 × 5); el aviso y el derrumbe, unas 3 u de ancho.",
+                    ConstructorEfectos.LienzoErupcion),
 
                 // Jefes: pixel art, y la Centinela con su escala y el pivote de los pies.
                 new Regla(CarpetaJefes + "/", null, null,

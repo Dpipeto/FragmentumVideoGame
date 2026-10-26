@@ -154,6 +154,12 @@ namespace Fragmentum.Tests.PlayMode
             }
         }
 
+        /// <summary>
+        /// Los pies del jugador sobre un objeto colocado en el suelo (la entrada de la arena, la
+        /// salida): el Nivel 1 no tiene el suelo a la misma altura en todo el recorrido.
+        /// </summary>
+        protected static Vector2 EnElSuelo(Vector3 objeto) => new Vector2(objeto.x, objeto.y + 0.05f);
+
         /// <summary>Espera un estado de la FSM global, con tiempo sin escala (varios estados paran el tiempo).</summary>
         protected static IEnumerator EsperarEstado(ESTADOS_JUEGO estado, float maximo)
         {

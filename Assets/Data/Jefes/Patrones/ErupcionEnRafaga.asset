@@ -17,9 +17,11 @@ MonoBehaviour:
   aviso: 0.6
   danio: 1
   color: {r: 1, g: 0.23921569, b: 0, a: 1}
+  dibujarZona: 1
   erupciones: 6
   intervalo: 0.28
   dispersion: 4.5
   tamano: {x: 1.6, y: 5}
   duracion: 0.8
   recuperacion: 0.5
+  efecto: {fileID: 3688350376876020757, guid: 15d3fa38ddb76da418bd42f8cff7adeb, type: 3}
