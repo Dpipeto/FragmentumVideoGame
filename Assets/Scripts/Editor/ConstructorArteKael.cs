@@ -85,7 +85,15 @@ namespace Fragmentum.EditorTools
         /// </summary>
         public static readonly Hoja HojaMorir = new Hoja { Archivo = "Kael_Morir", Fotogramas = 3, Pivote = new Vector2Int(33, 0) };
 
-        public static readonly Hoja[] Hojas = { HojaIdle, HojaCorrer, HojaSalto, HojaAtaque, HojaDash, HojaAgachado, HojaMorir };
+        /// <summary>
+        /// El daño (Daño.pxo, 68×138 a 1×, exportado a 7,5× y reducido a 1× sin pérdida con
+        /// <c>reducir_hoja.py --escala 7.5</c>): el golpe lo dobla hacia atrás, con unas chispas que se apagan
+        /// en los cuatro fotogramas. El torso cae en la x 40, donde el del idle; los pies, 12 píxeles por
+        /// encima del borde de abajo: ahí va el pivote, para que no flote.
+        /// </summary>
+        public static readonly Hoja HojaDanio = new Hoja { Archivo = "Kael_Danio", Fotogramas = 4, Pivote = new Vector2Int(40, 12) };
+
+        public static readonly Hoja[] Hojas = { HojaIdle, HojaCorrer, HojaSalto, HojaAtaque, HojaDash, HojaAgachado, HojaMorir, HojaDanio };
 
         /// <summary>Un clip: qué fotogramas de qué hoja y en qué momento empieza cada uno.</summary>
         public sealed class Clip
@@ -182,7 +190,53 @@ namespace Fragmentum.EditorTools
                 Estado = PlayerAnimacion.Morir, Hoja = HojaMorir, Fotogramas = Rango(0, 3),
                 Tiempos = Uniformes(3, 5f),
             },
+            // El daño: dura 1 s y PlayerAnimacion lo estira a lo que dura el retroceso (0,3 s), como el dash. Los
+            // cuatro duran lo mismo, como en Daño.pxo. Se queda en el último si el retroceso se alargara.
+            new Clip
+            {
+                Estado = PlayerAnimacion.Danio, Hoja = HojaDanio, Fotogramas = Rango(0, 4),
+                Tiempos = Uniformes(4, 4f),
+                ParametroVelocidad = AnimatorParams.VelocidadDanio.Nombre,
+            },
         };
+
+        // --- El escudo de la Defensa Reforzada ---
+
+        /// <summary>
+        /// El escudo (<c>Prompts_Mundo4.md</c>, apartado J; limpio en <c>Tesis/Imagenes/limpios/Mundo4/Escudo</c>): aparece,
+        /// para el golpe y se rompe, en el mismo lienzo. No es una hoja: cada dibujo es un sprite suelto, con su
+        /// regla en <see cref="TablaArte"/>. Lo enseña <see cref="EscudoDibujado"/>.
+        /// </summary>
+        public const string CarpetaEscudo = CarpetaSprites + "/Escudo";
+
+        public static readonly string[] FotogramasEscudo = { "Escudo1", "Escudo2", "Escudo3" };
+
+        public static readonly Vector2Int LienzoEscudo = new Vector2Int(60, 87);
+
+        /// <summary>Las placas miden 80 píxeles de alto (filas 2 a 81): a 46 por unidad, 1,74 u, casi lo que Kael.</summary>
+        public const float PixelesPorUnidadEscudo = 46f;
+
+        /// <summary>El centro del arco del primero (x 16,5, fila 42); los otros dos saltan a la derecha desde ahí.</summary>
+        public static Vector2 PivoteEscudo => new Vector2(16.5f / LienzoEscudo.x, (LienzoEscudo.y - 42f) / LienzoEscudo.y);
+
+        public static string RutaEscudo(string archivo) => $"{CarpetaEscudo}/{archivo}.png";
+
+        public static IEnumerable<TablaArte.Regla> ReglasEscudo => new[]
+        {
+            new TablaArte.Regla(CarpetaEscudo + "/", PixelesPorUnidadEscudo, PivoteEscudo,
+                "El escudo de Kael (la Defensa Reforzada): 60×87, aparece, para el golpe y se rompe. A 46 px/u las placas miden 1,74 u; " +
+                "el pivote, en el centro del arco.", LienzoEscudo),
+        };
+
+        /// <summary>Los tres dibujos del escudo, o null si falta alguno.</summary>
+        public static Sprite[] DibujosEscudo
+        {
+            get
+            {
+                var dibujos = FotogramasEscudo.Select(f => AssetDatabase.LoadAssetAtPath<Sprite>(RutaEscudo(f))).ToArray();
+                return dibujos.All(d => d != null) ? dibujos : null;
+            }
+        }
 
         // --- Menú y modo batch ---
 
@@ -237,6 +291,15 @@ namespace Fragmentum.EditorTools
             AsegurarCarpeta(CarpetaAnimaciones);
             var clips = Clips.ToDictionary(c => c.Estado, c => CrearClip(c, sprites[c.Hoja]));
             ArmarControlador(clips);
+
+            // El escudo, con sus ajustes, si ya está en el proyecto.
+            foreach (var archivo in FotogramasEscudo)
+            {
+                if (AssetImporter.GetAtPath(RutaEscudo(archivo)) is TextureImporter importador && TablaArte.Ajustar(importador))
+                {
+                    importador.SaveAndReimport();
+                }
+            }
 
             AssetDatabase.SaveAssets();
             Debug.Log($"[Fragmentum] Arte de Kael importado: {Hojas.Length} hojas, {Clips.Length} clips y {RutaControlador}.");
@@ -398,6 +461,7 @@ namespace Fragmentum.EditorTools
             AsegurarParametro(controlador, AnimatorParams.Death.Nombre, AnimatorControllerParameterType.Bool, 0f);
             AsegurarParametro(controlador, AnimatorParams.VelocidadAtaque.Nombre, AnimatorControllerParameterType.Float, 1f);
             AsegurarParametro(controlador, AnimatorParams.VelocidadDash.Nombre, AnimatorControllerParameterType.Float, 1f);
+            AsegurarParametro(controlador, AnimatorParams.VelocidadDanio.Nombre, AnimatorControllerParameterType.Float, 1f);
 
             var maquina = controlador.layers[0].stateMachine;
             var estados = new Dictionary<string, AnimatorState>();

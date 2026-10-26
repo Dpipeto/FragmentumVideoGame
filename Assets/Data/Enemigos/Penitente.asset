@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe741b5edf391fa419b30bd0f7522bcb, type: 3}
+  m_Name: Penitente
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.EnemyData
+  nombreCanonico: Penitente
+  descripcion: "Culpa (Mundo 4): el Eco de este mundo. Encorvado, con placas de identificaci\xF3n en el pecho, arrastra las cadenas de sus grilletes. Patrulla a 1 u/s y persigue a 2,2. Va en grupos de dos y tres: para eso est\xE1n los barriles. Si Kael se vuelve invisible, lo pierde y vuelve a su ronda. Tocarlo no hace da\xF1o: solo el golpe."
+  vidaMaxima: 3
+  danio: 1
+  danioContacto: 0
+  invulnerabilidad: 0.3
+  puntos: 100
+  velocidadPatrulla: 1
+  velocidadPersecucion: 2.2
+  toleranciaWaypoint: 0.2
+  esperaEnWaypoint: 1.5
+  evitarBordes: 1
+  inmuneALava: 0
+  deteccion: {fileID: 11400000, guid: 69124c2f72dee55459659af73a977899, type: 2}
+  detectionRadius: 6
+  factorHisteresis: 1.5
+  attackRadius: 1.3
+  alturaAtaque: 1.5
+  attackCooldown: 0.45
+  duracionAtaque: 0.5
+  inicioVentanaGolpe: 0.28125
+  finVentanaGolpe: 0.37499997
+  hiperarmadura: 0
+  damagedDuration: 0.3
+  retroceso: {x: 4, y: 3}
+  resistenciaRetroceso: 0.3
+  deathDelay: 1
+  spriteMiraDerecha: 1
+  tinte: {r: 1, g: 1, b: 1, a: 1}

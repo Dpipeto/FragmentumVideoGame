@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Levels.Escenario;
 using UnityEngine;
@@ -41,7 +42,8 @@ namespace Fragmentum.Enemies
     ///     (<see cref="limites"/>, el claro) y vuelve a escuchar.
     ///
     /// Mientras se agazapa, embiste, está aturdido o frena, su controlador está apagado, como el de
-    /// la Plañidera. No toca <see cref="EnemyController"/>.
+    /// la Plañidera. Con arte, su Animator sigue el estado de esta pieza (el entero «Estado»); sin
+    /// arte, el bloque se tiñe y se encoge. No toca <see cref="EnemyController"/>.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(EnemyController), typeof(Health))]
@@ -89,6 +91,9 @@ namespace Fragmentum.Enemies
 
         [SerializeField] private SpriteRenderer sprite;
 
+        [Tooltip("Con arte: su Animator, que sigue el estado de esta pieza (el entero «Estado»). Vacío = se busca solo.")]
+        [SerializeField] private Animator animator;
+
         [Header("Sin arte")]
         [Tooltip("Agazapado, el bloque se tiñe de este color (el aviso).")]
         [SerializeField] private Color colorAviso = new Color(0.62f, 0.2f, 0.24f, 1f);
@@ -127,12 +132,16 @@ namespace Fragmentum.Enemies
 
         private Color Tinte => _controlador != null && _controlador.Datos != null ? _controlador.Datos.tinte : Color.white;
 
+        /// <summary>¿Lleva su arte? Entonces el aviso, la embestida y el aturdimiento son su dibujo.</summary>
+        public bool ConArte => animator != null && animator.runtimeAnimatorController != null;
+
         private void Awake()
         {
             _controlador = GetComponent<EnemyController>();
             _vida = GetComponent<Health>();
             _cuerpo = GetComponent<Collider2D>();
             if (sprite == null) sprite = GetComponentInChildren<SpriteRenderer>();
+            if (animator == null) animator = GetComponentInChildren<Animator>();
             if (pivote == null && sprite != null) pivote = sprite.transform.parent != transform ? sprite.transform.parent : sprite.transform;
             if (sprite != null) _escalaSprite = sprite.transform.localScale;
             _relevo = new RelevoDelControlador(_controlador, _vida, pivote);
@@ -161,6 +170,13 @@ namespace Fragmentum.Enemies
         private void Update()
         {
             _relevo.Escuchar(_alOir);
+
+            // Antes de que el Animator se evalúe en este fotograma.
+            if (ConArte && animator.isInitialized)
+            {
+                AnimatorParams.FijarEntero(animator, AnimatorParams.EstadoMecanica, (int)Estado);
+            }
+
             if (!_vida.EstaVivo)
             {
                 return;
@@ -399,10 +415,10 @@ namespace Fragmentum.Enemies
             OnCambio?.Invoke(nuevo);
         }
 
-        // Sin arte: agazapado, el bloque se tiñe y se encoge; aturdido, se apaga.
+        // Sin arte: agazapado, el bloque se tiñe y se encoge; aturdido, se apaga. Con arte, su dibujo.
         private void Pintar(Color color, float alto)
         {
-            if (sprite == null)
+            if (sprite == null || ConArte)
             {
                 return;
             }

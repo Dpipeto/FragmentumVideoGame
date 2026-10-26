@@ -1,4 +1,5 @@
 using System;
+using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Data;
 using UnityEngine;
@@ -40,6 +41,8 @@ namespace Fragmentum.Enemies
     ///
     /// La estocada usa el arma y los tiempos del ataque de sus datos (2 de daño; se abre a los
     /// 0,3 s). Mientras oye, va y apuñala, su controlador está apagado, como el de la Plañidera.
+    /// Con arte, su Animator sigue el estado de esta pieza (el entero «Estado»): escucha con la mano
+    /// en la máscara y apuñala con su dibujo; sin arte, el bloque se ladea y se aclara.
     /// No toca <see cref="EnemyController"/>.
     /// </summary>
     [DisallowMultipleComponent]
@@ -74,6 +77,9 @@ namespace Fragmentum.Enemies
         [SerializeField] private Transform pivote;
 
         [SerializeField] private SpriteRenderer sprite;
+
+        [Tooltip("Con arte: su Animator, que sigue el estado de su oído (el entero «Estado»). Vacío = se busca solo.")]
+        [SerializeField] private Animator animator;
 
         [Header("Sin arte")]
         [Tooltip("Cuánto ladea la cabeza al escuchar (grados).")]
@@ -117,11 +123,15 @@ namespace Fragmentum.Enemies
 
         private Color Tinte => Datos != null ? Datos.tinte : Color.white;
 
+        /// <summary>¿Lleva su arte? Entonces el aviso y la estocada son su dibujo.</summary>
+        public bool ConArte => animator != null && animator.runtimeAnimatorController != null;
+
         private void Awake()
         {
             _controlador = GetComponent<EnemyController>();
             _vida = GetComponent<Health>();
             if (sprite == null) sprite = GetComponentInChildren<SpriteRenderer>();
+            if (animator == null) animator = GetComponentInChildren<Animator>();
             if (pivote == null && sprite != null) pivote = sprite.transform.parent != transform ? sprite.transform.parent : sprite.transform;
             _relevo = new RelevoDelControlador(_controlador, _vida, pivote);
             _alOir = AlOirRuido;
@@ -138,6 +148,13 @@ namespace Fragmentum.Enemies
         private void Update()
         {
             _relevo.Escuchar(_alOir);
+
+            // Antes de que el Animator se evalúe en este fotograma.
+            if (ConArte && animator.isInitialized)
+            {
+                AnimatorParams.FijarEntero(animator, AnimatorParams.EstadoMecanica, (int)Estado);
+            }
+
             if (!_vida.EstaVivo || !Alerta)
             {
                 return;
@@ -337,10 +354,10 @@ namespace Fragmentum.Enemies
             OnCambio?.Invoke(nuevo);
         }
 
-        // Sin arte: ladea el bloque y lo aclara mientras escucha.
+        // Sin arte: ladea el bloque y lo aclara mientras escucha. Con arte, escucha su dibujo.
         private void Ladear(bool escuchando)
         {
-            if (sprite == null)
+            if (sprite == null || ConArte)
             {
                 return;
             }

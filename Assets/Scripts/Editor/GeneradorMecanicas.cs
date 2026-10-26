@@ -50,10 +50,22 @@ namespace Fragmentum.EditorTools
         /// <summary>El tapón de hielo rompible: tapa un hueco de 2 u y asoma 1,25 u sobre el suelo (pivote arriba).</summary>
         public static readonly Vector2 TamanoTapon = new Vector2(2f, 2.25f);
 
-        // Las del mundo del Miedo (todavía sin arte).
+        // Las del mundo del Miedo (su arte, en ConstructorMecanicasMundo3).
         public const string Antorcha = "Antorcha";
         public const string Cepo = "Cepo";
         public const string RamaPodrida = "RamaPodrida";
+
+        // Mundo 4 (Culpa)
+        public const string BarrilExplosivo = "BarrilExplosivo";
+        public const string Mina = "Mina";
+
+        /// <summary>Lo que se ve de un barril sin su arte: madera vieja.</summary>
+        public static readonly Color ColorBarrilSinArte = new Color(0.45f, 0.26f, 0.15f, 1f);
+
+        /// <summary>Lo que se ve de una mina sin su arte: hierro oscuro, y su cadena, oxidada.</summary>
+        public static readonly Color ColorMinaSinArte = new Color(0.23f, 0.22f, 0.21f, 1f);
+
+        public static readonly Color ColorCadenaSinArte = new Color(0.4f, 0.32f, 0.27f, 1f);
 
         /// <summary>La rama podrida: 2 u de largo y el grueso de las ramas, con el pivote en la superficie.</summary>
         public static readonly Vector2 TamanoRama = new Vector2(2f, DisenoNivel3.GrosorRama);
@@ -97,6 +109,8 @@ namespace Fragmentum.EditorTools
             ok &= Guardar(Antorcha, CrearAntorcha);
             ok &= Guardar(Cepo, CrearCepo);
             ok &= Guardar(RamaPodrida, CrearRamaPodrida);
+            ok &= Guardar(BarrilExplosivo, CrearBarril);
+            ok &= Guardar(Mina, CrearMina);
             if (ok)
             {
                 Debug.Log($"[Fragmentum] Prefabs de mecánicas creados en {Carpeta}.");
@@ -204,6 +218,9 @@ namespace Fragmentum.EditorTools
             caja.size = cuerpo.size;
             caja.offset = cuerpo.center;
 
+            // Como todas las plataformas del mundo de la Ira: se atraviesa saltando desde abajo.
+            PlataformaDeUnSentido.Hacer(caja);
+
             var (dibujo, animator) = Dibujo(raiz.transform, ConstructorMecanicas.Plataforma, OrdenDibujo, cuerpo, Hex("8A6A55"));
             var componente = raiz.AddComponent<Levels.Mecanicas.PlataformaInestable>();
             Asignar(componente, "animator", p => p.objectReferenceValue = animator);
@@ -218,6 +235,7 @@ namespace Fragmentum.EditorTools
             var caja = raiz.AddComponent<BoxCollider2D>();
             caja.size = cuerpo.size;
             caja.offset = cuerpo.center;
+            PlataformaDeUnSentido.Hacer(caja);
 
             var (_, animator) = Dibujo(raiz.transform, ConstructorMecanicas.Combustion, OrdenDibujo, cuerpo, Hex("5C4033"));
 
@@ -366,18 +384,33 @@ namespace Fragmentum.EditorTools
             return raiz;
         }
 
-        // --- Mundo del Miedo (sin arte: rectángulos del tamaño de la pieza) ---
+        // --- Mundo del Miedo (con su arte, de ConstructorMecanicasMundo3; sin él, rectángulos) ---
 
         /// <summary>
-        /// La antorcha: un poste con la cabeza arriba, que cambia de color con su estado, y su luz
-        /// 2D en la llama, apagada hasta que Kael la enciende. Sus medidas son las del Anexo A
+        /// La antorcha: con arte, su dibujo y su Animator, que sigue su estado (apagada, la llama,
+        /// consumida); sin él, un poste con la cabeza arriba que cambia de color. Y su luz 2D en la
+        /// llama, apagada hasta que Kael la enciende. Sus medidas son las del Anexo A
         /// (<see cref="DisenoNivel3"/>): 8 u de luz durante 15 s, se enciende a 1,5 u.
         /// </summary>
         private static GameObject CrearAntorcha()
         {
             var raiz = Raiz(Antorcha, 0, null);
-            Provisional(raiz.transform, Rect.MinMaxRect(-0.1f, 0f, 0.1f, AlturaLlama - 0.2f), Hex("2B2118"), "la antorcha", "Prompts_Mundo3.md", "Poste");
-            var cabeza = Provisional(raiz.transform, Rect.MinMaxRect(-0.18f, AlturaLlama - 0.18f, 0.18f, AlturaLlama + 0.18f), new Color(0.25f, 0.22f, 0.2f, 1f), "la antorcha (la llama)", "Prompts_Mundo3.md", "Cabeza");
+            SpriteRenderer cabeza = null;
+            Animator animator = null;
+            var apagada = ConstructorMecanicasMundo3.AntorchaApagada;
+            var controladorAntorcha = ConstructorMecanicasMundo3.ControladorAntorcha;
+            if (apagada != null && controladorAntorcha != null)
+            {
+                var dibujo = ConArte(raiz.transform, apagada);
+                animator = dibujo.gameObject.AddComponent<Animator>();
+                animator.runtimeAnimatorController = controladorAntorcha;
+                animator.applyRootMotion = false;
+            }
+            else
+            {
+                Provisional(raiz.transform, Rect.MinMaxRect(-0.1f, 0f, 0.1f, AlturaLlama - 0.2f), Hex("2B2118"), "la antorcha", "Prompts_Mundo3.md", "Poste");
+                cabeza = Provisional(raiz.transform, Rect.MinMaxRect(-0.18f, AlturaLlama - 0.18f, 0.18f, AlturaLlama + 0.18f), new Color(0.25f, 0.22f, 0.2f, 1f), "la antorcha (la llama)", "Prompts_Mundo3.md", "Cabeza");
+            }
 
             var objetoLuz = new GameObject("Luz");
             objetoLuz.transform.SetParent(raiz.transform, false);
@@ -399,17 +432,26 @@ namespace Fragmentum.EditorTools
             Asignar(componente, "llama", p => p.vector2Value = new Vector2(0f, AlturaLlama));
             Asignar(componente, "luz", p => p.objectReferenceValue = luz);
             Asignar(componente, "cabeza", p => p.objectReferenceValue = cabeza);
+            Asignar(componente, "animator", p => p.objectReferenceValue = animator);
+            // El golpe de cuerdas al encenderla (Musica/Golpes/Antorcha, componer_nivel3.py).
+            Asignar(componente, "sonidoAlEncender", p => p.objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(MusicaNiveles.RutaAntorcha));
             return raiz;
         }
 
         /// <summary>
-        /// El cepo: un rectángulo en el suelo, escondido (transparente) hasta que Kael está cerca o
-        /// lo alumbra una antorcha. Sujeta 1 s, quita 1 y suena a 8 u (<see cref="DisenoNivel3"/>).
+        /// El cepo: su dibujo (o un rectángulo) en el suelo, escondido (transparente) hasta que Kael
+        /// está cerca o lo alumbra una antorcha. Sujeta 1 s, quita 1 y suena a 8 u
+        /// (<see cref="DisenoNivel3"/>). Con arte, abierto y cerrado son dos dibujos.
         /// </summary>
         private static GameObject CrearCepo()
         {
             var raiz = Raiz(Cepo, 0, null);
-            var dibujo = Provisional(raiz.transform, Rect.MinMaxRect(-TamanoCepo.x * 0.5f, 0f, TamanoCepo.x * 0.5f, TamanoCepo.y), Hex("8C8C99"), "el cepo", "Prompts_Mundo3.md");
+            var abierto = ConstructorMecanicasMundo3.CepoAbierto;
+            var cerrado = ConstructorMecanicasMundo3.CepoCerrado;
+            var conArte = abierto != null && cerrado != null;
+            var dibujo = conArte
+                ? ConArte(raiz.transform, abierto)
+                : Provisional(raiz.transform, Rect.MinMaxRect(-TamanoCepo.x * 0.5f, 0f, TamanoCepo.x * 0.5f, TamanoCepo.y), Hex("8C8C99"), "el cepo", "Prompts_Mundo3.md");
             dibujo.sortingOrder = 1;
             var componente = raiz.AddComponent<Levels.Mecanicas.Cepo>();
             componente.danio = DisenoNivel3.DanioCepo;
@@ -418,6 +460,15 @@ namespace Fragmentum.EditorTools
             componente.distanciaVer = DisenoNivel3.DistanciaVerCepo;
             Asignar(componente, "tamano", p => p.vector2Value = TamanoCepo);
             Asignar(componente, "visual", p => p.objectReferenceValue = dibujo);
+            if (conArte)
+            {
+                // Con arte no se tiñe: abierto y cerrado son sus dibujos.
+                Asignar(componente, "spriteAbierto", p => p.objectReferenceValue = abierto);
+                Asignar(componente, "spriteCerrado", p => p.objectReferenceValue = cerrado);
+                Asignar(componente, "colorAbierto", p => p.colorValue = Color.white);
+                Asignar(componente, "colorCerrado", p => p.colorValue = Color.white);
+            }
+
             return raiz;
         }
 
@@ -432,7 +483,10 @@ namespace Fragmentum.EditorTools
             var caja = raiz.AddComponent<BoxCollider2D>();
             caja.size = TamanoRama;
             caja.offset = new Vector2(0f, -TamanoRama.y * 0.5f);
-            var dibujo = Provisional(raiz.transform, Rect.MinMaxRect(-TamanoRama.x * 0.5f, -TamanoRama.y, TamanoRama.x * 0.5f, 0f), ColorRamaSinArte, "la rama podrida", "Prompts_Mundo3.md");
+            var conArte = ConstructorMecanicasMundo3.HayRamas;
+            var dibujo = conArte
+                ? ConArte(raiz.transform, ConstructorMecanicasMundo3.RamaSana)
+                : Provisional(raiz.transform, Rect.MinMaxRect(-TamanoRama.x * 0.5f, -TamanoRama.y, TamanoRama.x * 0.5f, 0f), ColorRamaSinArte, "la rama podrida", "Prompts_Mundo3.md");
             dibujo.sortingOrder = 0;
 
             var plataforma = raiz.AddComponent<Levels.Mecanicas.PlataformaInestable>();
@@ -444,11 +498,136 @@ namespace Fragmentum.EditorTools
             var rama = raiz.AddComponent<Levels.Mecanicas.RamaPodrida>();
             Asignar(rama, "visual", p => p.objectReferenceValue = dibujo);
             Asignar(rama, "colorSana", p => p.colorValue = ColorRamaSinArte);
+            if (conArte)
+            {
+                // A oscuras, la sana; con luz o crujiendo, la podrida; al partirse, rota y astillas.
+                Asignar(rama, "spriteSana", p => p.objectReferenceValue = ConstructorMecanicasMundo3.RamaSana);
+                Asignar(rama, "spritePodrida", p => p.objectReferenceValue = ConstructorMecanicasMundo3.RamaPodrida);
+                Asignar(rama, "spriteRota", p => p.objectReferenceValue = ConstructorMecanicasMundo3.RamaRota);
+                Asignar(rama, "spriteAstillas", p => p.objectReferenceValue = ConstructorMecanicasMundo3.Astillas);
+            }
+
             return raiz;
         }
 
-        /// <summary>Lo que se ve partirse la rama antes de desaparecer (lo mínimo de la plataforma inestable).</summary>
-        public const float DuracionCaidaRama = 0.25f;
+        /// <summary>Lo que se ve partirse la rama antes de desaparecer: con arte, la rota y después las astillas.</summary>
+        public const float DuracionCaidaRama = 0.4f;
+
+        /// <summary>
+        /// El barril explosivo del mundo de la Culpa (<see cref="DisenoNivel4"/>): un bloque en la capa de
+        /// los enemigos, que la espada golpea y que Kael y los enemigos atraviesan (la matriz de colisión
+        /// no los junta), y su dibujo (sin arte, un rectángulo). Pivote en el pie.
+        /// </summary>
+        private static GameObject CrearBarril()
+        {
+            var raiz = Raiz(BarrilExplosivo, Capa(Capas.Enemy), null);
+            var tamano = DisenoNivel4.TamanoBarril;
+            var caja = raiz.AddComponent<BoxCollider2D>();
+            caja.size = tamano;
+            caja.offset = new Vector2(0f, tamano.y * 0.5f);
+            // Con su arte, su dibujo (el pivote al pie): intacto, la mecha que parpadea y quemado.
+            var dibujos = ConstructorMecanicasMundo4.DibujosBarril;
+            var dibujo = dibujos != null
+                ? Dibujo(raiz.transform, "Sprite", dibujos[0], Vector2.zero)
+                : Provisional(raiz.transform, Rect.MinMaxRect(-tamano.x * 0.5f, 0f, tamano.x * 0.5f, tamano.y), ColorBarrilSinArte,
+                    "el barril", "Prompts_Mundo4.md");
+            dibujo.sortingOrder = 1;
+
+            var barril = raiz.AddComponent<Levels.Mecanicas.BarrilExplosivo>();
+            if (dibujos != null)
+            {
+                Asignar(barril, "spriteIntacto", p => p.objectReferenceValue = dibujos[0]);
+                Asignar(barril, "spriteMecha1", p => p.objectReferenceValue = dibujos[1]);
+                Asignar(barril, "spriteMecha2", p => p.objectReferenceValue = dibujos[2]);
+                Asignar(barril, "spriteQuemado", p => p.objectReferenceValue = dibujos[3]);
+            }
+
+            Asignar(barril, "dibujoExplosion", p => p.objectReferenceValue = ConstructorEfectosMundo4.PrefabExplosion);
+            barril.mecha = DisenoNivel4.MechaBarril;
+            barril.radio = DisenoNivel4.RadioBarril;
+            barril.danioEnemigos = DisenoNivel4.DanioBarrilEnemigos;
+            barril.danioJugador = DisenoNivel4.DanioBarrilKael;
+            barril.cadena = DisenoNivel4.CadenaBarril;
+            Asignar(barril, "centro", p => p.vector2Value = new Vector2(0f, tamano.y * 0.5f));
+            Asignar(barril, "visual", p => p.objectReferenceValue = dibujo);
+            Asignar(barril, "colorIntacto", p => p.colorValue = ColorBarrilSinArte);
+            return raiz;
+        }
+
+        /// <summary>
+        /// La mina del río del mundo de la Culpa (<see cref="DisenoNivel4"/>): el objeto en el fondo, donde
+        /// la sujeta la cadena, con un cuerpo cinemático; la bola, su hijo, en la capa de los enemigos (la
+        /// espada la golpea; a Kael lo nota con una consulta), y la cadena, un rectángulo del fondo a la
+        /// bola. Sin arte, rectángulos.
+        /// </summary>
+        private static GameObject CrearMina()
+        {
+            var raiz = Raiz(Mina, Capa(Capas.Enemy), null);
+            var cuerpo = raiz.AddComponent<Rigidbody2D>();
+            cuerpo.bodyType = RigidbodyType2D.Kinematic;
+
+            // Con su arte, la cadena es la del Verdugo: su tramo, girado y repetido del fondo a la bola.
+            var tramo = ConstructorEfectosMundo4.Cadena;
+            SpriteRenderer cadena;
+            if (tramo != null)
+            {
+                cadena = Dibujo(raiz.transform, "Cadena", tramo, new Vector2(0f, DisenoNivel4.MinaSobreElFondo * 0.5f));
+                cadena.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                cadena.drawMode = SpriteDrawMode.Tiled;
+                cadena.tileMode = SpriteTileMode.Continuous;
+                cadena.size = new Vector2(DisenoNivel4.MinaSobreElFondo, tramo.bounds.size.y);
+            }
+            else
+            {
+                cadena = Provisional(raiz.transform, Rect.MinMaxRect(-0.04f, 0f, 0.04f, DisenoNivel4.MinaSobreElFondo), ColorCadenaSinArte,
+                    "la cadena de la mina", "Prompts_Mundo4.md", "Cadena");
+            }
+
+            cadena.sortingOrder = 1;
+
+            var bola = new GameObject("Bola") { layer = raiz.layer };
+            bola.transform.SetParent(raiz.transform, false);
+            bola.transform.localPosition = new Vector3(0f, DisenoNivel4.MinaSobreElFondo, 0f);
+            var zona = bola.AddComponent<CircleCollider2D>();
+            var r = DisenoNivel4.RadioBolaMina;
+            zona.radius = r;
+            // Con su arte, su dibujo (el pivote en el centro de la bola), que parpadea con Kael cerca.
+            var dibujosMina = ConstructorMecanicasMundo4.DibujosMina;
+            var dibujo = dibujosMina != null
+                ? Dibujo(bola.transform, "Sprite", dibujosMina[0], Vector2.zero)
+                : Provisional(bola.transform, Rect.MinMaxRect(-r, -r, r, r), ColorMinaSinArte, "la mina", "Prompts_Mundo4.md");
+            dibujo.sortingOrder = 2;
+
+            var mina = raiz.AddComponent<Levels.Mecanicas.Mina>();
+            if (dibujosMina != null)
+            {
+                Asignar(mina, "dibujoBola", p => p.objectReferenceValue = dibujo);
+                Asignar(mina, "spriteReposo", p => p.objectReferenceValue = dibujosMina[0]);
+                Asignar(mina, "spriteAviso", p => p.objectReferenceValue = dibujosMina[1]);
+            }
+
+            Asignar(mina, "dibujoExplosion", p => p.objectReferenceValue = ConstructorEfectosMundo4.PrefabExplosion);
+            mina.recorrido = DisenoNivel4.RecorridoMina;
+            mina.periodo = DisenoNivel4.PeriodoMina;
+            mina.sobreElFondo = DisenoNivel4.MinaSobreElFondo;
+            mina.radio = DisenoNivel4.RadioMina;
+            mina.danioJugador = DisenoNivel4.DanioMinaKael;
+            mina.danioEnemigos = DisenoNivel4.DanioMinaEnemigos;
+            Asignar(mina, "bola", p => p.objectReferenceValue = bola.transform);
+            Asignar(mina, "cadena", p => p.objectReferenceValue = cadena.transform);
+            return raiz;
+        }
+
+        // Un dibujo con su arte, con el pivote del sprite en la posición local dada.
+        private static SpriteRenderer Dibujo(Transform padre, string nombre, Sprite sprite, Vector2 posicion)
+        {
+            var objeto = new GameObject(nombre) { layer = padre.gameObject.layer };
+            objeto.transform.SetParent(padre, false);
+            objeto.transform.localPosition = posicion;
+            var dibujo = objeto.AddComponent<SpriteRenderer>();
+            dibujo.sprite = sprite;
+            return dibujo;
+        }
 
         /// <summary>El rectángulo provisional de una pieza sin arte, y el aviso de lo que falta.</summary>
         // El dibujo de una pieza con arte: en el origen del prefab (el pivote de su sprite es el suyo)

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!DOCTYPE lmms-project>
+<lmms-project version="1.0" creator="LMMS" creatorversion="1.2.2" type="song">
+  <head bpm="125" timesig_numerator="4" timesig_denominator="4" mastervol="100" masterpitch="0" />
+  <song>
+    <trackcontainer type="song">
+      <track name="Aire" type="0" muted="0" solo="0">
+        <instrumenttrack vol="100" pan="0" fxch="0" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="tripleoscillator">
+            <tripleoscillator wavetype0="6" vol0="100" coarse0="0" finel0="0" finer0="0" pan0="0" phoffset0="0" stphdetun0="0" userwavefile0="" wavetype1="0" vol1="0" coarse1="0" finel1="0" finer1="0" pan1="0" phoffset1="0" stphdetun1="0" userwavefile1="" wavetype2="0" vol2="0" coarse2="0" finel2="0" finer2="0" pan2="0" phoffset2="0" stphdetun2="0" userwavefile2="" modalgo1="2" modalgo2="2" modalgo3="2" />
+          </instrument>
+          <eldata fcut="400" fres="3" ftype="2" fwet="1">
+            <elvol pdel="0" att="0.0632456" hold="0.0632456" dec="0.178885" sustain="0" rel="0.0632456" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0.118322" hold="0.0632456" dec="0.154919" sustain="0" rel="0.0632456" amt="0.547723" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Aire" pos="0" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="26" key="57" vol="100" pan="0" />
+        </pattern>
+      </track>
+      <track name="Aleteo" type="0" muted="0" solo="0">
+        <instrumenttrack vol="90" pan="0" fxch="0" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="tripleoscillator">
+            <tripleoscillator wavetype0="6" vol0="100" coarse0="0" finel0="0" finer0="0" pan0="0" phoffset0="0" stphdetun0="0" userwavefile0="" wavetype1="0" vol1="0" coarse1="0" finel1="0" finer1="0" pan1="0" phoffset1="0" stphdetun1="0" userwavefile1="" wavetype2="0" vol2="0" coarse2="0" finel2="0" finer2="0" pan2="0" phoffset2="0" stphdetun2="0" userwavefile2="" modalgo1="2" modalgo2="2" modalgo3="2" />
+          </instrument>
+          <eldata fcut="300" fres="2" ftype="2" fwet="1">
+            <elvol pdel="0" att="0.0632456" hold="0" dec="0.167332" sustain="0" rel="0.0632456" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0.1" hold="0" dec="0.167332" sustain="0" rel="0.0632456" amt="0.387298" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Aleteo" pos="5" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="20" key="57" vol="100" pan="0" />
+        </pattern>
+      </track>
+      <track name="Brillo" type="0" muted="0" solo="0">
+        <instrumenttrack vol="22" pan="0" fxch="0" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="sfxr">
+            <sfxr waveForm="2" version="1" att="0.0664078" hold="0.162665" sus="0" dec="0.230043" startFreq="0.375131" minFreq="0" slide="0.25" dSlide="0" vibDepth="0" vibSpeed="0" changeAmt="0" changeSpeed="0" sqrDuty="0" sqrSweep="0" repeatSpeed="0" phaserOffset="0" phaserSweep="0" lpFilCut="0.75" lpFilCutSweep="0" lpFilReso="0" hpFilCut="0" hpFilCutSweep="0" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Brillo" pos="0" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="22" key="57" vol="100" pan="0" />
+        </pattern>
+      </track>
+    </trackcontainer>
+    <fxmixer>
+      <fxchannel num="0" name="Master" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+      </fxchannel>
+    </fxmixer>
+    <timeline lp0pos="0" lp1pos="192" lpstate="0" />
+    <controllers />
+    <projectnotes>El doble salto de Kael, en el aire: el aire más alto, otra capa que aletea detrás y un brillo que sube (sfxr, un seno).</projectnotes>
+  </song>
+</lmms-project>

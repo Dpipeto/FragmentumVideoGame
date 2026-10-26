@@ -3,7 +3,10 @@ using UnityEngine;
 
 namespace Fragmentum.Core
 {
-    /// <summary>Algo del escenario que Kael usa con Interactuar (E): una antorcha del mundo del Miedo.</summary>
+    /// <summary>
+    /// Algo del escenario que Kael usa con Interactuar (W): una antorcha del mundo del Miedo, una
+    /// memoria del de la Culpa.
+    /// </summary>
     public interface IInteractuable
     {
         /// <summary>Dónde está. La distancia se mide desde los pies de Kael.</summary>
@@ -20,10 +23,16 @@ namespace Fragmentum.Core
 
         /// <summary>Lo usa <paramref name="quien"/> (Kael).</summary>
         void Interactuar(GameObject quien);
+
+        /// <summary>
+        /// ¿Se puede usar ahora mismo? Si no, el aviso dice solo <see cref="Accion"/>, sin la tecla: una
+        /// memoria de la Culpa con Kael invisible («Para recordar, déjate ver»).
+        /// </summary>
+        bool Usable => true;
     }
 
     /// <summary>
-    /// Registro de lo que se puede usar con Interactuar (E). Responde a una sola pregunta: ¿qué hay
+    /// Registro de lo que se puede usar con Interactuar (W). Responde a una sola pregunta: ¿qué hay
     /// al alcance de este punto? Lo pregunta Kael (<c>InteraccionJugador</c>) en cada fotograma, y el
     /// HUD enseña el aviso sobre lo que haya. Funciona como <see cref="Iluminacion"/>.
     /// </summary>

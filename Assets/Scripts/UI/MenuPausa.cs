@@ -6,9 +6,9 @@ namespace Fragmentum.UI
 {
     /// <summary>
     /// Menú de pausa, según la maqueta: icono de pausa, «PAUSA», el mundo («I · FORTALEZA
-    /// VOLCÁNICA»), su jefe, las opciones Continuar / Reiniciar / Mecánicas / Menú principal, la
-    /// frase del mundo y la ayuda de controles. «Mecánicas» abre la guía de lo que sabe hacer Kael
-    /// y, al cerrarla, se vuelve aquí.
+    /// VOLCÁNICA»), su jefe, las opciones Continuar / Reiniciar / Mecánicas / Opciones / Menú principal,
+    /// la frase del mundo y la ayuda de controles. «Mecánicas» abre la guía de lo que sabe hacer Kael y
+    /// «Opciones», el volumen; al cerrarlas, se vuelve aquí.
     ///
     /// Sustituye al <c>Pause</c> de la v1, que escribía <c>Time.timeScale</c> por su cuenta y
     /// cargaba el menú por nombre: ahora cada opción es una petición a la FSM global, que es
@@ -36,6 +36,7 @@ namespace Fragmentum.UI
             AgregarOpcion(columna, "Continuar", () => Juego?.Reanudar());
             _reiniciar = AgregarOpcion(columna, "Reiniciar", () => Juego?.ReiniciarNivel());
             AgregarOpcion(columna, "Mecánicas", VerMecanicas);
+            AgregarOpcion(columna, "Opciones", VerOpciones);
             AgregarOpcion(columna, "Menú principal", () => Juego?.IrAlMenu());
 
             FabricaUI.Hueco(columna, 30f);
@@ -63,6 +64,14 @@ namespace Fragmentum.UI
             if (UIManager.Instancia != null)
             {
                 UIManager.Instancia.MostrarMecanicas();
+            }
+        }
+
+        private static void VerOpciones()
+        {
+            if (UIManager.Instancia != null)
+            {
+                UIManager.Instancia.MostrarOpciones();
             }
         }
 

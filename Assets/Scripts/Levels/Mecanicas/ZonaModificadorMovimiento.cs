@@ -9,12 +9,13 @@ namespace Fragmentum.Levels.Mecanicas
     /// Añade un <see cref="ModificadorMovimiento"/> al motor al entrar y lo quita al salir.
     ///
     /// Es la pieza reutilizable sobre la que se construyen <c>UnderwaterZone</c> (con oxígeno)
-    /// e <c>IceSurface</c> en la Fase 10. Ya sirve para probar el Dash Acuático.
+    /// e <c>IceSurface</c> en la Fase 10. Ya sirve para probar el Dash Acuático. Las marañas de la
+    /// ciénaga (Nivel 3) son también una zona: la que sujeta (<see cref="Marana"/> la dibuja).
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class ZonaModificadorMovimiento : MonoBehaviour
     {
-        public enum TIPOS { AGUA, HIELO, PERSONALIZADO }
+        public enum TIPOS { AGUA, HIELO, PERSONALIZADO, MARANA }
 
         [SerializeField] private TIPOS tipo = TIPOS.AGUA;
 
@@ -29,6 +30,7 @@ namespace Fragmentum.Levels.Mecanicas
         {
             TIPOS.AGUA => ModificadorMovimiento.BajoElAgua,
             TIPOS.HIELO => ModificadorMovimiento.Hielo,
+            TIPOS.MARANA => ModificadorMovimiento.Marana,
             _ => personalizado
         };
 

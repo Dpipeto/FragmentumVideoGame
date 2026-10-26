@@ -19,7 +19,7 @@ namespace Fragmentum.Levels.Mecanicas
     ///
     /// Nota a Kael con una caja justo encima de su pivote (en el suelo), como la plataforma
     /// inestable: no depende de las capas de colisión. Va después de Kael en el orden de ejecución
-    /// para sujetarlo después de que su motor se mueva.
+    /// para sujetarlo después de que su motor se mueva. Con arte, abierto y cerrado son dos dibujos.
     /// </summary>
     [DefaultExecutionOrder(100)]
     [DisallowMultipleComponent]
@@ -47,6 +47,11 @@ namespace Fragmentum.Levels.Mecanicas
 
         [SerializeField] private Color colorAbierto = new Color(0.55f, 0.55f, 0.6f, 1f);
         [SerializeField] private Color colorCerrado = new Color(0.32f, 0.3f, 0.32f, 1f);
+
+        [Tooltip("Con arte: el cepo abierto y el cepo cerrado. Vacíos, el rectángulo cambia de color.")]
+        [SerializeField] private Sprite spriteAbierto;
+
+        [SerializeField] private Sprite spriteCerrado;
 
         [Tooltip("Lo deprisa que aparece y desaparece (opacidad por segundo).")]
         [SerializeField] private float velocidadFundido = 8f;
@@ -235,7 +240,13 @@ namespace Fragmentum.Levels.Mecanicas
                 return;
             }
 
-            var color = Estado == ESTADOS_CEPO.CLOSED ? colorCerrado : colorAbierto;
+            var cerrado = Estado == ESTADOS_CEPO.CLOSED;
+            if (spriteAbierto != null && spriteCerrado != null)
+            {
+                visual.sprite = cerrado ? spriteCerrado : spriteAbierto;
+            }
+
+            var color = cerrado ? colorCerrado : colorAbierto;
             color.a *= inicio ? 0f : _opacidad;
             visual.color = color;
         }

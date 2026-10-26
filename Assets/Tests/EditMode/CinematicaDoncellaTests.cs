@@ -79,10 +79,11 @@ namespace Fragmentum.Tests
             Assert.AreEqual(ConstructorCinematicasNivel2.Presentacion2, beats[3].imagen.name, "4: su rostro.");
             Assert.AreEqual((0.6f, 3.6f, 0.3f), (beats[3].fundidoEntrada, beats[3].duracion, beats[3].fundidoSalida));
 
-            // Triste y quieta: ni brasas, ni temblores, ni flash. Y sin sonido, que no lo hay.
+            // Triste y quieta: ni brasas, ni temblores, ni flash. Sin efectos de sonido; con su música (LMMS).
             Assert.IsTrue(beats.All(b => !b.brasas && b.temblores.Count == 0 && b.flashFinal == 0 && b.desplazamiento == Vector2Int.zero));
             Assert.IsTrue(beats.All(b => b.cues.Count == 0 && b.audio == null));
-            Assert.IsNull(datos.musica);
+            Assert.IsNotNull(datos.musica, "Su música: Musica/Cinematicas/Jefe_Tristeza.");
+            Assert.AreSame(MusicaNiveles.DeCinematica("Jefe_Tristeza"), datos.musica);
         }
 
         [Test]

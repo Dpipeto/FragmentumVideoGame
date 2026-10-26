@@ -10,6 +10,9 @@ namespace Fragmentum.Bosses.Patrones
     /// cuatro o cinco franjas el suelo brilla en verde (el aviso de las zonas, que aún no hacen
     /// daño) y en ellas caen hojas negras afiladas. La primera franja cae bajo Kael. Se responde
     /// saliendo de lo que brilla, como las erupciones de la Centinela.
+    ///
+    /// Con <see cref="efecto"/>, cada franja se ve dibujada (el suelo que brilla entre las hojas
+    /// muertas y las hojas que caen, <see cref="LluviaDeHojas"/>) en vez del rectángulo.
     /// </summary>
     [CreateAssetMenu(menuName = "Fragmentum/Jefes/Patrón: hojas", fileName = "PatronHojas")]
     public class PatronHojas : PatronAtaque
@@ -37,6 +40,9 @@ namespace Fragmentum.Bosses.Patrones
         [Tooltip("Lo lejos de la pared que aparece para alzar el brazo, en el lado contrario a Kael.")]
         [Min(0f)] public float margen = 3f;
 
+        [Tooltip("El dibujo de cada franja (un prefab que sigue las fases de su zona). Vacío = el rectángulo.")]
+        public GameObject efecto;
+
         public override IEnumerator Ejecutar(BossController jefe)
         {
             jefe.Detener();
@@ -47,7 +53,7 @@ namespace Fragmentum.Bosses.Patrones
             {
                 var centro = (limites.x + limites.y) * 0.5f;
                 pavor.Aparecer(kael <= centro ? limites.y - margen : limites.x + margen);
-                pavor.Destellar(aviso);
+                pavor.Destellar(aviso, GESTOS_PAVOR.AVISO_HOJAS);
             }
             else
             {
@@ -59,14 +65,22 @@ namespace Fragmentum.Bosses.Patrones
             foreach (var x in Franjas(limites, kael, cuantas, ancho, hueco))
             {
                 var zona = jefe.CrearZona("Hojas", new Vector2(x, suelo + alto * 0.5f), new Vector2(ancho, alto), danio, aviso, duracion,
-                    Vector2.zero, color, dibujarZona);
+                    Vector2.zero, color, dibujarZona && efecto == null);
+                zona.Vestir(efecto, 0);
                 if (pavor != null)
                 {
                     pavor.VerEnLaOscuridad(zona);
                 }
             }
 
-            yield return new WaitForSeconds(aviso + duracion + recuperacion);
+            // Al acabar el aviso, lanza las hojas hacia arriba.
+            yield return new WaitForSeconds(aviso);
+            if (pavor != null)
+            {
+                pavor.Gesto(GESTOS_PAVOR.HOJAS);
+            }
+
+            yield return new WaitForSeconds(duracion + recuperacion);
             if (pavor != null)
             {
                 pavor.Ocultarse();

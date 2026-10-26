@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE lmms-project>
+<lmms-project version="1.0" creator="LMMS" creatorversion="1.2.2" type="song">
+  <head bpm="125" timesig_numerator="4" timesig_denominator="4" mastervol="100" masterpitch="0" />
+  <song>
+    <trackcontainer type="song">
+      <track name="Impulso" type="0" muted="0" solo="0">
+        <instrumenttrack vol="45" pan="0" fxch="0" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="kicker">
+            <kicker startfreq="170" endfreq="60" decay="110" dist="0.2" distend="0.1" gain="1" env="0.3" noise="0.15" click="0.2" slope="0.2" startnote="0" endnote="0" version="1" syncmode="0" decay_numerator="4" decay_denominator="4" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Impulso" pos="0" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="15" key="57" vol="100" pan="0" />
+        </pattern>
+      </track>
+      <track name="Aire" type="0" muted="0" solo="0">
+        <instrumenttrack vol="100" pan="0" fxch="0" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="tripleoscillator">
+            <tripleoscillator wavetype0="6" vol0="100" coarse0="0" finel0="0" finer0="0" pan0="0" phoffset0="0" stphdetun0="0" userwavefile0="" wavetype1="0" vol1="0" coarse1="0" finel1="0" finer1="0" pan1="0" phoffset1="0" stphdetun1="0" userwavefile1="" wavetype2="0" vol2="0" coarse2="0" finel2="0" finer2="0" pan2="0" phoffset2="0" stphdetun2="0" userwavefile2="" modalgo1="2" modalgo2="2" modalgo3="2" />
+          </instrument>
+          <eldata fcut="250" fres="3" ftype="2" fwet="1">
+            <elvol pdel="0" att="0.0774597" hold="0.0774597" dec="0.184391" sustain="0" rel="0.0632456" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0.134164" hold="0.0774597" dec="0.154919" sustain="0" rel="0.0632456" amt="0.437798" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Aire" pos="0" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="30" key="57" vol="100" pan="0" />
+        </pattern>
+      </track>
+    </trackcontainer>
+    <fxmixer>
+      <fxchannel num="0" name="Master" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+      </fxchannel>
+    </fxmixer>
+    <timeline lp0pos="0" lp1pos="192" lpstate="0" />
+    <controllers />
+    <projectnotes>El salto de Kael (y el salto desde la pared): el pie que empuja (Kicker) y el aire, que sube (ruido por un filtro que se abre).</projectnotes>
+  </song>
+</lmms-project>

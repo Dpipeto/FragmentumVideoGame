@@ -18,26 +18,34 @@ MonoBehaviour:
   concepto: {fileID: 0}
   vidaMaxima: 28
   invulnerabilidad: 0.15
-  danioContacto: 1
-  velocidad: 2
+  danioContacto: 0
+  velocidad: 1.6
   puntos: 3000
   fases:
-  - nombre: Memorias
+  - nombre: "Lo que no mir\xF3: la orden, el pueblo, el compa\xF1ero y la carta"
     umbralVida: 1
-    patrones: []
+    patrones:
+    - {fileID: 11400000, guid: 0cff6948f74940d468bf7c92f1ab28b1, type: 2}
+    - {fileID: 11400000, guid: 8c184dc8ebb77804db51784ee7a10b84, type: 2}
+    - {fileID: 11400000, guid: 504e2d6c022dc83478bc9a6757ecb20e, type: 2}
+    - {fileID: 11400000, guid: 22d5bf99c026d1141bfac78af70acc0d, type: 2}
     pausaEntrePatrones: 1
     aleatorio: 0
     multiplicadorVelocidad: 1
-  - nombre: Memoria real y trampa (50 %)
+  - nombre: "Lo que se neg\xF3 a mirar (50 %): una real y una trampa"
     umbralVida: 0.5
-    patrones: []
-    pausaEntrePatrones: 1
+    patrones:
+    - {fileID: 11400000, guid: 504e2d6c022dc83478bc9a6757ecb20e, type: 2}
+    - {fileID: 11400000, guid: 0cff6948f74940d468bf7c92f1ab28b1, type: 2}
+    - {fileID: 11400000, guid: 22d5bf99c026d1141bfac78af70acc0d, type: 2}
+    - {fileID: 11400000, guid: 8c184dc8ebb77804db51784ee7a10b84, type: 2}
+    pausaEntrePatrones: 0.8
     aleatorio: 0
-    multiplicadorVelocidad: 1
+    multiplicadorVelocidad: 1.15
   duracionVulnerable: 3
-  multiplicadorVulnerable: 2
+  multiplicadorVulnerable: 1
   inmuneFueraDeVulnerable: 1
-  duracionDerrota: 2
-  tinte: {r: 0.54509807, g: 0.2, b: 0.2, a: 1}
-  tamano: {x: 2, y: 3.2}
+  duracionDerrota: 1.6
+  tinte: {r: 1, g: 1, b: 1, a: 1}
+  tamano: {x: 2, y: 3.4}
   spriteMiraDerecha: 1

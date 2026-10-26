@@ -13,7 +13,13 @@ namespace Fragmentum.Narrative
         CIERRE,
 
         /// <summary>Lo que Kael se dice ante un obstáculo que pide una habilidad (el tapón de hielo).</summary>
-        PISTA
+        PISTA,
+
+        /// <summary>La segunda pista de un mundo: ante la tierra de nadie de la Culpa, la Invisibilidad.</summary>
+        PISTA_INVISIBILIDAD,
+
+        /// <summary>Lo que Kael dice en la orilla de un agua que se cruza buceando: el río de la Culpa.</summary>
+        ORILLA
     }
 
     /// <summary>Una línea de diálogo interno: quién habla, qué dice y cuándo.</summary>

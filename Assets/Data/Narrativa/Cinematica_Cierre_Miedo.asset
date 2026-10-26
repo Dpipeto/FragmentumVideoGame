@@ -15,9 +15,9 @@ MonoBehaviour:
   id: Cierre_Miedo
   diapositivas:
   - imagen: {fileID: 0}
-    texto: La oscuridad retrocede un paso. Luego otro.
+    texto: 
     carteles: []
-    duracion: 4
+    duracion: 0.3
     audio: {fileID: 0}
     fundidoEntrada: 0
     fundidoSalida: 0
@@ -26,10 +26,40 @@ MonoBehaviour:
     brasas: 0
     flashFinal: 0
     cues: []
+  - imagen: {fileID: 21300000, guid: 6978e95d78485c34195e46d2c868d3d8, type: 3}
+    texto: 
+    carteles:
+    - texto: La oscuridad retrocede un paso. Luego otro.
+      inicio: 0.8
+      duracion: 2.6
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 252}
+      alineacion: 1
+    - texto: "El bosque no era un laberinto: era un lugar donde nadie hab\xEDa encendido una luz."
+      inicio: 3.7
+      duracion: 2.7
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 252}
+      alineacion: 1
+    duracion: 6.4
+    audio: {fileID: 0}
+    fundidoEntrada: 0.7
+    fundidoSalida: 0.4
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 0}
-    texto: "El bosque no era un laberinto: era un lugar donde nadie hab\xEDa encendido una luz."
+    texto: 
     carteles: []
-    duracion: 4
+    duracion: 0.2
     audio: {fileID: 0}
     fundidoEntrada: 0
     fundidoSalida: 0
@@ -38,13 +68,22 @@ MonoBehaviour:
     brasas: 0
     flashFinal: 0
     cues: []
-  - imagen: {fileID: 0}
-    texto: Kael integra el Fragmento del Miedo. Puede ocultarse sin dejar de avanzar.
-    carteles: []
-    duracion: 4
+  - imagen: {fileID: 21300000, guid: 217da4e1c1039d74fafccc07a87a038f, type: 3}
+    texto: 
+    carteles:
+    - texto: Kael integra el Fragmento del Miedo. Puede ocultarse sin dejar de avanzar.
+      inicio: 0.6
+      duracion: 3.6
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 255}
+      alineacion: 1
+    duracion: 4.6
     audio: {fileID: 0}
-    fundidoEntrada: 0
-    fundidoSalida: 0
+    fundidoEntrada: 0.6
+    fundidoSalida: 0.8
     desplazamiento: {x: 0, y: 0}
     temblores: []
     brasas: 0
@@ -52,12 +91,14 @@ MonoBehaviour:
     cues: []
   saltable: 1
   soloPrimeraVez: 0
-  montaje: 0
+  llevaDialogoDelJefe: 0
+  montaje: 1
   sobreElJuego: 0
   opacidadVelo: 0.55
-  escalaEntera: 0
+  escalaEntera: 1
+  rejilla: {x: 480, y: 268}
   fuente: {fileID: 0}
-  tamanoFuente: 8
+  tamanoFuente: 10
   interlineado: 0
   colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
   temblorPixeles: 1
@@ -65,8 +106,8 @@ MonoBehaviour:
   fundidoImagen: 0.6
   fundidoTexto: 0.4
   margenTexto: 0.8
-  bloqueoSalto: 2
+  bloqueoSalto: 0.5
   avisoSaltar: Pulsa cualquier tecla para saltar
   finAviso: 5
   opacidadAviso: 0.45
-  musica: {fileID: 0}
+  musica: {fileID: 8300000, guid: f32f0c730ed19d24184bdbfda569890b, type: 3}

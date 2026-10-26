@@ -11,7 +11,8 @@ namespace Fragmentum.UI
     ///   lleno. Sin aire parpadea en rojo: Kael está perdiendo corazones.
     /// - <b>El velo submarino:</b> los bordes de la pantalla se oscurecen en azul mientras Kael está
     ///   bajo el agua. Es la «visibilidad reducida» del Anexo A, hecha con la viñeta de la interfaz
-    ///   en lugar de con un volumen de post-procesado.
+    ///   en lugar de con un volumen de post-procesado. Cada nivel puede darle su color
+    ///   (<see cref="FijarColorVelo"/>): la ciénaga del Miedo lo lleva verde.
     ///
     /// El velo es la viñeta generada por código. La burbuja va a su tamaño: un píxel suyo, un
     /// píxel de la interfaz.
@@ -21,7 +22,8 @@ namespace Fragmentum.UI
     {
         private static readonly Color ColorAire = new Color(0.45f, 0.85f, 1f, 1f);
         private static readonly Color ColorAsfixia = new Color(0.9f, 0.2f, 0.2f, 1f);
-        private static readonly Color ColorVelo = new Color(0.02f, 0.08f, 0.18f, 1f);
+        /// <summary>El velo de la Tristeza: el de todos los niveles que no digan otro.</summary>
+        public static readonly Color ColorVeloPorDefecto = new Color(0.02f, 0.08f, 0.18f, 1f);
 
         private const float OpacidadVelo = 0.7f;
         private const float VelocidadVelo = 3f;
@@ -37,6 +39,7 @@ namespace Fragmentum.UI
         private float _alfaVelo;
         private float _alfaVeloObjetivo;
         private bool _asfixia;
+        private Color _colorVelo = ColorVeloPorDefecto;
 
         /// <summary>¿Se ve el aire (la burbuja o la barra)?</summary>
         public bool BarraVisible => _barra != null && _barra.activeSelf;
@@ -56,6 +59,19 @@ namespace Fragmentum.UI
         /// <summary>¿Parpadea en rojo? (Sin aire.)</summary>
         public bool Asfixia => _asfixia;
 
+        /// <summary>El color del velo submarino (sin su opacidad).</summary>
+        public Color ColorVelo => _colorVelo;
+
+        /// <summary>El color del velo bajo el agua de este nivel. Uno transparente deja el de la Tristeza.</summary>
+        public void FijarColorVelo(Color color)
+        {
+            _colorVelo = color.a > 0f ? new Color(color.r, color.g, color.b, 1f) : ColorVeloPorDefecto;
+            if (_velo != null)
+            {
+                PintarVelo();
+            }
+        }
+
         /// <summary>
         /// Crea el velo y la barra. El velo va el primero, para quedar por detrás del resto del
         /// HUD: la llama el <see cref="Hud"/> antes de construir lo demás.
@@ -64,7 +80,7 @@ namespace Fragmentum.UI
         {
             _velo = FabricaUI.Vineta(raiz, 0f);
             _velo.name = "VeloSubmarino";
-            _velo.color = new Color(ColorVelo.r, ColorVelo.g, ColorVelo.b, 0f);
+            _velo.color = new Color(_colorVelo.r, _colorVelo.g, _colorVelo.b, 0f);
             _velo.gameObject.SetActive(false);
 
             var arte = ArteInterfaz.Cargar();
@@ -196,7 +212,7 @@ namespace Fragmentum.UI
 
         private void PintarVelo()
         {
-            _velo.color = new Color(ColorVelo.r, ColorVelo.g, ColorVelo.b, _alfaVelo);
+            _velo.color = new Color(_colorVelo.r, _colorVelo.g, _colorVelo.b, _alfaVelo);
             _velo.gameObject.SetActive(_alfaVelo > 0.001f);
         }
 

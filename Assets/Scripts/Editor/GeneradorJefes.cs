@@ -184,18 +184,112 @@ namespace Fragmentum.EditorTools
 
             GenerarDoncella(sobrescribir);
             GenerarPavor(sobrescribir);
+            GenerarJuez(sobrescribir);
 
-            // Esqueletos: vida y fases del Anexo A, sin patrones todavía (Fase 10).
-            Completar("JuezSilente", sobrescribir, j =>
-            {
-                Esqueleto(j, 28, "8B3333", Fase("Memorias", 1f), Fase("Memoria real y trampa (50 %)", 0.5f));
-                j.inmuneFueraDeVulnerable = true;
-                j.duracionVulnerable = 3f;
-            });
+            // Esqueleto: vida y fases del Anexo A, sin patrones todavía (Fase 10).
             Completar("VerdaderoSoldado", sobrescribir, j =>
                 Esqueleto(j, 40, "5A5A5A", Fase("Combate espejo", 1f), Fase("Secciones de cada mundo (60 %)", 0.6f), Fase("Integración (30 %)", 0.3f)));
 
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>
+        /// El Juez Silente (<c>Docs/Diseno/Nivel4_Diseno.md</c>, sección 6): cada ataque es una memoria, y
+        /// solo se le hiere cuando Kael mira la suya (su marca en la plaza). Inmune fuera de esa ventana,
+        /// de 3 s, en la que los golpes valen lo de siempre. Sus datos nacieron como esqueleto: se
+        /// completan aquí la primera vez, y después se respeta lo que se haya ajustado a mano.
+        /// </summary>
+        private static void GenerarJuez(bool sobrescribir)
+        {
+            var rojoApagado = Hex("8B3333");
+
+            var orden = Patron<PatronOrden>("Orden", sobrescribir, p =>
+            {
+                p.nombre = "La orden (la radio)";
+                p.descripcion = "Señala al frente con la espada: seis explosiones de artillería caen una tras otra, avanzando por la " +
+                                "plaza desde su lado. Cada una marca el suelo 0,8 s antes. Quedarse entre dos marcas o saltar.";
+                p.memoria = 0;
+                p.aviso = 1f;
+                p.danio = 1;
+                p.color = rojoApagado;
+            });
+
+            var pueblo = Patron<PatronPueblo>("Pueblo", sobrescribir, p =>
+            {
+                p.nombre = "El pueblo (la campana)";
+                p.descripcion = "Golpea la balanza con la empuñadura: suena una campana y una ola de fuego de 1,2 u barre la plaza a " +
+                                "ras de suelo, primero desde un lado y después desde el otro. Se salta.";
+                p.memoria = 1;
+                p.aviso = 1f;
+                p.danio = 1;
+                p.color = new Color(1f, 0.5f, 0.2f, 1f);
+            });
+
+            var companero = Patron<PatronCompanero>("Companero", sobrescribir, p =>
+            {
+                p.nombre = "El compañero (la placa)";
+                p.descripcion = "Abre la capa: las placas salen volando en tres ráfagas, rectas a la cabeza de Kael, como los disparos " +
+                                "de los Artilleros. Agacharse tras uno de los dos escombros.";
+                p.memoria = 2;
+                p.aviso = 1f;
+                p.danio = 1;
+                p.color = new Color(0.66f, 0.62f, 0.55f, 1f);
+            });
+
+            var sentencia = Patron<PatronSentencia>("Sentencia", sobrescribir, p =>
+            {
+                p.nombre = "La carta (la sentencia)";
+                p.descripcion = "Camina hasta Kael, alza la espada con las dos manos (1 s) y la clava: una onda sale por el suelo hacia " +
+                                "los dos lados. Dos veces. Saltar la onda.";
+                p.memoria = 3;
+                p.aviso = 1f;
+                p.danio = 2;
+                p.color = rojoApagado;
+            });
+
+            Completar("JuezSilente", sobrescribir, j =>
+            {
+                j.vidaMaxima = 28;
+                j.velocidad = 1.6f;
+                // Tocarlo no hace daño: lo hacen sus ataques.
+                j.danioContacto = 0;
+                j.duracionVulnerable = 3f;
+                j.multiplicadorVulnerable = 1f;
+                j.inmuneFueraDeVulnerable = true;
+                j.tinte = Hex("5A5A66");
+                j.tamano = new Vector2(2f, 3.4f);
+                j.fases = new List<FaseJefe>
+                {
+                    Fase("Lo que no miró: la orden, el pueblo, el compañero y la carta", 1f, 1f, 1f, orden, pueblo, companero, sentencia),
+                    Fase("Lo que se negó a mirar (50 %): una real y una trampa", 0.5f, 0.8f, 1.15f, companero, orden, sentencia, pueblo),
+                };
+            }, completarEsqueleto: true);
+
+            // Con su arte (ConstructorJuez): sin tinte y la derrota dura su muerte hasta M5. Cada ataque
+            // lleva su dibujo (ConstructorEfectosMundo4): la artillería, la ola, la placa y la onda. Un dibujo
+            // puesto a mano en el patrón se respeta. La espada clavada de la sentencia ya se ve en su dibujo: su
+            // rectángulo no se pinta.
+            ConstructorJuez.AjustarDatos(CargarDatos("JuezSilente"));
+            Vestir(orden, ConstructorEfectosMundo4.PrefabArtilleria, p => p.efecto, (p, d) => p.efecto = d);
+            Vestir(pueblo, ConstructorEfectosMundo4.PrefabOla, p => p.efecto, (p, d) => p.efecto = d);
+            Vestir(companero, ConstructorEfectosMundo4.PrefabPlaca, p => p.placa, (p, d) => p.placa = d);
+            Vestir(sentencia, ConstructorEfectosMundo4.PrefabOnda, p => p.efecto, (p, d) => p.efecto = d);
+            if (ConstructorJuez.Controlador != null && sentencia.dibujarGolpe)
+            {
+                sentencia.dibujarGolpe = false;
+                EditorUtility.SetDirty(sentencia);
+            }
+        }
+
+        // Rellena el dibujo del patrón si está vacío (un dibujo puesto a mano se respeta). Sin el prefab, nada.
+        private static void Vestir<TPatron, TDibujo>(TPatron patron, TDibujo dibujo, Func<TPatron, TDibujo> actual, Action<TPatron, TDibujo> fijar)
+            where TPatron : PatronAtaque where TDibujo : Object
+        {
+            if (dibujo != null && actual(patron) == null)
+            {
+                fijar(patron, dibujo);
+                EditorUtility.SetDirty(patron);
+            }
         }
 
         /// <summary>
@@ -305,7 +399,8 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// Espectro del Pavor (<c>Docs/Diseno/Nivel3_Diseno.md</c>, sección 6): invisible salvo cuando
-        /// ataca, y cada ataque avisa 1 s con su destello. La ventana es el jadeo tras el tajo (fase 1)
+        /// ataca, y cada ataque avisa con su destello: 1 s las hojas y 0,6 s el tajo, las sombras y la
+        /// embestida (v0.67: más rápido, para que dé miedo). La ventana es el jadeo tras el tajo (fase 1)
         /// y tras las sombras (fase 2). Sus datos nacieron como esqueleto: se completan aquí la primera
         /// vez, y después se respeta lo que se haya ajustado a mano.
         /// </summary>
@@ -316,9 +411,9 @@ namespace Fragmentum.EditorTools
             var tajo = Patron<PatronTajo>("Tajo", sobrescribir, p =>
             {
                 p.nombre = "Tajo";
-                p.descripcion = "Aparece a 2,5 u de Kael, a su espalda (o delante, contra una pared), destella 1 s y lanza un tajo " +
+                p.descripcion = "Aparece a 2,5 u de Kael, a su espalda (o delante, contra una pared), destella 0,6 s y lanza un tajo " +
                                 "de 3 u. Después jadea 1,5 s, visible: la ventana.";
-                p.aviso = 1f;
+                p.aviso = 0.6f;
                 p.danio = 2;
                 p.distancia = 2.5f;
                 p.alcance = 3f;
@@ -331,11 +426,12 @@ namespace Fragmentum.EditorTools
             var embestida = Patron<PatronEmbestidaSombra>("EmbestidaSombra", sobrescribir, p =>
             {
                 p.nombre = "Embestida de sombra";
-                p.descripcion = "Aparece junto a la pared más lejana a Kael, destella 1 s y cruza la arena a ras de suelo " +
-                                "(1,6 u de alto, a 11 u/s). Al otro lado se queda 1 s a la vista. Se salta o se espera en una rama.";
-                p.aviso = 1f;
+                p.descripcion = "Aparece junto a la pared más lejana a Kael, a su altura (a ras de suelo o en la rama donde esté), " +
+                                "destella 0,6 s y cruza la arena (1,6 u de alto, a 16 u/s). Al otro lado se queda 1 s a la vista. " +
+                                "Se salta, o se baja de la rama.";
+                p.aviso = 0.6f;
                 p.danio = 1;
-                p.velocidad = 11f;
+                p.velocidad = 16f;
                 p.alto = 1.6f;
                 p.visibleAlFinal = 1f;
                 p.color = verdePalido;
@@ -364,7 +460,7 @@ namespace Fragmentum.EditorTools
                 p.descripcion = "Tres figuras (izquierda, centro y derecha) lanzan su tajo una tras otra, cada una con su destello; " +
                                 "después jadean las tres 1,5 s. Solo la verdadera lleva una luciérnaga dorada. Golpear a una " +
                                 "sombra la deshace y encoge la luz de Kael 3 s.";
-                p.aviso = 1f;
+                p.aviso = 0.6f;
                 p.danio = 2;
                 p.margen = 3f;
                 p.aparicion = 0.4f;
@@ -397,6 +493,31 @@ namespace Fragmentum.EditorTools
                     Fase("Las tres sombras (50 %)", 0.5f, 0.9f, 1f, sombras, hojas, sombras, embestida),
                 };
             }, completarEsqueleto: true);
+
+            // Con su arte (ConstructorPavor): sin tinte, la derrota dura su muerte hasta M5 y cada
+            // franja de hojas lleva su dibujo. Un dibujo puesto a mano en el patrón se respeta.
+            ConstructorPavor.AjustarDatos(CargarDatos("EspectroDelPavor"));
+            var dibujoHojas = ConstructorPavor.PrefabHojas;
+            if (dibujoHojas != null && hojas.efecto == null)
+            {
+                hojas.efecto = dibujoHojas;
+                EditorUtility.SetDirty(hojas);
+            }
+
+            // Con su arte, cada ataque lo enseña su dibujo: el tajo y la embestida, sus gestos (las
+            // sombras lanzan su mismo tajo), y las hojas, el suelo que brilla. El rectángulo verde de
+            // la zona, que sin arte (fase D) era el aviso, ya no se pinta ni en el aviso ni en el golpe.
+            if (dibujoHojas != null)
+            {
+                foreach (var patron in new PatronAtaque[] { tajo, embestida, hojas, sombras })
+                {
+                    if (patron.dibujarZona)
+                    {
+                        patron.dibujarZona = false;
+                        EditorUtility.SetDirty(patron);
+                    }
+                }
+            }
         }
 
         private static T Patron<T>(string nombre, bool sobrescribir, Action<T> rellenar) where T : PatronAtaque
@@ -597,10 +718,12 @@ namespace Fragmentum.EditorTools
                     sprite.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(RutaMaterialSinLuz);
                 }
 
-                // Los jefes con arte (la Centinela y la Doncella) llevan sus fotogramas, su Animator
-                // y su fragmento; los demás, la cápsula provisional.
+                // Los jefes con arte (la Centinela, la Doncella y el Pavor) llevan sus fotogramas, su
+                // Animator y su fragmento; los demás, la cápsula provisional.
                 var conArte = (nombre == ConstructorCentinela.NombreDatos && ConstructorCentinela.Vestir(objetoSprite, pivote, controlador)) ||
-                              (nombre == ConstructorDoncella.NombreDatos && ConstructorDoncella.Vestir(objetoSprite, pivote, controlador));
+                              (nombre == ConstructorDoncella.NombreDatos && ConstructorDoncella.Vestir(objetoSprite, pivote, controlador)) ||
+                              (nombre == ConstructorPavor.NombreDatos && ConstructorPavor.Vestir(objetoSprite, pivote, controlador)) ||
+                              (nombre == ConstructorJuez.NombreDatos && ConstructorJuez.Vestir(objetoSprite, pivote, controlador));
                 if (!conArte)
                 {
                     objetoSprite.transform.localPosition = new Vector3(0f, tamano.y * 0.5f, 0f);

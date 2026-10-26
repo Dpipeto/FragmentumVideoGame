@@ -5,6 +5,7 @@ using Fragmentum.Data;
 using Fragmentum.Enemies;
 using Fragmentum.Levels;
 using Fragmentum.Levels.Escenario;
+using Fragmentum.Levels.Mecanicas;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -31,6 +32,15 @@ namespace Fragmentum.EditorTools
     /// Fase C: el Acechador, con el claro como territorio, y los tres árboles contra los que se
     /// estrella (<see cref="Arbol"/>). El sueño de los Espectros y el oído de los Centinelas Ciegos
     /// van en sus prefabs (<see cref="GeneradorEnemigos"/>).
+    ///
+    /// Fase E: con el tileset del bosque cortado (<see cref="ConstructorEscenarioMundo3"/>), cada
+    /// bloque apaga su rectángulo de color y lleva su dibujo: la tierra con su musgo, las raíces del
+    /// callejón, las ramas con la rama sana; las cintas, los árboles y el atrezo
+    /// (<see cref="DisenoNivel3.Decorados"/>), los suyos.
+    ///
+    /// La ciénaga (2026-10-19): su agua, con la superficie dibujada; las marañas que sujetan, con su
+    /// dibujo (<see cref="Marana"/>); y la pista en la orilla. Las raíces del árbol hundido son muros
+    /// que no agarran, como las del callejón.
     /// </summary>
     public static partial class PreparadorNivel
     {
@@ -78,15 +88,26 @@ namespace Fragmentum.EditorTools
             var colorPared = FabricaColor(colorSuelo, 0.7f);
             var colorRama = GeneradorMecanicas.ColorRamaSinArte;
 
+            // Con el tileset cortado, cada bloque apaga su rectángulo de color y lleva su dibujo.
             var bloques = Hijo(recorrido, "Bloques");
+            var escenario = ConstructorEscenarioMundo3.Completo ? Hijo(recorrido, NombreEscenario) : null;
             foreach (var b in DisenoNivel3.Suelos)
             {
-                Suelo(bloques, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorSuelo);
+                var suelo = Suelo(bloques, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorSuelo);
+                if (escenario != null)
+                {
+                    Apagar(suelo, ConstructorEscenarioMundo3.VestirSuelo(escenario, NombreDibujo(b.Nombre), b.Desde, b.Hasta, b.Abajo, b.Arriba));
+                }
             }
 
             foreach (var b in DisenoNivel3.Paredes)
             {
                 var pared = Bloque(bloques, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, Capa(Capas.Wall), colorPared, SpriteCuadrado);
+                if (escenario != null)
+                {
+                    Apagar(pared, ConstructorEscenarioMundo3.VestirMuro(escenario, NombreDibujo(b.Nombre), b.Desde, b.Hasta, b.Abajo, b.Arriba,
+                        DisenoNivel3.NoAgarra(b.Nombre)));
+                }
 
                 // Las raíces del callejón: se choca con ellas, pero no se sube con el salto de pared.
                 if (DisenoNivel3.NoAgarra(b.Nombre))
@@ -98,7 +119,19 @@ namespace Fragmentum.EditorTools
             var ramas = Hijo(recorrido, "Ramas");
             foreach (var b in DisenoNivel3.Ramas)
             {
-                Suelo(ramas, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorRama);
+                var rama = Suelo(ramas, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorRama);
+                if (escenario != null)
+                {
+                    Apagar(rama, ConstructorEscenarioMundo3.VestirRama(escenario, NombreDibujo(b.Nombre), b.Desde, b.Hasta, b.Arriba));
+                }
+            }
+
+            if (escenario != null)
+            {
+                foreach (var decorado in DisenoNivel3.Decorados)
+                {
+                    ConstructorEscenarioMundo3.Decorar(escenario, decorado);
+                }
             }
 
             // Las podridas ceden: el prefab de la rama podrida, con el pivote en su superficie. A
@@ -109,7 +142,8 @@ namespace Fragmentum.EditorTools
                 Instanciar(escena, podridas, GeneradorMecanicas.RamaPodrida, b.Nombre, (b.Desde + b.Hasta) * 0.5f, b.Arriba);
             }
 
-            ColocarMecanicasNivel3(escena, recorrido);
+            ColocarMecanicasNivel3(escena, recorrido, escenario != null);
+            ColocarCienagaNivel3(recorrido, escenario);
             ColocarOscuridadNivel3(escena);
 
             // Las ramas de la arena las atraviesa el jefe (ArenaJefe.plataformas).
@@ -117,10 +151,15 @@ namespace Fragmentum.EditorTools
             var contenedorArena = Hijo(recorrido, "PlataformasArena");
             foreach (var b in DisenoNivel3.PlataformasArena)
             {
-                plataformasArena.Add(Suelo(contenedorArena, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorRama).GetComponent<Collider2D>());
+                var rama = Suelo(contenedorArena, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorRama);
+                plataformasArena.Add(rama.GetComponent<Collider2D>());
+                if (escenario != null)
+                {
+                    Apagar(rama, ConstructorEscenarioMundo3.VestirRama(escenario, NombreDibujo(b.Nombre), b.Desde, b.Hasta, b.Arriba));
+                }
             }
 
-            ColocarArbolesNivel3(recorrido);
+            ColocarArbolesNivel3(recorrido, escenario != null);
             ColocarEnemigosNivel3(escena, recorrido);
 
             var gestor = Buscar<LevelManager>(escena);
@@ -162,8 +201,9 @@ namespace Fragmentum.EditorTools
         public const string NombreLuzGlobal = "Global Light 2D";
 
         // Las antorchas y los cepos (prefabs, por su pie) y las cintas que marcan la ruta buena, que
-        // cuelgan de lo alto de sus ramas, por delante de ellas.
-        private static void ColocarMecanicasNivel3(Scene escena, Transform recorrido)
+        // cuelgan de lo alto de sus ramas, por delante de ellas. Con arte, la cinta va atada por el
+        // nudo en el centro de su rama y se mueve al viento.
+        private static void ColocarMecanicasNivel3(Scene escena, Transform recorrido, bool conArte)
         {
             var antorchas = Hijo(recorrido, "Antorchas");
             for (var i = 0; i < DisenoNivel3.Antorchas.Length; i++)
@@ -184,7 +224,157 @@ namespace Fragmentum.EditorTools
             for (var i = 0; i < DisenoNivel3.Cintas.Length; i++)
             {
                 var nudo = DisenoNivel3.Cintas[i];
-                Visual(cintas, $"Cinta_{i + 1}", new Vector2(nudo.x, nudo.y + 0.05f - tamano.y * 0.5f), tamano, new Color(0.95f, 0.95f, 0.92f, 1f), 1);
+                var conDibujo = conArte && ConstructorEscenarioMundo3.ColocarCinta(cintas, $"Cinta_{i + 1}",
+                    new Vector2(nudo.x, nudo.y - DisenoNivel3.GrosorRama * 0.5f), ConstructorEscenarioMundo3.OrdenSobreBloques) != null;
+                if (!conDibujo)
+                {
+                    Visual(cintas, $"Cinta_{i + 1}", new Vector2(nudo.x, nudo.y + 0.05f - tamano.y * 0.5f), tamano, new Color(0.95f, 0.95f, 0.92f, 1f), 1);
+                }
+            }
+        }
+
+        /// <summary>Nombre de la zona de la pista de la ciénaga.</summary>
+        public const string NombrePistaDeLaCienaga = "PistaDeLaCienaga";
+
+        /// <summary>Las marañas, por delante de Kael (10), que queda dentro de ellas, y por detrás del agua.</summary>
+        public const int OrdenMarana = 15;
+
+        /// <summary>El interior del árbol hundido, detrás de los túneles: por detrás de Kael y del atrezo.</summary>
+        public const int OrdenFondoTunel = -2;
+
+        /// <summary>Las raíces del interior de los túneles, oscurecidas: la maraña se lee contra ellas.</summary>
+        public static readonly Color ColorFondoTunel = new Color(0.3f, 0.3f, 0.35f, 1f);
+
+        /// <summary>Lo que se ve del agua de la ciénaga sin su arte: un velo verde oscuro.</summary>
+        public static readonly Color ColorAguaSinArteNivel3 = new Color(0.1f, 0.2f, 0.12f, 0.45f);
+
+        /// <summary>Lo que se ve de una maraña sin su arte: un rectángulo de raíces oscuras.</summary>
+        public static readonly Color ColorMaranaSinArte = new Color(0.2f, 0.12f, 0.25f, 0.85f);
+
+        /// <summary>
+        /// La ciénaga: el agua (su superficie dibujada sobre un cuerpo liso o, sin arte, un velo), el
+        /// interior oscuro de los túneles, las marañas que sujetan (zonas del tipo maraña, con su
+        /// dibujo) y, en la orilla, la pista, que vuelve a sonar si una maraña tiene a Kael sujeto.
+        /// </summary>
+        private static void ColocarCienagaNivel3(Transform recorrido, Transform escenario)
+        {
+            var cienaga = Hijo(recorrido, "Cienaga");
+
+            // Dentro de los túneles se ve el interior del árbol hundido, no el bosque del fondo: sus
+            // raíces, oscurecidas. Contra ellas se distingue la maraña.
+            var tunel = 0;
+            foreach (var techo in DisenoNivel3.RaicesDelArbolHundido)
+            {
+                tunel++;
+                var nombre = $"FondoDelTunel{tunel}";
+                var interior = escenario != null
+                    ? ConstructorEscenarioMundo3.VestirMuro(escenario, nombre, techo.Desde, techo.Hasta, DisenoNivel3.FondoCienaga, techo.Abajo, true)
+                    : null;
+                if (interior == null)
+                {
+                    Visual(cienaga, nombre, new Vector2((techo.Desde + techo.Hasta) * 0.5f, (DisenoNivel3.FondoCienaga + techo.Abajo) * 0.5f),
+                        new Vector2(techo.Hasta - techo.Desde, techo.Abajo - DisenoNivel3.FondoCienaga), ColorFondoTunel * 0.5f, OrdenFondoTunel);
+                    continue;
+                }
+
+                interior.color = ColorFondoTunel;
+                interior.sortingOrder = OrdenFondoTunel;
+            }
+
+            var superficie = ConstructorMecanicasMundo3.SuperficieDelAgua;
+            foreach (var zona in DisenoNivel3.Aguas)
+            {
+                if (superficie == null)
+                {
+                    ZonaDeMovimiento(cienaga, zona, ZonaModificadorMovimiento.TIPOS.AGUA, ColorAguaSinArteNivel3, SpriteCuadrado);
+                    continue;
+                }
+
+                ZonaDeMovimiento(cienaga, zona, ZonaModificadorMovimiento.TIPOS.AGUA, Color.clear, null);
+                DibujarAgua(cienaga, zona, superficie, ConstructorMecanicasMundo3.ColorAgua, ConstructorMecanicasMundo3.FondoDeLaSuperficie,
+                    ConstructorMecanicasMundo3.SegundosAgua);
+            }
+
+            var maranas = new List<Marana>();
+            foreach (var zona in DisenoNivel3.Maranas)
+            {
+                maranas.Add(CrearMarana(cienaga, zona));
+            }
+
+            var pista = DisenoNivel3.PistaDeLaCienaga;
+            var zonaPista = Bloque(cienaga, NombrePistaDeLaCienaga, pista.Desde, pista.Hasta, pista.Abajo, pista.Arriba, 0, Color.clear, null);
+            zonaPista.GetComponent<BoxCollider2D>().isTrigger = true;
+            var dialogo = zonaPista.AddComponent<ZonaDeDialogo>();
+            Asignar(dialogo, "momento", p => p.enumValueIndex = (int)Fragmentum.Narrative.MOMENTOS_DIALOGO.PISTA);
+            Asignar(dialogo, "maranas", p =>
+            {
+                p.arraySize = maranas.Count;
+                for (var i = 0; i < maranas.Count; i++)
+                {
+                    p.GetArrayElementAtIndex(i).objectReferenceValue = maranas[i];
+                }
+            });
+        }
+
+        // Una maraña: un trigger del tipo maraña, sin escala (sus dibujos son hijos), con un dibujo
+        // por cada 2 u, colgado del techo del túnel; el segundo, en espejo, para que el corte case
+        // consigo mismo. Sin arte, un rectángulo oscuro.
+        private static Marana CrearMarana(Transform padre, DisenoNivel2.Zona zona)
+        {
+            var objeto = new GameObject(zona.Nombre);
+            objeto.transform.SetParent(padre, false);
+            objeto.transform.position = new Vector3((zona.Desde + zona.Hasta) * 0.5f, (zona.Abajo + zona.Arriba) * 0.5f, 0f);
+            var caja = objeto.AddComponent<BoxCollider2D>();
+            caja.size = new Vector2(zona.Hasta - zona.Desde, zona.Arriba - zona.Abajo);
+            caja.isTrigger = true;
+
+            var tipo = objeto.AddComponent<ZonaModificadorMovimiento>();
+            Asignar(tipo, "tipo", p => p.enumValueIndex = (int)ZonaModificadorMovimiento.TIPOS.MARANA);
+            var marana = objeto.AddComponent<Marana>();
+
+            var reposo = ConstructorMecanicasMundo3.MaranaEnReposo;
+            var atrapa = ConstructorMecanicasMundo3.MaranaQueAtrapa;
+            if (reposo == null || atrapa == null)
+            {
+                Visual(objeto.transform, "SinArte", Vector2.zero, caja.size, ColorMaranaSinArte, OrdenMarana);
+                return marana;
+            }
+
+            var dibujos = new List<SpriteRenderer>();
+            var piezas = Mathf.Max(1, Mathf.RoundToInt((zona.Hasta - zona.Desde) / DisenoNivel3.AnchoDibujoMarana));
+            for (var i = 0; i < piezas; i++)
+            {
+                var pieza = new GameObject($"Dibujo{i + 1}");
+                pieza.transform.SetParent(objeto.transform, false);
+                pieza.transform.position = new Vector3(zona.Desde + (i + 0.5f) * DisenoNivel3.AnchoDibujoMarana, zona.Arriba, 0f);
+                var dibujo = pieza.AddComponent<SpriteRenderer>();
+                dibujo.sprite = reposo[0];
+                dibujo.flipX = i % 2 == 1;
+                dibujo.sortingOrder = OrdenMarana;
+                dibujos.Add(dibujo);
+            }
+
+            Asignar(marana, "dibujos", p => ListaDeObjetos(p, dibujos.ToArray()));
+            Asignar(marana, "reposo", p => ListaDeObjetos(p, reposo));
+            Asignar(marana, "atrapa", p => ListaDeObjetos(p, atrapa));
+            return marana;
+        }
+
+        private static void ListaDeObjetos(SerializedProperty propiedad, Object[] objetos)
+        {
+            propiedad.arraySize = objetos.Length;
+            for (var i = 0; i < objetos.Length; i++)
+            {
+                propiedad.GetArrayElementAtIndex(i).objectReferenceValue = objetos[i];
+            }
+        }
+
+        /// <summary>Con su dibujo, el rectángulo de color del bloque se apaga (la colisión sigue siendo la suya).</summary>
+        private static void Apagar(GameObject bloque, SpriteRenderer dibujo)
+        {
+            if (dibujo != null && bloque.TryGetComponent<SpriteRenderer>(out var liso))
+            {
+                liso.enabled = false;
             }
         }
 
@@ -249,8 +439,9 @@ namespace Fragmentum.EditorTools
         /// <summary>Lo que se ve de un árbol del claro mientras no llega su arte: un tronco oscuro, por detrás de todo.</summary>
         public static readonly Color ColorArbolSinArte = new Color(0.22f, 0.18f, 0.16f, 1f);
 
-        // Los árboles del claro: de pie en su suelo, sin collider (Kael pasa por delante).
-        private static void ColocarArbolesNivel3(Transform recorrido)
+        // Los árboles del claro: de pie en su suelo, sin collider (Kael pasa por delante). Con arte,
+        // el tocón del árbol muerto, al doble.
+        private static void ColocarArbolesNivel3(Transform recorrido, bool conArte)
         {
             var arboles = Hijo(recorrido, "Arboles");
             var tamano = DisenoNivel3.TamanoArbol;
@@ -262,7 +453,10 @@ namespace Fragmentum.EditorTools
                 arbol.position = new Vector3(x, DisenoNivel3.SueloBajo(x), 0f);
                 var componente = arbol.gameObject.AddComponent<Arbol>();
                 Asignar(componente, "tamano", p => p.vector2Value = tamano);
-                Visual(arbol, "Tronco", new Vector2(0f, tamano.y * 0.5f), tamano, ColorArbolSinArte, -1);
+                if (!conArte || ConstructorEscenarioMundo3.ColocarArbol(arbol, "Tronco", arbol.position) == null)
+                {
+                    Visual(arbol, "Tronco", new Vector2(0f, tamano.y * 0.5f), tamano, ColorArbolSinArte, -1);
+                }
             }
         }
 
@@ -291,6 +485,11 @@ namespace Fragmentum.EditorTools
                 enemigo.name = guardia.Nombre;
                 enemigo.transform.SetParent(enemigos, true);
                 enemigo.transform.position = new Vector3(guardia.X, guardia.Y + AlturaPies, 0f);
+                if (guardia.Tipo == DisenoNivel3.TIPOS_ENEMIGO.ESPECTRO)
+                {
+                    // Los Ecos de este mundo, a la escala de los del Nivel 1.
+                    enemigo.transform.localScale = new Vector3(DisenoNivel3.EscalaEspectro.x, DisenoNivel3.EscalaEspectro.y, 1f);
+                }
 
                 var a = Hijo(rutas, $"{guardia.Nombre}_A");
                 var b = Hijo(rutas, $"{guardia.Nombre}_B");

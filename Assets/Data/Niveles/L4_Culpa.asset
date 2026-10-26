@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.LevelData
   id: 4
   escena:
-    escena: {fileID: 0}
-    ruta: 
+    escena: {fileID: 102900000, guid: a47dc967c88c1d24da28b50d87ddc422, type: 3}
+    ruta: Assets/Scenes/Nivel4.unity
   nombreMundo: Campos de Batalla Arrasados
   emocion: {fileID: 11400000, guid: f4ae9a97edfe3434494e8ff5187280cf, type: 2}
   sinopsis: Responsabilidad, remordimiento. Confronta al jugador con consecuencias.
@@ -26,33 +26,44 @@ MonoBehaviour:
   - {r: 0.2901961, g: 0.36078432, b: 0.18039216, a: 1}
   - {r: 0.54509807, g: 0.2, b: 0.2, a: 1}
   icono: {fileID: 0}
-  musica: {fileID: 0}
-  musicaJefe: {fileID: 0}
+  musica: {fileID: 8300000, guid: d8ef1eb5f7fde5e4aa7ae6b767ec3867, type: 3}
+  musicaJefe: {fileID: 8300000, guid: a63bc3e64c4024247a966618cf068372, type: 3}
   jefe: {fileID: 11400000, guid: e4405ee785973304fb77497778cf7bd9, type: 2}
   fragmento: {fileID: 11400000, guid: 13b023e26d8949342a0dad7cb5378d57, type: 2}
   habilidadOtorgada: {fileID: 11400000, guid: 0e1fee6fee1f3a0419812d9308641eb5, type: 2}
   cinematicaEntrada: {fileID: 0}
   cinematicaCierre: {fileID: 11400000, guid: 1e36dd902ec8e8e4aa0d1952dd8dfa96, type: 2}
   cinematicaJefe: {fileID: 11400000, guid: a4f40ac0b4b347246840450af8a9340a, type: 2}
+  cinematicaJefeDerrotado: {fileID: 11400000, guid: 0709d521189ab1a43957addf8a0b6e67, type: 2}
   dialogos: {fileID: 11400000, guid: 4fbfd3b0fa45d844db73d576ef0336a6, type: 2}
   reglas:
     agacharse: 1
     sigilo: 0
     oscuridad: 0
     radioLuzJugador: 0
+    colorVeloAgua: {r: 0.12, g: 0.09, b: 0.05, a: 1}
   secciones:
   - nombre: "Secci\xF3n 1"
     desdeX: 0
-    hastaX: 25
-    contenido: 'Campo abierto: Penitentes y cobertura. 1 memoria sin riesgo.'
+    hastaX: 66
+    contenido: "El campo arrasado: el primer Penitente, la radio en el cr\xE1ter (la memoria sin riesgo), el tutorial del barril y el de la cobertura, el refugio, la tierra de nadie y el campanario."
   - nombre: "Secci\xF3n 2"
-    desdeX: 25
-    hastaX: 60
-    contenido: 'Ruinas con 2 rutas: alta (Artilleros y barriles) o baja (Penitentes y 2 memorias).'
+    desdeX: 66
+    hastaX: 114
+    contenido: 'Las ruinas del pueblo, con dos rutas: los tejados (Artilleros y barriles en cadena) o la calle (Penitentes y dos memorias). Se juntan en la convergencia.'
+  - nombre: "Secci\xF3n 3"
+    desdeX: 114
+    hastaX: 167
+    contenido: "El r\xEDo bajo el puente volado, que se cruza con el Dash Acu\xE1tico entre alambradas y una mina; la carta; el patio del Verdugo, y la antesala."
   - nombre: Arena del jefe
-    desdeX: 60
-    hastaX: 85
-    contenido: Plaza central con las memorias proyectadas en el suelo.
-  puntosDeControl: []
+    desdeX: 167
+    hastaX: 188
+    contenido: 'La plaza: el Juez Silente y las cuatro marcas de las memorias.'
+  puntosDeControl:
+  - 46
+  - 112.5
+  - 164.5
+  tiempoConBono: 960
+  puntosPorSegundo: 5
   acento: {r: 0.7882353, g: 0.64705884, b: 0.40392157, a: 1}
   cita: "el peso del ayer no define el ma\xF1ana"

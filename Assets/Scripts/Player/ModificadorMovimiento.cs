@@ -46,5 +46,12 @@ namespace Fragmentum.Player
 
         /// <summary>Suelo de hielo (Nivel 2): misma velocidad, pero cuesta arrancar y frenar.</summary>
         public static ModificadorMovimiento Hielo => new ModificadorMovimiento(1f, 1f, 1f, 0.15f, false);
+
+        /// <summary>
+        /// Una maraña de raíces bajo el agua (la ciénaga del Nivel 3): sujeta. Kael va al 5 % de su
+        /// velocidad y no salta; la gravedad es la del agua, que se suma. El dash fija su propia
+        /// velocidad: es lo único que la cruza.
+        /// </summary>
+        public static ModificadorMovimiento Marana => new ModificadorMovimiento(0.05f, 1f, 0f, 1f, false);
     }
 }

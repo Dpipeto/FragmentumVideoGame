@@ -242,6 +242,7 @@ MonoBehaviour:
   embestida: {fileID: 3295713076568554198}
   pivote: {fileID: 4899561462522801333}
   sprite: {fileID: 8498186242976115183}
+  animator: {fileID: 0}
   colorAviso: {r: 0.62, g: 0.2, b: 0.24, a: 1}
   colorAturdido: {r: 0.48, g: 0.5, b: 0.6, a: 1}
 --- !u!4 &4899561462522801333 stripped

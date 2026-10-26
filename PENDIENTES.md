@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.51 — Mundo 3, fase D: el Espectro del Pavor, 2026-10-14.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.68 — Lo que encontró el segundo tester: la Centinela ya no se castiga desde la plataforma baja, las plataformas del Nivel 1 se atraviesan desde abajo, y los controles nuevos (W, S, Ctrl, J y K), 2026-10-25.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -10,11 +10,15 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
-| N45 | *En curso.* **Genera las imágenes del Mundo 3.** | Están todos sus prompts en **`Docs/Diseno/Prompts_Mundo3.md`**: la primera tanda (los enemigos y el jefe, apartados A a D) y, desde el 2026-10-14, la segunda (el tileset, las antorchas, los cepos, las ramas, las cintas, el fondo, las cinemáticas y las puertas, apartados E a J). Con lo que aprendimos en el Mundo 2: la maestra con todo lo que no puede faltar, que no cambie el píxel y margen alrededor. | Todo se puede pedir ya: el diseño está aprobado. **Orden:** el Espectro (A1, editando las bases del Eco que están en `Tesis/Imagenes/Mundo3/Espectro/Bases/`) y el Espectro del Pavor (B y C) primero; después el Centinela Ciego y el Acechador; y la segunda tanda, empezando por el tileset (E1), que adjuntan la puerta, la verja y el checkpoint. Guárdalo todo en `Tesis/Imagenes/Mundo3/<Pieza>/` y avísame por paquetes. Las puertas llevan **decisiones mías** (apartado H: el farol que se enciende, la puerta en un árbol muerto, la luz ocre de la Culpa al otro lado, el fragmento violeta en el codo derecho): cámbialas antes de generar si no te convencen. |
-| N46 | **Si quieres, recorre el Nivel 3** (fases A a D). | Ya se juega de principio a fin, a oscuras y con sus enemigos y su jefe: las antorchas despiertan a los Espectros de su luz; los Centinelas Ciegos oyen correr delante; en el claro, el Acechador embiste hacia el ruido. En la arena, el **Espectro del Pavor** solo se ve cuando destella: aparece a tu espalda con el tajo (jadea después: la ventana), cruza la arena con su embestida, hace caer hojas donde el suelo brilla y, a mitad de vida, grita y saca dos sombras (la verdadera lleva una luciérnaga dorada). Al vencerlo, la oscuridad retrocede. | No hace falta para seguir. Si lo juegas, dime sobre todo **cuánta luz hay** (`DisenoNivel3.Luces`; no he podido sacar fotos con las luces), si los Espectros se dejan ver lo justo, si al Acechador se le puede vencer sin que sea un trámite y si **el Pavor se lee**: si el destello avisa a tiempo, si se le encuentra para golpearlo mientras jadea y si la luciérnaga se distingue. Y si las distancias se sienten bien caminando (Alt). |
-| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. **Del Mundo 2** hay nueve diferencias más, listadas al final de `Docs/Diseno/Nivel2_Diseno.md` (sección 9). Las tres últimas son del 2026-10-12: el aire dura 10 s y no 15, los checkpoints curan y el nivel mide unos 115 u. **Desde el 2026-10-13 los dos niveles tienen tres secciones y la arena** (el Anexo dice dos y la arena): el Nivel 1 va de 0 a 25, de 25 a 55, de 55 a 100 (la forja) y la arena de 100 a 125, con tres checkpoints (x 43, 57,5 y 94,5); el Nivel 2, de 0 a 40, de 40 a 70, de 70 a 100 (el canal) y la arena de 100 a 133 (139 u en total). Y **el puntaje sustituye a las monedas**: si la tesis habla de monedas o de economía, ahora es puntaje por enemigos, jefe y tiempo. **Del Mundo 3**, las diferencias con el Anexo A están al final de `Docs/Diseno/Nivel3_Diseno.md` (sección 9): mide unos 145 u y no 70, con tres secciones, tres checkpoints y un mini-jefe que el Anexo no tiene, entre otras. |
-| N3 | *En curso.* **Clips de Kael que faltan:** daño primero; después wall slide (y, para la Fase 10, nado). El dash ✔, la muerte ✔ y agacharse ✔ ya están. | El daño se ve en cada partida: hoy sigue el clip anterior y parpadea. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
-| N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Tienen arte los que salen en el Nivel 1 y, desde la v0.42, todos los del Mundo 2. Los del Mundo 3 ya tienen prompts (N45). Faltan los de los mundos 4 en adelante. | Ver «Arte que más necesito», justo debajo. |
+| N51 | **Juega el Mundo 4** y dime qué cambiar. Desde la v0.59, con el Penitente, el Artillero, el Verdugo y el Juez dibujados; desde la v0.60, con el escenario, las coberturas, el barril, la mina, el río y el campanario. | **Desde la v0.60, el campanario es el de su dibujo**: el balcón empieza en x 61,7, el arco mide 2,9 u y la torre 10,5; los dos Artilleros del balcón, en x 62 y 62,7. Las coberturas se dibujan algo más anchas que su bloque (hasta 0,25 u por lado): mira si alguna engaña sobre dónde te tapa. Al montar el arte cambió el Artillero (sección 10 de `Nivel4_Diseno.md`): **su cañón está donde lo tiene el dibujo** (1,06 u de alto), **sus sacos miden 0,9** y **apunta a lo alto de tu cabeza**. Con el cañón más bajo, de pie tras la cobertura más cercana a él te tapaba la cobertura; apuntando más arriba vuelve a hacer falta agacharse, pero tras el tercer escombro y la segunda chimenea el margen es pequeño: mira si allí, de pie, te da. Y lo de antes: **encender un barril con la espada cuesta un corazón si no sales de un dash**, **el Juez arrodillado recibe el daño de siempre** y **la cadena del Verdugo te empuja hacia él**. | Juega el Nivel 4 con una partida que ya tenga las tres habilidades (Ataque Cargado, Dash Acuático e Invisibilidad). **Desde la v0.61, las memorias tienen su dibujo**: en la plaza, cada una espera sobre su losa y las cuatro losas son iguales; en la segunda fase, la marca buena es la del objeto que el Juez proyecta en la pared, que ahora está detrás de él, a la vista (estaba demasiado alta). Mira si se distingue bien de la trampa y si la proyección estorba al pelear. **Desde la v0.62**, con la puerta de la iglesia, la verja de cadenas, la bandera blanca de los checkpoints, la onda de la sentencia dibujada y el escudo de Kael (se ve al parar un golpe). La losa de la carta (x 190) queda delante de la puerta de salida: dime si la prefieres en otro sitio. |
+| N53 | **Escucha la música** y dime qué cambiar: la del menú y el selector, la de los niveles 1 a 4, la de sus cuatro jefes, las 13 cinemáticas (la inicial y, en cada mundo, la presentación del jefe, su derrota y el cierre) y el golpe de la antorcha. Y prueba las **Opciones** (el volumen general y el de la música), desde el menú y desde la pausa. | La hice con los sonidos de LMMS y no la puedo oír: la compuse con teoría y comprobé lo que se mide (que cada instrumento suena en su nota, el volumen de cada parte, que los bucles no saltan al repetirse y que cada cinemática dura lo que su pieza). Si suena bien, lo decides tú. **Lo que más dudo:** que el Nivel 1 sea demasiado machacón para jugarlo entero; que la caja de música del Nivel 2, torcida a propósito, suene desafinada de más; y que el Nivel 3 (casi silencio, a -30 dB) se oiga en un portátil. **El tema de Kael** (Re menor) lo presenta la cinemática inicial y vuelve en cada cierre: es el que pide el Anexo A para el final. **La música calla en todas las cinemáticas**, no solo en las memorias: cada una trae la suya, salvo las memorias, en silencio. | Juega los niveles, o escucha los OGG de `Assets/Audio/Musica` (las cinemáticas, en `Cinematicas/`). Para cambiar algo, dímelo con palabras («la Doncella más lenta», «menos bombo en el Nivel 1») o ábrelo en LMMS (`Musica/`), cámbialo, guarda y `python Herramientas/exportar_musica.py` (`Musica/LEEME.md`). |
+| N54 | **Escucha los efectos de Kael** y dime si el estilo te encaja: el salto, el doble salto, el dash, el tajo, el tajo cargado y el daño. | Son el primer lote de efectos: si el estilo vale, sigo con los demás (la muerte, el checkpoint, la poción, los golpes a los enemigos, los clics de la UI…). Los hice con los sonidos de LMMS y no los puedo oír: comprobé lo que se mide (cuánto duran, lo fuerte que es cada capa y su color). **Lo que más dudo:** que el brillo que sube en el doble salto suene demasiado a juego retro; y que el quejido del daño (un tono que cae) desentone con la música. | Juega cualquier nivel, o escucha los WAV de `Assets/Audio/Sonidos/Kael`. Dímelo con palabras («el salto más suave», «el tajo más metálico») o ábrelos en LMMS (`Sonidos/Kael`), cámbialos, guarda y `python Herramientas/exportar_sonidos.py` (`Sonidos/LEEME.md`). El volumen de los efectos, en **Opciones**. |
+| N55 | **Pelea con el Espectro del Pavor** y dime si ahora da miedo sin ser injusto. | Lo pediste más rápido y que también cargue en las plataformas de arriba: el tajo y las sombras avisan 0,6 s (antes 1 s); la embestida avisa 0,6 s, cruza a 16 u/s (antes 11) y **aparece a tu altura**: si estás en una rama de la arena, embiste por ella, en el aire. Ya no hay sitio seguro: se esquiva saltándola o bajándote de la rama. Las hojas siguen en 1 s. **Lo que más dudo:** que 0,6 s sea poco para el tajo, que aparece a tu espalda (el verificador no deja bajar de 0,5 s); y que, cuando embiste por una rama, se vea raro su dibujo de la embestida y del frenazo (con una mano en el suelo) en el aire. | Juega el Nivel 3 hasta la arena. Los tiempos están en `Assets/Data/Jefes/Patrones` (`Tajo`, `Sombras` y `EmbestidaSombra`: su `aviso` y su `velocidad`); lo que cambió, en «Lo que cambió tras probarlo (v0.67)» de `Nivel3_Diseno.md`. |
+| N56 | **Prueba los controles nuevos y la arena de la Centinela** (lo que pidió el segundo tester). | Los controles: **W** interactúa (antes E), **S** agacha (antes C o Ctrl), **Ctrl izquierdo** camina (antes Alt), **J** ataca (antes Enter; el clic sigue valiendo) y **K** salta, además del espacio. En los menús, Enter sigue eligiendo. La guía de mecánicas y los avisos («W · Encender») los leen solos. Las dos plataformas bajas de la arena suben de 3 a 3,5 u: desde ellas ya no se alcanza la cabeza de la Centinela. Y todas las plataformas del Nivel 1 (las de la arena, las inestables y las de combustión) se atraviesan saltando desde abajo y se pisan al caer. **Lo que más dudo:** que W y S, que también son arriba y abajo en WASD, molesten (hoy arriba y abajo no hacen nada en el juego); y que la plataforma baja, ahora más alta, cueste más de subir (sigue pidiendo el doble salto, como antes). | Juega el Nivel 1 hasta la Centinela: súbete a las plataformas desde abajo y mira que caes bien en ellas, que la inestable solo se agrieta al pisarla y que desde la plataforma baja ya no le pegas. Las teclas, en `Assets/Settings/InputSystem_Actions.inputactions`. |
+| N50 | *En curso (el otro tester).* **Juega la ciénaga del Mundo 3** y dime qué cambiar. | La aprobaste el 2026-10-19 «a la espera de las verificaciones del otro tester», con su arte, y ya está montada: entre el CP2 y el claro, dos túneles bajo las raíces de un árbol hundido con **marañas que sujetan a quien duda**; solo las cruza el Dash Acuático (la primera, de un dash; la segunda, de dos). Entre los túneles, un tocón para respirar; en la orilla, una antorcha y la pista. Al montarla cambiaron algunas medidas (el agua, 3,5 u de hondo; las marañas, 2 y 4 u; todo lo de después, 28 u más allá) y el Espectro de la bajada se movió 2 u para que la antorcha de la orilla no lo despierte. | Juega el Nivel 3 con una partida que ya haya terminado el Mundo 2 (si no, no hay dash bajo el agua). Lo que cambió y por qué, en la sección 10 de `Nivel3_Diseno.md` («Lo que cambió al montarla»). Si algo no se siente bien, se cambia en `DisenoNivel3`. |
+| N19 | **Corrige el Anexo A de `Tesis.docx`** en cuatro puntos, para que diga lo mismo que el juego. | La plataforma de combustión va por ciclo fijo (el Anexo dice que quema si te quedas encima más de 2 s). Y en el Nivel 1, aprobaste: la arena mide 25 × 15 u (el Anexo dice 60 × 15, pero también que va de x 55 a x 80), su suelo es firme (la lava brota en las erupciones) y el checkpoint está en x 43, no en x 40. | Yo no toco `Tesis.docx`. Para la combustión basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». Lo del Nivel 1 está explicado en `Docs/Diseno/Nivel1_Diseno.md`, sección 6. **Del Mundo 2** hay nueve diferencias más, listadas al final de `Docs/Diseno/Nivel2_Diseno.md` (sección 9). Las tres últimas son del 2026-10-12: el aire dura 10 s y no 15, los checkpoints curan y el nivel mide unos 115 u. **Desde el 2026-10-13 los dos niveles tienen tres secciones y la arena** (el Anexo dice dos y la arena): el Nivel 1 va de 0 a 25, de 25 a 55, de 55 a 100 (la forja) y la arena de 100 a 125, con tres checkpoints (x 43, 57,5 y 94,5); el Nivel 2, de 0 a 40, de 40 a 70, de 70 a 100 (el canal) y la arena de 100 a 133 (139 u en total). Y **el puntaje sustituye a las monedas**: si la tesis habla de monedas o de economía, ahora es puntaje por enemigos, jefe y tiempo. **Del Mundo 3**, las diferencias con el Anexo A están al final de `Docs/Diseno/Nivel3_Diseno.md` (secciones 9 y 10): mide unos 173 u y no 70, con tres secciones, tres checkpoints, un mini-jefe y una ciénaga que el Anexo no tiene, entre otras. **Del Mundo 4**, al final de `Docs/Diseno/Nivel4_Diseno.md` (secciones 9 y 10): mide unos 200 u y no 85, con tres secciones, tres checkpoints, un mini-jefe (el Verdugo), un río con alambradas y minas, y los barriles también hieren a Kael, entre otras. **El Dash Acuático se estrena ya en el Mundo 3** (la ciénaga) y la Invisibilidad en el 4: no en el Jardín, como dice el Anexo. |
+| N3 | *En curso.* **Clips de Kael que faltan:** wall slide (y, para la Fase 10, nado). El dash ✔, la muerte ✔, agacharse ✔ y el daño ✔ (v0.62) ya están. | Pegado a la pared, Kael usa la caída. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
+| N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Tienen arte los que salen en el Nivel 1 y, desde la v0.42, todos los del Mundo 2. Los del Mundo 3, desde la v0.52. Los del Mundo 4 ya tienen prompts (N49). Faltan los de los mundos 5 en adelante. | Ver «Arte que más necesito», justo debajo. |
 
 ### Arte que más necesito, por urgencia
 
@@ -40,12 +44,179 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 7. **Las puertas de salida y sus cinemáticas:** ✔ *recibidas y montadas* (v0.45), con las verjas
    y los checkpoints de los dos mundos. `SalidaTristeza2` llegó como la copia pequeña del chat
    (1024 × 572) y con un dibujo más suave que su pareja: se bajó a la misma rejilla y funciona,
-   pero si la regeneras a tamaño completo, la cambio.
+   pero si la regeneras a tamaño completo, la cambio. Las del Mundo 3, desde la v0.53.
 8. **La portada del menú** (N41): ✔ *recibida y montada* (v0.49) en el menú y en el selector.
-9. **El Mundo 3** (N45): los enemigos y el jefe primero, el Espectro (12, editando el Eco), el
-   Centinela Ciego (13), el Acechador (17) y el Espectro del Pavor (26, por AI Studio), con sus
-   hojas, su luciérnaga y el Fragmento del Miedo. Después, el tileset, las mecánicas, el fondo,
-   las cinemáticas y las puertas. Prompts en `Docs/Diseno/Prompts_Mundo3.md`.
+9. **El Mundo 3:** ✔ *recibido y montado entero* (v0.52 y v0.53): los enemigos, el jefe con sus
+   hojas y su luciérnaga, el fragmento, las mecánicas, el tileset, los props, el fondo con sus
+   helechos, las cinemáticas del jefe y las puertas. `DerrotaEspectro2`, repetida (v0.54).
+   El sigilo de Kael no se hará. Prompts en `Docs/Diseno/Prompts_Mundo3.md`. **La ciénaga**
+   ✔ *recibida y montada* (v0.57): el agua y la maraña (apartado K).
+10. **El Mundo 4:** la primera tanda ✔ *recibida y montada* (v0.59): el Penitente, el Artillero, el
+    Verdugo, el Juez Silente y lo suyo (la explosión, la artillería, la ola, la placa, la bala, el
+    garfio y la cadena, y el fragmento). `M5` del Juez salió dos veces con él de pie: se quedó el
+    montón y la gema va aparte. De la segunda tanda ✔ *recibido y montado* (v0.60): el tileset y los
+    props, las coberturas, el barril, la mina, el agua del río, la alambrada y el campanario (E1-E8);
+    y (v0.61) las memorias con su losa, el fondo, las cinemáticas del Juez y las imágenes de las
+    memorias; y (v0.62) las puertas, la verja, el checkpoint, la salida, el escudo de Kael, el aviso y el
+    abrigo vacío del Artillero, la onda de la sentencia y, repetidas, dos cinemáticas del Juez. **El Mundo 4
+    tiene todo su arte.**
+
+### Resuelto en la v0.68
+
+- **El «cheese» de la Centinela** (el segundo tester): desde la plataforma baja de la arena se le pegaba sin que ella
+  alcanzara. La plataforma estaba a 3 u del suelo y la Centinela mide 3,4: la espada de Kael, que baja 0,25 u bajo sus
+  pies, le daba en la cabeza. Las dos plataformas bajas suben a 3,5 u.
+- **Las plataformas del Nivel 1 se atraviesan saltando desde abajo** y se pisan al caer, como antes.
+- **Los controles nuevos:** W interactúa, S agacha, Ctrl izquierdo camina, J ataca y K también salta.
+
+### Resuelto en la v0.67
+
+- **El Espectro del Pavor, más rápido** («más rápido tanto en su ataque como en la carga»): el tajo y las sombras
+  avisan 0,6 s en vez de 1 s; la embestida avisa 0,6 s y cruza a 16 u/s en vez de 11.
+- **Su embestida te busca** («que pueda cargar también en las plataformas de arriba»): aparece a la altura de lo que
+  pisas. Si estás en una rama de la arena, embiste por ella; debajo de una rama, a ras de suelo.
+
+### Resuelto en la v0.66
+
+- **Los efectos de sonido de Kael** («comienza con eso»: el salto, el dash, el ataque y el daño), con los sonidos de
+  LMMS: el salto (también desde la pared), el doble salto, el dash, el tajo, el tajo cargado y el daño (`Sonidos/Kael`,
+  WAV mono de 0,17 a 0,34 s). Suenan al momento, cada vez un poco distintos; el golpe que para el escudo no suena a
+  daño.
+- **El volumen de los efectos** en las opciones, junto al general y al de la música. También baja el golpe de la
+  antorcha.
+
+### Resuelto en la v0.65
+
+- **La música del menú inicial**, que es también la del selector («la música del menú inicial es igual a la de selector
+  de niveles»): el tema de Kael, tranquilo (`Menu.ogg`, 96 s). Sigue sonando al pasar del menú al selector y se apaga al
+  entrar en un nivel.
+- **Las opciones de volumen** («un apartado de opciones para bajar el volumen tanto en el menú inicial como en el menú
+  de pausa»): el volumen general y el de la música, de 10 en 10 %. Se oyen al momento y se guardan aparte de la partida
+  (una partida nueva no los toca).
+
+### Resuelto en la v0.64
+
+- **La música de los niveles 1 a 3, de sus jefes y de las cinemáticas** («sigue generando la música; también sería
+  ideal tener la música para cinemáticas»), con los sonidos de LMMS y como pide el Anexo A: la Ira (percusión
+  industrial, 160 BPM) y la Centinela; la Tristeza (la caja de música bajo el agua y el piano, 70 BPM) y el vals de la
+  Doncella; el Miedo (casi silencio, con ruidos del bosque) y el Espectro (percusión irregular y graves); las 13
+  cinemáticas, con el tema de Kael; y el golpe de cuerdas de la antorcha. Escúchala: N53.
+
+### Resuelto en la v0.63
+
+- **La música del Nivel 4** («hazlo con los sonidos de LMMS, empieza por el nivel 4»): la marcha del nivel y el
+  tema del Juez, con sus proyectos de LMMS en `Musica/Nivel4` y su OGG en `Assets/Audio/Musica`. Ya suenan: la
+  marcha en el campo, callada en las memorias, y el órgano en la plaza. Escúchala: N53.
+
+### Resuelto en la v0.62
+
+- **N52, lo que faltaba de la segunda tanda del Mundo 4** («ya están todas las imágenes que me solicitaste:
+  termina la fase E y F»): limpio y montado. La salida es la puerta de la iglesia (se abre como las de los
+  otros mundos), la plaza se cierra con la verja de cadenas y los checkpoints son la bandera blanca; la salida
+  de la Culpa tiene sus dos planos. El Juez estrena su onda en «La sentencia» y sus dos cinemáticas repetidas,
+  y el Artillero, el aviso del culatazo y el abrigo vacío. Lo que cambió al montarlo, en la sección 10 de
+  `Nivel4_Diseno.md`.
+- **El daño de Kael** («en Imágenes Kael ya está la de recibir daño»): su clip, en el retroceso de cada golpe.
+- **El escudo de Kael** (la Defensa Reforzada): se ve al recargarse y al parar un golpe.
+
+### Resuelto en la v0.61
+
+- **E9, F, G y H de la segunda tanda del Mundo 4** («limpia e implementa todas las imágenes nuevas»):
+  limpios y montados. Las memorias llevan su dibujo (el brillo late y se va al recordarlas); en la plaza,
+  cada una espera sobre su losa; la pared del Juez proyecta sus imágenes; el Nivel 4 tiene su fondo, de día;
+  y la presentación y la derrota del Juez y las cuatro memorias son cinemáticas con sus planos. Lo que
+  cambió al montarlo, en la sección 10 de `Nivel4_Diseno.md`. `PresentacionJuez2` y `DerrotaJuez1` se
+  repiten (N52). `Puerta1` está limpia y se monta con las otras tres.
+
+### Resuelto en la v0.60
+
+- **E1 a E8 de la segunda tanda del Mundo 4** («ve adaptando las imágenes que ya están descargadas»):
+  limpios y montados. La escena del Nivel 4 lleva su tileset, sus props y su atrezo; las coberturas, su
+  dibujo; el barril y la mina, los suyos (la mecha parpadea; la mina, con Kael cerca); el río, su agua; las
+  alambradas, la suya, y el campanario es el de su dibujo. Lo que cambió al montarlo (el balcón, el arco,
+  la torre y los Artilleros del balcón), en la sección 10 de `Nivel4_Diseno.md`.
+
+### Resuelto en la v0.59
+
+- **N49, la primera tanda del Mundo 4** («ya están todas las imágenes en su carpeta… limpia las imágenes e
+  impleméntalas»): recibida, limpia y montada. Los enemigos y el Juez llevan su arte en el Nivel 4; sus
+  ataques, su dibujo; el barril y la mina estallan con la explosión dibujada. Lo que cambió al montarlo
+  (el cañón, los sacos y a dónde apunta el Artillero; el fragmento del Juez, aparte), en la sección 10 de
+  `Nivel4_Diseno.md`. La placa salió bien pidiéndola desde su base (`Placa/Bases/Placa_base.png`).
+- **Los prompts de la segunda tanda** («dame los prompts para la fase F que no estaban en el archivo»):
+  en `Prompts_Mundo4.md`, apartados E a L. Generarlos es N52.
+
+### Resuelto en la v0.58
+
+- **N48, el diseño del Mundo 4** («me gusta el diseño que se le dio al mundo; empecemos ahora sí lo
+  más que se pueda de la fase A a la D mientras genero las imágenes»): aprobado con sus dieciséis
+  decisiones y montado sin arte en la rama nueva `nivel4-recorrido`, fases A a D: el recorrido, los
+  barriles, la mina, las memorias y sus consecuencias, el indicador de la Invisibilidad, el Penitente,
+  el Artillero, el Verdugo y el Juez Silente. Lo que cambió al montarlo, en la sección 10 de
+  `Nivel4_Diseno.md`; jugarlo es N51.
+- **El paso 2 del Penitente** («al adjuntarle las dos imágenes está realizando el mismo I1 que dio
+  para la imagen madre»): cada fotograma se pide ahora con una sola imagen, su base, y el diseño
+  descrito con palabras (`Prompts_Mundo4.md`, A1).
+
+### Resuelto en la v0.57
+
+- **N50, la ciénaga del Mundo 3** («por el momento lo apruebo; espero verificaciones del otro tester,
+  pero aun así ya te añadí las imágenes para que las implementes»): limpia, montada y probada, en la
+  rama `nivel3-recorrido`. Queda abierta para lo que diga el otro tester.
+- **El Mundo 4 crece con el río** («agranda también el nivel 4 añadiendo también alguna parte
+  acuática para completar el diseño y seguir implementando las mecánicas en cada mundo»): el puente
+  volado se cruza por debajo con el Dash Acuático, entre alambradas sumergidas y una mina. Con él, el
+  Mundo 4 usa las tres habilidades de antes. Son las decisiones 14 a 16 de N48.
+
+### Resuelto en la v0.56
+
+- **Las habilidades que Kael va ganando se usan en los mundos que siguen** («en el mundo 3 también
+  apliquemos las mecánicas que Kael ha ido obteniendo, como el dash acuático… en el mundo 4, mira
+  cómo aplicar esa invisibilidad»). Dos propuestas, por aprobar:
+  - **Mundo 3, la ciénaga** (N50): marañas bajo el agua que solo cruza el Dash Acuático.
+  - **Mundo 4, la tierra de nadie y lo que trae la Invisibilidad** (N48, decisiones 11 a 13): un
+    campo sin cobertura que se cruza invisible, para recordar hay que dejarse ver, y el Verdugo y el
+    Juez que buscan a Kael donde lo vieron por última vez.
+
+### Resuelto en la v0.55
+
+- **Empieza el Mundo 4** («empecemos por el nivel 4»), como el Mundo 3: su propuesta (N48), con el
+  recorrido, las mecánicas, los enemigos (el Penitente es el Eco de la Culpa) y el Juez Silente, y
+  los prompts de sus enemigos y su jefe (N49). Está en la rama del Mundo 3 hasta que lo apruebes.
+
+### Resuelto en la v0.54
+
+- **N47** («las decisiones están bien»): se quedan los tamaños, los árboles del claro, el atrezo,
+  las puertas (con la salida en x 135,5) y dónde va el texto de las cinemáticas.
+- **N46** («el nivel por el momento se siente bien»), con lo único que viste: **el recuadro verde**
+  que se veía en el aviso y en el golpe del Espectro del Pavor. Era su zona de daño, que se pintaba
+  como en la fase D, sin arte; con su dibujo ya no se pinta. Y **la gema que deja al caer brilla
+  más** («no se visualiza mucho»): una luz casi blanca que late la enciende sobre el montón de hojas.
+- **N45** («la nueva imagen ya está en la posición que decías»): `DerrotaEspectro2` repetida, sin
+  el jefe y con la gema violeta. Limpia y montada en la derrota.
+
+### Resuelto en la v0.53
+
+- **Mundo 3, cierre de la fase E y fase F** («ya están todas las imágenes… termina la fase e y
+  comienza la fase F»), en la rama `nivel3-recorrido`: los helechos del fondo, la puerta del árbol,
+  la verja de raíces, la lámpara de trinchera de los checkpoints, la presentación y la derrota del
+  Espectro del Pavor y la salida del Miedo. Las dos cosas que no cuadraban te las pregunté y
+  elegiste: borrar las nubes que traía el primer plano de abajo, y montar `DerrotaEspectro2` tal
+  como llegó para repetirlo (N45). Detalle en el CHANGELOG y en `Nivel3_Diseno.md` («Lo que cambió
+  al montarlo (fase F)»).
+- **El Espectro, al tamaño y al ritmo de los Ecos** («recuerda el tamaño y velocidad de ataque del
+  enemigo común»): escala 1,8 × 1,5 y ataque a 1,6× con 0,45 s de descanso, como los Ecos del
+  Nivel 1 y los Lamentos (N37). Lo pedía el diseño aprobado. Su aviso pasa de 0,5 a 0,31 s; si al
+  jugarlo no se le ve venir, se le puede devolver el aviso largo (N46).
+
+### Resuelto en la v0.52
+
+- **Mundo 3, fase E** («comienza con la fase E»), en la rama `nivel3-recorrido`, sobre el commit de
+  la fase D: el arte del Mundo 3 que ya estaba generado (todo hasta el primer plano de arriba del
+  fondo). Las tres cosas que no cuadraban te las pregunté y elegiste: voltear R1-R3 del Espectro y
+  dejar fuera su D3; borrar la copia borrosa de ocho fotogramas del Pavor; y dejar fuera Hoja2.
+  Detalle en el CHANGELOG, en `Nivel3_Diseno.md` («Lo que cambió al montarlo (fase E)») y en
+  `Tesis/Imagenes/limpios/Mundo3/LEEME.md`.
 
 ### Resuelto en la v0.51
 
@@ -659,7 +830,8 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **Plataforma:** el proyecto quedó en **Unity 6000.6.3f1**, la versión instalada en el PC nuevo. Se actualizó en un commit aparte.
 - **El jugador ya existe** (Fase 3): prefab `Assets/Prefabs/Player.prefab`, escena de prueba `Assets/Scenes/Pruebas/PruebaJugador.unity` y FSM completa. Los huecos de arte del jugador quedan concretados en el apartado B3.
 - **Git** está instalado en este PC. Los dos repositorios tienen la identidad de los commits anteriores y finales de línea LF.
-- **Input:** nueva acción `Ability` (Q o botón RB) y Ctrl izquierdo como segunda tecla de agacharse.
+- **Input:** nueva acción `Ability` (Q o botón RB) y Ctrl izquierdo como segunda tecla de agacharse. *(v0.68: agacharse
+  es S, y Ctrl izquierdo camina.)*
 - **Escena `Nivel1`:** tiene 2 tiles pintados y el Tilemap todavía no colisiona. Cuando la pintes, usa *Fragmentum → Jugador → Preparar tilemap seleccionado como suelo*.
 
 ## Revisión 0.2: qué cambió respecto de la v0.1
@@ -747,7 +919,7 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 
 | Cinemática (asset) | Dónde suena | Falta | Prioridad |
 |---|---|---|---|
-| `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | ✔ 12 planos y guion (80 s). Falta, opcional, la música o el sonido (campo `musica` del asset, o `audio` de cada plano) | P2 |
+| `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | ✔ 12 planos y guion (80 s). ✔ Su música (v0.64): presenta el tema de Kael. Faltan, opcionales, los efectos de sonido de cada plano (`audio`) | P2 |
 | `Cinematica_Jefe_Ira` (~9,6 s, con sus planos y a escala entera) | Al entrar en la arena de la Centinela, antes del combate (una vez por carga del nivel) | ✔ Planos `CinematicaJefe1` y `CinematicaJefe2` y su guion «El que ya estaba aquí» | — |
 | `Cinematica_Derrota_Ira` (a escala entera) | Cuando la Centinela termina de caer, antes de recoger el fragmento | ✔ `CinematicaFinalLvl1` y `CinematicaFinalLvl2`, retocada (v0.34) | — |
 | `Cinematica_Jefe_Tristeza`, `_Miedo`, `_Culpa` | Al entrar en la arena de cada jefe | ✔ Guion (nombre, mundo y la línea del jefe). Imágenes opcionales | P2 |
@@ -813,14 +985,14 @@ entrada «Arte de Kael» (y las del dash y de agacharse y morir).
 | Salto / caída / doble salto | `JUMP`, `FALL`, `DOUBLE_JUMP` | P1 | ✔ 9 fotogramas: 6 de subida y 3 de caída (2 en bucle) |
 | Ataque básico | `ATTACK` | P1 | ✔ 7 fotogramas, estirados a la duración del golpe. Ver N13 sobre la hitbox |
 | Carga y ataque cargado (Ira) | modificador de `ATTACK` | P1 | ✔ El mismo clip, más lento, con el tinte rojizo de la carga |
-| Daño | `DAMAGED` | P1 | Sigue el clip anterior y parpadea. Falta un fotograma de golpe |
+| Daño | `DAMAGED` | P1 | ✔ 4 fotogramas (`Daño.pxo`, exportado a 7,5× y reducido a 1× sin pérdida), estirados a lo que dura el retroceso (0,3 s) |
 | Muerte | `DEAD` | P1 | ✔ 3 fotogramas a 5 fps, como en `Morir.pxo`: se queda de rodillas hasta reaparecer |
 | Dash | `DASH` | P2 | ✔ 4 fotogramas, estirados a la duración del dash (0,18 s) |
 | Wall slide / wall jump | `WALL_SLIDE`, `WALL_JUMP` | P2 | Usan Caida y Salto. Falta el de wall slide (pegado a la pared) |
 | Agacharse | `CROUCH` | P2 | ✔ 7 fotogramas: baja (1 a 3), agachado en bucle (3 y 4) y, al soltar, se levanta (5 y 6) antes del idle. Avanzar agachado usa el mismo bucle. El collider agachado mide lo que el dibujo: 1,08 u |
 | Nado (Tristeza) | modificador de movimiento `BajoElAgua` | P2 | Usa Correr, más lento en el agua |
 | Invisibilidad parcial (Miedo) | habilidad | — | Opacidad al 40 % (no necesita arte) |
-| Defensa reforzada (Culpa) | escudo de `PlayerHealth` | P2 | Sin efecto visual: falta un VFX de escudo |
+| Defensa reforzada (Culpa) | escudo de `PlayerHealth` | P2 | ✔ Su dibujo (v0.62, `EscudoDibujado`): aparece un momento al recargarse; al parar un golpe, del lado del golpe, lo para y se rompe |
 
 **Audio del jugador (todo falta, P1 con silencio como placeholder):** pasos, salto, doble salto,
 dash, espada, carga completa, ataque cargado, golpe recibido, escudo absorbe y muerte. Los eventos
@@ -859,9 +1031,10 @@ cápsulas tintadas con un color de la paleta de su mundo.
 | Tristeza | Lamento (el Eco de la Tristeza) | ✔ `Lamento` / `Enemigo_Lamento`; tres en el Nivel 2. ✔ Su pesar (v0.38): media velocidad 2 s | ✔ Arte final (v0.42): `Lamento.prefab`, 12 fotogramas y 4 clips, con el cuerpo y el controlador del Eco. A la escala de los Ecos del Nivel 1 (1,8 × 1,5) y con su golpe a 1,6× | Audio; probarlo (N37) | P1 |
 | Tristeza | Escultura Viviente, Medusas de Hielo | ✔ En el Nivel 2: `Enemigo_Escultura` con `EsculturaDormida` (1, desde la v0.39) y `MedusaHielo` (4) | ✔ Arte final (v0.42): `Escultura.prefab` (14 fotogramas, 6 clips: duerme, despierta, golpea, se encoge y se rompe) y `MedusaHielo.prefab` (6 fotogramas, 3 clips) | Audio | P1 |
 | Tristeza | La Plañidera (mini-jefe) | ✔ En el Nivel 2 (v0.39): `Enemigo_Planidera`, con `Planidera` para las esquirlas | ✔ Arte final (v0.42): `Planidera.prefab` (16 fotogramas, 8 clips) y `Planidera_Esquirla.prefab` | Audio | P1 |
-| Miedo | Espectro | ✔ `Espectro` / `Enemigo_Espectro` (detección en oscuridad) | Cápsula oscura translúcida | Que sea invisible salvo al atacar (Fase 10) | P2 |
-| Miedo | Centinela Ciego | ✔ `CentinelaCiego` / `Enemigo_CentinelaCiego` (detección por ruido) | Cápsula violeta | Tecla de caminar con teclado (N5) | P2 |
-| Culpa | Penitentes, Artilleros (+ proyectil) | ✗ | ✗ | `Proyectil` y cobertura (Fase 10) | P2 |
+| Miedo | Espectro (el Eco del Miedo) | ✔ `Espectro` / `Enemigo_Espectro` (detección en oscuridad); en el Nivel 3, dormido (v0.50) | ✔ Arte final (v0.52): `Espectro.prefab`, 11 fotogramas y 4 clips, con el cuerpo y el controlador del Eco; casi invisible, se funde | Ojos verdes al atacar (opcional); audio | P1 |
+| Miedo | Centinela Ciego | ✔ `CentinelaCiego` / `Enemigo_CentinelaCiego`; oye en un cono (v0.50) | ✔ Arte final (v0.52): `CentinelaCiego.prefab`, 13 fotogramas y 8 clips; su Animator sigue su oído | Audio | P1 |
+| Miedo | El Acechador (mini-jefe) | ✔ `Acechador` / `Enemigo_Acechador`; embiste y se estrella contra los árboles (v0.50) | ✔ Arte final (v0.52): `Acechador.prefab`, 17 fotogramas y 8 clips | Audio | P1 |
+| Culpa | Penitente (el Eco de la Culpa), Artillero y el Verdugo (mini-jefe) | ✔ En el Nivel 4 (v0.58): `Enemigo_Penitente` (el controlador de los Ecos), `Enemigo_Artillero` con `Artillero` (la ráfaga a la cabeza, la línea roja, el culatazo, los turnos del campanario) y `Enemigo_Verdugo` con `Verdugo` (hachazo, barrido, cadena, rodillas, búsqueda a ciegas) | ✔ Arte final (v0.59): `Penitente.prefab` (12 fotogramas, 4 clips, el controlador del Eco), `Artillero.prefab` (11 fotogramas, 8 clips, su bala dibujada) y `Verdugo.prefab` (18 fotogramas, 14 clips, el garfio y la cadena) | ✔ El aviso del culatazo y el abrigo vacío del Artillero (v0.62). Falta el audio | P2 |
 | Esperanza | Guardianes del Jardín (pacíficos) | ✗ | ✗ | `GardenGuardian` (Fase 10) | P2 |
 
 #### Ficha: Golem de Ceniza (para dibujarlo, N7)
@@ -924,9 +1097,9 @@ rectángulos de color: avisan translúcidos y queman casi opacos.
 | Jefe | Estado | Falta | Prioridad |
 |---|---|---|---|
 | **Centinela Ardiente** (Ira) | ✔ Completo y más difícil desde la v0.14: tres fases, espadazo en combo, onda doble, salto aplastante y erupciones; presentación al entrar en la arena del Nivel 1 | Arte integrado en la rama `centinela-arte`, pendiente de tu prueba y de fusionar: los 29 sprites, los 8 clips, su Animator, el combate por eventos del dibujo, la ceniza de D4 con el fragmento que recoge Kael y el menú *Verificar Centinela*. La onda ✔ (v0.32) y la erupción entera ✔ (v0.34) ya tienen arte. Falta: el VFX de la caída del salto y, si quieres, rehacer R2 (prompts al final de `Docs/Diseno/Prompts_Gemini.md`, N40). | P1 |
-| **Doncella del Lamento** (Tristeza) | ✔ Completa, con su arte (v0.42) y sus cinemáticas (v0.43): flota, solo se la hiere mientras llora y tiene dos fases, con olas, inundación, congelamiento y llanto. Deja su fragmento en el charco | ✔ Arte final: 27 de sus 28 fotogramas (`F4` no se usa), la ola, el aviso de la inundación, las púas y la capa congelada. El juego funde en transparente el corte de la cola. Presentación y derrota montadas con sus cuatro planos (480 × 268). Falta su sonido. | P1 |
-| **Espectro del Pavor** (Miedo) | ✔ Completo sin arte (v0.51): invisible e intangible salvo cuando destella; tajo, embestida, hojas y, desde el 50 %, tres sombras (la verdadera, con su luciérnaga dorada); su grito y la oscuridad que retrocede al vencerlo. Con su verificador | Su arte (N45: `Prompts_Mundo3.md`, apartados B y C) y sus cinemáticas de presentación y derrota (fase F). | P1 |
-| **Juez Silente** (Culpa) | Esqueleto: inmune salvo en la ventana, que abre `ActivarMemoriaCorrecta()` | Proyectar las memorias y conectarlas (`MemoryObject`, Fase 10); todo el arte. | P2 |
+| **Doncella del Lamento** (Tristeza) | ✔ Completa, con su arte (v0.42) y sus cinemáticas (v0.43): flota, solo se la hiere mientras llora y tiene dos fases, con olas, inundación, congelamiento y llanto. Deja su fragmento en el charco | ✔ Arte final: 27 de sus 28 fotogramas (`F4` no se usa), la ola, el aviso de la inundación, las púas y la capa congelada. El juego funde en transparente el corte de la cola. Presentación y derrota montadas con sus cuatro planos (480 × 268). ✔ Su música (v0.64): el vals de su combate y la de sus cinemáticas. Faltan sus efectos de sonido. | P1 |
+| **Espectro del Pavor** (Miedo) | ✔ Completo, con su arte (v0.52): invisible e intangible salvo cuando destella; tajo, embestida (desde la v0.67, más rápida y también por las ramas), hojas y, desde el 50 %, tres sombras (la verdadera, con su luciérnaga dorada); su grito y la oscuridad que retrocede al vencerlo. Deja el fragmento del Miedo en su montón de hojas | ✔ Arte final: 26 fotogramas y 13 clips, un gesto por momento de cada ataque; la lluvia de hojas dibujada. Presentación y derrota montadas con sus cuatro planos (480 × 268, v0.53 y v0.54). ✔ Su música (v0.64): la de su combate y la de sus cinemáticas. Faltan sus efectos de sonido. | P1 |
+| **Juez Silente** (Culpa) | ✔ Completo sin arte (v0.58): cada ataque es una memoria (la orden, el pueblo, el compañero y la carta) con su marca en la plaza; mirarla lo arrodilla 3 s; en la segunda fase, una trampa; 36 de vida si no se miró ninguna memoria; al caer, todas se iluminan. `VerificadorJuez`. ✔ Con su arte (v0.59), sus cinemáticas (v0.61; dos repetidas en la v0.62), la pared con las imágenes de las memorias y la onda de la sentencia (v0.62) | Su música ✔ (v0.63): el órgano y el bajo. Faltan sus efectos de sonido. | P2 |
 | **El Verdadero Soldado** (Final) | Esqueleto: tres fases; no cae sin `CompletarIntegracion()` | Combate espejo, secciones de cada mundo y el plataformeo final (Fase 10); todo el arte (el concepto **no está** en el proyecto). | P2 |
 
 #### Ficha: Centinela Ardiente (para dibujarla)
@@ -997,10 +1170,10 @@ escena, en ese orden. Un nivel sin escena aparece «en construcción» en el sel
 |---|---|---|---|---|
 | `Menu_Inicial` | ✔ generada | ✔ (0) | Fondo y logo (hoy, texto sobre color liso) | P3 |
 | `Niveles` (selector) | ✔ generada | ✔ (1) | Íconos por mundo (B9) | P3 |
-| `Nivel1` (Ira) | ✔ Montada con su recorrido de diseño (v0.32, `DisenoNivel1`), pintada con el tileset: 10 Ecos y el Golem, las mecánicas, la arena de 25 × 15 con la Centinela y, desde la v0.45, la forja (x 55 a 100), tres checkpoints (x 43, 57,5 y 94,5) y sus puertas, verja y braseros. | ✔ (2) | ✔ Probada por ti (v0.34). Falta que juegues la forja (N42). | P1 |
-| `Nivel2` (Tristeza) | ✔ Montada con su recorrido de diseño (v0.36, `DisenoNivel2`), en bloques de color: agua, hielo, 3 Lamentos, 2 checkpoints y la arena de 25 × 15. ✔ Sus mecánicas (v0.37): tapón rompible, placas flotantes, oxígeno, velo, ecos de intentos y eco de memoria. ✔ Sus enemigos (v0.38 y v0.39): Lamentos que pesan, una Escultura dormida, Medusas y la Plañidera, el mini-jefe. ✔ Su jefe (v0.41): la Doncella, con las tres franjas de la arena que inunda y congela. | ✔ (3) | ✔ Con su arte y sus cinemáticas (v0.42 y v0.43) y probada por ti (v0.44: aire, tapón, plaza, muralla y esquirlas). Probada otra vez por ti (N39). Desde la v0.45 tiene el canal (x 74 a 104) y sus puertas, verja y faroles; falta que juegues el canal (N42) y el sonido. | P1 |
-| `Nivel3` (Miedo) | ✔ Montada con su recorrido de diseño (v0.47, `DisenoNivel3`), sus mecánicas (v0.48), sus enemigos (v0.50) y su jefe (v0.51), en bloques de color: la linde con el barranco, la trinchera (CP1, con el eco de memoria), la bifurcación con las copas y la hondonada que acaba en un callejón de raíces que no agarran, 6 Espectros dormidos, 3 Centinelas Ciegos, el Acechador entre los tres árboles del claro, 3 checkpoints y la arena de 25 × 15 con el Espectro del Pavor (sus cuatro ataques y sus sombras). A oscuras por tramos, con la luz de Kael, 4 antorchas, 5 cepos, 3 ramas podridas que ceden y 4 cintas. | ✔ (4) | El arte (N45), las cinemáticas y las puertas (fases E y F). | P1 |
-| Nivel 4 (Culpa) | ✗ | ✗ | idem | P2 |
+| `Nivel1` (Ira) | ✔ Montada con su recorrido de diseño (v0.32, `DisenoNivel1`), pintada con el tileset: 10 Ecos y el Golem, las mecánicas, la arena de 25 × 15 con la Centinela y, desde la v0.45, la forja (x 55 a 100), tres checkpoints (x 43, 57,5 y 94,5) y sus puertas, verja y braseros. | ✔ (2) | ✔ Probada por ti (v0.34). Falta que juegues la forja (N42). ✔ Su música (v0.64, N53); faltan los efectos de sonido. | P1 |
+| `Nivel2` (Tristeza) | ✔ Montada con su recorrido de diseño (v0.36, `DisenoNivel2`), en bloques de color: agua, hielo, 3 Lamentos, 2 checkpoints y la arena de 25 × 15. ✔ Sus mecánicas (v0.37): tapón rompible, placas flotantes, oxígeno, velo, ecos de intentos y eco de memoria. ✔ Sus enemigos (v0.38 y v0.39): Lamentos que pesan, una Escultura dormida, Medusas y la Plañidera, el mini-jefe. ✔ Su jefe (v0.41): la Doncella, con las tres franjas de la arena que inunda y congela. | ✔ (3) | ✔ Con su arte y sus cinemáticas (v0.42 y v0.43) y probada por ti (v0.44: aire, tapón, plaza, muralla y esquirlas). Probada otra vez por ti (N39). Desde la v0.45 tiene el canal (x 74 a 104) y sus puertas, verja y faroles; falta que juegues el canal (N42). ✔ Su música (v0.64, N53); faltan los efectos de sonido. | P1 |
+| `Nivel3` (Miedo) | ✔ Montada con su recorrido de diseño (v0.47, `DisenoNivel3`), sus mecánicas (v0.48), sus enemigos (v0.50), su jefe (v0.51), su arte (v0.52) y sus puertas y cinemáticas (v0.53), con el tileset del bosque, su atrezo y su fondo: la linde con el barranco, la trinchera (CP1, con el eco de memoria), la bifurcación con las copas y la hondonada que acaba en un callejón de raíces que no agarran, 6 Espectros dormidos, 3 Centinelas Ciegos, el Acechador entre los tres árboles del claro, 3 checkpoints y la arena de 25 × 15 con el Espectro del Pavor (sus cuatro ataques y sus sombras). A oscuras por tramos, con la luz de Kael, 4 antorchas, 5 cepos, 3 ramas podridas que ceden y 4 cintas. | ✔ (4) | Probada por ti (v0.54: «por el momento se siente bien»). ✔ Su música (v0.64, N53) y el golpe de cuerdas de la antorcha; faltan los efectos de sonido. | P1 |
+| `Nivel4` (Culpa) | ✔ Montada sin arte (v0.58, `DisenoNivel4`, fases A a D): el campo arrasado, la tierra de nadie y el campanario, los tejados y la calle, el río bajo el puente volado, el patio del Verdugo y la plaza del Juez, con 9 barriles, una mina, 4 memorias, 11 Penitentes, 5 Artilleros, el Verdugo y 3 checkpoints. | ✔ (5) | Vestida con todo su arte (v0.59 a v0.62): enemigos, jefe, escenario, memorias, fondo, cinemáticas y puertas. Con su música (v0.63, N53). Falta que lo juegues (N51) y los efectos de sonido. | P2 |
 | Nivel 5 (Esperanza) | ✗ | ✗ | idem | P2 |
 | Nivel final | ✗ | ✗ | idem | P2 |
 
@@ -1022,19 +1195,25 @@ de la `LevelDatabase` y ejecuta *Fragmentum → Niveles → Preparar la escena d
 ### B8. Audio — `LevelData.musica`, `AudioManager` *(propuesto)*
 
 **Estado en la v2 (Fase 6).** El `LevelManager` toca en bucle el clip del campo `musica` del
-`LevelData`. Si el campo está vacío, avisa por consola y el nivel suena en silencio. Hoy no hay
-ningún clip importado en la v2.
+`LevelData`. Si el campo está vacío, avisa por consola y el nivel suena en silencio. **Desde la
+v0.63** la música se hace con LMMS (`Musica/LEEME.md`): sus proyectos en `Musica/`, y
+`Herramientas/exportar_musica.py` los pasa a un OGG en `Assets/Audio/Musica` que se repite sin
+costura. En el juego calla en las cinemáticas y cambia a la del jefe fundiendo (`MusicaDelNivel`).
 
 | Asset | Existe | Prioridad |
 |---|---|---|
-| Música del menú | En la v1: `Music/MainMenu.mp3`. Falta importarla en la v2 y darle un `AudioSource` al menú. | P3 |
-| Música del Nivel 1 | En la v1: `Music/level1.mp3`. Para usarla, impórtala y arrástrala al campo `musica` de `Assets/Data/Niveles/L1_Ira`. **Verificar** si cumple el Anexo A (industrial, ~160 BPM). | P1 |
-| Música de los niveles 2, 3, 4 y 5 | ✗ | P2 |
-| Música del final en 3 fases | ✗ | P2 |
-| Temas de jefe (Centinela, Doncella, Espectro, Juez) | ✗. La arena ya cambia a `LevelData.musicaJefe` al empezar el combate y vuelve a `musica` al terminar: basta con asignar el clip. | Centinela P1, resto P2 |
-| Stinger de antorcha (Miedo) | ✗ | P2 |
-| Música del selector de niveles | ✗ (la escena no tiene `AudioSource`) | P3 |
-| **Todos los SFX**: salto, doble salto, dash, ataque, ataque cargado, daño, muerte, moneda, poción, caja, checkpoint, clics de UI, golpes a enemigos, muerte de enemigo | ✗ **No existe ni un solo efecto de sonido** | P1 (silencio como placeholder) |
+| Música del menú | ✔ (v0.65) `Menu.ogg`: el tema de Kael, tranquilo (Re menor, 60 BPM, 96 s). La toca `MusicaMenu`, con los sistemas. La de la v1 (`Music/MainMenu.mp3`) no se usa | — |
+| Música del Nivel 1 | ✔ (v0.64) `Nivel1_Ira.ogg`: percusión industrial y un sinte distorsionado, sin melodía (Mi frigio, 160 BPM, 96 s). La de la v1 (`Music/level1.mp3`) no se usa | — |
+| Música del Nivel 4 | ✔ (v0.63) `Nivel4_Marcha.ogg`: la marcha militar lenta y distorsionada del Anexo A (Re menor, 64 BPM, 120 s); calla en las memorias. Escúchala: N53 | — |
+| Música de los niveles 2 y 3 | ✔ (v0.64) `Nivel2_Tristeza.ogg` (la caja de música bajo el agua y el piano, Si menor, 70 BPM, 82 s) y `Nivel3_Miedo.ogg` (casi silencio y ruidos del bosque, 192 s, a -30 dB) | — |
+| Música del Nivel 5 | ✗. Cuando exista el nivel; se hace como las otras | P2 |
+| Música de las cinemáticas | ✔ (v0.64) las 13 de los mundos 1 a 4 (`Assets/Audio/Musica/Cinematicas`): la inicial, y en cada mundo la presentación del jefe, su derrota y el cierre. Las memorias de la Culpa, en silencio (Anexo A). Faltan las del Jardín y el final | — |
+| Música del final en 3 fases | ✗. Su tema principal ya existe: el de Kael (`componer_cinematicas.py`, `TEMA_KAEL`) | P2 |
+| Temas de jefe (Centinela, Doncella, Espectro, Juez) | ✔ Los cuatro: la Centinela (`Nivel1_Centinela.ogg`, v0.64), la Doncella (un vals, `Nivel2_Doncella.ogg`, v0.64), el Espectro (`Nivel3_Pavor.ogg`, v0.64) y el Juez (`Nivel4_Juez.ogg`, v0.63). La arena cambia a `LevelData.musicaJefe` al empezar el combate y vuelve a `musica` al terminar | — |
+| Stinger de antorcha (Miedo) | ✔ (v0.64) `Golpes/Antorcha.ogg`: un golpe de cuerdas en Do# menor, 3 s. Lo toca la `Antorcha` al encenderse | — |
+| Música del selector de niveles | ✔ (v0.65) La misma que la del menú, sin cortarse al pasar de uno a otro | — |
+| SFX de Kael: salto, doble salto, dash, ataque, ataque cargado, daño | ✔ (v0.66) Con LMMS (`Sonidos/Kael`, `Sonidos/LEEME.md`). Los toca `SonidosKael`, en el prefab del jugador. Falta que los escuches (N54) | — |
+| **Los demás SFX**: muerte, moneda, poción, caja, checkpoint, clics de UI, golpes a enemigos, muerte de enemigo | ✗. Cuando apruebes el estilo de los de Kael (N54), igual que ellos | P1 (silencio como placeholder) |
 
 ### B9. UI
 
@@ -1051,7 +1230,7 @@ ningún clip importado en la v2.
 | Pantalla de carga / fade | `SceneLoader` | ✗ (negro sólido basta) | P3 |
 | Íconos de las 4 habilidades | `PantallaMecanicas` → `HabilidadData.icono` | ✗ La guía funciona sin ellos: cada habilidad lleva el color de su emoción. | P3 |
 | Teclas del mando en la guía de mecánicas | `EtiquetasControles` | ✗ Hoy solo teclado y ratón, como la ayuda de la pausa. Para el mando harían falta sus íconos (A, B, X, Y). | P3 |
-| Panel de opciones | `MainMenu` | ✗ **No existe**: el botón «Configuration» no hace nada | P3 |
+| Panel de opciones | `PantallaOpciones` (menú principal y pausa) | ✔ (v0.65) El volumen general y el de la música (`AjustesAudio`, en `fragmentum_ajustes.json`, aparte de la partida). ✔ (v0.66) Y el de los efectos | — |
 | Corazones y monedas | HUD | ✔ `Elementos/Corazones.png`, `coins.png`, `Animaciones/hearths.anim`, `Coin.anim` | — |
 | Logo | Menú | ✔ `Images/tituloxd.png` en la v1; falta importarlo en la v2 (hoy el título es texto) | P3 |
 | Recursos esenciales de TextMeshPro | Toda la UI | ✗ No importados: la UI usa el `Text` integrado de Unity a través de `FabricaUI`. Se importan con *Window → TextMeshPro → Import TMP Essential Resources*; después se cambia `FabricaUI` y nada más. | P3 |

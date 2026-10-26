@@ -40,4 +40,4 @@ MonoBehaviour:
   resistenciaRetroceso: 1
   deathDelay: 1.5
   spriteMiraDerecha: 1
-  tinte: {r: 0.3529412, g: 0.30588236, b: 0.43137255, a: 1}
+  tinte: {r: 1, g: 1, b: 1, a: 1}

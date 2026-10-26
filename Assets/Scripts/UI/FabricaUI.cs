@@ -274,6 +274,60 @@ namespace Fragmentum.UI
         }
 
         /// <summary>
+        /// Un deslizador fino, como las líneas de la maqueta: la barra tenue, lo lleno del color de acento y
+        /// un tirador que se ilumina al seleccionarlo. Se mueve con el ratón o, seleccionado, con ← y →.
+        /// Devuelve el deslizador; lo lleno es su <c>fillRect</c>.
+        /// </summary>
+        public static Slider Deslizador(Transform padre, string nombre, Color acento, float ancho = 420f, float alto = 44f)
+        {
+            var rect = Objeto(nombre, padre);
+            var elemento = rect.gameObject.AddComponent<LayoutElement>();
+            elemento.preferredWidth = ancho;
+            elemento.preferredHeight = alto;
+            elemento.minHeight = alto;
+
+            // Fondo invisible para que toda la franja reciba el clic.
+            rect.gameObject.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0f);
+
+            var barra = Objeto("Barra", rect).gameObject.AddComponent<Image>();
+            barra.color = new Color(1f, 1f, 1f, 0.18f);
+            barra.raycastTarget = false;
+            Franja(barra.rectTransform, 4f, 10f);
+
+            var zonaLleno = Objeto("ZonaLleno", rect);
+            Franja(zonaLleno, 4f, 10f);
+            var lleno = Objeto("Lleno", zonaLleno).gameObject.AddComponent<Image>();
+            lleno.color = acento;
+            lleno.raycastTarget = false;
+            lleno.rectTransform.sizeDelta = Vector2.zero;
+
+            var zonaTirador = Objeto("ZonaTirador", rect);
+            Estirar(zonaTirador, 10f);
+            zonaTirador.offsetMin = new Vector2(10f, 12f);
+            zonaTirador.offsetMax = new Vector2(-10f, -12f);
+            var tirador = Objeto("Tirador", zonaTirador).gameObject.AddComponent<Image>();
+            tirador.color = Color.white;
+            tirador.rectTransform.sizeDelta = new Vector2(12f, 0f);
+
+            var deslizador = rect.gameObject.AddComponent<Slider>();
+            deslizador.fillRect = lleno.rectTransform;
+            deslizador.handleRect = tirador.rectTransform;
+            deslizador.targetGraphic = tirador;
+            deslizador.direction = Slider.Direction.LeftToRight;
+            AplicarAcento(deslizador, acento);
+            return deslizador;
+        }
+
+        // Una franja horizontal de «grosor» centrada en su padre, con «margen» a los lados.
+        private static void Franja(RectTransform rect, float grosor, float margen)
+        {
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(1f, 0.5f);
+            rect.offsetMin = new Vector2(margen, -grosor * 0.5f);
+            rect.offsetMax = new Vector2(-margen, grosor * 0.5f);
+        }
+
+        /// <summary>
         /// Las cuatro esquinas en «L» que enmarcan las pantallas de la maqueta. Devuelve las
         /// ocho piezas para poder teñirlas con el acento de cada mundo.
         /// </summary>

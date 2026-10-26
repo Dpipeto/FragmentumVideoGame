@@ -13,9 +13,23 @@ namespace Fragmentum.EditorTools
     ///
     /// Antes había uno por jefes, enemigos y fondos; ahora todo se decide en un sitio. Lo que no
     /// tiene regla (Kael, la cinemática inicial) lo ajusta su constructor al regenerar.
+    ///
+    /// Y la música de <c>Assets/Audio/Musica</c>, según <see cref="MusicaNiveles.AjustarImportador"/>.
     /// </summary>
     internal sealed class ImportadorArte : AssetPostprocessor
     {
+        private void OnPreprocessAudio()
+        {
+            if (assetImporter is AudioImporter importador && assetPath.StartsWith(MusicaNiveles.Carpeta + "/"))
+            {
+                MusicaNiveles.AjustarImportador(importador, assetPath);
+            }
+            else if (assetImporter is AudioImporter efecto && assetPath.StartsWith(SonidosDelJuego.Carpeta + "/"))
+            {
+                SonidosDelJuego.AjustarImportador(efecto);
+            }
+        }
+
         private void OnPreprocessTexture()
         {
             if (!(assetImporter is TextureImporter importador))
@@ -26,6 +40,18 @@ namespace Fragmentum.EditorTools
             if (assetPath.StartsWith(ConstructorFondoMundo2.CarpetaArte + "/"))
             {
                 ConstructorFondoMundo2.AjustarImportador(importador, ConstructorFondoMundo2.CapaDeRuta(assetPath));
+                return;
+            }
+
+            if (assetPath.StartsWith(ConstructorFondoMundo3.CarpetaArte + "/"))
+            {
+                ConstructorFondoMundo2.AjustarImportador(importador, ConstructorFondoMundo3.CapaDeRuta(assetPath));
+                return;
+            }
+
+            if (assetPath.StartsWith(ConstructorFondoMundo4.CarpetaArte + "/"))
+            {
+                ConstructorFondoMundo2.AjustarImportador(importador, ConstructorFondoMundo4.CapaDeRuta(assetPath));
                 return;
             }
 

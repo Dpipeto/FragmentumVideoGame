@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!DOCTYPE lmms-project>
+<lmms-project version="1.0" creator="LMMS" creatorversion="1.2.2" type="song">
+  <head bpm="125" timesig_numerator="4" timesig_denominator="4" mastervol="100" masterpitch="0" />
+  <song>
+    <trackcontainer type="song">
+      <track name="Tajo" type="0" muted="0" solo="0">
+        <instrumenttrack vol="120" pan="0" fxch="0" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="tripleoscillator">
+            <tripleoscillator wavetype0="6" vol0="100" coarse0="0" finel0="0" finer0="0" pan0="0" phoffset0="0" stphdetun0="0" userwavefile0="" wavetype1="0" vol1="0" coarse1="0" finel1="0" finer1="0" pan1="0" phoffset1="0" stphdetun1="0" userwavefile1="" wavetype2="0" vol2="0" coarse2="0" finel2="0" finer2="0" pan2="0" phoffset2="0" stphdetun2="0" userwavefile2="" modalgo1="2" modalgo2="2" modalgo3="2" />
+          </instrument>
+          <eldata fcut="300" fres="3" ftype="2" fwet="1">
+            <elvol pdel="0" att="0.1" hold="0.0774597" dec="0.223607" sustain="0" rel="0.0632456" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0.126491" hold="0.0774597" dec="0.2" sustain="0" rel="0.0632456" amt="0.532291" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Tajo" pos="0" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="35" key="57" vol="100" pan="0" />
+        </pattern>
+      </track>
+      <track name="Peso" type="0" muted="0" solo="0">
+        <instrumenttrack vol="90" pan="0" fxch="0" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="kicker">
+            <kicker startfreq="140" endfreq="38" decay="320" dist="0.3" distend="0.1" gain="1" env="0.2" noise="0.25" click="0.4" slope="0.3" startnote="0" endnote="0" version="1" syncmode="0" decay_numerator="4" decay_denominator="4" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0.223607" sustain="0" rel="0.0632456" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Peso" pos="5" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="38" key="57" vol="100" pan="0" />
+        </pattern>
+      </track>
+      <track name="Filo" type="0" muted="0" solo="0">
+        <instrumenttrack vol="35" pan="0" fxch="0" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="sfxr">
+            <sfxr waveForm="2" version="1" att="0.0939149" hold="0.132816" sus="0" dec="0.257196" startFreq="0.629147" minFreq="0" slide="-0.25" dSlide="0" vibDepth="0" vibSpeed="0" changeAmt="0" changeSpeed="0" sqrDuty="0" sqrSweep="0" repeatSpeed="0" phaserOffset="0" phaserSweep="0" lpFilCut="1" lpFilCutSweep="0" lpFilReso="0" hpFilCut="0.2" hpFilCutSweep="0" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Filo" pos="4" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="24" key="57" vol="100" pan="0" />
+        </pattern>
+      </track>
+      <track name="Metal" type="0" muted="0" solo="0">
+        <instrumenttrack vol="40" pan="0" fxch="0" basenote="48" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="misc/metalish_dong01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0.223607" sustain="0" rel="0.1" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Metal" pos="5" len="192" steps="16" muted="0" type="1">
+          <note pos="0" len="30" key="55" vol="100" pan="0" />
+        </pattern>
+      </track>
+    </trackcontainer>
+    <fxmixer>
+      <fxchannel num="0" name="Master" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+      </fxchannel>
+    </fxmixer>
+    <timeline lp0pos="0" lp1pos="192" lpstate="0" />
+    <controllers />
+    <projectnotes>El tajo cargado de Kael: más lento y más grave que el normal, con un golpe sordo (Kicker) donde corta, el filo y el metal de la hoja.</projectnotes>
+  </song>
+</lmms-project>

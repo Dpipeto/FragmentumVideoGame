@@ -1,0 +1,1187 @@
+<?xml version="1.0"?>
+<!DOCTYPE lmms-project>
+<lmms-project version="1.0" creator="LMMS" creatorversion="1.2.2" type="song">
+  <head bpm="140" timesig_numerator="3" timesig_denominator="4" mastervol="100" masterpitch="0" />
+  <song>
+    <trackcontainer type="song">
+      <track name="Piano bajo" type="0" muted="0" solo="0">
+        <instrumenttrack vol="49" pan="0" fxch="2" basenote="36" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="instruments/piano02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Piano bajo" pos="0" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="144" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="288" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="19" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="432" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="19" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="576" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="720" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="864" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="1008" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="1152" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="1296" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="1440" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="1584" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="1728" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="1872" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="2016" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="2160" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="2304" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="2448" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="2592" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="19" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="2736" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="19" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="2880" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="3024" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="3168" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="3312" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="3456" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="3600" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="3744" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="3888" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="4032" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="4176" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="4320" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="4464" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="4608" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="4752" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="4896" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="19" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="5040" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="19" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="5184" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="5328" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="5472" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="5616" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="5760" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="5904" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="6048" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="6192" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="6336" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="6480" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="18" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="6624" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Piano bajo" pos="6768" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="44" key="23" vol="100" pan="0" />
+        </pattern>
+      </track>
+      <track name="Piano vals" type="0" muted="0" solo="0">
+        <instrumenttrack vol="26" pan="0" fxch="2" basenote="36" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="instruments/piano02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.244949" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Piano vals" pos="0" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="144" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="288" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="432" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="576" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="720" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="864" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="1008" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="1152" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="1296" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="1440" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="45" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="45" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="1584" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="45" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="45" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="1728" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="1872" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="2016" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="2160" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="2304" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="2448" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="2592" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="2736" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="2880" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="3024" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="3168" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="3312" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="3456" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="3600" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="3744" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="45" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="45" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="3888" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="45" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="45" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="4032" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="4176" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="4320" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="4464" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="4608" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="4752" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="4896" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="5040" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="5184" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="5328" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="5472" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="5616" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="5760" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="5904" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="6048" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="45" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="45" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="6192" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="45" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="45" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="6336" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="40" vol="80" pan="0" />
+          <note pos="48" len="40" key="43" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="40" vol="80" pan="0" />
+          <note pos="96" len="40" key="43" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="6480" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="37" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="46" vol="80" pan="0" />
+          <note pos="96" len="40" key="37" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="46" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="6624" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Piano vals" pos="6768" len="144" steps="16" muted="0" type="1">
+          <note pos="48" len="40" key="38" vol="80" pan="0" />
+          <note pos="48" len="40" key="42" vol="80" pan="0" />
+          <note pos="48" len="40" key="47" vol="80" pan="0" />
+          <note pos="96" len="40" key="38" vol="80" pan="0" />
+          <note pos="96" len="40" key="42" vol="80" pan="0" />
+          <note pos="96" len="40" key="47" vol="80" pan="0" />
+        </pattern>
+      </track>
+      <track name="Cuerdas lamento" type="0" muted="0" solo="0">
+        <instrumenttrack vol="123" pan="0" fxch="3" basenote="48" pitch="8" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="stringsnpads/strings01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0.223607" hold="0" dec="0" sustain="1" rel="0.4" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Cuerdas lamento" pos="0" len="2160" steps="16" muted="0" type="1">
+          <note pos="0" len="140" key="54" vol="100" pan="0" />
+          <note pos="144" len="93" key="59" vol="100" pan="0" />
+          <note pos="240" len="47" key="62" vol="100" pan="0" />
+          <note pos="288" len="93" key="61" vol="100" pan="0" />
+          <note pos="384" len="47" key="59" vol="100" pan="0" />
+          <note pos="432" len="140" key="57" vol="100" pan="0" />
+          <note pos="576" len="93" key="55" vol="100" pan="0" />
+          <note pos="672" len="47" key="59" vol="100" pan="0" />
+          <note pos="720" len="93" key="64" vol="100" pan="0" />
+          <note pos="816" len="47" key="62" vol="100" pan="0" />
+          <note pos="864" len="140" key="61" vol="100" pan="0" />
+          <note pos="1008" len="93" key="58" vol="100" pan="0" />
+          <note pos="1104" len="47" key="54" vol="100" pan="0" />
+          <note pos="1152" len="93" key="59" vol="100" pan="0" />
+          <note pos="1248" len="47" key="62" vol="100" pan="0" />
+          <note pos="1296" len="140" key="66" vol="100" pan="0" />
+          <note pos="1440" len="93" key="64" vol="100" pan="0" />
+          <note pos="1536" len="47" key="62" vol="100" pan="0" />
+          <note pos="1584" len="140" key="57" vol="100" pan="0" />
+          <note pos="1728" len="47" key="55" vol="100" pan="0" />
+          <note pos="1776" len="47" key="59" vol="100" pan="0" />
+          <note pos="1824" len="47" key="64" vol="100" pan="0" />
+          <note pos="1872" len="93" key="62" vol="100" pan="0" />
+          <note pos="1968" len="47" key="61" vol="100" pan="0" />
+          <note pos="2016" len="140" key="59" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Cuerdas lamento" pos="4608" len="2160" steps="16" muted="0" type="1">
+          <note pos="0" len="140" key="66" vol="95" pan="0" />
+          <note pos="144" len="93" key="71" vol="95" pan="0" />
+          <note pos="240" len="47" key="74" vol="95" pan="0" />
+          <note pos="288" len="93" key="73" vol="95" pan="0" />
+          <note pos="384" len="47" key="71" vol="95" pan="0" />
+          <note pos="432" len="140" key="69" vol="95" pan="0" />
+          <note pos="576" len="93" key="67" vol="95" pan="0" />
+          <note pos="672" len="47" key="71" vol="95" pan="0" />
+          <note pos="720" len="93" key="76" vol="95" pan="0" />
+          <note pos="816" len="47" key="74" vol="95" pan="0" />
+          <note pos="864" len="140" key="73" vol="95" pan="0" />
+          <note pos="1008" len="93" key="70" vol="95" pan="0" />
+          <note pos="1104" len="47" key="66" vol="95" pan="0" />
+          <note pos="1152" len="93" key="71" vol="95" pan="0" />
+          <note pos="1248" len="47" key="74" vol="95" pan="0" />
+          <note pos="1296" len="140" key="78" vol="95" pan="0" />
+          <note pos="1440" len="93" key="76" vol="95" pan="0" />
+          <note pos="1536" len="47" key="74" vol="95" pan="0" />
+          <note pos="1584" len="140" key="69" vol="95" pan="0" />
+          <note pos="1728" len="47" key="67" vol="95" pan="0" />
+          <note pos="1776" len="47" key="71" vol="95" pan="0" />
+          <note pos="1824" len="47" key="76" vol="95" pan="0" />
+          <note pos="1872" len="93" key="74" vol="95" pan="0" />
+          <note pos="1968" len="47" key="73" vol="95" pan="0" />
+          <note pos="2016" len="140" key="71" vol="95" pan="0" />
+        </pattern>
+      </track>
+      <track name="Coro" type="0" muted="0" solo="0">
+        <instrumenttrack vol="67" pan="0" fxch="4" basenote="45" pitch="8" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="stringsnpads/chorus02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0.316228" hold="0" dec="0" sustain="1" rel="0.424264" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Coro" pos="0" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="144" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="288" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="55" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="432" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="55" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="576" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="52" vol="70" pan="0" />
+          <note pos="0" len="141" key="55" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="720" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="52" vol="70" pan="0" />
+          <note pos="0" len="141" key="55" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="864" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="46" vol="70" pan="0" />
+          <note pos="0" len="141" key="49" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="1008" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="46" vol="70" pan="0" />
+          <note pos="0" len="141" key="49" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="1152" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="1296" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="1440" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="45" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="1584" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="45" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="1728" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="52" vol="70" pan="0" />
+          <note pos="0" len="141" key="55" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="1872" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="46" vol="70" pan="0" />
+          <note pos="0" len="141" key="49" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="2016" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="2160" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="70" pan="0" />
+          <note pos="0" len="141" key="50" vol="70" pan="0" />
+          <note pos="0" len="141" key="54" vol="70" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="2304" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="2448" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="2592" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="55" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="2736" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="55" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="2880" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="52" vol="80" pan="0" />
+          <note pos="0" len="141" key="55" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="3024" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="52" vol="80" pan="0" />
+          <note pos="0" len="141" key="55" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="3168" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="46" vol="80" pan="0" />
+          <note pos="0" len="141" key="49" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="3312" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="46" vol="80" pan="0" />
+          <note pos="0" len="141" key="49" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="3456" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="3600" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="3744" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="45" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="3888" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="45" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="4032" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="52" vol="80" pan="0" />
+          <note pos="0" len="141" key="55" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="4176" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="46" vol="80" pan="0" />
+          <note pos="0" len="141" key="49" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="4320" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+        <pattern name="Coro" pos="4464" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="141" key="47" vol="80" pan="0" />
+          <note pos="0" len="141" key="50" vol="80" pan="0" />
+          <note pos="0" len="141" key="54" vol="80" pan="0" />
+        </pattern>
+      </track>
+      <track name="Coro lamento" type="0" muted="0" solo="0">
+        <instrumenttrack vol="152" pan="0" fxch="4" basenote="45" pitch="8" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="stringsnpads/chorus02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0.2" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Coro lamento" pos="4608" len="2160" steps="16" muted="0" type="1">
+          <note pos="0" len="140" key="54" vol="90" pan="0" />
+          <note pos="144" len="93" key="59" vol="90" pan="0" />
+          <note pos="240" len="47" key="62" vol="90" pan="0" />
+          <note pos="288" len="93" key="61" vol="90" pan="0" />
+          <note pos="384" len="47" key="59" vol="90" pan="0" />
+          <note pos="432" len="140" key="57" vol="90" pan="0" />
+          <note pos="576" len="93" key="55" vol="90" pan="0" />
+          <note pos="672" len="47" key="59" vol="90" pan="0" />
+          <note pos="720" len="93" key="64" vol="90" pan="0" />
+          <note pos="816" len="47" key="62" vol="90" pan="0" />
+          <note pos="864" len="140" key="61" vol="90" pan="0" />
+          <note pos="1008" len="93" key="58" vol="90" pan="0" />
+          <note pos="1104" len="47" key="54" vol="90" pan="0" />
+          <note pos="1152" len="93" key="59" vol="90" pan="0" />
+          <note pos="1248" len="47" key="62" vol="90" pan="0" />
+          <note pos="1296" len="140" key="66" vol="90" pan="0" />
+          <note pos="1440" len="93" key="64" vol="90" pan="0" />
+          <note pos="1536" len="47" key="62" vol="90" pan="0" />
+          <note pos="1584" len="140" key="57" vol="90" pan="0" />
+          <note pos="1728" len="47" key="55" vol="90" pan="0" />
+          <note pos="1776" len="47" key="59" vol="90" pan="0" />
+          <note pos="1824" len="47" key="64" vol="90" pan="0" />
+          <note pos="1872" len="93" key="62" vol="90" pan="0" />
+          <note pos="1968" len="47" key="61" vol="90" pan="0" />
+          <note pos="2016" len="140" key="59" vol="90" pan="0" />
+        </pattern>
+      </track>
+      <track name="Caja de musica" type="0" muted="0" solo="0">
+        <instrumenttrack vol="102" pan="0" fxch="5" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="tripleoscillator">
+            <tripleoscillator wavetype0="0" vol0="60" coarse0="0" finel0="0" finer0="0" pan0="0" phoffset0="0" stphdetun0="0" userwavefile0="" wavetype1="0" vol1="18" coarse1="24" finel1="4" finer1="4" pan1="0" phoffset1="0" stphdetun1="0" userwavefile1="" wavetype2="0" vol2="8" coarse2="29" finel2="-7" finer2="-7" pan2="0" phoffset2="0" stphdetun2="0" userwavefile2="" modalgo1="2" modalgo2="2" modalgo3="2" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0.489898" sustain="0" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Caja de musica" pos="2304" len="2160" steps="16" muted="0" type="1">
+          <note pos="0" len="140" key="66" vol="95" pan="0" />
+          <note pos="144" len="93" key="71" vol="95" pan="0" />
+          <note pos="240" len="47" key="74" vol="95" pan="0" />
+          <note pos="288" len="93" key="73" vol="95" pan="0" />
+          <note pos="384" len="47" key="71" vol="95" pan="0" />
+          <note pos="432" len="140" key="69" vol="95" pan="0" />
+          <note pos="576" len="93" key="67" vol="95" pan="0" />
+          <note pos="672" len="47" key="71" vol="95" pan="0" />
+          <note pos="720" len="93" key="76" vol="95" pan="0" />
+          <note pos="816" len="47" key="74" vol="95" pan="0" />
+          <note pos="864" len="140" key="73" vol="95" pan="0" />
+          <note pos="1008" len="93" key="70" vol="95" pan="0" />
+          <note pos="1104" len="47" key="66" vol="95" pan="0" />
+          <note pos="1152" len="93" key="71" vol="95" pan="0" />
+          <note pos="1248" len="47" key="74" vol="95" pan="0" />
+          <note pos="1296" len="140" key="78" vol="95" pan="0" />
+          <note pos="1440" len="93" key="76" vol="95" pan="0" />
+          <note pos="1536" len="47" key="74" vol="95" pan="0" />
+          <note pos="1584" len="140" key="69" vol="95" pan="0" />
+          <note pos="1728" len="47" key="67" vol="95" pan="0" />
+          <note pos="1776" len="47" key="71" vol="95" pan="0" />
+          <note pos="1824" len="47" key="76" vol="95" pan="0" />
+          <note pos="1872" len="93" key="74" vol="95" pan="0" />
+          <note pos="1968" len="47" key="73" vol="95" pan="0" />
+          <note pos="2016" len="140" key="71" vol="95" pan="0" />
+        </pattern>
+      </track>
+      <track name="Timbal" type="0" muted="0" solo="0">
+        <instrumenttrack vol="132" pan="0" fxch="6" basenote="31" pitch="-28" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="drums/tom_low01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.244949" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Timbal" pos="2304" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="2592" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="31" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="2880" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="3168" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="30" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="3456" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="3744" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="4032" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="4320" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="4608" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="4752" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="4896" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="31" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="5040" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="31" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="5184" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="5328" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="5472" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="30" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="5616" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="30" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="5760" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="5904" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="6048" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="6192" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="26" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="6336" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="28" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="6480" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="30" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="6624" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="6768" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="48" key="35" vol="100" pan="0" />
+        </pattern>
+        <pattern name="Timbal" pos="6768" len="144" steps="16" muted="0" type="1">
+          <note pos="0" len="12" key="30" vol="60" pan="0" />
+          <note pos="12" len="12" key="30" vol="65" pan="0" />
+          <note pos="24" len="12" key="30" vol="70" pan="0" />
+          <note pos="36" len="12" key="30" vol="75" pan="0" />
+          <note pos="48" len="12" key="30" vol="80" pan="0" />
+          <note pos="60" len="12" key="30" vol="85" pan="0" />
+          <note pos="72" len="12" key="30" vol="90" pan="0" />
+          <note pos="84" len="12" key="30" vol="95" pan="0" />
+          <note pos="96" len="12" key="30" vol="100" pan="0" />
+          <note pos="108" len="12" key="30" vol="105" pan="0" />
+          <note pos="120" len="12" key="30" vol="110" pan="0" />
+          <note pos="132" len="12" key="30" vol="115" pan="0" />
+        </pattern>
+      </track>
+      <track name="Hielo" type="0" muted="0" solo="0">
+        <instrumenttrack vol="71" pan="30" fxch="6" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="effects/wind_chimes01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.4" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Hielo" pos="0" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="45" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Hielo" pos="1152" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="45" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Hielo" pos="2304" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="45" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Hielo" pos="3456" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="45" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Hielo" pos="4608" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="45" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Hielo" pos="5760" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="45" vol="90" pan="0" />
+        </pattern>
+      </track>
+      <track name="Agua" type="0" muted="0" solo="0">
+        <instrumenttrack vol="130" pan="0" fxch="7" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="tripleoscillator">
+            <tripleoscillator wavetype0="6" vol0="50" coarse0="0" finel0="0" finer0="0" pan0="0" phoffset0="0" stphdetun0="0" userwavefile0="" wavetype1="0" vol1="0" coarse1="0" finel1="0" finer1="0" pan1="0" phoffset1="0" stphdetun1="0" userwavefile1="" wavetype2="0" vol2="0" coarse2="0" finel2="0" finer2="0" pan2="0" phoffset2="0" stphdetun2="0" userwavefile2="" modalgo1="2" modalgo2="2" modalgo3="2" />
+          </instrument>
+          <eldata fcut="380" fres="0.6" ftype="0" fwet="1">
+            <elvol pdel="0" att="0.632456" hold="0" dec="0" sustain="1" rel="0.632456" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Agua" pos="0" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="288" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="576" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="864" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="1152" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="1440" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="1728" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="2016" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="2304" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="2592" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="2880" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="3168" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="3456" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="3744" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="4032" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="4320" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="4608" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="4896" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="5184" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="5472" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="5760" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="6048" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="6336" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Agua" pos="6624" len="288" steps="16" muted="0" type="1">
+          <note pos="0" len="288" key="57" vol="90" pan="0" />
+        </pattern>
+      </track>
+    </trackcontainer>
+    <fxmixer>
+      <fxchannel num="0" name="Master" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+      </fxchannel>
+      <fxchannel num="1" name="Reverb" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="1" enabled="1">
+          <effect name="reverbsc" on="1" wet="1" gate="0" autoquit="8000" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <ReverbSCControls input_gain="0" size="0.95" color="5000" output_gain="0" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+      </fxchannel>
+      <fxchannel num="2" name="Piano" volume="0.7" muted="0" soloed="0">
+        <fxchain numofeffects="1" enabled="1">
+          <effect name="dualfilter" on="1" wet="1" gate="0" autoquit="1" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <DualFilterControls enabled1="1" filter1="0" cut1="4500" res1="0.6" gain1="100" enabled2="0" filter2="0" cut2="14000" res2="0.5" gain2="100" mix="-1" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.5" />
+      </fxchannel>
+      <fxchannel num="3" name="Cuerdas" volume="0.7" muted="0" soloed="0">
+        <fxchain numofeffects="1" enabled="1">
+          <effect name="dualfilter" on="1" wet="1" gate="0" autoquit="1" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <DualFilterControls enabled1="1" filter1="0" cut1="4000" res1="0.6" gain1="100" enabled2="0" filter2="0" cut2="14000" res2="0.5" gain2="100" mix="-1" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.55" />
+      </fxchannel>
+      <fxchannel num="4" name="Coro" volume="0.5" muted="0" soloed="0">
+        <fxchain numofeffects="1" enabled="1">
+          <effect name="dualfilter" on="1" wet="1" gate="0" autoquit="1" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <DualFilterControls enabled1="1" filter1="0" cut1="3500" res1="0.6" gain1="100" enabled2="0" filter2="0" cut2="14000" res2="0.5" gain2="100" mix="-1" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.6" />
+      </fxchannel>
+      <fxchannel num="5" name="Caja de musica" volume="0.6" muted="0" soloed="0">
+        <fxchain numofeffects="2" enabled="1">
+          <effect name="delay" on="1" wet="1" gate="0" autoquit="8000" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <Delay DelayTimeSamples="0.01" FeebackAmount="0" LfoFrequency="0.45" LfoAmount="0.004" OutGain="0" syncmode="0" DelayTimeSamples_numerator="4" DelayTimeSamples_denominator="4" LfoFrequency_numerator="4" LfoFrequency_denominator="4" LfoAmount_numerator="4" LfoAmount_denominator="4" />
+            <key />
+          </effect>
+          <effect name="dualfilter" on="1" wet="1" gate="0" autoquit="1" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <DualFilterControls enabled1="1" filter1="0" cut1="5000" res1="0.6" gain1="100" enabled2="0" filter2="0" cut2="14000" res2="0.5" gain2="100" mix="-1" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.5" />
+      </fxchannel>
+      <fxchannel num="6" name="Percusion" volume="0.8" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.35" />
+      </fxchannel>
+      <fxchannel num="7" name="Agua" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.3" />
+      </fxchannel>
+    </fxmixer>
+    <timeline lp0pos="0" lp1pos="6912" lpstate="1" />
+    <controllers />
+    <projectnotes>Nivel 2 (la Tristeza): la Doncella del Lamento. Un vals en Si menor, 3/4, 140 BPM, 48 compases en bucle. 1-16: el lamento en las cuerdas, sobre el vals del piano y el coro. 17-32: el lamento en la caja de música, con timbales. 33-48: cuerdas y coro juntos, arriba; el timbal redobla al final.</projectnotes>
+  </song>
+</lmms-project>

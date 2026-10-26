@@ -1,0 +1,473 @@
+fileFormatVersion: 2
+guid: f7d1b10b3d098d74c9ff911f95ebde69
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7762876319289422237
+    second: TileMap4_0
+  - first:
+      213: -4677139118338504831
+    second: TileMap4_1
+  - first:
+      213: -6256525795551090285
+    second: TileMap4_2
+  - first:
+      213: -4581637089843257608
+    second: TileMap4_3
+  - first:
+      213: -58750073841461652
+    second: TileMap4_4
+  - first:
+      213: -4853453311072911610
+    second: TileMap4_5
+  - first:
+      213: -8140877227393842722
+    second: TileMap4_6
+  - first:
+      213: 330611852443064283
+    second: TileMap4_7
+  - first:
+      213: 1721683130463065508
+    second: TileMap4_8
+  - first:
+      213: 3629737892758344925
+    second: TileMap4_9
+  - first:
+      213: 4625380263036939314
+    second: TileMap4_10
+  - first:
+      213: 3516309515949715477
+    second: TileMap4_11
+  - first:
+      213: 5670381727793788985
+    second: TileMap4_12
+  - first:
+      213: 1854389627185482679
+    second: TileMap4_13
+  - first:
+      213: -7924213805429981737
+    second: TileMap4_14
+  - first:
+      213: 5041312297659871740
+    second: TileMap4_15
+  - first:
+      213: 3730810506658714831
+    second: TileMap4_16
+  - first:
+      213: -7191861391402356329
+    second: TileMap4_17
+  - first:
+      213: -7670601237698524292
+    second: TileMap4_18
+  - first:
+      213: 5589076190985822582
+    second: TileMap4_19
+  - first:
+      213: 2635001293527069393
+    second: TileMap4_20
+  - first:
+      213: -7902595239901483621
+    second: TileMap4_21
+  - first:
+      213: 7289530166386425981
+    second: TileMap4_22
+  - first:
+      213: 9112915088321794084
+    second: TileMap4_23
+  - first:
+      213: 3741716677089314982
+    second: TileMap4_24
+  - first:
+      213: 1808218267647361788
+    second: TileMap4_25
+  - first:
+      213: 933478021949106508
+    second: TileMap4_26
+  - first:
+      213: -4973202253005263638
+    second: TileMap4_27
+  - first:
+      213: 6521802329926599058
+    second: TileMap4_28
+  - first:
+      213: -916480390639326955
+    second: TileMap4_29
+  - first:
+      213: 3533034073136947398
+    second: TileMap4_30
+  - first:
+      213: 7328788736759545896
+    second: TileMap4_31
+  - first:
+      213: 9192877113266010439
+    second: TileMap4_32
+  - first:
+      213: -7393389326727832293
+    second: TileMap4_33
+  - first:
+      213: 8540355917675038335
+    second: TileMap4_34
+  - first:
+      213: 8952772387230409252
+    second: TileMap4_35
+  - first:
+      213: -5016315535554934782
+    second: TileMap4_36
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tierra
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 233
+        width: 32
+        height: 26
+      alignment: 9
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d38074ce606ec79408e148d336f99f9b
+      internalID: 433953300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ceniza
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 259
+        width: 48
+        height: 8
+      alignment: 9
+      pivot: {x: 0, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab9db5ab8562db44caa7253158ce1e8f
+      internalID: -383046989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mamposteria
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 141
+        width: 39
+        height: 38
+      alignment: 9
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51c948a2b6b6c8e4cbafb5b23e8bd985
+      internalID: 896905557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tejado
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 51
+        width: 159
+        height: 33
+      alignment: 9
+      pivot: {x: 0.5, y: 0.8181818}
+      border: {x: 24, y: 0, z: 31, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec366b9fadfad8e46b113d19f66ef6fa
+      internalID: -1152031763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cruz
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 3
+        width: 90
+        height: 78
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025641026}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ffcc633247e1a23408d037035316a05c
+      internalID: 1379608106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Escombrera
+      rect:
+        serializedVersion: 2
+        x: 89
+        y: 141
+        width: 65
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882353}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd1cdb31e2c348c4bb325810c9d17cd0
+      internalID: -1005653614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Crater
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 147
+        width: 43
+        height: 19
+      alignment: 9
+      pivot: {x: 0.5, y: 0.36842105}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7af2a758f86144f4a98718b609eb1efc
+      internalID: 1394652150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Farola
+      rect:
+        serializedVersion: 2
+        x: 433
+        y: 89
+        width: 28
+        height: 43
+      alignment: 9
+      pivot: {x: 0.5, y: 0.9767442}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07b1ea8586feb4045a03dca8ed0e0c7f
+      internalID: 1459048935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cortina
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 67
+        width: 39
+        height: 59
+      alignment: 9
+      pivot: {x: 0.5, y: 0.9661017}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7e286cb9c15793344a427930fc1a2696
+      internalID: -1794281700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Cables
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 103
+        width: 63
+        height: 30
+      alignment: 9
+      pivot: {x: 0.5, y: 0.93333334}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 334ae26309549d1468679febfc3ea0b7
+      internalID: -820991882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 8004c14d53fc66d4a94dca15de50356d
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Cables: -820991882
+      Ceniza: -383046989
+      Cortina: -1794281700
+      Crater: 1394652150
+      Cruz: 1379608106
+      Escombrera: -1005653614
+      Farola: 1459048935
+      Mamposteria: 896905557
+      Tejado: -1152031763
+      Tierra: 433953300
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

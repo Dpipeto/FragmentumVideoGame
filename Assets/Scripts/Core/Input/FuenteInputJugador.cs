@@ -9,9 +9,9 @@ namespace Fragmentum.Core.Input
     ///
     /// Usa el mapa "Player" del asset <c>InputSystem_Actions</c>, que ya trae las acciones
     /// que necesita el juego:
-    /// Move (WASD y flechas), Jump (espacio), Attack (clic izquierdo o Enter),
-    /// Sprint (Shift izquierdo, aquí el dash), Crouch (C o Ctrl izquierdo), Interact (E),
-    /// Ability (Q, añadida en la Fase 3 para la Invisibilidad Parcial) y Walk (Alt izquierdo).
+    /// Move (WASD y flechas), Jump (espacio o K), Attack (clic izquierdo o J),
+    /// Sprint (Shift izquierdo, aquí el dash), Crouch (S), Interact (W),
+    /// Ability (Q, añadida en la Fase 3 para la Invisibilidad Parcial) y Walk (Ctrl izquierdo).
     ///
     /// Walk es caminar: mientras se mantiene, la dirección se queda en <see cref="factorCaminar"/>
     /// (35 %). Con teclado A y D van a fondo; así Kael puede ir por debajo del 40 % de su
@@ -35,7 +35,7 @@ namespace Fragmentum.Core.Input
         [Tooltip("Mapa de acciones del jugador dentro del asset.")]
         [SerializeField] private string mapaJugador = "Player";
 
-        [Tooltip("Fracción de la dirección mientras se mantiene caminar (Alt). Por debajo de 0,4 es sigilo.")]
+        [Tooltip("Fracción de la dirección mientras se mantiene caminar (Ctrl). Por debajo de 0,4 es sigilo.")]
         [SerializeField, Range(0.1f, 1f)] private float factorCaminar = 0.35f;
 
         private InputActionMap _mapa;
@@ -65,7 +65,7 @@ namespace Fragmentum.Core.Input
 
         public float EjeHorizontal => Bloqueado || _mover == null ? 0f : ConCaminar(_mover.ReadValue<Vector2>().x, CaminarMantenido, factorCaminar);
 
-        /// <summary>¿Se mantiene caminar (Alt)?</summary>
+        /// <summary>¿Se mantiene caminar (Ctrl)?</summary>
         public bool CaminarMantenido => !Bloqueado && _caminar != null && _caminar.IsPressed();
 
         /// <summary>La fracción que se aplica a la dirección al caminar.</summary>

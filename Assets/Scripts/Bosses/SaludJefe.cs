@@ -26,6 +26,12 @@ namespace Fragmentum.Bosses
         /// <summary>¿Lo atraviesan ahora los golpes? La fija el jefe (el Espectro del Pavor). Vacía = nunca.</summary>
         public Func<bool> Intangible { get; set; }
 
+        /// <summary>
+        /// La vida que tendría sin la de más (el Juez Silente, si no se miró ninguna memoria). 0 = no
+        /// tiene de más. La barra del jefe enseña ese tramo en otro color.
+        /// </summary>
+        public int VidaBase { get; set; }
+
         /// <summary>Un golpe no hizo nada porque el jefe era inmune o intangible (para un sonido, por ejemplo).</summary>
         public event Action<Golpe> OnGolpeBloqueado;
 

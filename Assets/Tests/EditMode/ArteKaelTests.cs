@@ -167,11 +167,14 @@ namespace Fragmentum.Tests
                 "Con 0 el ataque se quedaría congelado si nadie fijara la velocidad.");
             Assert.AreEqual(1f, Parametro(AnimatorParams.VelocidadDash.Nombre).defaultFloat,
                 "Con 0 el dash se quedaría congelado si nadie fijara la velocidad.");
+            Assert.AreEqual(1f, Parametro(AnimatorParams.VelocidadDanio.Nombre).defaultFloat,
+                "Con 0 el golpe se quedaría congelado si nadie fijara la velocidad.");
 
             Assert.AreEqual(AnimatorParams.Movement.Nombre, Estado(PlayerAnimacion.Correr).speedParameter,
                 "Las piernas siguen la velocidad real: no patinan bajo el agua ni sobre hielo.");
             Assert.AreEqual(AnimatorParams.VelocidadAtaque.Nombre, Estado(PlayerAnimacion.Ataque).speedParameter);
             Assert.AreEqual(AnimatorParams.VelocidadDash.Nombre, Estado(PlayerAnimacion.Dash).speedParameter);
+            Assert.AreEqual(AnimatorParams.VelocidadDanio.Nombre, Estado(PlayerAnimacion.Danio).speedParameter);
         }
 
         [Test]
@@ -322,6 +325,55 @@ namespace Fragmentum.Tests
                 Assert.AreEqual(i * 0.2f, claves[i].time, 0.001f, $"Kael_Morir_{i}");
                 Assert.AreEqual($"Kael_Morir_{i}", claves[i].value.name);
             }
+        }
+
+        [Test]
+        public void Danio_TieneSusCuatroFotogramas_YOcupaElRetroceso()
+        {
+            Assert.AreEqual(PlayerAnimacion.Danio, PlayerAnimacion.TablaPorDefecto().Single(e => e.estado == ESTADOS_JUGADOR.DAMAGED).estadoAnimator,
+                "DAMAGED ya tiene su clip: no se queda en el anterior.");
+            Assert.IsTrue(PlayerAnimacion.TablaPorDefecto().Single(e => e.estado == ESTADOS_JUGADOR.DAMAGED).reiniciar,
+                "Cada golpe, desde el principio.");
+
+            var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>($"{ConstructorArteKael.CarpetaAnimaciones}/Kael_{PlayerAnimacion.Danio}.anim");
+            Assert.IsNotNull(clip, "Falta el clip del daño.");
+            Assert.AreEqual(1f, clip.length, 0.001f, "Dura 1 s: PlayerAnimacion lo estira a lo que dura el retroceso.");
+            Assert.IsFalse(clip.isLooping, "Se queda en el último si el retroceso se alargara.");
+            var claves = AnimationUtility.GetObjectReferenceCurve(clip, CurvaSprite);
+            for (var i = 0; i < 4; i++)
+            {
+                Assert.AreEqual(i * 0.25f, claves[i].time, 0.001f, $"Kael_Danio_{i}: los cuatro duran lo mismo, como en Daño.pxo.");
+                Assert.AreEqual($"Kael_Danio_{i}", claves[i].value.name);
+            }
+
+            // El torso, donde el del idle: al recibir el golpe, Kael no salta de sitio.
+            Assert.AreEqual(ConstructorArteKael.HojaIdle.Pivote.x, ConstructorArteKael.HojaDanio.Pivote.x);
+        }
+
+        [Test]
+        public void ElEscudo_MideLoQueKael_YEstaEnElPrefab_OcultoHastaQueHaceAlgo()
+        {
+            var dibujos = ConstructorArteKael.DibujosEscudo;
+            Assert.IsNotNull(dibujos, "Faltan los tres dibujos del escudo.");
+            foreach (var dibujo in dibujos)
+            {
+                Assert.AreEqual(ConstructorArteKael.PixelesPorUnidadEscudo, dibujo.pixelsPerUnit, 1e-3f, dibujo.name);
+                Assert.AreEqual(ConstructorArteKael.LienzoEscudo, new Vector2Int((int)dibujo.rect.width, (int)dibujo.rect.height),
+                    $"{dibujo.name}: los tres en el mismo lienzo.");
+                Assert.AreEqual(dibujos[0].pivot, dibujo.pivot, $"{dibujo.name}: el mismo pivote: no salta al parar el golpe.");
+            }
+
+            // Las placas, de arriba abajo, casi lo que Kael (1,8 u).
+            Assert.That(80f / ConstructorArteKael.PixelesPorUnidadEscudo, Is.InRange(1.6f, 1.9f));
+
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ConstructorJugador.RutaPrefab);
+            var escudo = prefab.GetComponentInChildren<EscudoDibujado>(true);
+            Assert.IsNotNull(escudo, "El jugador lleva el dibujo de su escudo.");
+            Assert.IsTrue(escudo.Completo);
+            Assert.IsFalse(escudo.Dibujo.enabled, "Oculto: solo se ve al recargarse o al parar un golpe.");
+            Assert.Greater(escudo.Dibujo.sortingOrder, prefab.GetComponentsInChildren<SpriteRenderer>(true).First(s => s.name == "Sprite").sortingOrder,
+                "Por delante de Kael.");
+            Assert.AreNotSame(prefab.transform.Find("Pivote"), escudo.transform.parent, "No va en el pivote: se pone del lado del golpe.");
         }
 
         // --- Prefab ---

@@ -55,6 +55,7 @@ namespace Fragmentum.Bosses.Patrones
             var sombras = new SombraDelPavor[lugares.Length];
             pavor.Aparecer(lugares[verdadera]);
             pavor.Mostrarse();
+            pavor.Gesto(GESTOS_PAVOR.APARECE);
             pavor.LlevarLuciernaga(true);
             for (var i = 0; i < lugares.Length; i++)
             {
@@ -72,9 +73,10 @@ namespace Fragmentum.Bosses.Patrones
                 if (i == verdadera)
                 {
                     pavor.MirarAlJugador();
-                    pavor.Destellar(aviso);
+                    pavor.Destellar(aviso, GESTOS_PAVOR.AVISO_TAJO);
                     yield return new WaitForSeconds(aviso);
                     tajo.Tajo(jefe, pavor.Centro.x, pavor.Suelo, pavor.Mirando);
+                    pavor.Gesto(GESTOS_PAVOR.TAJO);
                 }
                 else
                 {
@@ -93,12 +95,21 @@ namespace Fragmentum.Bosses.Patrones
                     }
 
                     tajo.Tajo(jefe, sombra.Centro.x, pavor.Suelo, sombra.Mirando);
+                    sombra.Gesto(GESTOS_PAVOR.TAJO);
                 }
 
                 yield return new WaitForSeconds(tajo.duracionGolpe + intervalo);
             }
 
             // Las tres jadean: la ventana corta el patrón. Las sombras se deshacen al cerrarse.
+            foreach (var sombra in sombras)
+            {
+                if (sombra != null && !sombra.Deshecha)
+                {
+                    sombra.Gesto(GESTOS_PAVOR.JADEA);
+                }
+            }
+
             jefe.AbrirVentanaVulnerable(jadeo);
             yield return new WaitForSeconds(0.3f);
         }

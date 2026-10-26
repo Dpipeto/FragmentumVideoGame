@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Fragmentum.Player
 {
     /// <summary>
-    /// Interactuar (E): Kael usa lo que tenga al alcance de los pies (<see cref="Interacciones"/>).
+    /// Interactuar (W): Kael usa lo que tenga al alcance de los pies (<see cref="Interacciones"/>).
     /// En el mundo del Miedo, encender una antorcha.
     ///
     /// Lo que se puede usar no lee la tecla: se registra y espera a que Kael lo use. Así la tecla

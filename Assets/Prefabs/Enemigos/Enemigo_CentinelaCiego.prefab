@@ -116,5 +116,6 @@ MonoBehaviour:
   tiempoBusqueda: 2
   pivote: {fileID: 8726433626968085242}
   sprite: {fileID: 5695830090212595616}
+  animator: {fileID: 0}
   ladeo: 14
   colorAviso: {r: 0.72, g: 0.66, b: 0.86, a: 1}

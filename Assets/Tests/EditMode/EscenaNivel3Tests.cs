@@ -8,6 +8,7 @@ using Fragmentum.Enemies;
 using Fragmentum.Levels;
 using Fragmentum.Levels.Escenario;
 using Fragmentum.Levels.Mecanicas;
+using Fragmentum.Player;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -22,8 +23,8 @@ namespace Fragmentum.Tests
     /// ramas, raíces que no agarran, Espectros y Centinelas Ciegos, checkpoints, salida y la arena del
     /// Espectro del Pavor (fase A); la oscuridad por tramos, las antorchas, los cepos, las ramas
     /// podridas que ceden y las cintas (fase B); y el Acechador con los árboles del claro, los
-    /// Espectros dormidos y el oído de los Centinelas (fase C). Y la herramienta que la monta no
-    /// cambia nada al prepararla otra vez.
+    /// Espectros dormidos y el oído de los Centinelas (fase C); y la ciénaga, con su agua, sus
+    /// marañas y su pista. Y la herramienta que la monta no cambia nada al prepararla otra vez.
     /// </summary>
     public class EscenaNivel3Tests
     {
@@ -55,7 +56,8 @@ namespace Fragmentum.Tests
             Assert.AreEqual(GeneradorProgresion.RutaEscenaNivel3, _datos.escena.Ruta);
             Assert.IsTrue(_datos.Jugable, "Está en Build Settings.");
             CollectionAssert.AreEqual(DisenoNivel3.Checkpoints.Select(c => c.x).ToList(), _datos.puntosDeControl);
-            Assert.AreEqual(900f, _datos.tiempoConBono, 0.01f, "Decisión 9: 15 minutos con bono, porque se camina mucho.");
+            Assert.AreEqual(960f, _datos.tiempoConBono, 0.01f, "Decisión 9: 15 minutos con bono, porque se camina mucho; y uno más por la ciénaga.");
+            Assert.AreEqual(DisenoNivel3.ColorVeloAgua, _datos.reglas.colorVeloAgua, "Bajo el agua de la ciénaga, el velo es verde.");
             Assert.IsTrue(_datos.reglas.sigilo, "Correr hace ruido.");
             Assert.IsTrue(_datos.reglas.oscuridad, "El nivel es oscuro: lo aplica el LevelManager con la LuzDelNivel de la escena.");
             Assert.AreEqual(DisenoNivel3.RadioLuzKael, _datos.reglas.radioLuzJugador, 1e-4f);
@@ -107,15 +109,76 @@ namespace Fragmentum.Tests
         }
 
         [Test]
-        public void LasRaicesDelCallejon_NoAgarran_YSonLasUnicas()
+        public void LasRaicesDelCallejon_YLasDelArbolHundido_NoAgarran_YSonLasUnicas()
         {
             var sinAgarre = Todos<SinAgarre>(_nivel3);
-            Assert.AreEqual(1, sinAgarre.Count, "Solo las raíces: las demás paredes se escalan.");
-            Assert.AreEqual("RaicesDelCallejon", sinAgarre[0].name);
-            Assert.IsTrue(DisenoNivel3.NoAgarra(sinAgarre[0].name));
-            var caja = sinAgarre[0].GetComponent<BoxCollider2D>();
-            Assert.IsFalse(caja.isTrigger, "Sigue siendo una pared: se choca con ella.");
-            Assert.AreEqual(LayerMask.NameToLayer(Capas.Wall), caja.gameObject.layer);
+            var esperadas = DisenoNivel3.Paredes.Where(p => DisenoNivel3.NoAgarra(p.Nombre)).Select(p => p.Nombre).ToList();
+            CollectionAssert.AreEquivalent(new[] { "RaicesDelCallejon", "RaicesDelArbolHundido1", "RaicesDelArbolHundido2" }, esperadas);
+            CollectionAssert.AreEquivalent(esperadas, sinAgarre.Select(s => s.name).ToList(), "Solo las raíces: las demás paredes se escalan.");
+            foreach (var raices in sinAgarre)
+            {
+                var caja = raices.GetComponent<BoxCollider2D>();
+                Assert.IsFalse(caja.isTrigger, $"{raices.name} sigue siendo una pared: se choca con ella.");
+                Assert.AreEqual(LayerMask.NameToLayer(Capas.Wall), caja.gameObject.layer);
+            }
+        }
+
+        [Test]
+        public void LaCienaga_TieneSuAgua_SusMaranasDibujadas_YSuPista()
+        {
+            // El agua: una zona por cada una del diseño, con su superficie dibujada en bucle.
+            var aguas = Todos<ZonaModificadorMovimiento>(_nivel3).Where(z => z.Modificador.esAgua).ToList();
+            Assert.AreEqual(DisenoNivel3.Aguas.Length, aguas.Count, "Solo la ciénaga tiene agua.");
+            foreach (var zona in DisenoNivel3.Aguas)
+            {
+                var agua = aguas.SingleOrDefault(a => a.name == zona.Nombre);
+                Assert.IsNotNull(agua, $"Falta el agua {zona.Nombre}.");
+                AssertRect(zona.Rect, Rectangulo(agua.GetComponent<BoxCollider2D>()), zona.Nombre);
+                Assert.IsTrue(agua.GetComponent<BoxCollider2D>().isTrigger);
+                var superficie = PreparadorNivel.RaizRecorrido(_nivel3).GetComponentsInChildren<BucleDeSprites>(true)
+                    .SingleOrDefault(b => b.name == PreparadorNivel.NombreSuperficie(zona));
+                Assert.IsNotNull(superficie, $"{zona.Nombre}: su superficie dibujada.");
+                Assert.AreEqual(ConstructorMecanicasMundo3.FotogramasAgua.Length, superficie.Fotogramas, "Con sus tres fotogramas, en bucle.");
+                Assert.AreEqual(zona.Arriba, superficie.transform.position.y, 1e-4f, "Su línea, a la altura del agua.");
+            }
+
+            // Las marañas: una zona que sujeta, con un dibujo por cada 2,5 u.
+            var maranas = Todos<Marana>(_nivel3);
+            Assert.AreEqual(DisenoNivel3.Maranas.Length, maranas.Count);
+            foreach (var zona in DisenoNivel3.Maranas)
+            {
+                var marana = maranas.SingleOrDefault(m => m.name == zona.Nombre);
+                Assert.IsNotNull(marana, $"Falta la maraña {zona.Nombre}.");
+                AssertRect(zona.Rect, Rectangulo(marana.GetComponent<BoxCollider2D>()), zona.Nombre);
+                Assert.IsTrue(marana.GetComponent<BoxCollider2D>().isTrigger, "Se entra en ella: no es una pared.");
+                var sujeta = marana.GetComponent<ZonaModificadorMovimiento>().Modificador;
+                Assert.AreEqual(ModificadorMovimiento.Marana.velocidad, sujeta.velocidad, 1e-4f, $"{zona.Nombre}: sujeta.");
+                Assert.AreEqual(0f, sujeta.salto, 1e-4f, $"{zona.Nombre}: dentro no se salta.");
+
+                var piezas = Mathf.RoundToInt((zona.Hasta - zona.Desde) / DisenoNivel3.AnchoDibujoMarana);
+                Assert.AreEqual(piezas, marana.Dibujos.Length, $"{zona.Nombre}: un dibujo por cada 2,5 u.");
+                Assert.IsTrue(marana.Dibujos.All(d => d != null && d.sprite != null), $"{zona.Nombre}: con su arte.");
+                Assert.IsTrue(marana.Dibujos.All(d => d.sortingOrder == PreparadorNivel.OrdenMarana), "Por delante de Kael y por detrás del agua.");
+                var serializada = new SerializedObject(marana);
+                Assert.AreEqual(ConstructorMecanicasMundo3.FotogramasMaranaReposo.Length, serializada.FindProperty("reposo").arraySize);
+                Assert.AreEqual(ConstructorMecanicasMundo3.FotogramasMaranaAtrapa.Length, serializada.FindProperty("atrapa").arraySize);
+            }
+
+            // La pista, en la orilla, escucha a las dos marañas.
+            var pista = Todos<ZonaDeDialogo>(_nivel3).SingleOrDefault(z => z.name == PreparadorNivel.NombrePistaDeLaCienaga);
+            Assert.IsNotNull(pista, "Ante el agua, Kael nombra el Dash Acuático.");
+            Assert.AreEqual(Fragmentum.Narrative.MOMENTOS_DIALOGO.PISTA, pista.Momento);
+            CollectionAssert.AreEquivalent(maranas, pista.Maranas, "Y lo repite si una maraña lo sujeta.");
+            AssertRect(DisenoNivel3.PistaDeLaCienaga.Rect, Rectangulo(pista.GetComponent<BoxCollider2D>()), pista.name);
+            Assert.IsTrue(_datos.dialogos.Del(Fragmentum.Narrative.MOMENTOS_DIALOGO.PISTA).Count > 0, "El Nivel 3 tiene la línea de la pista.");
+        }
+
+        private static void AssertRect(Rect esperado, Rect real, string nombre)
+        {
+            Assert.AreEqual(esperado.xMin, real.xMin, 0.01f, nombre);
+            Assert.AreEqual(esperado.xMax, real.xMax, 0.01f, nombre);
+            Assert.AreEqual(esperado.yMin, real.yMin, 0.01f, nombre);
+            Assert.AreEqual(esperado.yMax, real.yMax, 0.01f, nombre);
         }
 
         [Test]
@@ -269,6 +332,12 @@ namespace Fragmentum.Tests
                 "Las ramas sanas no ceden.");
             var colorSana = Todos<SpriteRenderer>(_nivel3).First(s => s.name == DisenoNivel3.Ramas[0].Nombre).color;
             Assert.AreEqual(colorSana, podridas[0].ColorSana, "A oscuras, una rama podrida es del color de las sanas.");
+            if (podridas[0].ConArte)
+            {
+                var sana = Todos<SpriteRenderer>(_nivel3).First(s => s.name == PreparadorNivel.NombreDibujo(DisenoNivel3.Ramas[0].Nombre));
+                Assert.AreEqual(sana.sprite, podridas[0].DibujoDe(ESTADOS_PLATAFORMA.INTACT, false, 0f, 1f),
+                    "Con arte, a oscuras una rama podrida es el dibujo de las sanas.");
+            }
 
             var recorrido = PreparadorNivel.RaizRecorrido(_nivel3);
             var cintas = recorrido.Find("Cintas");
@@ -281,7 +350,16 @@ namespace Fragmentum.Tests
                 var dibujo = cinta.GetComponent<SpriteRenderer>();
                 Assert.IsNotNull(dibujo);
                 Assert.AreEqual(DisenoNivel3.Cintas[i].x, cinta.position.x, 1e-3f);
-                Assert.AreEqual(DisenoNivel3.Cintas[i].y + 0.05f, cinta.position.y + cinta.lossyScale.y * 0.5f, 1e-3f, "Cuelga de lo alto de su rama.");
+                if (cinta.GetComponent<BucleDeSprites>() != null)
+                {
+                    // Con arte, atada por el nudo en el centro de su rama, al viento.
+                    Assert.AreEqual(DisenoNivel3.Cintas[i].y - DisenoNivel3.GrosorRama * 0.5f, cinta.position.y, 1e-3f, "Atada a su rama.");
+                }
+                else
+                {
+                    Assert.AreEqual(DisenoNivel3.Cintas[i].y + 0.05f, cinta.position.y + cinta.lossyScale.y * 0.5f, 1e-3f, "Cuelga de lo alto de su rama.");
+                }
+
                 Assert.AreEqual(ConstructorEcoIra.RutaMaterialSprite, AssetDatabase.GetAssetPath(dibujo.sharedMaterial), "Solo se ve con luz.");
             }
         }
@@ -298,7 +376,7 @@ namespace Fragmentum.Tests
                 Assert.AreEqual(DisenoNivel3.TamanoArbol, arbol.Tamano);
                 Assert.IsEmpty(arbol.GetComponentsInChildren<Collider2D>(), "Kael pasa por delante: no tiene collider.");
                 var tronco = arbol.GetComponentInChildren<SpriteRenderer>();
-                Assert.IsNotNull(tronco, "Un tronco provisional, hasta que llegue su arte.");
+                Assert.IsNotNull(tronco, "Su tronco: con arte, el tocón del árbol muerto; sin él, un rectángulo.");
                 Assert.Less(tronco.sortingOrder, 0, "Por detrás de Kael y de los enemigos.");
             }
 

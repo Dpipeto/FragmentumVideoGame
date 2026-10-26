@@ -16,7 +16,7 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 SALIDA = os.path.join(AQUI, '..', 'Docs', 'Diseno', 'Nivel3_Diseno.png')
 
 U = 14                      # px por unidad
-X0, X1, Y0, Y1 = -7, 140, -7, 17
+X0, X1, Y0, Y1 = -7, 168, -7, 17
 MARGEN_IZQ, MARGEN_SUP, MARGEN_INF = 40, 76, 120
 ANCHO = (X1 - X0) * U + MARGEN_IZQ + 24
 ALTO = (Y1 - Y0) * U + MARGEN_SUP + MARGEN_INF
@@ -38,14 +38,17 @@ JEFE = (120, 255, 190)           # el brillo verde de jefe3.jpeg
 TEXTO = (236, 236, 244)
 TENUE = (150, 146, 172)
 ACENTO = (45, 27, 78)            # #2D1B4E, el color del Miedo
+AGUA = (34, 70, 58, 150)         # el agua de la ciénaga
+MARANA = (96, 120, 64)           # las marañas: solo el Dash Acuático las cruza
+TOCON = (88, 70, 50)
 
 FONDO_BLOQUES = -7
 
 # Secciones, con la luz que tiene cada una
 SECCIONES = ((-7, 36, 'SECCIÓN 1 · La linde (luz de luna)', (22, 22, 34)),
-             (36, 84, 'SECCIÓN 2 · El bosque cerrado (oscuridad)', (12, 12, 18)),
-             (84, 112, 'SECCIÓN 3 · El claro (luna)', (22, 22, 36)),
-             (112, 140, 'ARENA · El Espectro del Pavor (oscuridad total)', (8, 8, 12)))
+             (36, 112, 'SECCIÓN 2 · El bosque cerrado y la ciénaga (oscuridad)', (12, 12, 18)),
+             (112, 140, 'SECCIÓN 3 · El claro (luna)', (22, 22, 36)),
+             (140, 168, 'ARENA · El Espectro del Pavor (oscuridad total)', (8, 8, 12)))
 
 
 def fuente(tamano, negrita=False):
@@ -83,22 +86,22 @@ f, fb, fp, ft = fuente(13), fuente(13, True), fuente(11), fuente(20, True)
 
 for desde, hasta, _, color in SECCIONES:
     rect(d, desde, Y0, hasta, Y1, color)
-# El claro (el único sitio del bosque sin copas) y la antesala: entra la luna desde x 89
-rect(d, 89, 0, 112, Y1, (30, 32, 48))
+# El claro (el único sitio del bosque sin copas) y la antesala: entra la luna desde x 117
+rect(d, 117, 0, 140, Y1, (30, 32, 48))
 
 # --- La propuesta (Nivel3_Diseno.md, sección 3) ---
-SUELOS = [(-6, 17, 0), (17, 27, -2.5), (27, 38, 0), (38, 46, -2), (46, 58, 0), (58, 73, -4), (74, 112, 0),
-          (112, 139, 0)]
+SUELOS = [(-6, 17, 0), (17, 27, -2.5), (27, 38, 0), (38, 46, -2), (46, 58, 0), (58, 73, -4), (74, 86, 0),
+          (86, 96, -3.5), (96, 98, 0), (98, 110, -3.5), (110, 140, 0), (140, 167, 0)]
 RAMAS = [(18, 20, 0), (24, 26, 0),                    # el barranco de la linde
          (59, 61, 2), (62, 64, 4),                    # subir a las copas desde la bifurcación
          (68, 74, 4.5),                               # el puesto del vigía
          (78, 80, 3),                                 # bajar de las copas
-         (117, 120, 3.5), (131, 134, 3.5)]            # las dos ramas de la arena
+         (145, 148, 3.5), (159, 162, 3.5)]            # las dos ramas de la arena
 PODRIDAS = [(21, 23, 0), (65, 67, 4), (75, 77, 4)]
 BLOQUES = [(58, 60, -4, -2)]                          # el escalón para salir de la hondonada
 PAREDES = [(-7, -6, FONDO_BLOQUES, 17),               # ParedIzquierda
-           (138, 139, 0, 17),                         # ParedArena
-           (112, 139, 15, 17)]                        # TechoArena
+           (166, 167, 0, 17),                         # ParedArena
+           (140, 167, 15, 17)]                        # TechoArena
 RAICES = (73, 74, FONDO_BLOQUES, 4)                   # el fondo del callejón: no agarra
 
 for x0, x1, y in SUELOS:
@@ -106,6 +109,16 @@ for x0, x1, y in SUELOS:
 for x0, x1, y0, y1 in BLOQUES + PAREDES:
     rect(d, x0, y0, x1, y1, TIERRA, BORDE_TIERRA)
 rect(d, RAICES[0], RAICES[2], RAICES[1], RAICES[3], RAIZ, PODRIDA, 2)
+
+# La ciénaga: el agua (sin el tocón), las raíces del árbol hundido que hacen de techo de los túneles
+# (no agarran) y las marañas, que solo cruza el Dash Acuático
+for x0, x1 in ((86, 96), (98, 110)):
+    rect(d, x0, -3.5, x1, -0.1, AGUA)
+rect(d, 96, -3.5, 98, 0, TOCON)
+for x0, x1 in ((89, 95), (100, 107)):
+    rect(d, x0, -1, x1, 7, RAIZ, PODRIDA, 2)
+for x0, x1 in ((91, 93), (101, 105)):
+    rect(d, x0, -3.5, x1, -1, MARANA)
 for x0, x1, y in RAMAS:
     rect(d, x0, y - 0.4, x1, y, RAMA)
 for x0, x1, y in PODRIDAS:
@@ -121,13 +134,13 @@ a, b = px(38.3, -2.4)
 d.text((a, b - 2), 'la trinchera', font=fp, fill=TENUE)
 
 # Los árboles del claro: Kael pasa por delante; el Acechador, que embiste a ciegas, se estrella
-for x in (93, 98, 103):
+for x in (121, 126, 131):
     rect(d, x - 0.6, 0, x + 0.6, 6, (60, 50, 40), (100, 84, 64))
-a, b = px(91.4, 7.8)
+a, b = px(119.4, 7.8)
 d.text((a, b), 'tres árboles: el Acechador se estrella', font=fp, fill=TENUE)
 
 # Luz de las antorchas (8 u) y de Kael (3 u)
-for x, y in ((7, 0), (30, 0), (55, 0), (86, 0)):
+for x, y in ((7, 0), (30, 0), (55, 0), (85, 0), (114, 0)):
     circulo_discontinuo(d, x, y + 1.5, 8, (255, 176, 64, 150))
     a, b = px(x, y)
     d.rectangle([a - 2, b - 26, a + 2, b], fill=(120, 90, 60))
@@ -149,28 +162,28 @@ def cepo(x, y):
 
 for x, y in ((11, 0), (22, -2.5), (34, 0), (61.5, -4), (67, -4)):
     cepo(x, y)
-for x, y in ((14, 0), (33, 0), (56.5, 0), (78, 0), (69, -4), (71.5, -4)):
+for x, y in ((14, 0), (33, 0), (56.5, 0), (76, 0), (69, -4), (71.5, -4)):
     punto(x, y, ESPECTRO, 'E')
 for x, y in ((51, 0), (71, 4.5), (63.5, -4)):
     punto(x, y, CENTINELA, 'C', r=8)
-punto(100, 0, ACECHADOR, 'A', r=13)
-punto(125.5, 0, JEFE, 'P', r=16)
-a, b = px(125.5, 6.6)
+punto(128, 0, ACECHADOR, 'A', r=13)
+punto(153.5, 0, JEFE, 'P', r=16)
+a, b = px(153.5, 6.6)
 d.text((a - 92, b), 'invisible salvo al avisar y atacar', font=fp, fill=TEXTO)
 
 # Inicio, checkpoints, salida, verja
 a, b = px(2, 0)
 d.rectangle([a - 4, b - 22, a + 4, b], fill=LUNA)
 d.text((a - 14, b - 40), 'Kael', font=fb, fill=TEXTO)
-for x, y, nombre in ((41, -2, 'CP1 · eco de memoria'), (82.5, 0, 'CP2'), (109, 0, 'CP3')):
+for x, y, nombre in ((41, -2, 'CP1 · eco de memoria'), (82.5, 0, 'CP2'), (137, 0, 'CP3')):
     a, b = px(x, y)
     d.line([a, b, a, b - 30], fill=(200, 200, 205), width=3)
     d.polygon([(a, b - 30), (a + 12, b - 25), (a, b - 20)], fill=ANTORCHA)
     d.text((a - 10, b - 46), nombre, font=fp, fill=TEXTO)
-a, b = px(136, 0)
+a, b = px(163.5, 0)
 d.rectangle([a - 26, b - 56, a + 26, b], outline=JEFE, width=2)
 d.text((a - 16, b - 72), 'salida', font=fp, fill=TEXTO)
-a, b = px(113.3, 5.4)
+a, b = px(141.3, 5.4)
 d.text((a, b), '← verja', font=fp, fill=TEXTO)
 
 # Rótulos de tramo
@@ -179,12 +192,13 @@ for x, y, texto in ((-5.5, 3.2, 'inicio'), (5, 10.4, 'primera antorcha: E'), (17
                     (52.5, 10.4, 'la bifurcación'), (57.5, 7.6, 'arriba: las copas (la buena)'),
                     (58.3, -5.9, 'abajo: la hondonada (la trampa)'), (66.2, 6.4, 'el puesto del vigía'),
                     (66.2, -1.6, 'callejón'), (74.4, 6.0, 'raíces que no agarran'),
-                    (84.3, 10.4, 'antorcha del claro'), (104.6, 4.4, 'antesala')):
+                    (83.4, 10.4, 'la ciénaga: solo el Dash Acuático'), (95.2, 1.9, 'tocón'),
+                    (112.3, 10.4, 'antorcha del claro'), (132.6, 4.4, 'antesala')):
     a, b = px(x, y)
     d.text((a, b), texto, font=fp, fill=TENUE)
 
 # Cotas
-for x in range(-5, 140, 5):
+for x in range(-5, 168, 5):
     a, b = px(x, Y0)
     d.line([a, b, a, b + 6], fill=TENUE)
     d.text((a - 6, b + 8), str(x), font=fp, fill=TENUE)
@@ -200,10 +214,11 @@ for x, _, nombre, _ in SECCIONES:
 
 # Título y leyenda
 d.text((MARGEN_IZQ, 14), 'Nivel 3 · Miedo · Bosque Tenebroso — el recorrido (vista lateral, 1 u = 1 tile)', font=ft, fill=TEXTO)
-d.text((MARGEN_IZQ, 44), 'La luz enseña el camino pero despierta a los Espectros; correr hace ruido y los ciegos oyen. Esconderse sirve; quedarse quieto, no.',
+d.text((MARGEN_IZQ, 44), 'La luz enseña el camino pero despierta a los Espectros; correr hace ruido y los ciegos oyen. Esconderse sirve; quedarse quieto, no. En la ciénaga, quien duda queda atrapado.',
        font=f, fill=TENUE)
 ly = ALTO - MARGEN_INF + 44
 items = [(TIERRA, 'tierra'), (RAMA, 'rama'), (PODRIDA, 'rama podrida (cede)'), (RAIZ, 'raíces (no agarran)'),
+         (AGUA[:3], 'agua (10 s de aire)'), (MARANA, 'maraña (solo el Dash Acuático)'),
          (ANTORCHA, 'antorcha (8 u, 15 s)'), (CEPO, 'cepo oculto'), (ESPECTRO, 'E · Espectro (Eco del Miedo)'),
          (CENTINELA, 'C · Centinela Ciego'), (ACECHADOR, 'A · el Acechador (mini-jefe)'),
          (JEFE, 'P · Espectro del Pavor')]

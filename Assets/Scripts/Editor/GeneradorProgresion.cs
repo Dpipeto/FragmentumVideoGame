@@ -44,6 +44,7 @@ namespace Fragmentum.EditorTools
         public const string RutaEscenaNivel1 = "Assets/Scenes/Nivel1.unity";
         public const string RutaEscenaNivel2 = "Assets/Scenes/Nivel2.unity";
         public const string RutaEscenaNivel3 = "Assets/Scenes/Nivel3.unity";
+        public const string RutaEscenaNivel4 = "Assets/Scenes/Nivel4.unity";
         public const string RutaSistemas = "Assets/Resources/Sistemas.prefab";
         public const string RutaGuiaMecanicas = "Assets/Data/Habilidades/GuiaMecanicas.asset";
 
@@ -113,9 +114,10 @@ namespace Fragmentum.EditorTools
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaMenu) == null) CrearEscenaMenu(false);
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaSelector) == null) CrearEscenaSelector(false);
 
-            // Las escenas de los niveles 2 y 3 se crean vacías (cámara y luz); su recorrido lo monta PreparadorNivel.
+            // Las escenas de los niveles 2, 3 y 4 se crean vacías (cámara y luz); su recorrido lo monta PreparadorNivel.
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaNivel2) == null) CrearEscenaNivel(RutaEscenaNivel2);
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaNivel3) == null) CrearEscenaNivel(RutaEscenaNivel3);
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RutaEscenaNivel4) == null) CrearEscenaNivel(RutaEscenaNivel4);
             var bd = GenerarDatos(false);
 
             // Cinemáticas, diálogos y registro emocional (Fase 8): antes del prefab, que los usa.
@@ -193,15 +195,15 @@ namespace Fragmentum.EditorTools
                 Asset<LevelData>("Niveles/L3_Miedo", sobrescribir, n => Nivel(n, 3, RutaEscenaNivel3, "Bosque Tenebroso", miedo, 4,
                     "Ansiedad, inseguridad. Explota la desorientación y la incertidumbre.",
                     new[] { "0A0A0F", "2D1B4E", "1A2E1A", "3A3A4A" }, espectro, fMiedo, invisibilidad,
-                    new ReglasNivel { sigilo = true, oscuridad = true, radioLuzJugador = DisenoNivel3.RadioLuzKael },
+                    new ReglasNivel { sigilo = true, oscuridad = true, radioLuzJugador = DisenoNivel3.RadioLuzKael, colorVeloAgua = DisenoNivel3.ColorVeloAgua },
                     SeccionesDelNivel3())),
 
-                Asset<LevelData>("Niveles/L4_Culpa", sobrescribir, n => Nivel(n, 4, null, "Campos de Batalla Arrasados", culpa, 3,
+                // El recorrido montado está en DisenoNivel4 (Docs/Diseno/Nivel4_Diseno.md).
+                Asset<LevelData>("Niveles/L4_Culpa", sobrescribir, n => Nivel(n, 4, RutaEscenaNivel4, "Campos de Batalla Arrasados", culpa, 3,
                     "Responsabilidad, remordimiento. Confronta al jugador con consecuencias.",
-                    new[] { "3C2E1E", "5C3D1E", "4A5C2E", "8B3333" }, juez, fCulpa, defensa, new ReglasNivel { agacharse = true },
-                    Seccion("Sección 1", 0, 25, "Campo abierto: Penitentes y cobertura. 1 memoria sin riesgo."),
-                    Seccion("Sección 2", 25, 60, "Ruinas con 2 rutas: alta (Artilleros y barriles) o baja (Penitentes y 2 memorias)."),
-                    Seccion("Arena del jefe", 60, 85, "Plaza central con las memorias proyectadas en el suelo."))),
+                    new[] { "3C2E1E", "5C3D1E", "4A5C2E", "8B3333" }, juez, fCulpa, defensa,
+                    new ReglasNivel { agacharse = true, colorVeloAgua = DisenoNivel4.ColorVeloAgua },
+                    SeccionesDelNivel4())),
 
                 Asset<LevelData>("Niveles/L5_Esperanza", sobrescribir, n => Nivel(n, 5, null, "Jardín Etéreo", esperanza, 1,
                     "Aceptación, reconciliación. Por primera vez el entorno no es hostil.",
@@ -228,10 +230,24 @@ namespace Fragmentum.EditorTools
             SeguirElDiseno(niveles[0], SeccionesDelNivel1(), DisenoNivel1.Checkpoints);
             SeguirElDiseno(niveles[1], SeccionesDelNivel2(), Array.ConvertAll(DisenoNivel2.Checkpoints, c => c.x));
             SeguirElDiseno(niveles[2], SeccionesDelNivel3(), Array.ConvertAll(DisenoNivel3.Checkpoints, c => c.x));
+            SeguirElDiseno(niveles[3], SeccionesDelNivel4(), Array.ConvertAll(DisenoNivel4.Checkpoints, c => c.x));
+
+            // La ciénaga (2026-10-19) llegó después de crear el asset del Nivel 3: el velo de su agua.
+            VeloDelAgua(niveles[2], DisenoNivel3.ColorVeloAgua);
+
+            // El Nivel 4 se montó el 2026-10-20 (Nivel4_Diseno.md): el velo de su río.
+            VeloDelAgua(niveles[3], DisenoNivel4.ColorVeloAgua);
+
+            // La música de los cuatro primeros niveles y de sus jefes llegó el 2026-10-23 (Musica/).
+            for (var i = 0; i < MusicaNiveles.DeLosNiveles.Length; i++)
+            {
+                MusicaNiveles.Asignar(niveles[i], MusicaNiveles.DeLosNiveles[i].musica, MusicaNiveles.DeLosNiveles[i].jefe);
+            }
 
             // Los niveles cuya escena llegó después de crear su asset: se les asigna sin tocar lo demás.
             AsignarEscenaSiFalta(niveles[1], RutaEscenaNivel2);
             AsignarEscenaSiFalta(niveles[2], RutaEscenaNivel3);
+            AsignarEscenaSiFalta(niveles[3], RutaEscenaNivel4);
             Completar(niveles[2], "7FE0B0", "lo que ocultas en la sombra crece");
             Completar(niveles[3], "C9A567", "el peso del ayer no define el mañana");
             Completar(niveles[4], "FFE4A0", "respira. el camino continúa");
@@ -243,6 +259,9 @@ namespace Fragmentum.EditorTools
                 b.escenaSelector = Escena(RutaEscenaSelector);
                 b.niveles = niveles;
             });
+
+            // La música del menú y del selector (2026-10-23, Musica/Menu).
+            MusicaNiveles.AsignarAlMenu(bd);
 
             // Las escenas de navegación pueden no existir aún cuando se crea la base de datos.
             if (!bd.escenaMenu.Asignada || !bd.escenaSelector.Asignada)
@@ -407,6 +426,22 @@ namespace Fragmentum.EditorTools
             DisenoNivel3.Secciones.Select((tramo, i) => Seccion(DisenoNivel3.TextosDeLasSecciones[i].nombre, tramo.x, tramo.y,
                 DisenoNivel3.TextosDeLasSecciones[i].contenido)).ToArray();
 
+        private static SeccionNivel[] SeccionesDelNivel4() =>
+            DisenoNivel4.Secciones.Select((tramo, i) => Seccion(DisenoNivel4.TextosDeLasSecciones[i].nombre, tramo.x, tramo.y,
+                DisenoNivel4.TextosDeLasSecciones[i].contenido)).ToArray();
+
+        // El color del velo bajo el agua de un nivel, si no es ya ese.
+        private static void VeloDelAgua(LevelData n, Color color)
+        {
+            if (n.reglas.colorVeloAgua == color)
+            {
+                return;
+            }
+
+            n.reglas.colorVeloAgua = color;
+            EditorUtility.SetDirty(n);
+        }
+
         // Pone en el nivel los tramos y los checkpoints de su diseño, si no son ya esos: cuántos
         // son, de dónde a dónde van y qué dicen.
         private static void SeguirElDiseno(LevelData n, SeccionNivel[] tramos, float[] puntosDeControl)
@@ -564,13 +599,14 @@ namespace Fragmentum.EditorTools
             FabricaUI.Colocar(subtitulo.rectTransform, arribaIzquierda, new Vector2(126f, -240f), new Vector2(1100f, 56f), arribaIzquierda);
 
             var columna = FabricaUI.Objeto("Botones", lienzo);
-            FabricaUI.Colocar(columna, new Vector2(0f, 0.5f), new Vector2(120f, -110f), new Vector2(460f, 502f), new Vector2(0f, 0.5f));
+            FabricaUI.Colocar(columna, new Vector2(0f, 0.5f), new Vector2(120f, -90f), new Vector2(460f, 588f), new Vector2(0f, 0.5f));
             FabricaUI.Columna(columna, 14f);
             var continuar = FabricaUI.Boton(columna, "Continuar", "Continuar", Hex("8B1A1A"), 72f);
             var nueva = FabricaUI.Boton(columna, "NuevaPartida", "Nueva partida", Hex("5C4033"), 72f);
             var selector = FabricaUI.Boton(columna, "Selector", "Seleccionar mundo", Hex("2C3E50"), 72f);
             var yo = FabricaUI.Boton(columna, "YoReconstruido", "Yo reconstruido", Hex("2D1B4E"), 72f);
             var mecanicas = FabricaUI.Boton(columna, "Mecanicas", "Mecánicas", Hex("1F3D3A"), 72f);
+            var opciones = FabricaUI.Boton(columna, "Opciones", "Opciones", Hex("33404A"), 72f);
             var salir = FabricaUI.Boton(columna, "Salir", "Salir", Hex("3A3A4A"), 72f);
 
             var progreso = FabricaUI.Texto(lienzo, "Progreso", string.Empty, 26, new Color(1f, 1f, 1f, 0.75f), TextAnchor.MiddleLeft);
@@ -587,6 +623,7 @@ namespace Fragmentum.EditorTools
             Asignar(menu, "botonSelector", p => p.objectReferenceValue = selector);
             Asignar(menu, "botonYoReconstruido", p => p.objectReferenceValue = yo);
             Asignar(menu, "botonMecanicas", p => p.objectReferenceValue = mecanicas);
+            Asignar(menu, "botonOpciones", p => p.objectReferenceValue = opciones);
             Asignar(menu, "botonSalir", p => p.objectReferenceValue = salir);
             Asignar(menu, "textoProgreso", p => p.objectReferenceValue = progreso);
 

@@ -19,16 +19,37 @@ MonoBehaviour:
     carteles: []
     duracion: 7
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 6be78c58f56381245a3cb4c783152380, type: 3}
     texto: Hubo una guerra.
     carteles: []
     duracion: 8
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: bab7e1eadf35e3c46aeed407b96304a8, type: 3}
     texto: "Alguien volvi\xF3 de ella."
     carteles: []
     duracion: 6
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 72fe536e166374249b190d68e1aca40d, type: 3}
     texto: 
     carteles:
@@ -37,43 +58,100 @@ MonoBehaviour:
       duracion: 2.5
       posicion: 2
       titulo: 0
+      sinFundido: 0
+      enPunto: 0
+      punto: {x: 0, y: 0}
+      alineacion: 0
     - texto: "As\xED que decidi\xF3 no sentirlo."
       inicio: 3.5
       duracion: 3
       posicion: 2
       titulo: 0
+      sinFundido: 0
+      enPunto: 0
+      punto: {x: 0, y: 0}
+      alineacion: 0
     duracion: 7
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 054eb6e82b6ef4248b77c5bd3e160ed6, type: 3}
     texto: 
     carteles: []
     duracion: 6
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 5e07dc501ad0897498baaa271ee82985, type: 3}
     texto: Le sacaron todo lo que pesaba.
     carteles: []
     duracion: 7
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 7ecc0647fd4b26547a5819a76dbe3d34, type: 3}
     texto: "Pero lo que neg\xF3 no desapareci\xF3."
     carteles: []
     duracion: 8
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 56d34aa200e606140b9317973a6b3e18, type: 3}
     texto: "Tom\xF3 forma, y se qued\xF3 esper\xE1ndolo."
     carteles: []
     duracion: 7
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 27ea573202f47f24dbc8738e6a367662, type: 3}
     texto: 
     carteles: []
     duracion: 8
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: b570f3310ddc3414e9a82a3d8c133038, type: 3}
     texto: "Y con lo que sobr\xF3, hicieron a alguien nuevo."
     carteles: []
     duracion: 7
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 73f8e59a3daa2db4c88954b976d96196, type: 3}
     texto: 
     carteles:
@@ -82,15 +160,45 @@ MonoBehaviour:
       duracion: 3.4
       posicion: 0
       titulo: 1
+      sinFundido: 0
+      enPunto: 0
+      punto: {x: 0, y: 0}
+      alineacion: 0
     duracion: 5
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 21300000, guid: 658bcaae1554ed045889c6f292711bdf, type: 3}
     texto: "\xBFQu\xE9 es lo que no est\xE1s mirando?"
     carteles: []
     duracion: 4
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   saltable: 1
   soloPrimeraVez: 1
+  llevaDialogoDelJefe: 0
+  montaje: 0
+  sobreElJuego: 0
+  opacidadVelo: 0.55
+  escalaEntera: 0
+  rejilla: {x: 240, y: 135}
+  fuente: {fileID: 0}
+  tamanoFuente: 8
+  interlineado: 0
+  colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
+  temblorPixeles: 1
+  temblorFotogramas: 4
   fundidoImagen: 0.6
   fundidoTexto: 0.4
   margenTexto: 0.8
@@ -98,4 +206,4 @@ MonoBehaviour:
   avisoSaltar: Pulsa cualquier tecla para saltar
   finAviso: 5
   opacidadAviso: 0.45
-  musica: {fileID: 0}
+  musica: {fileID: 8300000, guid: 26ad8b947acfe2049adb6b84c5b5b56e, type: 3}

@@ -1,0 +1,262 @@
+<?xml version="1.0"?>
+<!DOCTYPE lmms-project>
+<lmms-project version="1.0" creator="LMMS" creatorversion="1.2.2" type="song">
+  <head bpm="60" timesig_numerator="4" timesig_denominator="4" mastervol="100" masterpitch="0" />
+  <song>
+    <trackcontainer type="song">
+      <track name="Zumbido grave" type="0" muted="0" solo="0">
+        <instrumenttrack vol="11" pan="0" fxch="2" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="tripleoscillator">
+            <tripleoscillator wavetype0="0" vol0="60" coarse0="0" finel0="0" finer0="0" pan0="0" phoffset0="0" stphdetun0="0" userwavefile0="" wavetype1="0" vol1="25" coarse1="12" finel1="-4" finer1="4" pan1="0" phoffset1="0" stphdetun1="0" userwavefile1="" wavetype2="0" vol2="0" coarse2="0" finel2="0" finer2="0" pan2="0" phoffset2="0" stphdetun2="0" userwavefile2="" modalgo1="2" modalgo2="2" modalgo3="2" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0.774597" hold="0" dec="0" sustain="1" rel="0.774597" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Zumbido grave" pos="0" len="768" steps="16" muted="0" type="1">
+          <note pos="0" len="720" key="13" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Zumbido grave" pos="1536" len="768" steps="16" muted="0" type="1">
+          <note pos="0" len="720" key="13" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Zumbido grave" pos="2688" len="1344" steps="16" muted="0" type="1">
+          <note pos="0" len="1296" key="13" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Zumbido grave" pos="4800" len="1152" steps="16" muted="0" type="1">
+          <note pos="0" len="1104" key="13" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Zumbido grave" pos="6720" len="1152" steps="16" muted="0" type="1">
+          <note pos="0" len="1104" key="13" vol="90" pan="0" />
+        </pattern>
+        <pattern name="Zumbido grave" pos="8640" len="576" steps="16" muted="0" type="1">
+          <note pos="0" len="528" key="13" vol="90" pan="0" />
+        </pattern>
+      </track>
+      <track name="Viento" type="0" muted="0" solo="0">
+        <instrumenttrack vol="88" pan="0" fxch="2" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="tripleoscillator">
+            <tripleoscillator wavetype0="6" vol0="60" coarse0="0" finel0="0" finer0="0" pan0="0" phoffset0="0" stphdetun0="0" userwavefile0="" wavetype1="0" vol1="0" coarse1="0" finel1="0" finer1="0" pan1="0" phoffset1="0" stphdetun1="0" userwavefile1="" wavetype2="0" vol2="0" coarse2="0" finel2="0" finer2="0" pan2="0" phoffset2="0" stphdetun2="0" userwavefile2="" modalgo1="2" modalgo2="2" modalgo3="2" />
+          </instrument>
+          <eldata fcut="350" fres="0.8" ftype="0" fwet="1">
+            <elvol pdel="0" att="0.83666" hold="0" dec="0" sustain="1" rel="0.83666" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0.894427" hold="0" dec="0.5" sustain="0.6" rel="0.774597" amt="0.12" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Viento" pos="576" len="576" steps="16" muted="0" type="1">
+          <note pos="0" len="552" key="57" vol="79" pan="0" />
+        </pattern>
+        <pattern name="Viento" pos="2496" len="384" steps="16" muted="0" type="1">
+          <note pos="0" len="360" key="57" vol="82" pan="0" />
+        </pattern>
+        <pattern name="Viento" pos="4224" len="384" steps="16" muted="0" type="1">
+          <note pos="0" len="360" key="57" vol="74" pan="0" />
+        </pattern>
+        <pattern name="Viento" pos="5568" len="384" steps="16" muted="0" type="1">
+          <note pos="0" len="360" key="57" vol="95" pan="0" />
+        </pattern>
+        <pattern name="Viento" pos="7296" len="384" steps="16" muted="0" type="1">
+          <note pos="0" len="360" key="57" vol="83" pan="0" />
+        </pattern>
+        <pattern name="Viento" pos="8640" len="576" steps="16" muted="0" type="1">
+          <note pos="0" len="552" key="57" vol="86" pan="0" />
+        </pattern>
+      </track>
+      <track name="Rama" type="0" muted="0" solo="0">
+        <instrumenttrack vol="157" pan="-3" fxch="3" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="drums/wood01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Rama" pos="1536" len="384" steps="16" muted="0" type="1">
+          <note pos="37" len="192" key="53" vol="96" pan="0" />
+        </pattern>
+        <pattern name="Rama" pos="6144" len="384" steps="16" muted="0" type="1">
+          <note pos="29" len="192" key="53" vol="99" pan="0" />
+          <note pos="58" len="192" key="51" vol="60" pan="0" />
+        </pattern>
+        <pattern name="Rama" pos="7488" len="384" steps="16" muted="0" type="1">
+          <note pos="181" len="192" key="52" vol="83" pan="0" />
+        </pattern>
+        <pattern name="Rama" pos="8832" len="384" steps="16" muted="0" type="1">
+          <note pos="161" len="192" key="60" vol="93" pan="0" />
+          <note pos="177" len="192" key="58" vol="60" pan="0" />
+        </pattern>
+      </track>
+      <track name="Crujido" type="0" muted="0" solo="0">
+        <instrumenttrack vol="108" pan="1" fxch="3" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="drums/rim01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Crujido" pos="768" len="384" steps="16" muted="0" type="1">
+          <note pos="50" len="192" key="46" vol="99" pan="0" />
+        </pattern>
+        <pattern name="Crujido" pos="6528" len="384" steps="16" muted="0" type="1">
+          <note pos="74" len="192" key="44" vol="101" pan="0" />
+        </pattern>
+        <pattern name="Crujido" pos="8256" len="384" steps="16" muted="0" type="1">
+          <note pos="49" len="192" key="45" vol="85" pan="0" />
+        </pattern>
+      </track>
+      <track name="Aliento" type="0" muted="0" solo="0">
+        <instrumenttrack vol="158" pan="10" fxch="3" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="misc/breath01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Aliento" pos="3456" len="384" steps="16" muted="0" type="1">
+          <note pos="160" len="192" key="50" vol="71" pan="0" />
+        </pattern>
+      </track>
+      <track name="Campana lejana" type="0" muted="0" solo="0">
+        <instrumenttrack vol="70" pan="-10" fxch="3" basenote="38" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="misc/dong02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Campana lejana" pos="0" len="384" steps="16" muted="0" type="1">
+          <note pos="145" len="192" key="24" vol="103" pan="0" />
+        </pattern>
+      </track>
+      <track name="Carillon" type="0" muted="0" solo="0">
+        <instrumenttrack vol="77" pan="-4" fxch="3" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="effects/wind_chimes01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Carillon" pos="3072" len="384" steps="16" muted="0" type="1">
+          <note pos="148" len="192" key="46" vol="86" pan="0" />
+        </pattern>
+      </track>
+      <track name="Golpe sordo" type="0" muted="0" solo="0">
+        <instrumenttrack vol="67" pan="-6" fxch="3" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="drums/bassdrum_acoustic02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Golpe sordo" pos="1920" len="384" steps="16" muted="0" type="1">
+          <note pos="127" len="192" key="49" vol="97" pan="0" />
+        </pattern>
+        <pattern name="Golpe sordo" pos="4992" len="384" steps="16" muted="0" type="1">
+          <note pos="22" len="192" key="52" vol="105" pan="0" />
+        </pattern>
+      </track>
+      <track name="Zumbido" type="0" muted="0" solo="0">
+        <instrumenttrack vol="190" pan="-31" fxch="3" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="effects/warp01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.34641" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Zumbido" pos="2496" len="384" steps="16" muted="0" type="1">
+          <note pos="154" len="192" key="54" vol="102" pan="0" />
+        </pattern>
+        <pattern name="Zumbido" pos="4224" len="384" steps="16" muted="0" type="1">
+          <note pos="66" len="192" key="53" vol="109" pan="0" />
+        </pattern>
+        <pattern name="Zumbido" pos="5376" len="384" steps="16" muted="0" type="1">
+          <note pos="88" len="192" key="52" vol="81" pan="0" />
+        </pattern>
+        <pattern name="Zumbido" pos="6912" len="384" steps="16" muted="0" type="1">
+          <note pos="147" len="192" key="52" vol="105" pan="0" />
+        </pattern>
+      </track>
+    </trackcontainer>
+    <fxmixer>
+      <fxchannel num="0" name="Master" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+      </fxchannel>
+      <fxchannel num="1" name="Reverb" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="1" enabled="1">
+          <effect name="reverbsc" on="1" wet="1" gate="0" autoquit="8000" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <ReverbSCControls input_gain="0" size="0.93" color="3500" output_gain="0" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+      </fxchannel>
+      <fxchannel num="2" name="Fondo" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.4" />
+      </fxchannel>
+      <fxchannel num="3" name="Bosque" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="1" enabled="1">
+          <effect name="dualfilter" on="1" wet="1" gate="0" autoquit="1" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <DualFilterControls enabled1="1" filter1="0" cut1="5000" res1="0.5" gain1="100" enabled2="0" filter2="0" cut2="14000" res2="0.5" gain2="100" mix="-1" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.7" />
+      </fxchannel>
+    </fxmixer>
+    <timeline lp0pos="0" lp1pos="9216" lpstate="1" />
+    <controllers />
+    <projectnotes>Nivel 3 (el Miedo). Casi silencio: 48 compases a 60 BPM (192 s), sin pulso. Un zumbido grave que va y viene, viento a ratos y, cada 8 a 16 s, un ruido del bosque, al azar (siempre el mismo: componer_nivel3.py, SEMILLA). Suena muy bajo: lo normaliza a -30 dB exportar_musica.py.</projectnotes>
+  </song>
+</lmms-project>

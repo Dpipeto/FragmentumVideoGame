@@ -12,7 +12,7 @@ namespace Fragmentum.EditorTools
     /// valor de diseño nuevo no llegaría a ellos de otra forma).
     ///
     /// <b>El criterio.</b> Un enemigo común vale 100. El que aguanta más o pega más fuerte, algo
-    /// más. Un mini-jefe (el Golem de Ceniza, la Plañidera, el Acechador) vale varias veces un
+    /// más. Un mini-jefe (el Golem de Ceniza, la Plañidera, el Acechador, el Verdugo) vale varias veces un
     /// enemigo común: es la pelea que el jugador puede saltarse corriendo (o caminando, en el
     /// claro del Miedo), y el puntaje paga por no saltársela.
     /// Un jefe vale más que todo lo demás de su mundo junto a su mini-jefe, y cada mundo, más que
@@ -34,16 +34,19 @@ namespace Fragmentum.EditorTools
             ("SoldadoLava", EnemigoComun),
             ("EcoIra", EnemigoComun),
             ("Lamento", EnemigoComun),
+            ("Penitente", EnemigoComun),
             ("Espectro", 150),
             ("CentinelaCiego", 150),
             ("Escultura", 250),
             ("GolemCeniza", 500),
             ("Planidera", 600),
             ("Acechador", 700),
+            ("Artillero", 150),
+            ("Verdugo", 800),
         };
 
         /// <summary>Los que son mini-jefes: valen varias veces un enemigo común.</summary>
-        public static readonly string[] MiniJefes = { "GolemCeniza", "Planidera", "Acechador" };
+        public static readonly string[] MiniJefes = { "GolemCeniza", "Planidera", "Acechador", "Verdugo" };
 
         /// <summary>Los jefes, por el nombre de su asset en <c>Assets/Data/Jefes</c>.</summary>
         public static readonly (string asset, int puntos)[] Jefes =
@@ -57,17 +60,18 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// Segundos de juego con bono de cada nivel, por su id. Los de los niveles montados salen de lo
-        /// que miden (<see cref="DisenoNivel1"/>, <see cref="DisenoNivel2"/> y <see cref="DisenoNivel3"/>):
-        /// el doble, más o menos, de lo que tarda quien los conoce. El Nivel 3, que se cruza caminando
-        /// para no hacer ruido, lleva 15 minutos (Nivel3_Diseno.md, decisión 9). Los demás llevan 12
-        /// hasta que existan.
+        /// que miden (<see cref="DisenoNivel1"/>, <see cref="DisenoNivel2"/>, <see cref="DisenoNivel3"/> y
+        /// <see cref="DisenoNivel4"/>): el doble, más o menos, de lo que tarda quien los conoce. El Nivel 3,
+        /// que se cruza caminando para no hacer ruido, lleva 16 minutos: 15 (Nivel3_Diseno.md, decisión 9)
+        /// y uno más por la ciénaga (sección 10). El Nivel 4, también 16 (Nivel4_Diseno.md, decisión 1):
+        /// se espera tras la cobertura, se bucea y las memorias se miran. Los demás llevan 12 hasta que existan.
         /// </summary>
         public static readonly (int nivel, float tiempoConBono)[] Niveles =
         {
             (1, 600f),
             (2, 780f),
-            (3, 900f),
-            (4, 720f),
+            (3, 960f),
+            (4, 960f),
             (5, 720f),
             (6, 720f),
         };

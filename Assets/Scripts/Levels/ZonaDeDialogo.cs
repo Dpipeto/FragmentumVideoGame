@@ -15,6 +15,10 @@ namespace Fragmentum.Levels
     /// cuando un golpe normal lo agrieta sin romperlo (que es cuando el jugador acaba de ver que
     /// no basta), y calla si el hielo ya está roto.
     ///
+    /// La usa también la pista de la ciénaga (mundo del Miedo): ante el agua, Kael dice que las
+    /// raíces se cruzan con el Dash Acuático; con sus <see cref="maranas"/> asignadas, la dice otra vez
+    /// cuando una lo tiene sujeto unos segundos.
+    ///
     /// Cada motivo vale una vez, y la línea nunca suena dos veces seguidas: si acaba de sonar por
     /// uno, el otro se da por dicho.
     /// </summary>
@@ -26,17 +30,23 @@ namespace Fragmentum.Levels
         [Tooltip("Opcional. La línea suena también cuando este hielo se agrieta sin romperse, y calla si ya está roto.")]
         [SerializeField] private HieloRompible hielo;
 
+        [Tooltip("Opcional. La línea suena también cuando una de estas marañas tiene sujeto a Kael unos segundos.")]
+        [SerializeField] private Marana[] maranas = new Marana[0];
+
         [Tooltip("Segundos que tienen que pasar para que vuelva a sonar.")]
         [Min(0f)] [SerializeField] private float esperaEntreVeces = 8f;
 
         private LevelManager _nivel;
         private bool _dichaAlEntrar;
         private bool _dichaAlAgrietar;
+        private bool _dichaAlSujetar;
         private float _ultimaVez = float.NegativeInfinity;
 
         public MOMENTOS_DIALOGO Momento => momento;
 
         public HieloRompible Hielo => hielo;
+
+        public Marana[] Maranas => maranas;
 
         /// <summary>Cuántas veces ha sonado.</summary>
         public int Veces { get; private set; }
@@ -49,6 +59,14 @@ namespace Fragmentum.Levels
             {
                 hielo.OnCambioEstado += AlCambiarElHielo;
             }
+
+            foreach (var marana in maranas)
+            {
+                if (marana != null)
+                {
+                    marana.OnSujetaDemasiado += AlSujetarlo;
+                }
+            }
         }
 
         private void OnDisable()
@@ -56,6 +74,14 @@ namespace Fragmentum.Levels
             if (hielo != null)
             {
                 hielo.OnCambioEstado -= AlCambiarElHielo;
+            }
+
+            foreach (var marana in maranas)
+            {
+                if (marana != null)
+                {
+                    marana.OnSujetaDemasiado -= AlSujetarlo;
+                }
             }
         }
 
@@ -85,6 +111,17 @@ namespace Fragmentum.Levels
             }
 
             _dichaAlAgrietar = true;
+            Decir();
+        }
+
+        private void AlSujetarlo()
+        {
+            if (_dichaAlSujetar)
+            {
+                return;
+            }
+
+            _dichaAlSujetar = true;
             Decir();
         }
 

@@ -193,6 +193,12 @@ namespace Fragmentum.Tests
                 Assert.IsFalse(Patron(nombre).dibujarZona, $"{nombre}: el golpe lo enseña la animación de la Centinela.");
             }
 
+            // Ni los del Espectro del Pavor: su aviso y su golpe los enseñan sus gestos y el dibujo de las hojas.
+            foreach (var nombre in new[] { "Tajo", "EmbestidaSombra", "Hojas", "Sombras" })
+            {
+                Assert.IsFalse(Patron(nombre).dibujarZona, $"{nombre}: con el arte del Pavor no se pinta el rectángulo verde.");
+            }
+
             foreach (var nombre in new[] { "OndaDeSuelo", "OndaDoble", "PlataformasEnErupcion", "ErupcionEnRafaga" })
             {
                 Assert.IsTrue(Patron(nombre).dibujarZona, $"{nombre}: sin arte propio todavía, no puede hacer daño invisible.");

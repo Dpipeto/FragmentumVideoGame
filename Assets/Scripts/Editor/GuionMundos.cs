@@ -32,9 +32,25 @@ namespace Fragmentum.EditorTools
 
             /// <summary>
             /// Lo que Kael se dice ante el obstáculo del mundo que pide una habilidad que ya tiene
-            /// (el tapón de hielo y el Ataque Cargado). Vacío: el mundo no tiene.
+            /// (el tapón de hielo y el Ataque Cargado; las raíces de la ciénaga y el Dash Acuático).
+            /// Vacío: el mundo no tiene.
             /// </summary>
             public string Pista;
+
+            /// <summary>
+            /// La segunda pista, si el mundo la tiene: ante la tierra de nadie de la Culpa, la
+            /// Invisibilidad. Vacío: el mundo no tiene.
+            /// </summary>
+            public string PistaInvisibilidad;
+
+            /// <summary>Lo que Kael dice en la orilla de un agua que se cruza buceando (el río de la Culpa). Vacío: no tiene.</summary>
+            public string Orilla;
+
+            /// <summary>
+            /// Las memorias que se recuerdan con Interactuar (la Culpa, Anexo A): su id y lo que Kael dice
+            /// en su cinemática.
+            /// </summary>
+            public (string id, string texto)[] Memorias = new (string, string)[0];
 
             public string Cierre;
 
@@ -82,6 +98,7 @@ namespace Fragmentum.EditorTools
                 Apertura = "No veo mis propios pasos. Algo respira entre los árboles… o soy yo. Esto es el Miedo.",
                 EcoMemoria = "Una trinchera. Un silencio demasiado largo. Él se quedó quieto para que no lo encontraran.",
                 AntesDelJefe = "Él aprendió a desaparecer para seguir vivo. Yo soy todo lo que dejó escondido.",
+                Pista = "Raíces bajo el agua. Si dudo entre ellas, me atrapan. Tengo que cruzarlas de golpe: con el Dash Acuático.",
                 Cierre = "El Miedo no se fue: dejó de decidir por mí. Puedo andar en la sombra sin perderme en ella.",
                 CinematicaCierre = new[]
                 {
@@ -96,6 +113,16 @@ namespace Fragmentum.EditorTools
                 Apertura = "Aquí nada se movió desde el último disparo. Es la Culpa de otro… y la siento mía.",
                 EcoMemoria = "Una orden. Un sí. Un pueblo que ya no está. Él lo recuerda cada día con los ojos abiertos.",
                 AntesDelJefe = "No dicto sentencia. Solo te muestro lo que él se negó a mirar.",
+                Pista = "Ese barril… Un Ataque Cargado y no quedaría nada a su alrededor. Ni yo, si me quedo cerca.",
+                PistaInvisibilidad = "Ni un escombro hasta la torre: si me ven, no llego. Con la Invisibilidad no me verán… pero dura poco: hay que correr.",
+                Orilla = "Volamos el puente para que nadie nos siguiera. Ahora el que tiene que cruzar soy yo.",
+                Memorias = new[]
+                {
+                    ("LaOrden", "Una radio entre el barro. «Adelante». Él dice que sí antes de preguntar adónde."),
+                    ("ElPueblo", "Una campana caída entre cenizas. Nadie la tocó para avisar. Él tampoco."),
+                    ("ElCompanero", "Una placa con un nombre que no es el suyo. Se la guardó. Nunca supo a quién devolverla."),
+                    ("LaCarta", "Una carta que solo dice «Lo siento». La escribió muchas veces. Nunca la envió."),
+                },
                 Cierre = "Mirarlo no me destruyó. La Culpa es un peso, no un nombre. Puedo cargarlo y seguir de pie.",
                 CinematicaCierre = new[]
                 {

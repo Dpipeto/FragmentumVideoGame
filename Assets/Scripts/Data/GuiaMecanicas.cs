@@ -20,7 +20,7 @@ namespace Fragmentum.Data
     {
         public string nombre;
 
-        [Tooltip("Teclas. Las acciones van entre llaves y se leen del asset de input: {Jump} → ESPACIO. " +
+        [Tooltip("Teclas. Las acciones van entre llaves y se leen del asset de input: {Jump} → ESPACIO / K. " +
                  "Con una barra se eligen las partes de un compuesto: {Move/left,right} → A D / ← →.")]
         public string controles;
 

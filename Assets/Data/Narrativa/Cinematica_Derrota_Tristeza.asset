@@ -59,4 +59,4 @@ MonoBehaviour:
   avisoSaltar: Pulsa cualquier tecla para saltar
   finAviso: 4
   opacidadAviso: 0.45
-  musica: {fileID: 0}
+  musica: {fileID: 8300000, guid: afdc12aa6e6dd0248a73934fa8d18656, type: 3}

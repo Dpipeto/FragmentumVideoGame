@@ -280,14 +280,19 @@ namespace Fragmentum.EditorTools
         /// <summary>Nombre del cuerpo liso de una zona de agua.</summary>
         public static string NombreCuerpoDelAgua(DisenoNivel2.Zona zona) => $"Cuerpo_{zona.Nombre}";
 
+        private static void DibujarAgua(Transform padre, DisenoNivel2.Zona zona, Sprite[] superficie) =>
+            DibujarAgua(padre, zona, superficie, ConstructorMecanicasMundo2.ColorAgua, ConstructorMecanicasMundo2.FondoDeLaSuperficie,
+                ConstructorMecanicasMundo2.SegundosAgua);
+
         // La superficie, repetida a lo ancho y en bucle, con su línea a la altura del agua; por debajo,
         // un rectángulo liso del color con el que acaba, hasta el fondo. Los dos, igual de translúcidos.
-        private static void DibujarAgua(Transform padre, DisenoNivel2.Zona zona, Sprite[] superficie)
+        // La ciénaga del Nivel 3 la dibuja igual, con su agua.
+        private static void DibujarAgua(Transform padre, DisenoNivel2.Zona zona, Sprite[] superficie, Color color, float fondoDeLaSuperficie,
+            float segundos)
         {
             var ancho = zona.Hasta - zona.Desde;
             var centro = (zona.Desde + zona.Hasta) * 0.5f;
-            var color = ConstructorMecanicasMundo2.ColorAgua;
-            var techoDelCuerpo = zona.Arriba - ConstructorMecanicasMundo2.FondoDeLaSuperficie;
+            var techoDelCuerpo = zona.Arriba - fondoDeLaSuperficie;
             if (techoDelCuerpo > zona.Abajo)
             {
                 Visual(padre, NombreCuerpoDelAgua(zona), new Vector2(centro, (zona.Abajo + techoDelCuerpo) * 0.5f),
@@ -314,7 +319,7 @@ namespace Fragmentum.EditorTools
                     p.GetArrayElementAtIndex(i).objectReferenceValue = superficie[i];
                 }
             });
-            Asignar(bucle, "segundos", p => p.floatValue = ConstructorMecanicasMundo2.SegundosAgua);
+            Asignar(bucle, "segundos", p => p.floatValue = segundos);
         }
 
         private static Color DePaleta(LevelData nivel, int indice, Color porDefecto) =>

@@ -43,14 +43,15 @@ namespace Fragmentum.Tests
         private static PantallaMecanicas.Fila[] Filas(DatosGuardado datos, LevelData nivelActual = null, System.Func<HABILIDADES, bool> enVivo = null) =>
             PantallaMecanicas.Calcular(Guia(), BaseDeDatos(), datos, nivelActual, enVivo, Acciones()).ToArray();
 
-        [TestCase("{Jump}", "ESPACIO")]
+        [TestCase("{Jump}", "ESPACIO / K")]
         [TestCase("{Sprint}", "SHIFT")]
-        [TestCase("{Attack}", "CLIC / ENTER")]
-        [TestCase("{Crouch}", "C / CTRL")]
+        [TestCase("{Attack}", "CLIC / J")]
+        [TestCase("{Crouch}", "S")]
+        [TestCase("{Interact}", "W")]
         [TestCase("{Ability}", "Q")]
-        [TestCase("{Walk}", "ALT")]
+        [TestCase("{Walk}", "CTRL")]
         [TestCase("{Move/left,right}", "A D / ← →")]
-        [TestCase("Mantén {Attack}", "Mantén CLIC / ENTER")]
+        [TestCase("Mantén {Attack}", "Mantén CLIC / J")]
         [TestCase("Pasiva", "Pasiva")]
         [TestCase("{NoExiste}", EtiquetasControles.SinTecla)]
         public void LasTeclas_SalenDelAssetDeInput(string plantilla, string esperado)
@@ -105,7 +106,7 @@ namespace Fragmentum.Tests
             var cargado = habilidades[0];
             Assert.IsFalse(cargado.Bloqueada);
             Assert.AreEqual("Ataque Cargado", cargado.Nombre);
-            Assert.AreEqual("Mantén CLIC / ENTER", cargado.Controles);
+            Assert.AreEqual("Mantén CLIC / J", cargado.Controles);
             Assert.AreEqual("Fragmento de la Ira", cargado.Origen);
             Assert.AreEqual(BaseDeDatos().niveles[0].ColorAcento, cargado.Color, "Con el color de su mundo.");
             Assert.IsTrue(habilidades.Skip(1).All(h => h.Bloqueada));
@@ -129,7 +130,7 @@ namespace Fragmentum.Tests
 
             datos.nivelMaximoAlcanzado = 4;
             var agacharse = Filas(datos).Single(f => f.Nombre == "Agacharse");
-            Assert.AreEqual("C / CTRL", agacharse.Controles);
+            Assert.AreEqual("S", agacharse.Controles);
 
             var culpa = BaseDeDatos().niveles.First(n => n.reglas.agacharse);
             Assert.IsTrue(Filas(new DatosGuardado(), culpa).Any(f => f.Nombre == "Agacharse"), "Y dentro de ese mundo, siempre.");
@@ -158,7 +159,7 @@ namespace Fragmentum.Tests
             {
                 var filas = PantallaMecanicas.Calcular(guia, null, null, null, null, Acciones());
                 Assert.AreEqual(7, filas.Count, "Sin base de datos: los movimientos y ninguna habilidad.");
-                Assert.AreEqual("ESPACIO", filas[2].Controles);
+                Assert.AreEqual("ESPACIO / K", filas[2].Controles);
             }
             finally
             {

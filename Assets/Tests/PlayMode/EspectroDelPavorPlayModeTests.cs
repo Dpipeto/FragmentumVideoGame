@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Fragmentum.Bosses;
 using Fragmentum.Bosses.Patrones;
+using Fragmentum.Core;
 using Fragmentum.Core.Combate;
 using Fragmentum.Data;
 using Fragmentum.Player;
@@ -18,9 +19,10 @@ namespace Fragmentum.Tests.PlayMode
     /// una arena de 25 u como la suya:
     ///
     /// - Antes del combate se ve; al empezar se desvanece, y los golpes lo atraviesan.
-    /// - El tajo aparece a la espalda de Kael (delante, si Kael está contra una pared), avisa 1 s,
+    /// - El tajo aparece a la espalda de Kael (delante, si Kael está contra una pared), avisa 0,6 s,
     ///   quita 2 y deja una ventana de 1,5 s en la que los golpes valen el doble.
-    /// - La embestida cruza la arena desde la pared más lejana a Kael y al otro lado se ve 1 s.
+    /// - La embestida cruza la arena desde la pared más lejana a Kael, a su altura (por su rama, si
+    ///   está en una; a ras de suelo, si está debajo), y al otro lado se ve 1 s.
     /// - Las hojas brillan en cuatro o cinco franjas, la primera bajo Kael, y después quitan 1.
     /// - Las sombras: tres figuras, solo la verdadera con luciérnaga dorada; golpear a una sombra la
     ///   deshace y encoge la luz de Kael 3 s; golpear a la verdadera las deshace a todas; lanzan su
@@ -32,6 +34,10 @@ namespace Fragmentum.Tests.PlayMode
         private const string RutaPrefab = "Assets/Prefabs/Jefes/EspectroDelPavor.prefab";
         private const string CarpetaPatrones = "Assets/Data/Jefes/Patrones";
         private static readonly Vector2 LimitesArena = new Vector2(-12.5f, 12.5f);
+
+        // Una rama como las de su arena: a 3,5 u, de media unidad de grueso.
+        private const float Rama = 3.5f;
+        private const float GrosorRama = 0.5f;
 
         [UnityTearDown]
         public IEnumerator BorrarZonas()
@@ -102,7 +108,7 @@ namespace Fragmentum.Tests.PlayMode
         // --- Tajo ---
 
         [UnityTest]
-        public IEnumerator ElTajo_ApareceALaEspaldaDeKael_AvisaUnSegundo_QuitaDos_YJadeaUnoYMedio()
+        public IEnumerator ElTajo_ApareceALaEspaldaDeKael_AvisaSeisDecimas_QuitaDos_YJadeaUnoYMedio()
         {
             var pavor = CrearPavor(8f);
             Solo(pavor, "Tajo");
@@ -116,7 +122,7 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsTrue(pavor.Tangible, "Mientras avisa, se le ve y se le puede golpear.");
             var aviso = Time.time;
             yield return EsperarHasta(() => Jugador.Vida.Vida < vidaKael, 1.5f, "que el tajo alcance a Kael, que no se movió");
-            Assert.AreEqual(1f, Time.time - aviso, 0.15f, "Tras 1 s de aviso.");
+            Assert.AreEqual(0.6f, Time.time - aviso, 0.15f, "Tras 0,6 s de aviso.");
             Assert.AreEqual(vidaKael - 2, Jugador.Vida.Vida, "El tajo quita 2.");
 
             yield return EsperarHasta(() => pavor.EsVulnerable, 0.6f, "que se quede jadeando");
@@ -162,6 +168,45 @@ namespace Fragmentum.Tests.PlayMode
             Assert.IsTrue(pavor.Visible, "Al otro lado se queda a la vista…");
             yield return new WaitForSeconds(1.2f);
             Assert.IsFalse(pavor.Visible, "…1 s.");
+        }
+
+        [UnityTest]
+        public IEnumerator ConKaelEnUnaRama_LaEmbestidaCruzaPorLaRama_YLeAlcanza()
+        {
+            var pavor = CrearPavor();
+            Solo(pavor, "EmbestidaSombra");
+            Bloque("Rama", 3f, 7f, Rama - GrosorRama, Rama, Capas.Suelo);
+            yield return CrearJugadorEnSuelo(new Vector2(5f, Rama));
+            var vidaKael = Jugador.Vida.Vida;
+            pavor.Activar(Jugador.transform, LimitesArena);
+
+            yield return EsperarHasta(() => pavor.Destellando, 2.5f, "que aparezca junto a una pared");
+            Assert.Less(pavor.Centro.x, LimitesArena.x + 2f, "La pared más lejana a Kael: la de la izquierda.");
+            Assert.AreEqual(Rama, pavor.Pies.y, 0.05f, "A la altura de Kael: con los pies a la de su rama, en el aire.");
+
+            yield return EsperarHasta(() => Zonas("Embestida").Count > 0, 1f, "que embista");
+            Assert.AreEqual(Rama + 0.8f, Zonas("Embestida")[0].transform.position.y, 0.05f, "La embestida va por la rama.");
+            yield return EsperarHasta(() => Jugador.Vida.Vida < vidaKael, 2f, "que lo arrolle en su rama");
+            Assert.AreEqual(vidaKael - 1, Jugador.Vida.Vida, "Quita 1.");
+            Assert.AreEqual(Rama, pavor.Pies.y, 0.05f, "Cruza sin bajar.");
+
+            pavor.Vida.Matar();
+            yield return null;
+            Assert.IsTrue(pavor.Derrotado);
+            Assert.AreEqual(pavor.Suelo, pavor.Pies.y, 0.05f, "Si cae en el aire, cae al suelo de su arena: allí deja su fragmento.");
+        }
+
+        [UnityTest]
+        public IEnumerator ConKaelBajoUnaRama_LaEmbestidaVaARasDeSuelo()
+        {
+            var pavor = CrearPavor();
+            Solo(pavor, "EmbestidaSombra");
+            Bloque("Rama", 3f, 7f, Rama - GrosorRama, Rama, Capas.Suelo);
+            yield return CrearJugadorEnSuelo(new Vector2(5f, 0f));
+            pavor.Activar(Jugador.transform, LimitesArena);
+
+            yield return EsperarHasta(() => pavor.Destellando, 2.5f, "que aparezca junto a una pared");
+            Assert.AreEqual(pavor.Suelo, pavor.Pies.y, 0.05f, "Kael pisa el suelo, aunque tenga una rama encima: a ras de suelo.");
         }
 
         // --- Hojas ---

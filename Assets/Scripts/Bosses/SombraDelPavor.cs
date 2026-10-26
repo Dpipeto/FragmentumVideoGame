@@ -12,7 +12,8 @@ namespace Fragmentum.Bosses
     /// Golpearla la deshace en hojas y castiga a Kael: su luz se encoge un rato
     /// (<see cref="EspectroDelPavor.SombraGolpeada"/>). Golpear al verdadero deshace a todas.
     ///
-    /// Está en la capa Enemy, como el jefe: la espada de Kael la nota y Kael la atraviesa.
+    /// Está en la capa Enemy, como el jefe: la espada de Kael la nota y Kael la atraviesa. Con arte
+    /// lleva su mismo Animator y hace sus mismos gestos (<see cref="Gesto"/>).
     /// </summary>
     [DisallowMultipleComponent]
     public class SombraDelPavor : MonoBehaviour, IGolpeable
@@ -21,6 +22,10 @@ namespace Fragmentum.Bosses
 
         private EspectroDelPavor _duenio;
         private SpriteRenderer _dibujo;
+        private Animator _animador;
+        private GESTOS_PAVOR _gesto;
+        private bool _gestoPendiente;
+        private bool _voltear;
         private Collider2D _cuerpo;
         private Transform _luciernaga;
         private Color _tinte;
@@ -43,6 +48,9 @@ namespace Fragmentum.Bosses
         public int Mirando => _mirando;
 
         public bool Destellando => Time.time < _finDestello;
+
+        /// <summary>Lo último que le pidieron hacer con el cuerpo.</summary>
+        public GESTOS_PAVOR GestoActual => _gesto;
 
         /// <summary>
         /// Una sombra de <paramref name="duenio"/> de pie en <paramref name="pies"/>: el mismo dibujo,
@@ -75,22 +83,58 @@ namespace Fragmentum.Bosses
                 sprite.sortingOrder = como.sortingOrder;
                 dibujo.transform.localPosition = como.transform.localPosition;
                 dibujo.transform.localScale = new Vector3(Mathf.Abs(como.transform.lossyScale.x), como.transform.lossyScale.y, 1f);
+
+                // Con arte: su mismo Animator (y dibujada hacia el mismo lado).
+                var animadorDelJefe = como.GetComponent<Animator>();
+                if (animadorDelJefe != null && animadorDelJefe.runtimeAnimatorController != null)
+                {
+                    var animador = dibujo.AddComponent<Animator>();
+                    animador.runtimeAnimatorController = animadorDelJefe.runtimeAnimatorController;
+                    animador.applyRootMotion = false;
+                    animador.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                }
             }
 
             var sombra = objeto.AddComponent<SombraDelPavor>();
             sombra._duenio = duenio;
             sombra._dibujo = sprite;
+            sombra._animador = dibujo.GetComponent<Animator>();
+            sombra._voltear = como != null && como.flipX;
             sombra._cuerpo = cuerpo;
             sombra._tinte = duenio.Datos != null ? duenio.Datos.tinte : Color.white;
             sombra._desfase = Random.Range(0f, Mathf.PI * 2f);
-            sombra._luciernaga = EspectroDelPavor.CrearLuciernaga(objeto.transform, duenio.ColorLuciernagaSombra, sprite);
+            sombra._luciernaga = EspectroDelPavor.CrearLuciernaga(objeto.transform, duenio.ColorLuciernagaSombra, sprite, duenio.FotogramasLuciernaga);
             sombra._luciernaga.gameObject.SetActive(true);
             sombra.Mirar(duenio.CentroJugador.x >= pies.x ? 1 : -1);
+            sombra.Gesto(GESTOS_PAVOR.APARECE);
             return sombra;
         }
 
         /// <summary>El aviso de su tajo, como el del Espectro: destella <paramref name="segundos"/>.</summary>
-        public void Destellar(float segundos) => _finDestello = Time.time + Mathf.Max(0f, segundos);
+        public void Destellar(float segundos)
+        {
+            _finDestello = Time.time + Mathf.Max(0f, segundos);
+            Gesto(GESTOS_PAVOR.AVISO_TAJO);
+        }
+
+        /// <summary>Lo que hace con el cuerpo, como el Espectro (con arte, su animación).</summary>
+        public void Gesto(GESTOS_PAVOR gesto)
+        {
+            _gesto = gesto;
+            _gestoPendiente = true;
+            AplicarGesto();
+        }
+
+        private void AplicarGesto()
+        {
+            if (!_gestoPendiente || _animador == null || !_animador.isInitialized || Deshecha)
+            {
+                return;
+            }
+
+            _gestoPendiente = false;
+            EspectroDelPavor.PedirGesto(_animador, _gesto);
+        }
 
         public void Mirar(int direccion)
         {
@@ -147,6 +191,8 @@ namespace Fragmentum.Bosses
                 return;
             }
 
+            AplicarGesto();
+
             if (Deshecha)
             {
                 var avance = Mathf.Clamp01((Time.time - _inicioDeshacer) / Deshaciendose);
@@ -169,7 +215,7 @@ namespace Fragmentum.Bosses
 
             tinte.a = 1f;
             _dibujo.color = tinte;
-            _dibujo.flipX = false;
+            _dibujo.flipX = _voltear;
             var escala = _dibujo.transform.localScale;
             _dibujo.transform.localScale = new Vector3(Mathf.Abs(escala.x) * _mirando, escala.y, escala.z);
             EspectroDelPavor.Orbitar(_luciernaga, Centro + Vector2.up * 1.2f, _desfase);

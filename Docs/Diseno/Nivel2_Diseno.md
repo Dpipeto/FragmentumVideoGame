@@ -30,7 +30,7 @@ dice con un gesto: **dejarse hundir y seguir avanzando**. Y Kael lo cierra con �
 pero también sostiene». El nivel convierte esas tres frases en reglas de juego, en tres tiempos:
 
 1. **Suprimir: la superficie helada.** El hielo es la tristeza congelada, el «estoy bien». En él
-   todo resbala y nada agarra. Si corres, acabas en el agua; si caminas (Alt), tienes el control.
+   todo resbala y nada agarra. Si corres, acabas en el agua; si caminas (Ctrl), tienes el control.
    Los Lamentos se pegan y te vuelven pesado. Y la superficie no lleva a ningún sitio: termina en
    una muralla de hielo liso que no se puede subir, ni con el salto de pared.
 2. **Sentir: hundirse.** La única salida es romper el hielo y dejarse caer. El hielo solo cede al
@@ -62,7 +62,7 @@ Medidas con los parámetros reales de Kael (`ParametrosJugador`).
 
 | Mecánica | Qué hace | En el código |
 |---|---|---|
-| **Hielo** | Kael tarda 0,57 s en arrancar y 0,5 s en frenar. A toda velocidad resbala 1,5 u; caminando (Alt), solo 0,2 u. | ✔ Una franja de 0,5 u con `ZonaModificadorMovimiento` (hielo: aceleración ×0,15) sobre cada suelo de hielo y sobre cada placa. |
+| **Hielo** | Kael tarda 0,57 s en arrancar y 0,5 s en frenar. A toda velocidad resbala 1,5 u; caminando (Ctrl), solo 0,2 u. | ✔ Una franja de 0,5 u con `ZonaModificadorMovimiento` (hielo: aceleración ×0,15) sobre cada suelo de hielo y sobre cada placa. |
 | **Agua** | Velocidad ×0,6, gravedad ×0,3 y salto ×0,6, como dice el Anexo. Resultado: va más lento (3,6 u/s) y cae despacio (máx. 5,4 u/s), pero salta **más alto**: 2,9 u (en seco, 2,4) y 5,0 con doble salto (en seco, 4,1). Se ve menos: los bordes de la pantalla se oscurecen en azul. | ✔ Zonas de `ZonaModificadorMovimiento` (agua), con un velo translúcido por delante de Kael; el dash ya se bloqueaba bajo el agua sin el Dash Acuático. La visibilidad reducida es un velo del HUD (`IndicadorAgua`), la viñeta de la interfaz en azul, en lugar de un volumen de post-procesado de URP: hace lo mismo sin un perfil más que mantener. |
 | **Oxígeno** | **10 s** bajo el agua (eran 15 hasta el 2026-10-12: al probarlo sobraba). Se recarga en las bolsas de aire y al salir del agua (lleno en 1 s). **Si se acaba, Kael pierde un corazón cada 2 s**, sin empujón, hasta que respira o muere (con 5 corazones, 10 s más). Mientras tanto, la barra de aire del HUD parpadea en rojo. *Decidido el 2026-10-08.* | ✔ `OxigenoJugador` en el prefab de Kael, con su cuenta en `ReservaOxigeno`. Quita vida con `Health.PerderVida`, que no es un golpe: sin retroceso, sin i-frames y sin escudo. La barra de aire está en `IndicadorAgua`, bajo la de vida, y aparece al meterse en el agua. |
 | **Bolsas de aire** | Huecos sin agua bajo un techo: la campana hundida y el campanario. | ✔ Son la ausencia de agua. Falta la columna de burbujas que las señale (arte, A6). |
@@ -74,8 +74,9 @@ Medidas con los parámetros reales de Kael (`ParametrosJugador`).
 | **Hielo liso** | La muralla que cierra la plaza es de hielo: se choca con ella, pero Kael ni se desliza por ella ni salta desde ella. *Pedido el 2026-10-12: con el salto de pared se subía y se saltaba medio nivel.* | ✔ `SinAgarre`, una marca en la pared que `PlayerSensors` se salta al buscar dónde agarrarse. |
 
 **El Dash Acuático se gana aquí, no se usa aquí.** En este mundo el dash no funciona bajo el
-agua, y así ya está programado. El agua se aprende sin atajos; la habilidad se estrena en el
-Jardín (mundo 5), en su zona acuática.
+agua, y así ya está programado. El agua se aprende sin atajos. El Anexo A estrena la habilidad en
+el Jardín (mundo 5), en su zona acuática; la propuesta de la ciénaga del Mundo 3
+(`Nivel3_Diseno.md`, sección 10, PENDIENTES N50) la adelanta allí.
 
 ## 3. El recorrido, tramo a tramo
 
@@ -430,6 +431,18 @@ Siguen pendientes de antes (N3): el daño y el wall slide.
 
 La música del nivel (~70 BPM: caja de música lenta y distorsionada, piano con mucha
 reverberación), el tema de la Doncella y efectos de agua, burbujas y hielo que cruje y se rompe.
+
+**La música ✔ (2026-10-23), con los sonidos de LMMS** (`Musica/LEEME.md`):
+
+- **El nivel** (`Nivel2_Tristeza`): Si menor, 70 BPM, 82 s en bucle. Una nana en una caja de música que
+  se tuerce como una cinta vieja, bajo el agua (sin agudos) y con una reverb enorme; la nana en el piano,
+  con cuerdas; y la caja de música sola, cada vez con menos notas. Debajo, un rumor de agua.
+- **La Doncella** (`Nivel2_Doncella`): un vals en Si menor (3/4, 140 BPM, 62 s). El lamento en las
+  cuerdas sobre el piano y el coro; en la caja de música, con timbales; y arriba, cuerdas y coro juntos.
+- **Sus cinemáticas**: la presentación (la caja de música; el coro con su rostro; las cuerdas suben hasta
+  el combate), la derrota (el coro cae, la caja de música se queda sin cuerda y asoma el tema de Kael) y el
+  cierre (el tema de Kael en la caja de música, que resuelve en Re mayor).
+- Faltan los efectos: el agua, las burbujas y el hielo.
 
 ### Orden recomendado
 

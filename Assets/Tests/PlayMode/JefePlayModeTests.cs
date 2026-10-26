@@ -338,19 +338,21 @@ namespace Fragmentum.Tests.PlayMode
 
         // --- Derrota y reinicio ---
 
-        // Un jefe sin arte (la Doncella, de momento cápsula) se desvanece. La Centinela, con arte,
+        // Un jefe sin arte (el Juez Silente, de momento cápsula) se desvanece. La Centinela, con arte,
         // se queda en su ceniza: CentinelaPlayModeTests.
         [UnityTest]
         public IEnumerator Derrota_EmiteElEvento_ApagaElDanio_YSinArteSeDesvanece()
         {
-            // El Espectro: de los jefes, uno que sigue sin arte.
-            var jefe = CrearJefe("EspectroDelPavor");
+            // El Verdadero Soldado: de los jefes, el que sigue sin arte (el Juez ya lo tiene, desde la fase E
+            // del Mundo 4). A él no se le vence quitándole la vida, sino con la integración: se completa antes.
+            var jefe = CrearJefe("VerdaderoSoldado");
             Assert.IsFalse(jefe.TieneArte);
             yield return CrearJugadorEnSuelo(new Vector2(-10f, 0f));
             var derrotas = 0;
             jefe.OnJefeDerrotado += _ => derrotas++;
             jefe.Activar(Jugador.transform, LimitesArena);
 
+            ((VerdaderoSoldado)jefe).CompletarIntegracion();
             jefe.Vida.Matar();
             yield return null;
 
@@ -405,7 +407,8 @@ namespace Fragmentum.Tests.PlayMode
             Assert.AreEqual(ESTADOS_JEFE.VULNERABLE, juez.EstadoActual);
 
             juez.Vida.RecibirGolpe(new Golpe(3, juez.Centro));
-            Assert.AreEqual(juez.Vida.VidaMaxima - 6, juez.Vida.Vida);
+            Assert.AreEqual(juez.Vida.VidaMaxima - Mathf.CeilToInt(3 * juez.Datos.multiplicadorVulnerable), juez.Vida.Vida,
+                "Arrodillado, se le puede golpear.");
         }
 
         [UnityTest]

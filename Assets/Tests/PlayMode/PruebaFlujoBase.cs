@@ -58,6 +58,7 @@ namespace Fragmentum.Tests.PlayMode
 
             Sistemas = Bootstrap.CrearSistemas();
             Gestor.UsarCarpetaDeGuardado(_carpeta);
+            AjustesAudio.UsarCarpeta(_carpeta); // el volumen, también aparte del del jugador
 
             // Las pruebas que no son de narrativa no deben esperar a la cinemática inicial.
             if (CinematicaInicialVista)

@@ -40,7 +40,7 @@ namespace Fragmentum.Core.Input
         /// <summary>Se mantiene agacharse (cobertura del mundo de la Culpa).</summary>
         bool AgacharseMantenido { get; }
 
-        /// <summary>Se pulsó interactuar (antorchas y memorias, tecla E).</summary>
+        /// <summary>Se pulsó interactuar (antorchas y memorias, tecla W).</summary>
         bool InteractuarPulsado { get; }
 
         /// <summary>Se pulsó la habilidad activa (Invisibilidad Parcial, tecla Q).</summary>

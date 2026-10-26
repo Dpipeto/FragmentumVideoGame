@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cba49e80cd9bdc4fba0fe38f34ea4bb, type: 3}
+  m_Name: Cinematica_Memoria_LaOrden
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.CutsceneData
+  id: Memoria_LaOrden
+  diapositivas:
+  - imagen: {fileID: 0}
+    texto: 
+    carteles: []
+    duracion: 0.2
+    audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
+  - imagen: {fileID: 21300000, guid: 37cce6a38d500af40b2a0548c49ff16f, type: 3}
+    texto: 
+    carteles:
+    - texto: "Una radio entre el barro. \xABAdelante\xBB.\n\xC9l dice que s\xED antes de preguntar ad\xF3nde."
+      inicio: 0.5
+      duracion: 3.6
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 264}
+      alineacion: 7
+    duracion: 3.8
+    audio: {fileID: 0}
+    fundidoEntrada: 0.5
+    fundidoSalida: 0.5
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
+  saltable: 1
+  soloPrimeraVez: 0
+  llevaDialogoDelJefe: 0
+  montaje: 1
+  sobreElJuego: 0
+  opacidadVelo: 0.75
+  escalaEntera: 1
+  rejilla: {x: 480, y: 268}
+  fuente: {fileID: 0}
+  tamanoFuente: 10
+  interlineado: 0
+  colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
+  temblorPixeles: 1
+  temblorFotogramas: 4
+  fundidoImagen: 0.6
+  fundidoTexto: 0.4
+  margenTexto: 0.8
+  bloqueoSalto: 0.5
+  avisoSaltar: 
+  finAviso: 5
+  opacidadAviso: 0.45
+  musica: {fileID: 0}

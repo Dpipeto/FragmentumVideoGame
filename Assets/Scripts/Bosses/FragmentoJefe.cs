@@ -13,6 +13,9 @@ namespace Fragmentum.Bosses
     /// tamaño del fragmento lo borra del sprite y la ceniza se queda. No hace falta un D4 sin
     /// fragmento.
     ///
+    /// El del Juez Silente sí va aparte (<see cref="gema"/>): su último fotograma es solo el montón de
+    /// la capa, y la gema, el Fragmento de la Culpa suelto, flota encima. Al recogerlo, se apaga.
+    ///
     /// El trigger va desde el suelo hasta el fragmento: basta con entrar en la ceniza, sin saltar.
     /// </summary>
     [DisallowMultipleComponent]
@@ -25,6 +28,9 @@ namespace Fragmentum.Bosses
         [Tooltip("Máscara del tamaño del fragmento: al recogerlo, lo borra del sprite.")]
         [SerializeField] private SpriteMask mascara;
 
+        [Tooltip("El fragmento dibujado aparte, si el último fotograma no lo lleva (el Juez): se apaga al recogerlo.")]
+        [SerializeField] private SpriteRenderer gema;
+
         private BossController _jefe;
         private Collider2D _zona;
 
@@ -34,7 +40,11 @@ namespace Fragmentum.Bosses
         public bool Disponible => gameObject.activeInHierarchy && !Recogido;
 
         /// <summary>Centro del fragmento dibujado, en el mundo.</summary>
-        public Vector2 Centro => mascara != null ? (Vector2)mascara.transform.position : (Vector2)transform.position;
+        public Vector2 Centro => gema != null ? (Vector2)gema.bounds.center
+            : mascara != null ? (Vector2)mascara.transform.position : (Vector2)transform.position;
+
+        /// <summary>El fragmento dibujado aparte, o null si va en el dibujo del jefe.</summary>
+        public SpriteRenderer Gema => gema;
 
         private void Awake()
         {
@@ -86,6 +96,11 @@ namespace Fragmentum.Bosses
             {
                 mascara.enabled = true;
                 dibujo.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
+            }
+
+            if (gema != null)
+            {
+                gema.enabled = false;
             }
         }
     }

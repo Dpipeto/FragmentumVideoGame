@@ -101,6 +101,13 @@ namespace Fragmentum.EditorTools
                 }
 
                 var dialogos = Dialogos(nivel, guion, clave, sobrescribir);
+
+                // Las memorias de la Culpa: una cinemática cada una (de momento, la línea de Kael; su
+                // imagen llegará con el arte).
+                foreach (var (id, texto) in guion.Memorias)
+                {
+                    CinematicaMemoria(id, texto, sobrescribir);
+                }
                 // El jefe final ya se presenta en la cinemática de entrada del nivel.
                 var presentacion = nivel.jefe != null && nivel.emocion.id != EMOCIONES.INTEGRACION ? CinematicaJefe(nivel, guion, clave, sobrescribir) : null;
 
@@ -143,6 +150,30 @@ namespace Fragmentum.EditorTools
             }, c => c.diapositivas != null && c.diapositivas.All(d => d.imagen == null) &&
                     (c.diapositivas.Any(d => EsProvisional(d.texto)) || (anterior != null && anterior(c))));
         }
+
+        /// <summary>Lo que dura la cinemática de una memoria (Nivel4_Diseno.md: unos 5 s).</summary>
+        public const float DuracionMemoria = 5f;
+
+        /// <summary>La cinemática de una memoria de la Culpa.</summary>
+        public static string RutaCinematicaMemoria(string id) => $"{Carpeta}/Cinematica_Memoria_{id}.asset";
+
+        public static CutsceneData CargarCinematicaMemoria(string id) => AssetDatabase.LoadAssetAtPath<CutsceneData>(RutaCinematicaMemoria(id));
+
+        /// <summary>
+        /// Una memoria (~5 s) sobre la escena congelada: la línea de Kael y, cuando llegue, su imagen (la
+        /// misma que el Juez proyecta en la plaza). Se ve cada vez que se recuerda.
+        /// </summary>
+        private static CutsceneData CinematicaMemoria(string id, string texto, bool sobrescribir) =>
+            Crear<CutsceneData>($"Cinematica_Memoria_{id}", sobrescribir, c =>
+            {
+                c.id = $"Memoria_{id}";
+                c.saltable = true;
+                c.soloPrimeraVez = false;
+                c.sobreElJuego = true;
+                c.opacidadVelo = 0.75f;
+                c.bloqueoSalto = 0.5f;
+                c.diapositivas = new List<Diapositiva> { new Diapositiva { texto = texto, duracion = DuracionMemoria } };
+            });
 
         /// <summary>
         /// Presentación del jefe al entrar en su arena (~7 s), sobre la escena congelada: su
@@ -251,7 +282,7 @@ namespace Fragmentum.EditorTools
             return dialogos;
         }
 
-        /// <summary>Las líneas del guion de un mundo, en orden: apertura, eco de memoria, la pista, antes del jefe y cierre.</summary>
+        /// <summary>Las líneas del guion de un mundo, en orden: apertura, eco de memoria, las pistas, la orilla, antes del jefe y cierre.</summary>
         private static List<LineaDialogo> LineasDelGuion(LevelData nivel, GuionMundos.Mundo guion)
         {
             var lineas = new List<LineaDialogo> { Linea("Kael", MOMENTOS_DIALOGO.APERTURA, guion.Apertura) };
@@ -263,6 +294,16 @@ namespace Fragmentum.EditorTools
             if (!string.IsNullOrEmpty(guion.Pista))
             {
                 lineas.Add(Linea("Kael", MOMENTOS_DIALOGO.PISTA, guion.Pista));
+            }
+
+            if (!string.IsNullOrEmpty(guion.PistaInvisibilidad))
+            {
+                lineas.Add(Linea("Kael", MOMENTOS_DIALOGO.PISTA_INVISIBILIDAD, guion.PistaInvisibilidad));
+            }
+
+            if (!string.IsNullOrEmpty(guion.Orilla))
+            {
+                lineas.Add(Linea("Kael", MOMENTOS_DIALOGO.ORILLA, guion.Orilla));
             }
 
             if (nivel.jefe != null && !string.IsNullOrEmpty(guion.AntesDelJefe))
