@@ -66,6 +66,21 @@ namespace Fragmentum.Core
         public static readonly Parametro Quema = new Parametro("Quema");
         public static readonly Parametro Apagada = new Parametro("Apagada");
 
+        // La Escultura Viviente tiene hiperarmadura: no se aturde, pero acusa el golpe (H1). El
+        // disparador lo pone su script, no la FSM.
+        public static readonly Parametro Golpeada = new Parametro("Golpeada");
+
+        // La Medusa de Hielo: el golpe que la aparta (A1) y el segundo que pasa encogida (A2).
+        public static readonly Parametro Apartada = new Parametro("Apartada");
+        public static readonly Parametro Encogida = new Parametro("Encogida");
+
+        // La Doncella del Lamento: el gesto de cada ataque tiene su disparador (el rugido y la
+        // muerte usan Rugido y Death). El llanto va con «Estado», que pone su script: 0 flota,
+        // 1 baja a llorar y 2 llora.
+        public static readonly Parametro Ola = new Parametro("Ola");
+        public static readonly Parametro Inundar = new Parametro("Inundar");
+        public static readonly Parametro Congelar = new Parametro("Congelar");
+
         /// <summary>¿El Animator tiene este parámetro? Avisa una sola vez por parámetro ausente.</summary>
         public static bool Existe(Animator animator, in Parametro parametro)
         {

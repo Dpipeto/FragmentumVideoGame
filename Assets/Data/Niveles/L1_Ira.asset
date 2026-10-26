@@ -50,11 +50,19 @@ MonoBehaviour:
     desdeX: 25
     hastaX: 55
     contenido: "Plataformeo sobre lava y plataformas de combusti\xF3n. 4 Ecos de la Ira y el Golem de Ceniza. Checkpoint en x = 43."
-  - nombre: Arena del jefe
+  - nombre: "Secci\xF3n 3"
     desdeX: 55
-    hastaX: 80
+    hastaX: 100
+    contenido: "La forja: una almena con 2 Ecos bajo el fuego de una torreta y un lago de 12 u con una inestable entre dos de combusti\xF3n. 3 Ecos. Checkpoints en x = 57,5 y x = 94,5."
+  - nombre: Arena del jefe
+    desdeX: 100
+    hastaX: 125
     contenido: "Sala cerrada de 25 \xD7 15 u con plataformas a 3 alturas. La lava brota en las erupciones; el suelo es firme."
   puntosDeControl:
   - 43
+  - 57.5
+  - 94.5
+  tiempoConBono: 600
+  puntosPorSegundo: 5
   acento: {r: 1, g: 0.41960785, b: 0.20784314, a: 1}
   cita: la rabia consume al que la niega

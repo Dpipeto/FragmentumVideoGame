@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a270712d3340f744858925322945ba1, type: 3}
+  m_Name: Sombras
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronSombras
+  nombre: Las tres sombras
+  descripcion: "Tres figuras (izquierda, centro y derecha) lanzan su tajo una tras otra, cada una con su destello; despu\xE9s jadean las tres 1,5 s. Solo la verdadera lleva una luci\xE9rnaga dorada. Golpear a una sombra la deshace y encoge la luz de Kael 3 s."
+  aviso: 1
+  danio: 2
+  color: {r: 0.55, g: 0.9, b: 0.55, a: 1}
+  dibujarZona: 1
+  tajo: {fileID: 11400000, guid: 29125cbb3b84023438fa4ba0bea0feca, type: 2}
+  margen: 3
+  aparicion: 0.4
+  intervalo: 0.3
+  jadeo: 1.5

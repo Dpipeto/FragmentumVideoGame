@@ -206,7 +206,9 @@ namespace Fragmentum.Tests.PlayMode
 
             Assert.Greater(avanceIra, avanceTristeza * 2f,
                 $"El enemigo de la Ira ({avanceIra:0.00} u) debe perseguir mucho más rápido que el de la Tristeza ({avanceTristeza:0.00} u).");
-            Assert.Less(ira.attackCooldown, tristeza.attackCooldown, "La Ira ataca más a menudo.");
+            // El Lamento descansa entre golpes lo que el Eco de la Ira (el ajuste del Nivel 1): lo que
+            // le distingue es que avisa más antes de golpear.
+            Assert.Less(ira.inicioVentanaGolpe, tristeza.inicioVentanaGolpe, "La Ira golpea con menos aviso.");
         }
 
         private IEnumerator MedirAvance(EnemyData datos, Action<float> resultado)

@@ -7,8 +7,8 @@ namespace Fragmentum.Tests
 {
     /// <summary>
     /// Pruebas del guardado: ida y vuelta completa, escritura atómica con copia de seguridad,
-    /// recuperación de archivos dañados y migración desde los PlayerPrefs de la v1. Cubren el
-    /// criterio «el progreso sobrevive al cierre y reapertura del juego».
+    /// recuperación de archivos dañados y partidas de antes de que el puntaje sustituyera a las
+    /// monedas. Cubren el criterio «el progreso sobrevive al cierre y reapertura del juego».
     /// </summary>
     public class SaveSystemTests
     {
@@ -30,9 +30,7 @@ namespace Fragmentum.Tests
             }
         }
 
-        private SaveSystem Sistema(int monedasV1 = -1) => new SaveSystem(_carpeta, new MigracionPlayerPrefs(
-            clave => monedasV1 >= 0 && clave == MigracionPlayerPrefs.ClaveMonedas,
-            _ => monedasV1));
+        private SaveSystem Sistema() => new SaveSystem(_carpeta);
 
         [Test]
         public void SinArchivo_EmpiezaUnaPartidaNueva()
@@ -40,7 +38,7 @@ namespace Fragmentum.Tests
             var datos = Sistema().Cargar();
 
             Assert.AreEqual(1, datos.nivelMaximoAlcanzado);
-            Assert.AreEqual(0, datos.monedas);
+            Assert.AreEqual(0, datos.PuntajeTotal);
             Assert.IsFalse(datos.TieneProgreso);
         }
 
@@ -50,9 +48,12 @@ namespace Fragmentum.Tests
             var datos = new DatosGuardado
             {
                 nivelMaximoAlcanzado = 3,
-                monedas = 12,
-                checkpoint = new DatosCheckpoint { nivelId = 3, checkpointId = "L3_CP1" }
+                checkpoint = new DatosCheckpoint { nivelId = 3, checkpointId = "L3_CP1" },
+                intento = new DatosIntento { nivelId = 3, puntos = 350, segundos = 81.5f }
             };
+            datos.intento.derrotados.Add("Espectro_1@12,0");
+            datos.AnotarPuntaje(1, 4200, 301.5f);
+            datos.AnotarPuntaje(2, 5300, 512f);
             datos.nivelesCompletados.AddRange(new[] { 1, 2 });
             datos.fragmentos.AddRange(new[] { "IRA", "TRISTEZA" });
             datos.habilidades.AddRange(new[] { "ATAQUE_CARGADO", "DASH_ACUATICO" });
@@ -62,7 +63,13 @@ namespace Fragmentum.Tests
             var cargados = Sistema().Cargar();
 
             Assert.AreEqual(3, cargados.nivelMaximoAlcanzado);
-            Assert.AreEqual(12, cargados.monedas);
+            Assert.AreEqual(4200, cargados.PuntajeDe(1).puntos);
+            Assert.AreEqual(301.5f, cargados.PuntajeDe(1).segundos, 0.001f);
+            Assert.AreEqual(9500, cargados.PuntajeTotal);
+            Assert.AreEqual(3, cargados.intento.nivelId);
+            Assert.AreEqual(350, cargados.intento.puntos);
+            Assert.AreEqual(81.5f, cargados.intento.segundos, 0.001f);
+            CollectionAssert.AreEqual(new[] { "Espectro_1@12,0" }, cargados.intento.derrotados);
             CollectionAssert.AreEqual(new[] { 1, 2 }, cargados.nivelesCompletados);
             CollectionAssert.AreEqual(new[] { "IRA", "TRISTEZA" }, cargados.fragmentos);
             CollectionAssert.AreEqual(new[] { "ATAQUE_CARGADO", "DASH_ACUATICO" }, cargados.habilidades);
@@ -74,24 +81,24 @@ namespace Fragmentum.Tests
         public void Guardar_DejaLaVersionAnteriorComoCopia_YNingunTemporal()
         {
             var sistema = Sistema();
-            sistema.Guardar(new DatosGuardado { monedas = 1 });
-            sistema.Guardar(new DatosGuardado { monedas = 2 });
+            sistema.Guardar(new DatosGuardado { nivelMaximoAlcanzado = 2 });
+            sistema.Guardar(new DatosGuardado { nivelMaximoAlcanzado = 3 });
 
             Assert.IsTrue(File.Exists(sistema.RutaCopia), "El guardado anterior debe quedar como .bak.");
-            StringAssert.Contains("\"monedas\": 1", File.ReadAllText(sistema.RutaCopia));
+            StringAssert.Contains("\"nivelMaximoAlcanzado\": 2", File.ReadAllText(sistema.RutaCopia));
             Assert.IsFalse(File.Exists(sistema.Ruta + ".tmp"), "No debe quedar el archivo temporal.");
-            Assert.AreEqual(2, sistema.Cargar().monedas);
+            Assert.AreEqual(3, sistema.Cargar().nivelMaximoAlcanzado);
         }
 
         [Test]
         public void ArchivoDanado_SeRecuperaLaCopia()
         {
             var sistema = Sistema();
-            sistema.Guardar(new DatosGuardado { monedas = 7 });
-            sistema.Guardar(new DatosGuardado { monedas = 9 });
+            sistema.Guardar(new DatosGuardado { nivelMaximoAlcanzado = 4 });
+            sistema.Guardar(new DatosGuardado { nivelMaximoAlcanzado = 5 });
             File.WriteAllText(sistema.Ruta, "{ esto no es json");
 
-            Assert.AreEqual(7, sistema.Cargar().monedas, "Debe recuperar la copia de seguridad.");
+            Assert.AreEqual(4, sistema.Cargar().nivelMaximoAlcanzado, "Debe recuperar la copia de seguridad.");
         }
 
         [Test]
@@ -109,31 +116,33 @@ namespace Fragmentum.Tests
         }
 
         [Test]
-        public void SinPartida_ImportaLasMonedasDeLaV1()
+        public void UnaPartidaDeCuandoHabiaMonedas_SeCargaIgual_YSinPuntaje()
         {
-            var datos = Sistema(monedasV1: 25).Cargar();
+            var sistema = Sistema();
+            File.WriteAllText(sistema.Ruta,
+                "{\"version\":1,\"nivelMaximoAlcanzado\":2,\"nivelesCompletados\":[1],\"monedas\":12,\"migradoDePlayerPrefs\":true}");
 
-            Assert.AreEqual(25, datos.monedas);
-            Assert.IsTrue(datos.migradoDePlayerPrefs);
-        }
+            var datos = sistema.Cargar();
 
-        [Test]
-        public void ConPartidaGuardada_NoVuelveAImportarLaV1()
-        {
-            Sistema().Guardar(new DatosGuardado { monedas = 3 });
-
-            Assert.AreEqual(3, Sistema(monedasV1: 25).Cargar().monedas);
+            Assert.AreEqual(2, datos.nivelMaximoAlcanzado);
+            CollectionAssert.AreEqual(new[] { 1 }, datos.nivelesCompletados);
+            Assert.IsTrue(datos.TieneProgreso);
+            Assert.AreEqual(0, datos.PuntajeTotal, "Las monedas no se convierten en puntos.");
+            Assert.IsNull(datos.PuntajeDe(1), "El nivel superado antes de que hubiera puntaje no tiene récord todavía.");
+            Assert.AreEqual(0, datos.intento.nivelId);
         }
 
         [Test]
         public void JsonIncompleto_SeNormalizaSinListasNulas()
         {
             var sistema = Sistema();
-            File.WriteAllText(sistema.Ruta, "{\"version\":1,\"monedas\":4}");
+            File.WriteAllText(sistema.Ruta, "{\"version\":1,\"puntajes\":null,\"intento\":null}");
 
             var datos = sistema.Cargar();
 
-            Assert.AreEqual(4, datos.monedas);
+            Assert.IsNotNull(datos.puntajes);
+            Assert.IsNotNull(datos.intento);
+            Assert.IsNotNull(datos.intento.derrotados);
             Assert.IsNotNull(datos.fragmentos);
             Assert.IsNotNull(datos.checkpoint);
             Assert.AreEqual(1, datos.nivelMaximoAlcanzado);

@@ -92,7 +92,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -299,7 +299,17 @@ MonoBehaviour:
   fragmento: {fileID: 0}
   currentState: 0
   registrarTransiciones: 0
-  opacidadOculto: 0.25
+  velocidadFundido: 6
+  esperaAlEmpezar: 1.2
+  grito: 0.9
+  luzTrasLaSombra: 0.5
+  segundosLuzEncogida: 3
+  luzAlMorir: 0.85
+  subidaAlMorir: 3
+  colorAlMorir: {r: 0.7, g: 0.75, b: 1, a: 1}
+  colorDestello: {r: 0.72, g: 1, b: 0.72, a: 1}
+  colorLuciernaga: {r: 1, g: 0.82, b: 0.3, a: 1}
+  colorLuciernagaSombra: {r: 0.45, g: 0.95, b: 0.5, a: 1}
 --- !u!1 &9096145412586435882
 GameObject:
   m_ObjectHideFlags: 0

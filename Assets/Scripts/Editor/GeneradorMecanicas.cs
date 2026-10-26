@@ -5,6 +5,7 @@ using Fragmentum.Levels.Mecanicas;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using static Fragmentum.EditorTools.UtilidadesEditor;
 using Object = UnityEngine.Object;
 
@@ -13,8 +14,10 @@ namespace Fragmentum.EditorTools
     /// <summary>
     /// Prefabs de las mecánicas del mundo de la Ira (Anexo A) en <c>Assets/Prefabs/Mecanicas</c>,
     /// con su arte (<see cref="ConstructorMecanicas"/>): plataforma inestable, plataforma de
-    /// combustión, lava, torreta de fuego y la bola de la torreta. Son las piezas que se
-    /// arrastran al pintar un nivel, y las que coloca el preparador de escenas.
+    /// combustión, lava, torreta de fuego y la bola de la torreta. Las del mundo de la Tristeza: la
+    /// placa de hielo flotante y el hielo rompible. Y las del mundo del Miedo, todavía sin arte: la
+    /// antorcha, el cepo y la rama podrida. Son las piezas que se arrastran al pintar un nivel, y las
+    /// que coloca el preparador de escenas.
     ///
     /// - <b>Pivotes donde se pisa:</b> el de cada pieza es el de su arte (<see cref="TablaArte"/>):
     ///   la superficie de las plataformas, la base de la torreta y la costra de la lava. Se colocan
@@ -37,6 +40,36 @@ namespace Fragmentum.EditorTools
         public const string TorretaFuego = "TorretaFuego";
         public const string BolaDeFuego = "BolaDeFuego";
 
+        // Las del mundo de la Tristeza (todavía sin arte).
+        public const string PlataformaFlotante = "PlataformaFlotante";
+        public const string HieloRompible = "HieloRompible";
+
+        /// <summary>La placa flotante: 2,5 u de ancho y 0,5 de grueso, con el pivote en la superficie.</summary>
+        public static readonly Vector2 TamanoPlaca = new Vector2(2.5f, 0.5f);
+
+        /// <summary>El tapón de hielo rompible: tapa un hueco de 2 u y asoma 1,25 u sobre el suelo (pivote arriba).</summary>
+        public static readonly Vector2 TamanoTapon = new Vector2(2f, 2.25f);
+
+        // Las del mundo del Miedo (todavía sin arte).
+        public const string Antorcha = "Antorcha";
+        public const string Cepo = "Cepo";
+        public const string RamaPodrida = "RamaPodrida";
+
+        /// <summary>La rama podrida: 2 u de largo y el grueso de las ramas, con el pivote en la superficie.</summary>
+        public static readonly Vector2 TamanoRama = new Vector2(2f, DisenoNivel3.GrosorRama);
+
+        /// <summary>El cepo: 0,8 u de ancho y 0,3 de alto, con el pivote en el centro de su base (en el suelo).</summary>
+        public static readonly Vector2 TamanoCepo = new Vector2(0.8f, 0.3f);
+
+        /// <summary>La antorcha: un poste con la llama a esta altura sobre su pie (el pivote, en el suelo).</summary>
+        public const float AlturaLlama = 1.5f;
+
+        /// <summary>Las ramas sin arte: el marrón de las sanas, también el de las podridas a oscuras.</summary>
+        public static readonly Color ColorRamaSinArte = new Color(0.43f, 0.33f, 0.22f, 1f);
+
+        /// <summary>La luz de las antorchas: lo único cálido del mundo del Miedo.</summary>
+        public static readonly Color ColorLuzAntorcha = new Color(1f, 0.7f, 0.38f, 1f);
+
         /// <summary>Orden de dibujo de las piezas: detrás de los tiles del suelo (0) y de su decoración (-1).</summary>
         public const int OrdenDibujo = -2;
 
@@ -46,7 +79,7 @@ namespace Fragmentum.EditorTools
         /// <summary>Radio de la bola de fuego (provisional hasta que llegue su arte).</summary>
         public const float RadioBola = 0.3f;
 
-        [MenuItem("Fragmentum/Niveles/Crear prefabs de mecánicas (Ira)", priority = 133)]
+        [MenuItem("Fragmentum/Niveles/Crear prefabs de mecánicas", priority = 133)]
         public static void MenuCrearPrefabs() => CrearPrefabs();
 
         public static bool CrearPrefabs()
@@ -59,6 +92,11 @@ namespace Fragmentum.EditorTools
             ok &= Guardar(PlataformaCombustion, CrearPlataformaCombustion);
             ok &= Guardar(Lava, CrearLava);
             ok &= Guardar(TorretaFuego, CrearTorreta);
+            ok &= Guardar(PlataformaFlotante, CrearPlataformaFlotante);
+            ok &= Guardar(HieloRompible, CrearHieloRompible);
+            ok &= Guardar(Antorcha, CrearAntorcha);
+            ok &= Guardar(Cepo, CrearCepo);
+            ok &= Guardar(RamaPodrida, CrearRamaPodrida);
             if (ok)
             {
                 Debug.Log($"[Fragmentum] Prefabs de mecánicas creados en {Carpeta}.");
@@ -242,6 +280,202 @@ namespace Fragmentum.EditorTools
             Asignar(componente, "boca", p => p.objectReferenceValue = boca);
             Asignar(componente, "bola", p => p.objectReferenceValue = Cargar(BolaDeFuego)?.GetComponent<Proyectil>());
             return raiz;
+        }
+
+        // --- Mundo de la Tristeza (sin arte: un rectángulo del tamaño de la pieza) ---
+
+        /// <summary>
+        /// La placa de hielo que sube y baja. Lleva encima su franja de hielo (un trigger hijo con
+        /// <see cref="ZonaModificadorMovimiento"/>), que se mueve con ella: si se llega corriendo, se resbala.
+        /// </summary>
+        private static GameObject CrearPlataformaFlotante()
+        {
+            var raiz = Raiz(PlataformaFlotante, Capa(Capas.Suelo), GameTags.IcePlatform);
+            var cuerpo = raiz.AddComponent<Rigidbody2D>();
+            cuerpo.bodyType = RigidbodyType2D.Kinematic;
+            cuerpo.interpolation = RigidbodyInterpolation2D.Interpolate;
+            var caja = raiz.AddComponent<BoxCollider2D>();
+            caja.size = TamanoPlaca;
+            caja.offset = new Vector2(0f, -TamanoPlaca.y * 0.5f);
+
+            var hielo = new GameObject("Hielo");
+            hielo.transform.SetParent(raiz.transform, false);
+            var franja = hielo.AddComponent<BoxCollider2D>();
+            franja.isTrigger = true;
+            franja.size = new Vector2(TamanoPlaca.x, 0.5f);
+            franja.offset = new Vector2(0f, 0.25f);
+            var zona = hielo.AddComponent<ZonaModificadorMovimiento>();
+            Asignar(zona, "tipo", p => p.enumValueIndex = (int)ZonaModificadorMovimiento.TIPOS.HIELO);
+
+            // Con su arte, la placa dibujada (su pivote está en la superficie); sin él, el rectángulo.
+            var placa = ConstructorMecanicasMundo2.PlacaFlotante;
+            if (placa != null)
+            {
+                ConArte(raiz.transform, placa);
+            }
+            else
+            {
+                Provisional(raiz.transform, Rect.MinMaxRect(-TamanoPlaca.x * 0.5f, -TamanoPlaca.y, TamanoPlaca.x * 0.5f, 0f), Hex("B4D2E6"), "la placa de hielo flotante");
+            }
+
+            raiz.AddComponent<Levels.Mecanicas.PlataformaFlotante>();
+            return raiz;
+        }
+
+        /// <summary>
+        /// El tapón de hielo que solo rompe el Ataque Cargado. El cuerpo se pisa (capa del suelo);
+        /// la zona de golpe, igual de grande, está en la capa Enemy: es la que nota la espada.
+        /// </summary>
+        private static GameObject CrearHieloRompible()
+        {
+            var raiz = Raiz(HieloRompible, Capa(Capas.Suelo), GameTags.IcePlatform);
+            var centro = new Vector2(0f, -TamanoTapon.y * 0.5f);
+            var caja = raiz.AddComponent<BoxCollider2D>();
+            caja.size = TamanoTapon;
+            caja.offset = centro;
+
+            var golpe = new GameObject("ZonaDeGolpe") { layer = Capa(Capas.Enemy) };
+            golpe.transform.SetParent(raiz.transform, false);
+            var zonaGolpe = golpe.AddComponent<BoxCollider2D>();
+            zonaGolpe.size = TamanoTapon;
+            zonaGolpe.offset = centro;
+
+            // Con su arte, el tapón dibujado y su Animator, que sigue el estado del script (intacto,
+            // agrietado y roto); sin él, el rectángulo que cambia de color.
+            SpriteRenderer dibujo;
+            Animator animator = null;
+            var intacto = ConstructorMecanicasMundo2.TaponIntacto;
+            var controlador = ConstructorMecanicasMundo2.Tapon.Controlador;
+            if (intacto != null && controlador != null)
+            {
+                dibujo = ConArte(raiz.transform, intacto);
+                animator = dibujo.gameObject.AddComponent<Animator>();
+                animator.runtimeAnimatorController = controlador;
+                animator.applyRootMotion = false;
+                animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            }
+            else
+            {
+                dibujo = Provisional(raiz.transform, Rect.MinMaxRect(-TamanoTapon.x * 0.5f, -TamanoTapon.y, TamanoTapon.x * 0.5f, 0f), Hex("BFD9F2"), "el hielo rompible");
+            }
+
+            var componente = raiz.AddComponent<Levels.Mecanicas.HieloRompible>();
+            Asignar(componente, "visual", p => p.objectReferenceValue = dibujo);
+            Asignar(componente, "animator", p => p.objectReferenceValue = animator);
+            Asignar(componente, "zonaDeGolpe", p => p.objectReferenceValue = zonaGolpe);
+            return raiz;
+        }
+
+        // --- Mundo del Miedo (sin arte: rectángulos del tamaño de la pieza) ---
+
+        /// <summary>
+        /// La antorcha: un poste con la cabeza arriba, que cambia de color con su estado, y su luz
+        /// 2D en la llama, apagada hasta que Kael la enciende. Sus medidas son las del Anexo A
+        /// (<see cref="DisenoNivel3"/>): 8 u de luz durante 15 s, se enciende a 1,5 u.
+        /// </summary>
+        private static GameObject CrearAntorcha()
+        {
+            var raiz = Raiz(Antorcha, 0, null);
+            Provisional(raiz.transform, Rect.MinMaxRect(-0.1f, 0f, 0.1f, AlturaLlama - 0.2f), Hex("2B2118"), "la antorcha", "Prompts_Mundo3.md", "Poste");
+            var cabeza = Provisional(raiz.transform, Rect.MinMaxRect(-0.18f, AlturaLlama - 0.18f, 0.18f, AlturaLlama + 0.18f), new Color(0.25f, 0.22f, 0.2f, 1f), "la antorcha (la llama)", "Prompts_Mundo3.md", "Cabeza");
+
+            var objetoLuz = new GameObject("Luz");
+            objetoLuz.transform.SetParent(raiz.transform, false);
+            objetoLuz.transform.localPosition = new Vector3(0f, AlturaLlama, 0f);
+            var luz = objetoLuz.AddComponent<Light2D>();
+            luz.lightType = Light2D.LightType.Point;
+            luz.pointLightOuterRadius = DisenoNivel3.RadioAntorcha;
+            luz.pointLightInnerRadius = 1f;
+            luz.intensity = 1.2f;
+            luz.color = ColorLuzAntorcha;
+            luz.shadowsEnabled = false;
+            luz.enabled = false;
+
+            var componente = raiz.AddComponent<Levels.Mecanicas.Antorcha>();
+            componente.radio = DisenoNivel3.RadioAntorcha;
+            componente.duracion = DisenoNivel3.DuracionAntorcha;
+            componente.parpadeo = DisenoNivel3.ParpadeoAntorcha;
+            componente.distanciaEncender = DisenoNivel3.DistanciaEncender;
+            Asignar(componente, "llama", p => p.vector2Value = new Vector2(0f, AlturaLlama));
+            Asignar(componente, "luz", p => p.objectReferenceValue = luz);
+            Asignar(componente, "cabeza", p => p.objectReferenceValue = cabeza);
+            return raiz;
+        }
+
+        /// <summary>
+        /// El cepo: un rectángulo en el suelo, escondido (transparente) hasta que Kael está cerca o
+        /// lo alumbra una antorcha. Sujeta 1 s, quita 1 y suena a 8 u (<see cref="DisenoNivel3"/>).
+        /// </summary>
+        private static GameObject CrearCepo()
+        {
+            var raiz = Raiz(Cepo, 0, null);
+            var dibujo = Provisional(raiz.transform, Rect.MinMaxRect(-TamanoCepo.x * 0.5f, 0f, TamanoCepo.x * 0.5f, TamanoCepo.y), Hex("8C8C99"), "el cepo", "Prompts_Mundo3.md");
+            dibujo.sortingOrder = 1;
+            var componente = raiz.AddComponent<Levels.Mecanicas.Cepo>();
+            componente.danio = DisenoNivel3.DanioCepo;
+            componente.sujecion = DisenoNivel3.SujecionCepo;
+            componente.radioRuido = DisenoNivel3.RadioRuidoCepo;
+            componente.distanciaVer = DisenoNivel3.DistanciaVerCepo;
+            Asignar(componente, "tamano", p => p.vector2Value = TamanoCepo);
+            Asignar(componente, "visual", p => p.objectReferenceValue = dibujo);
+            return raiz;
+        }
+
+        /// <summary>
+        /// La rama podrida: una <see cref="Levels.Mecanicas.PlataformaInestable"/> con los tiempos del
+        /// Miedo (cruje 0,3 s, se parte y vuelve a los 4 s) y una <see cref="Levels.Mecanicas.RamaPodrida"/>,
+        /// que a oscuras la pinta como las sanas y bajo una antorcha la delata. Pivote en la superficie.
+        /// </summary>
+        private static GameObject CrearRamaPodrida()
+        {
+            var raiz = Raiz(RamaPodrida, Capa(Capas.Suelo), GameTags.Suelo);
+            var caja = raiz.AddComponent<BoxCollider2D>();
+            caja.size = TamanoRama;
+            caja.offset = new Vector2(0f, -TamanoRama.y * 0.5f);
+            var dibujo = Provisional(raiz.transform, Rect.MinMaxRect(-TamanoRama.x * 0.5f, -TamanoRama.y, TamanoRama.x * 0.5f, 0f), ColorRamaSinArte, "la rama podrida", "Prompts_Mundo3.md");
+            dibujo.sortingOrder = 0;
+
+            var plataforma = raiz.AddComponent<Levels.Mecanicas.PlataformaInestable>();
+            plataforma.retardoRotura = DisenoNivel3.CrujidoRama;
+            plataforma.duracionCaida = DuracionCaidaRama;
+            plataforma.tiempoReaparicion = DisenoNivel3.VueltaRama - DuracionCaidaRama;
+            Asignar(plataforma, "visual", p => p.objectReferenceValue = dibujo);
+
+            var rama = raiz.AddComponent<Levels.Mecanicas.RamaPodrida>();
+            Asignar(rama, "visual", p => p.objectReferenceValue = dibujo);
+            Asignar(rama, "colorSana", p => p.colorValue = ColorRamaSinArte);
+            return raiz;
+        }
+
+        /// <summary>Lo que se ve partirse la rama antes de desaparecer (lo mínimo de la plataforma inestable).</summary>
+        public const float DuracionCaidaRama = 0.25f;
+
+        /// <summary>El rectángulo provisional de una pieza sin arte, y el aviso de lo que falta.</summary>
+        // El dibujo de una pieza con arte: en el origen del prefab (el pivote de su sprite es el suyo)
+        // y a escala 1 (su tamaño lo dan sus píxeles por unidad).
+        private static SpriteRenderer ConArte(Transform padre, Sprite sprite)
+        {
+            var objeto = new GameObject("Sprite") { layer = padre.gameObject.layer };
+            objeto.transform.SetParent(padre, false);
+            var dibujo = objeto.AddComponent<SpriteRenderer>();
+            dibujo.sprite = sprite;
+            dibujo.sortingOrder = OrdenDibujo;
+            return dibujo;
+        }
+
+        private static SpriteRenderer Provisional(Transform padre, Rect zona, Color color, string pieza, string prompts = "Prompts_Mundo2.md",
+            string nombre = "Sprite")
+        {
+            Debug.LogWarning($"[Fragmentum] Todavía no hay arte para {pieza}: el prefab lleva un rectángulo provisional (Docs/Diseno/{prompts}).");
+            var objeto = new GameObject(nombre) { layer = padre.gameObject.layer };
+            objeto.transform.SetParent(padre, false);
+            objeto.transform.localPosition = zona.center;
+            objeto.transform.localScale = new Vector3(zona.width, zona.height, 1f);
+            var dibujo = objeto.AddComponent<SpriteRenderer>();
+            dibujo.sprite = SpriteCuadrado;
+            dibujo.color = color;
+            dibujo.sortingOrder = OrdenDibujo;
+            return dibujo;
         }
 
         // --- Utilidades ---

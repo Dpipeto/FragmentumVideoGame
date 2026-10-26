@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Fragmentum.Core;
+using Fragmentum.Core.Puntuacion;
 using Fragmentum.Data;
+using Fragmentum.Levels;
 using Fragmentum.Narrative;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,7 +17,8 @@ namespace Fragmentum.UI
     ///    comentario opcional y, la primera vez, un código de participante opcional. «Omitir»
     ///    pasa sin guardar nada: nunca bloquea el juego.
     /// 2. <b>Recompensa:</b> el fragmento integrado, la habilidad que desbloquea, la línea de
-    ///    cierre de Kael, cuántos fragmentos lleva y a dónde lleva «Continuar».
+    ///    cierre de Kael, cuántos fragmentos lleva, el puntaje del nivel (enemigos, jefe y bono
+    ///    por tiempo, y si es récord) y a dónde lleva «Continuar».
     ///
     /// Si el registro está desactivado en su configuración, se pasa directamente al paso 2.
     /// </summary>
@@ -40,6 +43,8 @@ namespace Fragmentum.UI
         private Text _habilidad;
         private Text _cierre;
         private Text _integrados;
+        private Text _puntaje;
+        private Text _detallePuntaje;
         private Text _siguiente;
         private Button _continuar;
         private Button _menu;
@@ -60,6 +65,12 @@ namespace Fragmentum.UI
         public Button BotonMenu => _menu;
 
         public string LineaCierre => _cierre != null ? _cierre.text : string.Empty;
+
+        /// <summary>«PUNTAJE  4 625», o vacío si la escena no lleva marcador.</summary>
+        public string TextoPuntaje => _puntaje != null && _puntaje.gameObject.activeSelf ? _puntaje.text : string.Empty;
+
+        /// <summary>El desglose del puntaje y cómo queda frente al mejor guardado.</summary>
+        public string DetallePuntaje => _detallePuntaje != null && _detallePuntaje.gameObject.activeSelf ? _detallePuntaje.text : string.Empty;
 
         private ConfiguracionRegistro Config => Configuracion != null ? Configuracion : Configuracion = ScriptableObject.CreateInstance<ConfiguracionRegistro>();
 
@@ -109,8 +120,8 @@ namespace Fragmentum.UI
 
         protected override void ConstruirContenido(RectTransform columna)
         {
-            FabricaUI.Texto(columna, "Titulo", FabricaUI.Espaciar("MUNDO SUPERADO"), 34, new Color(1f, 1f, 1f, 0.85f));
-            _mundo = TextoAcento(columna, "Mundo", 24);
+            FabricaUI.Titulo(columna, "Titulo", FabricaUI.Espaciar("MUNDO SUPERADO"), 34, new Color(1f, 1f, 1f, 0.85f));
+            _mundo = TextoAcento(columna, "Mundo", 24, deTitulo: true);
             FabricaUI.Hueco(columna, 6f);
             SeparadorAcento(columna);
             FabricaUI.Hueco(columna, 14f);
@@ -175,8 +186,8 @@ namespace Fragmentum.UI
             _panelRecompensa = panel.gameObject;
 
             _gracias = FabricaUI.Texto(panel, "Gracias", string.Empty, 18, new Color(1f, 1f, 1f, 0.45f));
-            FabricaUI.Texto(panel, "Integrado", "FRAGMENTO INTEGRADO", 18, new Color(1f, 1f, 1f, 0.45f));
-            _fragmento = TextoAcento(panel, "Fragmento", 40);
+            FabricaUI.Titulo(panel, "Integrado", "FRAGMENTO INTEGRADO", 18, new Color(1f, 1f, 1f, 0.45f));
+            _fragmento = TextoAcento(panel, "Fragmento", 40, deTitulo: true);
             _descripcionFragmento = FabricaUI.Texto(panel, "DescripcionFragmento", string.Empty, 22, new Color(1f, 1f, 1f, 0.6f));
             Ancho(_descripcionFragmento, 900f);
             FabricaUI.Hueco(panel, 8f);
@@ -187,7 +198,11 @@ namespace Fragmentum.UI
             _cierre.fontStyle = FontStyle.Italic;
             Ancho(_cierre, 900f);
             _integrados = FabricaUI.Texto(panel, "Integrados", string.Empty, 20, new Color(1f, 1f, 1f, 0.55f));
-            FabricaUI.Hueco(panel, 16f);
+            FabricaUI.Hueco(panel, 6f);
+            _puntaje = TextoAcento(panel, "Puntaje", 34, deTitulo: true);
+            _detallePuntaje = FabricaUI.Texto(panel, "DetallePuntaje", string.Empty, 20, new Color(1f, 1f, 1f, 0.7f));
+            Ancho(_detallePuntaje, 900f);
+            FabricaUI.Hueco(panel, 12f);
 
             _continuar = AgregarOpcion(panel, "Continuar", () => Juego?.ContinuarTrasNivel());
             _siguiente = FabricaUI.Texto(panel, "Siguiente", string.Empty, 18, new Color(1f, 1f, 1f, 0.45f));
@@ -234,6 +249,7 @@ namespace Fragmentum.UI
             var cierre = nivel != null && nivel.dialogos != null ? nivel.dialogos.Del(MOMENTOS_DIALOGO.CIERRE) : null;
             _cierre.text = cierre != null && cierre.Count > 0 ? $"«{cierre[0].texto}» — {cierre[0].hablante}" : string.Empty;
             _integrados.text = ContarIntegrados();
+            RellenarPuntaje();
             _siguiente.text = DescribirSiguiente(nivel);
 
             var conRegistro = config.activo;
@@ -272,6 +288,35 @@ namespace Fragmentum.UI
             _ayuda.text = MostrandoRegistro
                 ? Ayuda(Acento, ("←→", "ELEGIR"), ("ENTER", "CONFIRMAR"))
                 : Ayuda(Acento, ("↑↓", "NAVEGAR"), ("ENTER", "SELECCIONAR"));
+        }
+
+        // El marcador de la escena ya está cerrado: lo cierra el LevelManager al cruzar la salida.
+        private void RellenarPuntaje()
+        {
+            var marcador = MarcadorNivel.Actual;
+            var hay = marcador != null && marcador.Cerrado;
+            _puntaje.gameObject.SetActive(hay);
+            _detallePuntaje.gameObject.SetActive(hay);
+            if (!hay)
+            {
+                return;
+            }
+
+            var resultado = marcador.Resultado;
+            _puntaje.text = $"PUNTAJE  {ReglasPuntaje.Puntos(resultado.Total)}";
+
+            var detalle = $"Enemigos {ReglasPuntaje.Puntos(resultado.Enemigos)}  ·  Jefe {ReglasPuntaje.Puntos(resultado.Jefe)}  ·  " +
+                          $"Tiempo {ReglasPuntaje.Tiempo(resultado.Segundos)}  +{ReglasPuntaje.Puntos(resultado.BonoTiempo)}";
+            if (resultado.EsRecord)
+            {
+                detalle += $"\n<color=#{FabricaUI.ColorHtml(Acento)}>¡Nuevo récord!</color>  Antes: {ReglasPuntaje.Puntos(resultado.MejorAnterior)}";
+            }
+            else if (resultado.HabiaAnterior)
+            {
+                detalle += $"\nTu mejor puntaje: {ReglasPuntaje.Puntos(resultado.MejorAnterior)}";
+            }
+
+            _detallePuntaje.text = detalle;
         }
 
         private static string ContarIntegrados()

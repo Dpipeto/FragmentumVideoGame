@@ -22,7 +22,8 @@ namespace Fragmentum.Tests.PlayMode
     {
         private static LevelManager Nivel => Object.FindAnyObjectByType<LevelManager>();
 
-        private static Checkpoint PrimerCheckpoint => Nivel.Checkpoints.Checkpoints[0];
+        // El primero del recorrido: desde que el nivel tiene tres (2026-10-13), la lista no va en orden.
+        private static Checkpoint PrimerCheckpoint => Nivel.Checkpoints.Buscar("L1_CP1");
 
         [UnityTest]
         public IEnumerator EntrarEnElNivel_ApareceUnSoloJugadorEnElInicio_ConHudYCamara()
@@ -58,6 +59,49 @@ namespace Fragmentum.Tests.PlayMode
             var enDisco = new SaveSystem(CarpetaGuardado).Cargar();
             Assert.AreEqual("L1_CP1", enDisco.checkpoint.checkpointId, "El checkpoint se guarda en cuanto se activa.");
             Assert.AreEqual("Punto de control", Interfaz.Hud.AvisoActual, "El HUD avisa al activarlo.");
+        }
+
+        // Mueve a Kael sin revivirlo: Revivir ya le devolvería la vida.
+        private static IEnumerator Mover(Vector2 pies)
+        {
+            var cuerpo = Jugador.GetComponent<Rigidbody2D>();
+            cuerpo.position = pies;
+            cuerpo.linearVelocity = Vector2.zero;
+            for (var i = 0; i < 6; i++)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ElCheckpoint_CuraAKael_TambienCuandoYaEstaActivo()
+        {
+            yield return EntrarEnNivel1();
+            var checkpoint = PrimerCheckpoint;
+            Assert.IsTrue(checkpoint.Cura, "Los checkpoints curan (2026-10-12).");
+            var inicio = Nivel.Checkpoints.PuntoInicio;
+            var vida = Jugador.Vida;
+            var curas = 0;
+            checkpoint.OnCuro += (_, corazones) => curas += corazones;
+
+            vida.PerderVida(3);
+            Assert.AreEqual(vida.VidaMaxima - 3, vida.Vida);
+            yield return Mover(checkpoint.PuntoReaparicion);
+            Assert.AreEqual(vida.VidaMaxima, vida.Vida, "Al tocar la bandera recupera toda la vida.");
+            Assert.AreSame(checkpoint, Nivel.Checkpoints.Activo, "Y se activa, como siempre.");
+            Assert.AreEqual(3, curas);
+
+            // Vuelve herido al mismo checkpoint, que ya está activo: cura otra vez.
+            yield return Mover(inicio);
+            vida.PerderVida(2);
+            yield return Mover(checkpoint.PuntoReaparicion);
+            Assert.AreEqual(vida.VidaMaxima, vida.Vida, "El que ya está activo también cura.");
+            Assert.AreEqual(5, curas);
+
+            // Con la vida entera no hay nada que curar.
+            yield return Mover(inicio);
+            yield return Mover(checkpoint.PuntoReaparicion);
+            Assert.AreEqual(5, curas, "Sano, no avisa de ninguna cura.");
         }
 
         [UnityTest]
@@ -250,9 +294,11 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarReal(2f);
             Assert.AreEqual(ESTADOS_JUEGO.LEVEL_COMPLETE, Juego.EstadoActual, "Con pantalla, el fin de nivel espera al jugador.");
 
+            // Continuar lleva al mundo siguiente, que ya tiene escena.
             ContinuarDesdeFinDeNivel();
-            yield return EsperarEstado(ESTADOS_JUEGO.LEVEL_SELECT, 6f);
-            Assert.IsFalse(Interfaz.Hud.gameObject.activeSelf, "Fuera de los niveles no hay HUD.");
+            yield return EsperarEstado(ESTADOS_JUEGO.PLAYING, 8f);
+            Assert.AreSame(BaseDeDatos.niveles[1], Gestor.NivelActual, "Tras la Ira, la Tristeza.");
+            Assert.IsTrue(Interfaz.Hud.gameObject.activeSelf, "En el Nivel 2 vuelve el HUD.");
         }
 
         [UnityTest]

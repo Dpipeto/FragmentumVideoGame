@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: datos
       value: 
       objectReference: {fileID: 11400000, guid: 35aff3c7b399bae4ea3e4598ea131869, type: 2}
+    - target: {fileID: 1955004379582796497, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5836579621604681419, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
       propertyPath: m_Name
       value: Enemigo_Espectro
@@ -59,5 +63,45 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5836579621604681419, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6041714501536915658}
   m_SourcePrefab: {fileID: 100100000, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+--- !u!4 &1301829174710624123 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5767095229146733892, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 4763066996704789055}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1361883743471412468 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5836579621604681419, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 4763066996704789055}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6041714501536915658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1361883743471412468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: debae2dfb8aa6f7408c911d678628a4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Enemies.Espectro
+  empiezaDormido: 1
+  radioDespertar: 1.5
+  opacidadEnLaLuzDeKael: 0.25
+  velocidadFundido: 5
+  alcanceEspera: 12
+  margenBorde: 0.5
+  pivote: {fileID: 1301829174710624123}
+  sprite: {fileID: 2594113863480990241}
+  colorDormido: {r: 0.16, g: 0.16, b: 0.2, a: 1}
+  colorAtaque: {r: 0.62, g: 1, b: 0.66, a: 1}
+--- !u!212 &2594113863480990241 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7357180718059526174, guid: 779f5b3ddf9b27f43ae933a5dbf2d987, type: 3}
+  m_PrefabInstance: {fileID: 4763066996704789055}
+  m_PrefabAsset: {fileID: 0}

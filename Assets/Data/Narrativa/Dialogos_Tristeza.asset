@@ -29,3 +29,7 @@ MonoBehaviour:
     texto: "Me dej\xE9 hundir y no me ahogu\xE9. La Tristeza pesa, pero tambi\xE9n sostiene."
     momento: 3
     duracion: 4.5
+  - hablante: Kael
+    texto: "Este hielo no cede a un golpe cualquiera. Hace falta el Ataque Cargado: contener el golpe\u2026 y soltarlo."
+    momento: 4
+    duracion: 4.5

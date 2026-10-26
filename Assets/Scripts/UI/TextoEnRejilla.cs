@@ -37,6 +37,27 @@ namespace Fragmentum.UI
 
         public string Texto => _texto;
 
+        private Vector2Int _rejilla = CamaraCinematica.RejillaPorDefecto;
+
+        /// <summary>La rejilla del plano sobre el que se escribe. Al cambiarla, el texto se rehace en la nueva.</summary>
+        public Vector2Int Rejilla
+        {
+            get => _rejilla;
+            set
+            {
+                if (value == _rejilla)
+                {
+                    return;
+                }
+
+                _rejilla = value;
+                if (_malla != null && !string.IsNullOrEmpty(_texto))
+                {
+                    Construir();
+                }
+            }
+        }
+
         /// <summary>El bloque de texto en píxeles del plano (x desde la izquierda, y desde arriba).</summary>
         public RectInt Bloque { get; private set; }
 
@@ -205,10 +226,10 @@ namespace Fragmentum.UI
         private void Cuadro(int x0, int y0, int x1, int y1, CharacterInfo info)
         {
             var primero = _vertices.Count;
-            _vertices.Add(EnElMundo(x0, y1));
-            _vertices.Add(EnElMundo(x0, y0));
-            _vertices.Add(EnElMundo(x1, y0));
-            _vertices.Add(EnElMundo(x1, y1));
+            _vertices.Add(EnElMundo(x0, y1, _rejilla));
+            _vertices.Add(EnElMundo(x0, y0, _rejilla));
+            _vertices.Add(EnElMundo(x1, y0, _rejilla));
+            _vertices.Add(EnElMundo(x1, y1, _rejilla));
             _uvs.Add(info.uvBottomLeft);
             _uvs.Add(info.uvTopLeft);
             _uvs.Add(info.uvTopRight);
@@ -226,8 +247,11 @@ namespace Fragmentum.UI
         /// (el plano mide 135 de alto y su centro cae a mitad de un píxel). Coinciden con los bordes
         /// de los píxeles de la rejilla.
         /// </summary>
-        public static Vector3 EnElMundo(int columna, int fila) =>
-            new Vector3(columna - CamaraCinematica.AnchoReferencia * 0.5f, CamaraCinematica.AltoReferencia * 0.5f - fila, 0f);
+        public static Vector3 EnElMundo(int columna, int fila) => EnElMundo(columna, fila, CamaraCinematica.RejillaPorDefecto);
+
+        /// <summary>Lo mismo en una rejilla de otro tamaño.</summary>
+        public static Vector3 EnElMundo(int columna, int fila, Vector2Int rejilla) =>
+            new Vector3(columna - rejilla.x * 0.5f, rejilla.y * 0.5f - fila, 0f);
 
         private void Volcar()
         {

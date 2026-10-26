@@ -297,9 +297,12 @@ namespace Fragmentum.Tests
                 var separacion = cataratas.velocidad * (catarata.transform.position.x - tramo.transform.position.x);
                 Assert.LessOrEqual(Mathf.Abs(separacion) + catarata.sprite.bounds.size.x / 2f, ancho / 2f, "La catarata cae dentro del tramo de muro.");
 
-                // El muro tapa la pantalla mientras la cámara recorre la arena del jefe.
+                // El muro tapa la pantalla mientras la cámara recorre la arena del jefe: desde donde
+                // empieza su tramo (tres cuartos del nivel) hasta el final.
                 var limiteCamara = datos.Extension.y + 6f - AnchoVista / 2f;
-                for (var camara = 60f; camara <= limiteCamara; camara += 0.5f)
+                var inicioDelMuro = Mathf.Lerp(datos.Extension.x, datos.Extension.y, ConstructorFondoMundo1.TramosMuro[0].x);
+                Assert.Less(inicioDelMuro, DisenoNivel1.PuertaDesde, "El muro empieza antes que la arena.");
+                for (var camara = inicioDelMuro; camara <= limiteCamara; camara += 0.5f)
                 {
                     var centro = CalculoParallax.PosicionX(tramo.transform.position.x, camara, muro.velocidad) - camara;
                     Assert.LessOrEqual(centro - ancho / 2f, -AnchoVista / 2f + 1e-3f, $"Cámara en {camara}.");

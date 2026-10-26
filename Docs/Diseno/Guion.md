@@ -24,6 +24,9 @@
 - **Cada apertura y cada cierre nombran la emoción del mundo,** que es lo que pide la tarea G y lo
   que comprueban las pruebas.
 - **Las líneas del HUD duran 4,5 s:** ninguna pasa de unas 120 letras.
+- **La pista** es la única línea que explica una mecánica. Kael la dice ante un obstáculo que
+  pide una habilidad que ya tiene, y nombra la habilidad por su nombre para que el jugador sepa
+  qué usar. Hoy solo la tiene el Mundo 2.
 
 | Mundo | Mensaje (Anexo A, tabla 3) | Mecánica | Habilidad | Cómo lo dice el guion |
 |---|---|---|---|---|
@@ -57,6 +60,7 @@
 |---|---|---|
 | Apertura | Kael | Una ciudad entera bajo el agua y ni una lágrima en la superficie. Así de callada es la Tristeza. |
 | Eco de memoria | Kael | Alguien deja una silla vacía en la mesa. Nadie la quita. Nadie la nombra. |
+| Pista, ante el tapón de hielo | Kael | Este hielo no cede a un golpe cualquiera. Hace falta el Ataque Cargado: contener el golpe… y soltarlo. *(Añadida el 2026-10-12, a petición del autor: el tapón no se entendía. La escribí yo; retoma el cierre de la Ira, «contener un golpe… y soltarlo cuando decida».)* |
 | Antes del jefe | Doncella del Lamento | Él cerró los ojos para no llorar, y la ciudad se hundió. ¿Vienes a cerrarlos tú también? |
 | Cierre | Kael | Me dejé hundir y no me ahogué. La Tristeza pesa, pero también sostiene. |
 

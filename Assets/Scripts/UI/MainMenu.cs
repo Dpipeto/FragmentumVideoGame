@@ -1,4 +1,5 @@
 using Fragmentum.Core;
+using Fragmentum.Core.Puntuacion;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,9 @@ namespace Fragmentum.UI
     /// </summary>
     public class MainMenu : MonoBehaviour
     {
+        /// <summary>Quienes hicieron el juego, como en la portada de la tesis.</summary>
+        public const string Autores = "David Felipe Garzón Barbosa  ·  Juan Diego Romero Jiménez";
+
         [SerializeField] private Button botonContinuar;
         [SerializeField] private Button botonNuevaPartida;
         [SerializeField] private Button botonSelector;
@@ -59,7 +63,7 @@ namespace Fragmentum.UI
             if (textoProgreso != null)
             {
                 textoProgreso.text = gestor == null || bd == null ? string.Empty
-                    : $"Fragmentos integrados: {gestor.Datos.fragmentos.Count} de {TotalFragmentos(bd)} · Monedas: {gestor.Datos.monedas}";
+                    : $"Fragmentos integrados: {gestor.Datos.fragmentos.Count} de {TotalFragmentos(bd)} · Puntaje: {ReglasPuntaje.Puntos(gestor.Datos.PuntajeTotal)}";
             }
         }
 

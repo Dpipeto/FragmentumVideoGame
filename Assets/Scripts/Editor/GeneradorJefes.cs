@@ -26,6 +26,14 @@ namespace Fragmentum.EditorTools
         public const string CarpetaPatrones = "Assets/Data/Jefes/Patrones";
         public const string CarpetaPrefabs = "Assets/Prefabs/Jefes";
 
+        public const string NombrePavor = "EspectroDelPavor";
+
+        /// <summary>
+        /// El material de los sprites que no dependen de la luz: el Espectro del Pavor, en una arena a
+        /// oscuras, tiene que verse desde cualquier sitio cuando destella.
+        /// </summary>
+        public const string RutaMaterialSinLuz = ConstructorFondoMundo1.RutaMaterialSprites;
+
         /// <summary>Cada jefe: nombre de su asset de datos y su controlador.</summary>
         public static readonly (string asset, Type controlador)[] Jefes =
         {
@@ -174,9 +182,10 @@ namespace Fragmentum.EditorTools
                 };
             });
 
+            GenerarDoncella(sobrescribir);
+            GenerarPavor(sobrescribir);
+
             // Esqueletos: vida y fases del Anexo A, sin patrones todavía (Fase 10).
-            Completar("DoncellaLamento", sobrescribir, j => Esqueleto(j, 26, "4A7FA5", Fase("Olas e inundación", 1f), Fase("Congelamiento (50 %)", 0.5f)));
-            Completar("EspectroDelPavor", sobrescribir, j => Esqueleto(j, 22, "6B4FA0", Fase("Ataques con destello", 1f), Fase("Tres clones (50 %)", 0.5f)));
             Completar("JuezSilente", sobrescribir, j =>
             {
                 Esqueleto(j, 28, "8B3333", Fase("Memorias", 1f), Fase("Memoria real y trampa (50 %)", 0.5f));
@@ -187,6 +196,207 @@ namespace Fragmentum.EditorTools
                 Esqueleto(j, 40, "5A5A5A", Fase("Combate espejo", 1f), Fase("Secciones de cada mundo (60 %)", 0.6f), Fase("Integración (30 %)", 0.3f)));
 
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>
+        /// Doncella del Lamento (<c>Docs/Diseno/Nivel2_Diseno.md</c>, sección 6): solo se la hiere
+        /// mientras llora, así que cada fase termina su ronda con un llanto. Sus datos nacieron como
+        /// esqueleto (dos fases sin patrones): se completan aquí la primera vez, y después se respeta
+        /// lo que se haya ajustado a mano.
+        /// </summary>
+        private static void GenerarDoncella(bool sobrescribir)
+        {
+            var azulHielo = Hex("4A7FA5");
+
+            var ola = Patron<PatronOla>("Ola", sobrescribir, p =>
+            {
+                p.nombre = "Ola";
+                p.descripcion = "Una ola a ras del hielo cruza la arena desde la pared que tiene a la espalda. Se salta o se espera sobre una placa.";
+                p.aviso = 0.7f;
+                p.danio = 1;
+                p.color = azulHielo;
+            });
+
+            var olaDoble = Patron<PatronOla>("OlaDoble", sobrescribir, p =>
+            {
+                p.nombre = "Ola doble";
+                p.descripcion = "Dos olas seguidas: dos saltos con ritmo.";
+                p.aviso = 0.6f;
+                p.danio = 1;
+                p.olas = 2;
+                p.intervalo = 0.8f;
+                p.recuperacion = 0.5f;
+                p.color = azulHielo;
+            });
+
+            var inundacion = Patron<PatronInundacion>("Inundacion", sobrescribir, p =>
+            {
+                p.nombre = "Inundación";
+                p.descripcion = "Sale agua por las grietas de la franja de Kael y después sube y se queda 5 s. No hace daño: es agua.";
+                p.aviso = 1f;
+                p.danio = 0;
+                p.franjas = 1;
+                p.duracion = 5f;
+                p.color = azulHielo;
+            });
+
+            var congelar = Patron<PatronCongelar>("Congelar", sobrescribir, p =>
+            {
+                p.nombre = "Congelar";
+                p.descripcion = "El agua de la inundación se pone blanca y se congela: púas en lo que estaba inundado y, arriba, una capa de hielo que se pisa 6 s.";
+                p.aviso = 0.8f;
+                p.danio = 1;
+                p.duracionPuas = 0.6f;
+                p.duracionCapa = 6f;
+                p.color = Hex("E8EEF4");
+            });
+
+            var llanto = Patron<PatronLlanto>("Llanto", sobrescribir, p =>
+            {
+                p.nombre = "Llanto";
+                p.descripcion = "Baja al hielo, cerca de Kael, y llora 1,5 s. Es la única ventana para herirla.";
+                p.aviso = 0f;
+                p.danio = 0;
+                p.duracion = 1.5f;
+                p.color = Hex("00D4FF");
+            });
+
+            var llantoSobreElAgua = Patron<PatronLlanto>("LlantoSobreElAgua", sobrescribir, p =>
+            {
+                p.nombre = "Llanto sobre el agua";
+                p.descripcion = "Llora 1,2 s flotando bajo sobre la franja que acaba de congelar o de inundar: hay que subirse a su hielo o meterse en su agua.";
+                p.aviso = 0f;
+                p.danio = 0;
+                p.duracion = 1.2f;
+                p.color = Hex("00D4FF");
+            });
+
+            // Las olas llevan su dibujo (ConstructorMecanicasMundo2) en vez del rectángulo. Como con las
+            // ondas de la Centinela, solo se rellena el campo vacío.
+            var dibujoOla = ConstructorMecanicasMundo2.PrefabOla;
+            foreach (var patron in new[] { ola, olaDoble })
+            {
+                if (dibujoOla != null && patron.efecto == null)
+                {
+                    patron.efecto = dibujoOla;
+                    EditorUtility.SetDirty(patron);
+                }
+            }
+
+            Completar("DoncellaLamento", sobrescribir, j =>
+            {
+                j.vidaMaxima = 26;
+                j.velocidad = 2.5f;
+                // Tocarla no hace daño: las placas de la arena, que ella atraviesa, son refugio.
+                j.danioContacto = 0;
+                j.duracionVulnerable = 1.5f;
+                j.multiplicadorVulnerable = 2f;
+                j.inmuneFueraDeVulnerable = true;
+                j.tinte = azulHielo;
+                j.tamano = new Vector2(2f, 3.2f);
+                j.fases = new List<FaseJefe>
+                {
+                    Fase("Olas e inundación", 1f, 0.8f, 1f, ola, inundacion, ola, llanto),
+                    // El llanto va justo después de congelar: la capa de hielo sigue ahí para subirse.
+                    Fase("Congelamiento (50 %)", 0.5f, 0.6f, 1.2f, olaDoble, inundacion, congelar, llantoSobreElAgua),
+                };
+            }, completarEsqueleto: true);
+        }
+
+        /// <summary>
+        /// Espectro del Pavor (<c>Docs/Diseno/Nivel3_Diseno.md</c>, sección 6): invisible salvo cuando
+        /// ataca, y cada ataque avisa 1 s con su destello. La ventana es el jadeo tras el tajo (fase 1)
+        /// y tras las sombras (fase 2). Sus datos nacieron como esqueleto: se completan aquí la primera
+        /// vez, y después se respeta lo que se haya ajustado a mano.
+        /// </summary>
+        private static void GenerarPavor(bool sobrescribir)
+        {
+            var verdePalido = new Color(0.55f, 0.9f, 0.55f, 1f);
+
+            var tajo = Patron<PatronTajo>("Tajo", sobrescribir, p =>
+            {
+                p.nombre = "Tajo";
+                p.descripcion = "Aparece a 2,5 u de Kael, a su espalda (o delante, contra una pared), destella 1 s y lanza un tajo " +
+                                "de 3 u. Después jadea 1,5 s, visible: la ventana.";
+                p.aviso = 1f;
+                p.danio = 2;
+                p.distancia = 2.5f;
+                p.alcance = 3f;
+                p.alto = 2.6f;
+                p.duracionGolpe = 0.2f;
+                p.jadeo = 1.5f;
+                p.color = verdePalido;
+            });
+
+            var embestida = Patron<PatronEmbestidaSombra>("EmbestidaSombra", sobrescribir, p =>
+            {
+                p.nombre = "Embestida de sombra";
+                p.descripcion = "Aparece junto a la pared más lejana a Kael, destella 1 s y cruza la arena a ras de suelo " +
+                                "(1,6 u de alto, a 11 u/s). Al otro lado se queda 1 s a la vista. Se salta o se espera en una rama.";
+                p.aviso = 1f;
+                p.danio = 1;
+                p.velocidad = 11f;
+                p.alto = 1.6f;
+                p.visibleAlFinal = 1f;
+                p.color = verdePalido;
+            });
+
+            var hojas = Patron<PatronHojas>("Hojas", sobrescribir, p =>
+            {
+                p.nombre = "Hojas";
+                p.descripcion = "Alza el brazo y destella 1 s; en cuatro o cinco franjas el suelo brilla en verde y caen hojas " +
+                                "negras afiladas. La primera, bajo Kael. Se sale de lo que brilla.";
+                p.aviso = 1f;
+                p.danio = 1;
+                p.franjasMinimo = 4;
+                p.franjasMaximo = 5;
+                p.ancho = 2f;
+                p.hueco = 1f;
+                p.alto = 5f;
+                p.duracion = 0.6f;
+                p.recuperacion = 0.6f;
+                p.color = new Color(0.35f, 0.85f, 0.4f, 1f);
+            });
+
+            var sombras = Patron<PatronSombras>("Sombras", sobrescribir, p =>
+            {
+                p.nombre = "Las tres sombras";
+                p.descripcion = "Tres figuras (izquierda, centro y derecha) lanzan su tajo una tras otra, cada una con su destello; " +
+                                "después jadean las tres 1,5 s. Solo la verdadera lleva una luciérnaga dorada. Golpear a una " +
+                                "sombra la deshace y encoge la luz de Kael 3 s.";
+                p.aviso = 1f;
+                p.danio = 2;
+                p.margen = 3f;
+                p.aparicion = 0.4f;
+                p.intervalo = 0.3f;
+                p.jadeo = 1.5f;
+                p.color = verdePalido;
+            });
+
+            // Las sombras lanzan el mismo tajo que él: solo se rellena si está vacío.
+            if (sombras.tajo == null)
+            {
+                sombras.tajo = tajo;
+                EditorUtility.SetDirty(sombras);
+            }
+
+            Completar("EspectroDelPavor", sobrescribir, j =>
+            {
+                j.vidaMaxima = 22;
+                j.velocidad = 2f;
+                // Tocarlo no hace daño: es invisible y lo atravesaría; lo hacen sus ataques.
+                j.danioContacto = 0;
+                j.duracionVulnerable = 1.5f;
+                j.multiplicadorVulnerable = 2f;
+                j.inmuneFueraDeVulnerable = false;
+                j.tinte = Hex("6B4FA0");
+                j.tamano = new Vector2(2f, 3.2f);
+                j.fases = new List<FaseJefe>
+                {
+                    Fase("El acecho: tajo, embestida, tajo y hojas", 1f, 1f, 1f, tajo, embestida, tajo, hojas),
+                    Fase("Las tres sombras (50 %)", 0.5f, 0.9f, 1f, sombras, hojas, sombras, embestida),
+                };
+            }, completarEsqueleto: true);
         }
 
         private static T Patron<T>(string nombre, bool sobrescribir, Action<T> rellenar) where T : PatronAtaque
@@ -257,7 +467,9 @@ namespace Fragmentum.EditorTools
             }
         }
 
-        private static void Completar(string asset, bool sobrescribir, Action<JefeData> rellenar)
+        // Con completarEsqueleto, también rellena al jefe que todavía es un esqueleto (fases sin
+        // ningún patrón): así pasa de esqueleto a completo sin restablecer a los demás.
+        private static void Completar(string asset, bool sobrescribir, Action<JefeData> rellenar, bool completarEsqueleto = false)
         {
             var jefe = CargarDatos(asset);
             if (jefe == null)
@@ -266,11 +478,30 @@ namespace Fragmentum.EditorTools
                 return;
             }
 
-            if (sobrescribir || jefe.fases == null || jefe.fases.Count == 0)
+            if (sobrescribir || jefe.fases == null || jefe.fases.Count == 0 || (completarEsqueleto && EsEsqueleto(jefe)))
             {
                 rellenar(jefe);
                 EditorUtility.SetDirty(jefe);
             }
+        }
+
+        /// <summary>¿Tiene fases pero ningún patrón? Entonces espera sin atacar.</summary>
+        public static bool EsEsqueleto(JefeData jefe)
+        {
+            if (jefe == null || jefe.fases == null)
+            {
+                return true;
+            }
+
+            foreach (var fase in jefe.fases)
+            {
+                if (fase != null && fase.patrones != null && fase.patrones.Count > 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static void Esqueleto(JefeData j, int vida, string tinte, params FaseJefe[] fases)
@@ -360,9 +591,16 @@ namespace Fragmentum.EditorTools
                 sprite.sortingOrder = 5;
                 var animator = objetoSprite.AddComponent<Animator>();
 
-                // Los jefes con arte (de momento, la Centinela) llevan sus fotogramas, su Animator
+                // El Espectro del Pavor se deja ver a oscuras: su dibujo no depende de la luz.
+                if (nombre == NombrePavor)
+                {
+                    sprite.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(RutaMaterialSinLuz);
+                }
+
+                // Los jefes con arte (la Centinela y la Doncella) llevan sus fotogramas, su Animator
                 // y su fragmento; los demás, la cápsula provisional.
-                var conArte = nombre == ConstructorCentinela.NombreDatos && ConstructorCentinela.Vestir(objetoSprite, pivote, controlador);
+                var conArte = (nombre == ConstructorCentinela.NombreDatos && ConstructorCentinela.Vestir(objetoSprite, pivote, controlador)) ||
+                              (nombre == ConstructorDoncella.NombreDatos && ConstructorDoncella.Vestir(objetoSprite, pivote, controlador));
                 if (!conArte)
                 {
                     objetoSprite.transform.localPosition = new Vector3(0f, tamano.y * 0.5f, 0f);

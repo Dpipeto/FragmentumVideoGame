@@ -101,6 +101,7 @@ namespace Fragmentum.EditorTools
         private static readonly Vector2Int LienzoCombustion = new Vector2Int(166, 89);
         private static readonly Vector2Int LienzoBola = new Vector2Int(40, 29);
         private static readonly Vector2Int LienzoCinematica = new Vector2Int(240, 135);
+        private static readonly Vector2Int LienzoPortada = new Vector2Int(480, 270);
 
         private static readonly Regla[] Tabla = new[]
             {
@@ -145,10 +146,19 @@ namespace Fragmentum.EditorTools
                 // Enemigos.
                 new Regla(ConstructorEcoIra.CarpetaSprites + "/", ConstructorEcoIra.PixelesPorUnidad, ConstructorEcoIra.Pivote,
                     "Eco de la Ira: 1229×905, el pivote en los pies."),
+
+                // La portada del menú (N41).
+                new Regla(GeneradorProgresion.RutaFondoMenu, null, null,
+                    "Portada del menú y del selector: 480×270, 16:9 exacto (Imagenes/limpios/script/limpiar_portada.py). " +
+                    "La pinta una imagen de la interfaz a pantalla completa: en 1920×1080 se ve a ×4.", LienzoPortada),
             }
             .Concat(ConstructorCentinela.FotogramasIdle.Select(fotograma =>
                 new Regla(ConstructorCentinela.RutaSprite(fotograma), ConstructorCentinela.PixelesPorUnidadIdle, ConstructorCentinela.Pivote,
                     "Centinela, idle frontal: dibujado más grande; a 58 mide lo mismo que en combate.")))
+            // Mundo 2 (Tristeza): cada constructor lleva las reglas de su arte.
+            .Concat(ArteMundo2.Reglas)
+            // Las puertas de salida, las verjas, los checkpoints y los planos de salida de cada mundo.
+            .Concat(ConstructorPuertas.Reglas)
             .ToArray();
 
         public static IReadOnlyList<Regla> Reglas => Tabla;

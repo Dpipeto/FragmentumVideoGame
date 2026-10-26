@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Espectro
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.EnemyData
   nombreCanonico: Espectro
-  descripcion: "Miedo: solo se acerca si el jugador est\xE1 a oscuras; la luz de una antorcha lo mantiene a raya."
+  descripcion: "Miedo: duerme hasta que una antorcha lo despierta, Kael pasa a 1,5 u o le pegan. Despierto, solo se acerca si el jugador est\xE1 a oscuras; si est\xE1 en la luz de una antorcha, espera en su borde. Casi invisible: se le ve entero bajo una antorcha y al atacar, que avisa medio segundo."
   vidaMaxima: 2
   danio: 1
   danioContacto: 1
   invulnerabilidad: 0.3
+  puntos: 150
   velocidadPatrulla: 1.5
   velocidadPersecucion: 3.8
   toleranciaWaypoint: 0.2
@@ -30,9 +31,10 @@ MonoBehaviour:
   attackRadius: 1.2
   alturaAtaque: 1.5
   attackCooldown: 1
-  duracionAtaque: 0.45
-  inicioVentanaGolpe: 0.2
-  finVentanaGolpe: 0.35
+  duracionAtaque: 0.8
+  inicioVentanaGolpe: 0.5
+  finVentanaGolpe: 0.65
+  hiperarmadura: 0
   damagedDuration: 0.3
   retroceso: {x: 4, y: 3}
   resistenciaRetroceso: 0

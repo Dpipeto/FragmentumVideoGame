@@ -20,10 +20,14 @@ namespace Fragmentum.Levels
     /// - <b>Configuración:</b> fondo de cámara con la paleta, límites de cámara desde las
     ///   secciones del Anexo A y música del nivel. Lo que falte (música, prefab) se avisa por
     ///   consola y el nivel sigue funcionando.
+    /// - <b>Oscuridad:</b> si las reglas del nivel la piden (el Miedo), activa la luz de cada tramo
+    ///   de la escena (<see cref="LuzDelNivel"/>) y enciende la luz propia de Kael.
     /// - <b>Reaparición:</b> tras un Game Over, la FSM global pide reintentar
     ///   (<see cref="EventosJuego.ReintentoSolicitado"/>) y el jugador vuelve al checkpoint
     ///   activo. Fuera de los niveles del juego (escenas de prueba) no hay Game Over: el jugador
     ///   reaparece solo tras una espera. Sustituye a la <c>ReaparicionSimple</c> provisional.
+    /// - <b>Puntaje:</b> crea el <see cref="MarcadorNivel"/> de la escena y lo cierra en la
+    ///   victoria, antes de que se guarde la partida.
     /// - <b>Victoria:</b> <see cref="Completar"/>, que llama la <see cref="SalidaNivel"/>. La FSM
     ///   global muestra el fin de nivel. En los niveles con jefe, la salida solo se abre al
     ///   derrotarlo, y el fragmento y la habilidad llegan en ese momento (<see cref="JefeDerrotado"/>).
@@ -65,9 +69,11 @@ namespace Fragmentum.Levels
         [SerializeField] private float volumenMusica = 0.6f;
 
         private CheckpointManager _checkpoints;
+        private MarcadorNivel _marcador;
         private PlayerController _jugador;
         private CameraMovement _camara;
         private bool _completado;
+        private bool _ecoDeMemoriaDicho;
 
         /// <summary>El jugador reapareció (tras un Game Over o, fuera de los niveles, tras morir).</summary>
         public event Action<PlayerController> OnJugadorReaparecio;
@@ -83,6 +89,9 @@ namespace Fragmentum.Levels
         public PlayerController Jugador => _jugador;
 
         public CheckpointManager Checkpoints => _checkpoints;
+
+        /// <summary>El puntaje y el reloj de este intento.</summary>
+        public MarcadorNivel Marcador => _marcador;
 
         public bool Completado => _completado;
 
@@ -101,13 +110,41 @@ namespace Fragmentum.Levels
             }
 
             PrepararJugador();
+            PrepararMarcador();
             PrepararCamara();
             PrepararMusica();
         }
 
-        private void OnEnable() => EventosJuego.ReintentoSolicitado += Reaparecer;
+        private void OnEnable()
+        {
+            EventosJuego.ReintentoSolicitado += Reaparecer;
+            if (_checkpoints != null)
+            {
+                _checkpoints.OnCheckpointActivado += AlActivarCheckpoint;
+            }
+        }
 
-        private void OnDisable() => EventosJuego.ReintentoSolicitado -= Reaparecer;
+        private void OnDisable()
+        {
+            EventosJuego.ReintentoSolicitado -= Reaparecer;
+            if (_checkpoints != null)
+            {
+                _checkpoints.OnCheckpointActivado -= AlActivarCheckpoint;
+            }
+        }
+
+        // El eco de memoria del guion suena la primera vez que se toca su checkpoint en esta
+        // carga del nivel. Restaurar un checkpoint guardado no lo dispara: no es tocarlo.
+        private void AlActivarCheckpoint(Checkpoint checkpoint)
+        {
+            if (_ecoDeMemoriaDicho || checkpoint == null || !checkpoint.EcoDeMemoria || nivel == null || DialogueManager.Instancia == null)
+            {
+                return;
+            }
+
+            _ecoDeMemoriaDicho = true;
+            DialogueManager.Instancia.Reproducir(nivel.dialogos, MOMENTOS_DIALOGO.ECO_MEMORIA);
+        }
 
         // En Start todas las cámaras ya pasaron por su Awake: se encuadra sin suavizado.
         private void Start()
@@ -116,6 +153,8 @@ namespace Fragmentum.Levels
             {
                 _camara.Encuadrar();
             }
+
+            PrepararOscuridad();
 
             // Las líneas de apertura esperan a que se juegue (tras la cinemática de entrada, si la hay).
             if (nivel != null && DialogueManager.Instancia != null)
@@ -167,6 +206,13 @@ namespace Fragmentum.Levels
             {
                 Debug.Log("[Nivel] Salida alcanzada. Esta escena no es un nivel de la LevelDatabase, así que no hay fin de nivel.", this);
                 return false;
+            }
+
+            // El puntaje se anota antes: completar el nivel guarda la partida y abre el fin de
+            // nivel, que lo enseña.
+            if (juego.PuedeCompletarNivel)
+            {
+                _marcador.Cerrar();
             }
 
             if (!juego.CompletarNivel())
@@ -267,6 +313,18 @@ namespace Fragmentum.Levels
             }
         }
 
+        // Si se empieza en un checkpoint guardado, el marcador sigue como estaba al activarlo.
+        private void PrepararMarcador()
+        {
+            _marcador = GetComponent<MarcadorNivel>();
+            if (_marcador == null)
+            {
+                _marcador = gameObject.AddComponent<MarcadorNivel>();
+            }
+
+            _marcador.Empezar(nivel, this, _checkpoints.Activo != null);
+        }
+
         private void PrepararCamara()
         {
             var camara = Camera.main;
@@ -301,6 +359,40 @@ namespace Fragmentum.Levels
             if (limitesDesdeSecciones && tramo.y > tramo.x)
             {
                 _camara.FijarLimites(new Vector2(tramo.x - margenCamara, alturaCamara.x), new Vector2(tramo.y + margenCamara, alturaCamara.y));
+            }
+        }
+
+        // En Start: la luz global y Kael ya pasaron por su Awake.
+        private void PrepararOscuridad()
+        {
+            if (nivel == null || !nivel.reglas.oscuridad)
+            {
+                return;
+            }
+
+            LuzDelNivel luz = null;
+            foreach (var raiz in gameObject.scene.GetRootGameObjects())
+            {
+                luz = raiz.GetComponentInChildren<LuzDelNivel>(true);
+                if (luz != null)
+                {
+                    break;
+                }
+            }
+
+            if (luz != null)
+            {
+                luz.Activar(_jugador != null ? _jugador.transform : null);
+            }
+            else
+            {
+                Debug.LogWarning($"[Nivel] '{nivel.Titulo}' pide oscuridad, pero su escena no tiene LuzDelNivel: se queda con luz. Prepara la escena (Fragmentum → Niveles).", this);
+            }
+
+            var propia = _jugador != null ? _jugador.GetComponent<LuzJugador>() : null;
+            if (propia != null)
+            {
+                propia.Encender(nivel.reglas.radioLuzJugador);
             }
         }
 

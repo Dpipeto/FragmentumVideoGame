@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72516ab5ca490e049b95e5bdcf055a97, type: 3}
+  m_Name: Tajo
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronTajo
+  nombre: Tajo
+  descripcion: "Aparece a 2,5 u de Kael, a su espalda (o delante, contra una pared), destella 1 s y lanza un tajo de 3 u. Despu\xE9s jadea 1,5 s, visible: la ventana."
+  aviso: 1
+  danio: 2
+  color: {r: 0.55, g: 0.9, b: 0.55, a: 1}
+  dibujarZona: 1
+  distancia: 2.5
+  alcance: 3
+  alto: 2.6
+  duracionGolpe: 0.2
+  jadeo: 1.5

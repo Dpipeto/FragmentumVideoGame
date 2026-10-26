@@ -7,12 +7,12 @@ using UnityEngine.UI;
 namespace Fragmentum.UI
 {
     /// <summary>
-    /// HUD de los niveles: barra de vida del jugador, monedas, el mundo actual, un aviso breve
-    /// (checkpoint, fragmento obtenido) y la barra del jefe durante su combate. Vive con los sistemas persistentes (lo crea el UIManager), así
+    /// HUD de los niveles: barra de vida del jugador, el puntaje y el reloj, el mundo actual, un aviso breve
+    /// (checkpoint, fragmento obtenido), la tecla de Interactuar sobre lo que Kael tiene al alcance y la barra del jefe durante su combate. Vive con los sistemas persistentes (lo crea el UIManager), así
     /// que ninguna escena de nivel necesita su propio HUD, y se engancha al jugador que registra
     /// el GameManager en cada escena.
     ///
-    /// Solo escucha eventos: no lee la vida ni las monedas en cada frame.
+    /// Solo escucha eventos: no lee la vida ni el puntaje en cada frame.
     /// </summary>
     public class Hud : MonoBehaviour
     {
@@ -29,8 +29,20 @@ namespace Fragmentum.UI
         private Text _linea;
         private float _ocultarAvisoEn;
         private bool _construido;
+        private IndicadorAgua _agua;
+        private ContadorPuntaje _puntaje;
+        private AvisoInteraccion _interaccion;
 
         public LifeBar Barra => _barra;
+
+        /// <summary>El aviso de Interactuar sobre lo que Kael tiene al alcance (una antorcha).</summary>
+        public AvisoInteraccion Interaccion => _interaccion;
+
+        /// <summary>El puntaje y el reloj del nivel, arriba a la derecha.</summary>
+        public ContadorPuntaje Puntaje => _puntaje;
+
+        /// <summary>La barra de aire y el velo submarino (mundo de la Tristeza).</summary>
+        public IndicadorAgua Agua => _agua;
 
         /// <summary>¿Se ve la barra del jefe? (Solo durante un combate de jefe.)</summary>
         public bool JefeVisible => _panelJefe != null && _panelJefe.activeSelf;
@@ -59,6 +71,10 @@ namespace Fragmentum.UI
             var raiz = (RectTransform)transform;
             FabricaUI.Estirar(raiz);
 
+            // Lo primero: su velo submarino queda por detrás de todo lo demás.
+            _agua = gameObject.AddComponent<IndicadorAgua>();
+            _agua.Construir(raiz);
+
             var fondo = FabricaUI.Objeto("BarraVida", raiz).gameObject.AddComponent<Image>();
             fondo.color = new Color(0f, 0f, 0f, 0.6f);
             fondo.raycastTarget = false;
@@ -81,16 +97,26 @@ namespace Fragmentum.UI
             _barra.BuscarJugador = false;
             _barra.FijarRelleno(relleno);
 
-            _mundo = FabricaUI.Texto(raiz, "Mundo", string.Empty, 22, new Color(1f, 1f, 1f, 0.55f), TextAnchor.UpperLeft);
+            _mundo = FabricaUI.Titulo(raiz, "Mundo", string.Empty, 22, new Color(1f, 1f, 1f, 0.55f), TextAnchor.UpperLeft);
             FabricaUI.Colocar(_mundo.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -66f), new Vector2(700f, 34f), new Vector2(0f, 1f));
 
-            var monedas = FabricaUI.Texto(raiz, "Monedas", string.Empty, 28, new Color(0.78f, 0.64f, 0.29f, 1f), TextAnchor.UpperRight);
-            FabricaUI.Colocar(monedas.rectTransform, new Vector2(1f, 1f), new Vector2(-28f, -24f), new Vector2(420f, 40f), new Vector2(1f, 1f));
-            monedas.gameObject.AddComponent<ContadorMonedas>();
+            // Arriba a la derecha, donde la v1 llevaba las monedas: el puntaje, el reloj y, un
+            // momento, lo que se acaba de ganar.
+            var puntos = FabricaUI.Titulo(raiz, "Puntaje", string.Empty, 28, new Color(0.78f, 0.64f, 0.29f, 1f), TextAnchor.UpperRight);
+            FabricaUI.Colocar(puntos.rectTransform, new Vector2(1f, 1f), new Vector2(-28f, -24f), new Vector2(520f, 40f), new Vector2(1f, 1f));
+            var tiempo = FabricaUI.Titulo(raiz, "Tiempo", string.Empty, 24, new Color(1f, 1f, 1f, 0.75f), TextAnchor.UpperRight);
+            FabricaUI.Colocar(tiempo.rectTransform, new Vector2(1f, 1f), new Vector2(-28f, -62f), new Vector2(520f, 34f), new Vector2(1f, 1f));
+            var ganancia = FabricaUI.Titulo(raiz, "Ganancia", string.Empty, 26, new Color(1f, 0.9f, 0.55f, 1f), TextAnchor.UpperRight);
+            FabricaUI.Colocar(ganancia.rectTransform, new Vector2(1f, 1f), new Vector2(-28f, -98f), new Vector2(520f, 36f), new Vector2(1f, 1f));
+            _puntaje = puntos.gameObject.AddComponent<ContadorPuntaje>();
+            _puntaje.Fijar(puntos, tiempo, ganancia);
 
             _aviso = FabricaUI.Texto(raiz, "Aviso", string.Empty, 30, new Color(1f, 1f, 1f, 0.9f));
             FabricaUI.Colocar(_aviso.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 120f), new Vector2(1000f, 50f));
             _aviso.gameObject.SetActive(false);
+
+            _interaccion = gameObject.AddComponent<AvisoInteraccion>();
+            _interaccion.Construir(raiz);
 
             ConstruirBarraJefe(raiz);
             ConstruirDialogo(raiz);
@@ -100,18 +126,20 @@ namespace Fragmentum.UI
         private void ConstruirDialogo(RectTransform raiz)
         {
             var panel = FabricaUI.Objeto("Dialogo", raiz);
-            FabricaUI.Colocar(panel, new Vector2(0.5f, 0f), new Vector2(0f, 190f), new Vector2(1200f, 120f), new Vector2(0.5f, 0f));
+            FabricaUI.Colocar(panel, new Vector2(0.5f, 0f), new Vector2(0f, 190f), new Vector2(1200f, 134f), new Vector2(0.5f, 0f));
             var fondo = panel.gameObject.AddComponent<Image>();
             fondo.color = new Color(0f, 0f, 0f, 0.6f);
             fondo.raycastTarget = false;
             _panelDialogo = panel.gameObject;
 
-            _hablante = FabricaUI.Texto(panel, "Hablante", string.Empty, 22, Color.white, TextAnchor.UpperLeft);
-            FabricaUI.Colocar(_hablante.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -12f), new Vector2(600f, 30f), new Vector2(0f, 1f));
+            // Quien habla, en la letra de los títulos; lo que dice, en cursiva de Alegreya, algo
+            // más grande que con la fuente integrada (su ojo es más pequeño).
+            _hablante = FabricaUI.Titulo(panel, "Hablante", string.Empty, 24, Color.white, TextAnchor.UpperLeft);
+            FabricaUI.Colocar(_hablante.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -12f), new Vector2(600f, 32f), new Vector2(0f, 1f));
             _hablante.fontStyle = FontStyle.Bold;
 
-            _linea = FabricaUI.Texto(panel, "Linea", string.Empty, 26, new Color(0.94f, 0.93f, 0.85f, 1f), TextAnchor.UpperLeft);
-            FabricaUI.Colocar(_linea.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -44f), new Vector2(1144f, 70f), new Vector2(0f, 1f));
+            _linea = FabricaUI.Texto(panel, "Linea", string.Empty, 30, new Color(0.94f, 0.93f, 0.85f, 1f), TextAnchor.UpperLeft);
+            FabricaUI.Colocar(_linea.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -48f), new Vector2(1144f, 80f), new Vector2(0f, 1f));
             _linea.fontStyle = FontStyle.Italic;
 
             _panelDialogo.SetActive(false);
@@ -142,7 +170,7 @@ namespace Fragmentum.UI
             FabricaUI.Colocar(panel, new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(760f, 70f), new Vector2(0.5f, 1f));
             _panelJefe = panel.gameObject;
 
-            _nombreJefe = FabricaUI.Texto(panel, "Nombre", string.Empty, 24, new Color(1f, 0.85f, 0.7f, 0.95f));
+            _nombreJefe = FabricaUI.Titulo(panel, "Nombre", string.Empty, 24, new Color(1f, 0.85f, 0.7f, 0.95f));
             FabricaUI.Colocar(_nombreJefe.rectTransform, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(760f, 32f), new Vector2(0.5f, 1f));
 
             var fondo = FabricaUI.Objeto("Barra", panel).gameObject.AddComponent<Image>();
@@ -188,11 +216,13 @@ namespace Fragmentum.UI
             _panelJefe.SetActive(false);
         }
 
-        /// <summary>Engancha la barra de vida al jugador (null la deja vacía).</summary>
+        /// <summary>Engancha la barra de vida y la de aire al jugador (null las deja vacías).</summary>
         public void Vincular(PlayerController jugador)
         {
             Construir();
             _barra.Vincular(jugador != null ? jugador.Vida : null);
+            _agua.Vincular(jugador != null ? jugador.GetComponent<OxigenoJugador>() : null);
+            _interaccion.Vincular(jugador);
         }
 
         /// <summary>Pone el nombre del mundo en una esquina (vacío fuera de los niveles).</summary>

@@ -32,6 +32,22 @@ namespace Fragmentum.Levels.Mecanicas
             _ => personalizado
         };
 
+        /// <summary>
+        /// Cambia el tipo por código, para las zonas que nacen en mitad del juego (el agua y el
+        /// hielo de la inundación de la Doncella). A quien ya esté dentro le cambia el modificador.
+        /// </summary>
+        public void FijarTipo(TIPOS nuevo)
+        {
+            tipo = nuevo;
+            foreach (var motor in _dentro)
+            {
+                if (motor != null)
+                {
+                    motor.AgregarModificador(this, Modificador);
+                }
+            }
+        }
+
         private void Reset()
         {
             GetComponent<Collider2D>().isTrigger = true;

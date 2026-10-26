@@ -36,6 +36,9 @@ namespace Fragmentum.Player
 
         private Color _colorBase = Color.white;
 
+        /// <summary>El dibujo de Kael (lo copian, por ejemplo, los ecos de intentos de la Tristeza).</summary>
+        public SpriteRenderer Dibujo => sprite != null ? sprite : sprite = GetComponentInChildren<SpriteRenderer>();
+
         private void Awake()
         {
             if (jugador == null) jugador = GetComponent<PlayerController>();

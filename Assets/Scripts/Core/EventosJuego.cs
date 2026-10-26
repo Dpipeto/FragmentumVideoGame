@@ -32,6 +32,12 @@ namespace Fragmentum.Core
         /// <summary>Terminó el combate de jefe (derrota o reinicio). El HUD oculta su barra.</summary>
         public static event Action JefeFueraDeCombate;
 
+        /// <summary>Cambió el puntaje del nivel: (total del intento, lo que se acaba de ganar).</summary>
+        public static event Action<int, int> PuntajeCambiado;
+
+        /// <summary>Pasó un segundo en el reloj del nivel: (segundos enteros jugados).</summary>
+        public static event Action<int> TiempoCambiado;
+
         /// <summary>
         /// ¿Está bloqueado el input de juego? Lo fija la FSM global (pausa, cinemáticas, cargas,
         /// Game Over) y lo respeta <c>FuenteInputJugador</c>.
@@ -56,6 +62,10 @@ namespace Fragmentum.Core
         public static void NotificarJefeEnCombate(string nombre, Health vida) => JefeEnCombate?.Invoke(nombre, vida);
 
         public static void NotificarJefeFueraDeCombate() => JefeFueraDeCombate?.Invoke();
+
+        public static void NotificarPuntaje(int total, int ganados) => PuntajeCambiado?.Invoke(total, ganados);
+
+        public static void NotificarTiempo(int segundos) => TiempoCambiado?.Invoke(segundos);
 
         public static void FijarEntradaBloqueada(bool bloqueada)
         {
@@ -83,6 +93,8 @@ namespace Fragmentum.Core
             CheckpointActivado = null;
             JefeEnCombate = null;
             JefeFueraDeCombate = null;
+            PuntajeCambiado = null;
+            TiempoCambiado = null;
             EntradaBloqueada = false;
             FotogramaDesbloqueo = -1;
         }

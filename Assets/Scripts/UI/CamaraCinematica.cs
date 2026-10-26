@@ -10,10 +10,11 @@ namespace Fragmentum.UI
     /// <summary>
     /// La cámara de las cinemáticas en pixel art. Es una cámara propia, aparte de la del juego, con
     /// la Pixel Perfect Camera de URP:
-    /// - dibuja en una textura de exactamente <see cref="AnchoReferencia"/> × <see cref="AltoReferencia"/>
-    ///   píxeles (<i>Upscale Render Texture</i>) y la amplía a la pantalla por el mayor número
-    ///   entero que cabe, con filtro Point: 1 píxel del plano son k × k píxeles de pantalla, sin
-    ///   interpolar. En 1920 × 1080, k = 8;
+    /// - dibuja en una textura de exactamente el tamaño de los planos (<see cref="Rejilla"/>: por
+    ///   defecto <see cref="AnchoReferencia"/> × <see cref="AltoReferencia"/>, y cada cinemática
+    ///   puede traer la suya) con <i>Upscale Render Texture</i>, y la amplía a la pantalla por el
+    ///   mayor número entero que cabe, con filtro Point: 1 píxel del plano son k × k píxeles de
+    ///   pantalla, sin interpolar. En 1920 × 1080, k = 8 (k = 4 con los planos de 480 × 268);
     /// - centra la imagen y rellena de negro lo que sobra (<i>Windowbox</i>): en 1280 × 720, k = 5
     ///   y queda un borde negro fino;
     /// - los planos van a 1 píxel por unidad (<see cref="PixelesPorUnidad"/>), igual que la
@@ -44,6 +45,9 @@ namespace Fragmentum.UI
 
         public const int AltoReferencia = 135;
 
+        /// <summary>La rejilla por defecto: la de los planos del Nivel 1.</summary>
+        public static readonly Vector2Int RejillaPorDefecto = new Vector2Int(AnchoReferencia, AltoReferencia);
+
         /// <summary>Píxeles por unidad de los planos y de la cámara: un píxel del plano, una unidad.</summary>
         public const int PixelesPorUnidad = 1;
 
@@ -64,7 +68,8 @@ namespace Fragmentum.UI
         private static readonly Vector2Int[] Direcciones = { Vector2Int.down, Vector2Int.right, Vector2Int.up, Vector2Int.left };
 
         // Tercios del plano para los textos sin punto propio (arriba, centro, abajo), desde arriba.
-        private static readonly int[] FilasTercio = { AltoReferencia / 6, AltoReferencia / 2, AltoReferencia - AltoReferencia / 6 };
+        private static int FilaDelTercio(POSICIONES_CARTEL posicion, int alto) =>
+            posicion == POSICIONES_CARTEL.ARRIBA ? alto / 6 : posicion == POSICIONES_CARTEL.CENTRO ? alto / 2 : alto - alto / 6;
 
         private static readonly HashSet<string> AvisadasSinFuente = new HashSet<string>();
         private static Sprite _blanco;
@@ -101,6 +106,40 @@ namespace Fragmentum.UI
         public SpriteRenderer PlanoEncima => planoEncima;
 
         public CapaBrasas CapaBrasas => brasas;
+
+        /// <summary>La rejilla en la que dibuja: el tamaño de los planos de la cinemática en curso.</summary>
+        public Vector2Int Rejilla { get; private set; } = new Vector2Int(AnchoReferencia, AltoReferencia);
+
+        /// <summary>
+        /// Cambia la rejilla: la Pixel Perfect Camera pasa a dibujar en una textura de ese tamaño y
+        /// a ampliarla por el mayor entero que quepa, y el flash la cubre entera. Cada cinemática
+        /// trae la suya (<see cref="CutsceneData.Rejilla"/>). Las brasas siguen repartidas a lo
+        /// ancho de la rejilla por defecto: solo las usa la presentación de la Centinela.
+        /// </summary>
+        public void FijarRejilla(Vector2Int rejilla)
+        {
+            if (rejilla.x <= 0 || rejilla.y <= 0)
+            {
+                rejilla = RejillaPorDefecto;
+            }
+
+            Rejilla = rejilla;
+            if (pixelPerfect != null)
+            {
+                pixelPerfect.refResolutionX = rejilla.x;
+                pixelPerfect.refResolutionY = rejilla.y;
+            }
+
+            if (camara != null)
+            {
+                camara.orthographicSize = rejilla.y * 0.5f / PixelesPorUnidad;
+            }
+
+            if (flash != null)
+            {
+                flash.transform.localScale = new Vector3(rejilla.x, rejilla.y, 1f);
+            }
+        }
 
         /// <summary>
         /// Por cuánto se multiplica cada píxel del plano en pantalla. Lo calcula la Pixel Perfect
@@ -258,8 +297,9 @@ namespace Fragmentum.UI
                     tamano *= 2; // el título, al doble: un entero, sigue en la rejilla
                 }
 
-                var (punto, alineacion) = Anclaje(cartel, encuadre);
+                var (punto, alineacion) = Anclaje(cartel, encuadre, Rejilla);
                 texto.gameObject.SetActive(true);
+                texto.Rejilla = Rejilla;
                 texto.Fijar(cartel.texto, fuente, tamano, cinematica != null ? cinematica.interlineado : 0, punto, alineacion,
                     cinematica != null ? cinematica.colorTexto : Color.white);
                 texto.FijarAlfa(visibles[i].Alfa);
@@ -278,9 +318,13 @@ namespace Fragmentum.UI
         /// mismo sitio.
         /// </summary>
         public static (Vector2Int punto, TextAnchor alineacion) Anclaje(Cartel cartel, Vector2Int encuadre = default) =>
+            Anclaje(cartel, encuadre, RejillaPorDefecto);
+
+        /// <summary>Lo mismo en una rejilla de otro tamaño: los tercios son los de esa rejilla.</summary>
+        public static (Vector2Int punto, TextAnchor alineacion) Anclaje(Cartel cartel, Vector2Int encuadre, Vector2Int rejilla) =>
             cartel.enPunto
                 ? (cartel.punto + new Vector2Int(encuadre.x, -encuadre.y), cartel.alineacion)
-                : (new Vector2Int(AnchoReferencia / 2, FilasTercio[(int)cartel.posicion]), TextAnchor.MiddleCenter);
+                : (new Vector2Int(rejilla.x / 2, FilaDelTercio(cartel.posicion, rejilla.y)), TextAnchor.MiddleCenter);
 
         private TextoEnRejilla Texto(int indice)
         {
@@ -342,11 +386,14 @@ namespace Fragmentum.UI
         /// <paramref name="alto"/> píxeles, como lo calcula la Pixel Perfect Camera: k veces la
         /// referencia, centrado con división entera.
         /// </summary>
-        public static RectInt RectEnPantalla(int ancho, int alto)
+        public static RectInt RectEnPantalla(int ancho, int alto) => RectEnPantalla(ancho, alto, RejillaPorDefecto);
+
+        /// <summary>Lo mismo para una rejilla de otro tamaño (la de 480 × 268: ×4 en 1920 × 1080, ×2 en 1280 × 720).</summary>
+        public static RectInt RectEnPantalla(int ancho, int alto, Vector2Int rejilla)
         {
-            var k = Mathf.Max(1, Mathf.Min(ancho / AnchoReferencia, alto / AltoReferencia));
-            var w = AnchoReferencia * k;
-            var h = AltoReferencia * k;
+            var k = Mathf.Max(1, Mathf.Min(ancho / rejilla.x, alto / rejilla.y));
+            var w = rejilla.x * k;
+            var h = rejilla.y * k;
             return new RectInt((ancho - w) / 2, (alto - h) / 2, w, h);
         }
 

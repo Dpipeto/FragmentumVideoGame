@@ -100,6 +100,13 @@ namespace Fragmentum.Data
                  "preparar la escena; en el juego mandan los objetos Checkpoint de la escena.")]
         public List<float> puntosDeControl = new List<float>();
 
+        [Header("Puntaje")]
+        [Tooltip("Segundos de juego dentro de los que cruzar la salida da bono por tiempo. Pasados, no hay bono (y no se resta).")]
+        [Min(0f)] public float tiempoConBono = 720f;
+
+        [Tooltip("Puntos del bono por cada segundo que sobre de tiempoConBono.")]
+        [Min(0)] public int puntosPorSegundo = 5;
+
         [Header("Interfaz (maqueta de los menús de pausa)")]
         [Tooltip("Color de acento de las pantallas de pausa, Game Over y fin de nivel.")]
         public Color acento;

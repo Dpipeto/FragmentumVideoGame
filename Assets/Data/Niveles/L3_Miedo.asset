@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.LevelData
   id: 3
   escena:
-    escena: {fileID: 0}
-    ruta: 
+    escena: {fileID: 102900000, guid: 32e2452388644de4482e2e415ac7d579, type: 3}
+    ruta: Assets/Scenes/Nivel3.unity
   nombreMundo: Bosque Tenebroso
   emocion: {fileID: 11400000, guid: 75a8f2376c848d64995713f996c79aef, type: 2}
   sinopsis: "Ansiedad, inseguridad. Explota la desorientaci\xF3n y la incertidumbre."
@@ -34,6 +34,7 @@ MonoBehaviour:
   cinematicaEntrada: {fileID: 0}
   cinematicaCierre: {fileID: 11400000, guid: 3a7a8e1ee0d4e8642a06997b5f3eb89d, type: 2}
   cinematicaJefe: {fileID: 11400000, guid: 725826ce794f5ca4fad94470709fa362, type: 2}
+  cinematicaJefeDerrotado: {fileID: 0}
   dialogos: {fileID: 11400000, guid: 5862d793edad30747b232dcc705a3cab, type: 2}
   reglas:
     agacharse: 0
@@ -43,16 +44,25 @@ MonoBehaviour:
   secciones:
   - nombre: "Secci\xF3n 1"
     desdeX: 0
-    hastaX: 20
-    contenido: Luz moderada y tutorial de antorchas. 2 Espectros y 3 trampas ocultas.
+    hastaX: 36
+    contenido: 'La linde, con luz de luna: el tutorial de las antorchas, un barranco con una rama podrida, 2 Espectros y 3 cepos.'
   - nombre: "Secci\xF3n 2"
-    desdeX: 20
-    hastaX: 50
-    contenido: 'Oscuridad completa: laberinto con 2 rutas. 3 Centinelas Ciegos y 4 Espectros.'
+    desdeX: 36
+    hastaX: 84
+    contenido: "El bosque cerrado, a oscuras: la trinchera, la bifurcaci\xF3n (las copas o la hondonada, que acaba en un callej\xF3n), 3 Centinelas Ciegos y 4 Espectros."
+  - nombre: "Secci\xF3n 3"
+    desdeX: 84
+    hastaX: 112
+    contenido: "El claro, con luz de luna: el Acechador entre tres \xE1rboles. Y la antesala."
   - nombre: Arena del jefe
-    desdeX: 50
-    hastaX: 70
-    contenido: Oscuridad total; solo la luz del jugador.
-  puntosDeControl: []
+    desdeX: 112
+    hastaX: 133
+    contenido: 'Oscuridad total: solo la luz de Kael.'
+  puntosDeControl:
+  - 41
+  - 82.5
+  - 109
+  tiempoConBono: 900
+  puntosPorSegundo: 5
   acento: {r: 0.49803922, g: 0.8784314, b: 0.6901961, a: 1}
   cita: lo que ocultas en la sombra crece

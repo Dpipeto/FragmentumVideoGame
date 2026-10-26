@@ -488,6 +488,25 @@ namespace Fragmentum.EditorTools
             return true;
         }
 
+        /// <summary>
+        /// Reparte otra vez los hitos del fondo que ya tenga la escena, para lo que mide ahora el
+        /// nivel. Devuelve false si la escena no tiene fondo (lo pondrá <see cref="Colocar"/>).
+        /// </summary>
+        public static bool RepartirEn(Scene escena, LevelData nivel)
+        {
+            foreach (var raiz in escena.GetRootGameObjects())
+            {
+                var reparto = raiz.GetComponentInChildren<RepartoHitos>(true);
+                if (reparto != null)
+                {
+                    Repartir(reparto, escena, nivel);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static void Repartir(RepartoHitos reparto, Scene escena, LevelData nivel)
         {
             var extension = nivel.Extension;

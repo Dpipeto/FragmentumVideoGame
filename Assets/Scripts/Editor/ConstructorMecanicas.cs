@@ -215,7 +215,7 @@ namespace Fragmentum.EditorTools
         /// mecánica. Desde cualquier estado se salta al del valor pedido, sin tiempo de salida: el
         /// ciclo y sus tiempos son del script. Empieza en el primero (reposo, intacta, apagada).
         /// </summary>
-        private static void ArmarControlador(Mecanica mecanica, IReadOnlyList<(string nombre, Motion clip)> clips)
+        internal static void ArmarControlador(Mecanica mecanica, IReadOnlyList<(string nombre, Motion clip)> clips)
         {
             var controlador = ControladoresAnimator.CargarOCrear(mecanica.RutaControlador);
             var parametro = AnimatorParams.EstadoMecanica.Nombre;

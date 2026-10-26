@@ -136,6 +136,29 @@ namespace Fragmentum.Core.Combate
             return curado;
         }
 
+        /// <summary>
+        /// Quita vida sin que sea un golpe: no hay retroceso (nadie golpea), ni i-frames, ni escudo
+        /// que lo pare. Es el ahogo del mundo de la Tristeza: Kael se va apagando sin que nada lo
+        /// empuje. Devuelve los puntos realmente perdidos.
+        /// </summary>
+        public int PerderVida(int cantidad)
+        {
+            if (!EstaVivo || cantidad <= 0)
+            {
+                return 0;
+            }
+
+            var antes = Vida;
+            Vida = Mathf.Max(0, Vida - cantidad);
+            OnVidaCambiada?.Invoke(Vida, vidaMaxima);
+            if (Vida == 0)
+            {
+                OnMuerte?.Invoke();
+            }
+
+            return antes - Vida;
+        }
+
         /// <summary>Muerte instantánea: ignora i-frames y escudos (lava, vacío, ahogamiento).</summary>
         public void Matar(GameObject causante = null)
         {

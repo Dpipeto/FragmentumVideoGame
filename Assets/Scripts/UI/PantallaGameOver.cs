@@ -22,8 +22,8 @@ namespace Fragmentum.UI
 
         protected override void ConstruirContenido(RectTransform columna)
         {
-            FabricaUI.Texto(columna, "Titulo", FabricaUI.Espaciar("HAS CAÍDO"), 44, new Color(1f, 1f, 1f, 0.9f));
-            _mundo = TextoAcento(columna, "Mundo", 24);
+            FabricaUI.Titulo(columna, "Titulo", FabricaUI.Espaciar("HAS CAÍDO"), 44, new Color(1f, 1f, 1f, 0.9f));
+            _mundo = TextoAcento(columna, "Mundo", 24, deTitulo: true);
             FabricaUI.Hueco(columna, 6f);
             SeparadorAcento(columna);
             FabricaUI.Hueco(columna, 10f);

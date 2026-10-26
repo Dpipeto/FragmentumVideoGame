@@ -55,7 +55,7 @@ namespace Fragmentum.Tests
         public void SoloElGolemDeCeniza_EsInmuneALaLava()
         {
             Assert.IsTrue(Cargar("GolemCeniza").inmuneALava, "Decisión del diseño (PENDIENTES N9): el Golem no muere en la lava.");
-            foreach (var otro in new[] { "Generico", "SoldadoLava", "EcoIra", "Lamento", "Espectro", "CentinelaCiego" })
+            foreach (var otro in new[] { "Generico", "SoldadoLava", "EcoIra", "Lamento", "Escultura", "Planidera", "Espectro", "CentinelaCiego", "Acechador" })
             {
                 Assert.IsFalse(Cargar(otro).inmuneALava, $"{otro} sí muere en la lava.");
             }
@@ -75,8 +75,13 @@ namespace Fragmentum.Tests
         public void Miedo_UsaEstrategiasDeDeteccionPropias()
         {
             Assert.IsInstanceOf<DeteccionEnOscuridad>(Cargar("Espectro").deteccion);
-            Assert.IsInstanceOf<DeteccionPorRuido>(Cargar("CentinelaCiego").deteccion);
             Assert.IsInstanceOf<DeteccionConVision>(Cargar("SoldadoLava").deteccion);
+
+            // Desde la fase C del Mundo 3, el oído del Centinela Ciego y del Acechador lo lleva su propia
+            // pieza: su controlador solo nota a Kael si lo tiene encima.
+            Assert.IsInstanceOf<DeteccionPorTacto>(Cargar("CentinelaCiego").deteccion);
+            Assert.AreEqual(1.2f, Cargar("CentinelaCiego").detectionRadius, 1e-4f, "El roce (Nivel3_Diseno.md, sección 5).");
+            Assert.IsInstanceOf<DeteccionPorTacto>(Cargar("Acechador").deteccion);
         }
 
         [Test]

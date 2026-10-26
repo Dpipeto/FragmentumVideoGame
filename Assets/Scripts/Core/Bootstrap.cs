@@ -48,7 +48,6 @@ namespace Fragmentum.Core
                     $"[Bootstrap] Falta Resources/{RutaRecurso}.prefab: se crean los sistemas sin LevelDatabase " +
                     "(sin menú ni progresión). Ejecuta Fragmentum → Regenerar todo.");
                 sistemas = new GameObject();
-                sistemas.AddComponent<EconomyManager>();
                 sistemas.AddComponent<GameManager>();
                 sistemas.AddComponent<SceneLoader>();
                 sistemas.AddComponent<GameStateMachine>();

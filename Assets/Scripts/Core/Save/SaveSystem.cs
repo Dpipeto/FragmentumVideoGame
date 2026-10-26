@@ -6,7 +6,7 @@ namespace Fragmentum.Core.Save
 {
     /// <summary>
     /// Guardado del progreso en JSON (patrón Facade): oculta la ruta, la serialización, la
-    /// escritura atómica, la copia de seguridad y la migración desde la v1.
+    /// escritura atómica y la copia de seguridad.
     ///
     /// - Archivo: <c>persistentDataPath/fragmentum_guardado.json</c>.
     /// - Escritura atómica: se escribe un temporal y se reemplaza el archivo, dejando el
@@ -14,22 +14,18 @@ namespace Fragmentum.Core.Save
     /// - Si el archivo está dañado, se recupera la copia; si tampoco sirve, se empieza de cero
     ///   avisando por consola (nunca se lanza una excepción al jugador).
     ///
-    /// Sustituye a los PlayerPrefs sueltos de la v1, donde las monedas se leían pero no se
-    /// guardaban nunca.
+    /// Sustituye a los PlayerPrefs sueltos de la v1, que se leían pero no se guardaban nunca.
+    /// (Lo único que había en ellos eran las monedas, que ya no existen: ahora hay puntaje.)
     /// </summary>
     public sealed class SaveSystem
     {
         public const int VersionActual = 1;
         public const string NombreArchivo = "fragmentum_guardado.json";
 
-        private readonly MigracionPlayerPrefs _migracion;
-
         /// <param name="carpeta">Carpeta del guardado; por defecto <c>Application.persistentDataPath</c>.</param>
-        /// <param name="migracion">Fuente de la migración; las pruebas pasan una falsa.</param>
-        public SaveSystem(string carpeta = null, MigracionPlayerPrefs migracion = null)
+        public SaveSystem(string carpeta = null)
         {
             Carpeta = string.IsNullOrEmpty(carpeta) ? Application.persistentDataPath : carpeta;
-            _migracion = migracion ?? new MigracionPlayerPrefs();
         }
 
         public string Carpeta { get; }
@@ -47,9 +43,7 @@ namespace Fragmentum.Core.Save
         {
             if (!Existe)
             {
-                var nuevos = new DatosGuardado();
-                _migracion.Aplicar(nuevos);
-                return nuevos;
+                return new DatosGuardado();
             }
 
             if (Leer(Ruta, out var datos))

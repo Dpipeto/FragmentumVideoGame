@@ -18,6 +18,7 @@ MonoBehaviour:
   danio: 2
   danioContacto: 1
   invulnerabilidad: 0.3
+  puntos: 500
   velocidadPatrulla: 1
   velocidadPersecucion: 2
   toleranciaWaypoint: 0.2

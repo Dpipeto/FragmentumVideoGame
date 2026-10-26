@@ -796,3 +796,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4592bb7a0e803434399bd73ae5b51d40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Levels.Escenario.ParallaxMovement
+  seguirCamaraEnY: 1
+  lejania: 0

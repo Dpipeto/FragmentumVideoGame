@@ -142,10 +142,13 @@ namespace Fragmentum.EditorTools
             var conocidos = new HashSet<string>(Sprites);
             var carpetas = new[] { TablaArte.CarpetaGolem, TablaArte.CarpetaMecanicas, TablaArte.CarpetaCinematicasNivel1 }
                 .Where(AssetDatabase.IsValidFolder).ToArray();
+            // Solo lo que cuelga directamente de esas carpetas: las mecánicas de los demás mundos
+            // van en subcarpetas (Mecanicas/Mundo2) y las revisa su propio verificador.
             return carpetas.Length == 0
                 ? Enumerable.Empty<string>()
                 : AssetDatabase.FindAssets("t:Texture2D", carpetas).Select(AssetDatabase.GUIDToAssetPath)
-                    .Where(r => !conocidos.Contains(r)).Distinct().OrderBy(r => r, StringComparer.Ordinal);
+                    .Where(r => !conocidos.Contains(r) && carpetas.Contains(Path.GetDirectoryName(r)?.Replace('\\', '/')))
+                    .Distinct().OrderBy(r => r, StringComparer.Ordinal);
         }
 
         /// <summary>

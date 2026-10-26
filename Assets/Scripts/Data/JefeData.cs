@@ -61,6 +61,9 @@ namespace Fragmentum.Data
 
         [Min(0f)] public float velocidad = 2.5f;
 
+        [Tooltip("Puntos que da derrotarlo: más que cualquier enemigo del mundo, mini-jefe incluido.")]
+        [Min(0)] public int puntos = 1500;
+
         [Tooltip("Hasta 3 fases, de mayor a menor umbral de vida. La primera empieza siempre en 1.")]
         public List<FaseJefe> fases = new List<FaseJefe>();
 

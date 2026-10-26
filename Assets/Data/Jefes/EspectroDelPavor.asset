@@ -18,22 +18,31 @@ MonoBehaviour:
   concepto: {fileID: 0}
   vidaMaxima: 22
   invulnerabilidad: 0.15
-  danioContacto: 1
+  danioContacto: 0
   velocidad: 2
+  puntos: 2500
   fases:
-  - nombre: Ataques con destello
+  - nombre: 'El acecho: tajo, embestida, tajo y hojas'
     umbralVida: 1
-    patrones: []
+    patrones:
+    - {fileID: 11400000, guid: 29125cbb3b84023438fa4ba0bea0feca, type: 2}
+    - {fileID: 11400000, guid: 7290d39ea423de745840ca60b270f9c6, type: 2}
+    - {fileID: 11400000, guid: 29125cbb3b84023438fa4ba0bea0feca, type: 2}
+    - {fileID: 11400000, guid: bf7e601295c945b41aee709bcd6a82a6, type: 2}
     pausaEntrePatrones: 1
     aleatorio: 0
     multiplicadorVelocidad: 1
-  - nombre: Tres clones (50 %)
+  - nombre: Las tres sombras (50 %)
     umbralVida: 0.5
-    patrones: []
-    pausaEntrePatrones: 1
+    patrones:
+    - {fileID: 11400000, guid: 5d1cc2479eba1e54699272dd909f8662, type: 2}
+    - {fileID: 11400000, guid: bf7e601295c945b41aee709bcd6a82a6, type: 2}
+    - {fileID: 11400000, guid: 5d1cc2479eba1e54699272dd909f8662, type: 2}
+    - {fileID: 11400000, guid: 7290d39ea423de745840ca60b270f9c6, type: 2}
+    pausaEntrePatrones: 0.9
     aleatorio: 0
     multiplicadorVelocidad: 1
-  duracionVulnerable: 1.2
+  duracionVulnerable: 1.5
   multiplicadorVulnerable: 2
   inmuneFueraDeVulnerable: 0
   duracionDerrota: 2

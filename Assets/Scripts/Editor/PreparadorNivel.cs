@@ -28,12 +28,15 @@ namespace Fragmentum.EditorTools
     /// - el Golem de Ceniza con su arte en lugar del provisional;
     /// - en el Nivel 1, el <b>recorrido de diseño</b> (<see cref="DisenoNivel1"/>) en lugar del
     ///   provisional: es lo único que borra, y solo la primera vez (lo provisional y lo que se colocó
-    ///   para él: su escenario pintado, el checkpoint, la salida y la arena).
+    ///   para él: su escenario pintado, el checkpoint, la salida y la arena);
+    /// - en el Nivel 2, el suyo (<see cref="DisenoNivel2"/>), que se vuelve a montar entero cuando
+    ///   cambia su versión (<c>PreparadorNivelTristeza.cs</c>), y lo mismo el del Nivel 3
+    ///   (<see cref="DisenoNivel3"/>, <c>PreparadorNivelMiedo.cs</c>).
     ///
     /// Es idempotente: ejecutarla otra vez sobre una escena preparada no cambia nada, y la
     /// escena solo se guarda si cambió.
     /// </summary>
-    public static class PreparadorNivel
+    public static partial class PreparadorNivel
     {
         public const string NombreRaiz = "Nivel";
         public const string NombreProvisional = "Provisional (bórralo al pintar el nivel)";
@@ -145,7 +148,7 @@ namespace Fragmentum.EditorTools
 
             // 0. El recorrido de diseño (DisenoNivel1), en lugar del provisional. Pone también el
             //    checkpoint, la salida y la arena en su sitio: los pasos de abajo ya no los crean.
-            if (DisenoNivel1.EsDe(nivel) && RaizRecorrido(escena) == null)
+            if (DisenoNivel1.EsDe(nivel) && !RecorridoNivel1AlDia(escena))
             {
                 MontarRecorridoNivel1(escena, nivel, raiz);
                 cambios = true;
@@ -166,6 +169,22 @@ namespace Fragmentum.EditorTools
                 var inicio = Hijo(raiz, "Inicio");
                 inicio.position = new Vector3(tramo.x + 2f, AlturaPies, 0f);
                 Asignar(gestor, "puntoInicio", p => p.objectReferenceValue = inicio);
+                cambios = true;
+            }
+
+            // 1b. El recorrido de diseño del Nivel 2 (DisenoNivel2), ya con el LevelManager hecho:
+            //     coloca también el inicio, los checkpoints, la salida, la arena y la zona mortal, así
+            //     que los pasos de abajo no los crean. Se vuelve a montar si cambia su versión.
+            if (DisenoNivel2.EsDe(nivel) && !RecorridoNivel2AlDia(escena))
+            {
+                MontarRecorridoNivel2(escena, nivel, raiz);
+                cambios = true;
+            }
+
+            // 1c. El del Nivel 3 (DisenoNivel3), igual que el del Nivel 2.
+            if (DisenoNivel3.EsDe(nivel) && !RecorridoNivel3AlDia(escena))
+            {
+                MontarRecorridoNivel3(escena, nivel, raiz);
                 cambios = true;
             }
 
@@ -234,16 +253,24 @@ namespace Fragmentum.EditorTools
                 cambios |= PintorEscenario.Pintar(escena, provisional, true) > 0;
             }
 
-            // 9. El fondo con parallax del mundo, con los hitos repartidos según la longitud del
-            //    nivel. Por ahora solo existe el de la Ira.
+            // 9. El fondo con parallax del mundo: el de la Ira, con los hitos repartidos según la
+            //    longitud del nivel, y el de la Tristeza, con su fondo de debajo del agua.
             if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.IRA && Buscar<ParallaxMovement>(escena) == null)
             {
                 cambios |= ConstructorFondoMundo1.Colocar(escena, nivel);
             }
 
+            if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.TRISTEZA && !ConstructorFondoMundo2.EstaColocado(escena))
+            {
+                cambios |= ConstructorFondoMundo2.Colocar(escena, nivel);
+            }
+
             // 10. El Golem de Ceniza sin arte (la cápsula de la Fase 4) se sustituye por el que lo
             //     tiene, en su sitio y con su ruta de patrulla.
             cambios |= ConstructorGolem.SustituirGolemsSinArte(escena) > 0;
+
+            // 11. El eco de memoria del guion, en el primer checkpoint del nivel.
+            cambios |= AsegurarEcoDeMemoria(escena, nivel);
 
             return cambios;
         }
@@ -305,6 +332,16 @@ namespace Fragmentum.EditorTools
         /// meterse bajo las orillas sin taparlas, y las plataformas de combustión se ven en pie dentro de ella.</summary>
         public const int OrdenLavaEnHueco = -3;
 
+        /// <summary>Hijo del recorrido del Nivel 1 que dice qué versión del diseño está montada.</summary>
+        public static string MarcaVersionNivel1 => $"Diseño v{DisenoNivel1.Version}";
+
+        /// <summary>¿La escena tiene montado el recorrido de la versión actual de <see cref="DisenoNivel1"/>?</summary>
+        public static bool RecorridoNivel1AlDia(Scene escena)
+        {
+            var recorrido = RaizRecorrido(escena);
+            return recorrido != null && recorrido.Find(MarcaVersionNivel1) != null;
+        }
+
         /// <summary>El recorrido de diseño de la escena (<see cref="NombreRecorrido"/>), o null.</summary>
         public static Transform RaizRecorrido(Scene escena)
         {
@@ -320,16 +357,17 @@ namespace Fragmentum.EditorTools
         }
 
         /// <summary>
-        /// Monta el recorrido de <see cref="DisenoNivel1"/>. Borra lo provisional y lo que se colocó
-        /// para él (su escenario pintado, el checkpoint, la salida y la arena); levanta los bloques,
-        /// la lava, las mecánicas y los enemigos; pone el inicio, el checkpoint, la salida y la arena
-        /// del diseño, y lo viste con el tileset.
+        /// Monta el recorrido de <see cref="DisenoNivel1"/>. Borra lo provisional, un montaje de una
+        /// versión anterior del diseño y lo que se colocó para ellos (su escenario pintado, los
+        /// checkpoints, la salida y la arena); levanta los bloques, la lava, las mecánicas y los
+        /// enemigos; pone el inicio, los checkpoints, la salida y la arena del diseño, lo viste
+        /// con el tileset y reparte otra vez los hitos del fondo, que van por fracciones del nivel.
         /// </summary>
         private static void MontarRecorridoNivel1(Scene escena, LevelData nivel, Transform raiz)
         {
             foreach (var objeto in escena.GetRootGameObjects())
             {
-                if (objeto.name == NombreProvisional || objeto.name == PintorEscenario.NombreRaiz)
+                if (objeto.name == NombreRecorrido || objeto.name == NombreProvisional || objeto.name == PintorEscenario.NombreRaiz)
                 {
                     Object.DestroyImmediate(objeto);
                 }
@@ -346,6 +384,7 @@ namespace Fragmentum.EditorTools
 
             var recorrido = new GameObject(NombreRecorrido).transform;
             SceneManager.MoveGameObjectToScene(recorrido.gameObject, escena);
+            Hijo(recorrido, MarcaVersionNivel1);
 
             var colorSuelo = nivel.paleta != null && nivel.paleta.Length > 3 ? nivel.paleta[3] : new Color(0.36f, 0.25f, 0.2f);
             var colorPared = FabricaColor(colorSuelo, 0.6f);
@@ -396,6 +435,10 @@ namespace Fragmentum.EditorTools
             CrearSalida(raiz, DisenoNivel1.Salida, nivel, DisenoNivel1.SueloArena);
             CrearArenaNivel1(escena, raiz, nivel, plataformas);
             PintorEscenario.Pintar(escena, recorrido, true);
+
+            // Si el fondo ya estaba puesto, sus hitos (la fortaleza, el muro y la catarata) siguen
+            // repartidos para lo que medía el nivel: se reparten para lo que mide ahora.
+            ConstructorFondoMundo1.RepartirEn(escena, nivel);
         }
 
         private static GameObject Instanciar(Scene escena, Transform padre, string prefab, string nombre, float x, float y)
@@ -489,7 +532,7 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// La arena del diseño: la entrada justo después de la puerta, la puerta en el borde de la sala
-        /// (se cierra detrás del jugador), la Centinela en x 70 y las plataformas que ella atraviesa.
+        /// (se cierra detrás del jugador), la Centinela en el centro y las plataformas que ella atraviesa.
         /// </summary>
         private static void CrearArenaNivel1(Scene escena, Transform raiz, LevelData nivel, List<Collider2D> plataformas)
         {
@@ -506,6 +549,7 @@ namespace Fragmentum.EditorTools
             var colorPuerta = nivel.paleta != null && nivel.paleta.Length > 1 ? nivel.paleta[1] : Color.gray;
             var puerta = Bloque(arena, "Puerta", DisenoNivel1.PuertaDesde, DisenoNivel1.PuertaHasta, DisenoNivel1.SueloArena, DisenoNivel1.TechoArena,
                 Capa(Capas.Wall), colorPuerta, SpriteCuadrado);
+            ConstructorPuertas.VestirVerja(puerta, nivel, DisenoNivel1.PuertaDesde, DisenoNivel1.PuertaHasta, DisenoNivel1.SueloArena, DisenoNivel1.TechoArena);
             puerta.SetActive(false);
 
             GameObject jefe = null;
@@ -630,7 +674,7 @@ namespace Fragmentum.EditorTools
 
         // --- Piezas ---
 
-        private static void CrearCheckpoint(Transform padre, string id, float x, LevelData nivel, float suelo = AlturaSuelo)
+        private static Checkpoint CrearCheckpoint(Transform padre, string id, float x, LevelData nivel, float suelo = AlturaSuelo)
         {
             var objeto = new GameObject(id) { tag = GameTags.Checkpoint };
             objeto.transform.SetParent(padre, false);
@@ -649,6 +693,33 @@ namespace Fragmentum.EditorTools
             Asignar(checkpoint, "id", p => p.stringValue = id);
             Asignar(checkpoint, "indicador", p => p.objectReferenceValue = pano.GetComponent<SpriteRenderer>());
             Asignar(checkpoint, "colorActivo", p => p.colorValue = nivel.ColorAcento);
+
+            // Con el arte del mundo, el brasero o el farol en lugar de la bandera provisional.
+            ConstructorPuertas.VestirCheckpoint(checkpoint, nivel);
+            return checkpoint;
+        }
+
+        /// <summary>El id del checkpoint donde suena el eco de memoria del nivel: el primero.</summary>
+        public static string CheckpointDelEcoDeMemoria(LevelData nivel) => $"L{nivel.id}_CP1";
+
+        // El eco de memoria del guion suena en el primer checkpoint de cada nivel. Solo cambia el
+        // checkpoint si aún no lo tiene marcado.
+        private static bool AsegurarEcoDeMemoria(Scene escena, LevelData nivel)
+        {
+            var id = CheckpointDelEcoDeMemoria(nivel);
+            foreach (var raiz in escena.GetRootGameObjects())
+            {
+                foreach (var checkpoint in raiz.GetComponentsInChildren<Checkpoint>(true))
+                {
+                    if (checkpoint.Id == id && !checkpoint.EcoDeMemoria)
+                    {
+                        Asignar(checkpoint, "ecoDeMemoria", p => p.boolValue = true);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static void CrearSalida(Transform padre, float x, LevelData nivel, float suelo = AlturaSuelo)
@@ -665,6 +736,9 @@ namespace Fragmentum.EditorTools
             var acento = nivel.ColorAcento;
             Visual(objeto.transform, "Portal", new Vector2(0f, 3f), new Vector2(2f, 6f), new Color(acento.r, acento.g, acento.b, 0.35f), -2);
             objeto.AddComponent<SalidaNivel>();
+
+            // Con el arte del mundo, la puerta dibujada en lugar del rectángulo translúcido.
+            ConstructorPuertas.VestirSalida(objeto, nivel);
         }
 
         /// <summary>

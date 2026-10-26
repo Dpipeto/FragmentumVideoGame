@@ -15,9 +15,9 @@ MonoBehaviour:
   id: Cierre_Tristeza
   diapositivas:
   - imagen: {fileID: 0}
-    texto: El agua baja despacio, como quien termina de llorar.
+    texto: 
     carteles: []
-    duracion: 4
+    duracion: 0.3
     audio: {fileID: 0}
     fundidoEntrada: 0
     fundidoSalida: 0
@@ -26,10 +26,40 @@ MonoBehaviour:
     brasas: 0
     flashFinal: 0
     cues: []
+  - imagen: {fileID: 21300000, guid: b8b6bdcab02fa0c428dfb8a4cfc04ae3, type: 3}
+    texto: 
+    carteles:
+    - texto: El agua baja despacio, como quien termina de llorar.
+      inicio: 0.8
+      duracion: 2.6
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 330, y: 182}
+      alineacion: 1
+    - texto: "La ciudad respira por primera vez en a\xF1os."
+      inicio: 3.7
+      duracion: 2.6
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 330, y: 182}
+      alineacion: 1
+    duracion: 6.4
+    audio: {fileID: 0}
+    fundidoEntrada: 0.7
+    fundidoSalida: 0.4
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   - imagen: {fileID: 0}
-    texto: "La ciudad respira por primera vez en a\xF1os."
+    texto: 
     carteles: []
-    duracion: 4
+    duracion: 0.2
     audio: {fileID: 0}
     fundidoEntrada: 0
     fundidoSalida: 0
@@ -38,13 +68,22 @@ MonoBehaviour:
     brasas: 0
     flashFinal: 0
     cues: []
-  - imagen: {fileID: 0}
-    texto: "Kael integra el Fragmento de la Tristeza. Ya puede avanzar tambi\xE9n bajo el agua."
-    carteles: []
-    duracion: 4
+  - imagen: {fileID: 21300000, guid: da9bcb5161d0ef34db36c3205dc326df, type: 3}
+    texto: 
+    carteles:
+    - texto: "Kael integra el Fragmento de la Tristeza. Ya puede avanzar tambi\xE9n bajo el agua."
+      inicio: 0.6
+      duracion: 3.6
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 236}
+      alineacion: 1
+    duracion: 4.6
     audio: {fileID: 0}
-    fundidoEntrada: 0
-    fundidoSalida: 0
+    fundidoEntrada: 0.6
+    fundidoSalida: 0.8
     desplazamiento: {x: 0, y: 0}
     temblores: []
     brasas: 0
@@ -52,12 +91,14 @@ MonoBehaviour:
     cues: []
   saltable: 1
   soloPrimeraVez: 0
-  montaje: 0
+  llevaDialogoDelJefe: 0
+  montaje: 1
   sobreElJuego: 0
   opacidadVelo: 0.55
-  escalaEntera: 0
+  escalaEntera: 1
+  rejilla: {x: 480, y: 268}
   fuente: {fileID: 0}
-  tamanoFuente: 8
+  tamanoFuente: 10
   interlineado: 0
   colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
   temblorPixeles: 1
@@ -65,7 +106,7 @@ MonoBehaviour:
   fundidoImagen: 0.6
   fundidoTexto: 0.4
   margenTexto: 0.8
-  bloqueoSalto: 2
+  bloqueoSalto: 0.5
   avisoSaltar: Pulsa cualquier tecla para saltar
   finAviso: 5
   opacidadAviso: 0.45

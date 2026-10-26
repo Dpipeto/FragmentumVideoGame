@@ -31,6 +31,11 @@ namespace Fragmentum.Data
         [Tooltip("Invulnerabilidad tras recibir un golpe (i-frames).")]
         [Min(0f)] public float invulnerabilidad = 0.3f;
 
+        [Header("Puntaje")]
+        [Tooltip("Puntos que da derrotarlo. Un mini-jefe vale varias veces lo que un enemigo común. " +
+                 "Los pone la tabla de Fragmentum → Progresión → Aplicar la tabla de puntaje.")]
+        [Min(0)] public int puntos = 100;
+
         [Header("Movimiento")]
         public float velocidadPatrulla = 1.5f;
         public float velocidadPersecucion = 3f;

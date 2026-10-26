@@ -91,7 +91,7 @@ namespace Fragmentum.UI
 
         protected override void ConstruirContenido(RectTransform columna)
         {
-            FabricaUI.Texto(columna, "Titulo", FabricaUI.Espaciar("MECÁNICAS"), 34, new Color(1f, 1f, 1f, 0.85f));
+            FabricaUI.Titulo(columna, "Titulo", FabricaUI.Espaciar("MECÁNICAS"), 34, new Color(1f, 1f, 1f, 0.85f));
             _cuenta = TextoAcento(columna, "Cuenta", 22);
             FabricaUI.Hueco(columna, 6f);
             SeparadorAcento(columna);
@@ -291,7 +291,7 @@ namespace Fragmentum.UI
             elemento.preferredWidth = AnchoColumna;
             elemento.minWidth = AnchoColumna;
 
-            var cabecera = FabricaUI.Texto(columna, "Cabecera", FabricaUI.Espaciar(titulo), 18, new Color(1f, 1f, 1f, 0.45f), TextAnchor.MiddleLeft);
+            var cabecera = FabricaUI.Titulo(columna, "Cabecera", FabricaUI.Espaciar(titulo), 18, new Color(1f, 1f, 1f, 0.45f), TextAnchor.MiddleLeft);
             cabecera.gameObject.AddComponent<LayoutElement>().preferredHeight = 30f;
             return columna;
         }

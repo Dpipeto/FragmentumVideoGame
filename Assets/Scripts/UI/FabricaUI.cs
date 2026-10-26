@@ -11,17 +11,46 @@ namespace Fragmentum.UI
     /// maqueta de <c>Referencias/Menus/fragmentum_pause_worlds.jsx</c>). La usan el selector de
     /// niveles, las herramientas que montan las escenas de menú y el <c>UIManager</c>.
     ///
-    /// Usa la fuente integrada de Unity y no TextMeshPro, porque los recursos esenciales de
-    /// TMP no están importados en el proyecto (pendiente de pulido de UI, PENDIENTES B9).
+    /// <b>Dos letras</b> (las pidió el director: la integrada de Unity era plana): Cinzel, de
+    /// capitales talladas, para los títulos, los menús y los nombres (<see cref="FuenteTitulos"/>,
+    /// <see cref="Titulo"/>); y Alegreya, una serifa de lectura con cursiva propia, para los
+    /// diálogos y el resto del texto (<see cref="Fuente"/>, <see cref="Texto"/>). Las dos son de
+    /// Google Fonts con licencia OFL, que va junto a ellas en <c>Resources/Fuentes</c>. Cambiar
+    /// de letra es cambiar esos archivos.
+    ///
+    /// Sigue sin usar TextMeshPro: sus recursos esenciales no están importados en el proyecto.
     /// </summary>
     public static class FabricaUI
     {
         public static readonly Vector2 ResolucionReferencia = new Vector2(1920f, 1080f);
 
+        /// <summary>Dentro de Resources, sin extensión.</summary>
+        public const string RutaFuenteTexto = "Fuentes/Alegreya";
+
+        public const string RutaFuenteTitulos = "Fuentes/Cinzel";
+
         private static Font _fuente;
+        private static Font _fuenteTitulos;
         private static Sprite _vineta;
 
-        public static Font Fuente => _fuente != null ? _fuente : _fuente = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        /// <summary>La letra de los diálogos y del texto corrido.</summary>
+        public static Font Fuente => _fuente != null ? _fuente : _fuente = Cargar(RutaFuenteTexto);
+
+        /// <summary>La letra de los títulos, los menús y los nombres. Solo tiene mayúsculas.</summary>
+        public static Font FuenteTitulos => _fuenteTitulos != null ? _fuenteTitulos : _fuenteTitulos = Cargar(RutaFuenteTitulos);
+
+        // Sin el archivo, la fuente integrada de Unity: el juego se ve peor, pero se ve.
+        private static Font Cargar(string ruta)
+        {
+            var fuente = Resources.Load<Font>(ruta);
+            if (fuente == null)
+            {
+                Debug.LogWarning($"[UI] Falta la fuente Resources/{ruta}: se usa la integrada de Unity.");
+                fuente = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            }
+
+            return fuente;
+        }
 
         public static RectTransform Objeto(string nombre, Transform padre)
         {
@@ -65,6 +94,15 @@ namespace Fragmentum.UI
             return texto;
         }
 
+        /// <summary>Como <see cref="Texto"/>, con la letra de los títulos.</summary>
+        public static Text Titulo(Transform padre, string nombre, string contenido, int tamano, Color color,
+            TextAnchor alineacion = TextAnchor.MiddleCenter)
+        {
+            var texto = Texto(padre, nombre, contenido, tamano, color, alineacion);
+            texto.font = FuenteTitulos;
+            return texto;
+        }
+
         /// <summary>Botón con fondo de color y texto centrado que ocupa todo el botón.</summary>
         public static Button Boton(Transform padre, string nombre, string etiqueta, Color fondo, float alto,
             UnityAction alPulsar = null, int tamanoTexto = 28)
@@ -88,7 +126,7 @@ namespace Fragmentum.UI
             elemento.preferredHeight = alto;
             elemento.minHeight = alto;
 
-            var texto = Texto(rect, "Texto", etiqueta, tamanoTexto, Color.white);
+            var texto = Titulo(rect, "Texto", etiqueta, tamanoTexto, Color.white);
             Estirar(texto.rectTransform, 16f);
             return boton;
         }
@@ -106,7 +144,7 @@ namespace Fragmentum.UI
             var zona = rect.gameObject.AddComponent<Image>();
             zona.color = new Color(1f, 1f, 1f, 0f);
 
-            var texto = Texto(rect, "Texto", etiqueta, tamanoTexto, Color.white);
+            var texto = Titulo(rect, "Texto", etiqueta, tamanoTexto, Color.white);
             Estirar(texto.rectTransform);
 
             var boton = rect.gameObject.AddComponent<Button>();

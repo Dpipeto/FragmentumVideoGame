@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe741b5edf391fa419b30bd0f7522bcb, type: 3}
+  m_Name: Planidera
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Data.EnemyData
+  nombreCanonico: "La Pla\xF1idera"
+  descripcion: "Tristeza (mini-jefe, vida 10): flota despacio hacia Kael y, de cerca, echa el brazo atr\xE1s (0,55 s) y barre. Cada pocos segundos alza sus esquirlas, las apunta y las lanza una tras otra; despu\xE9s llora 2 s sin atacar: ah\xED se la castiga. Los golpes no la interrumpen. Tocarla no hace da\xF1o."
+  vidaMaxima: 10
+  danio: 2
+  danioContacto: 0
+  invulnerabilidad: 0.3
+  puntos: 600
+  velocidadPatrulla: 0.8
+  velocidadPersecucion: 1.6
+  toleranciaWaypoint: 0.2
+  esperaEnWaypoint: 2
+  evitarBordes: 1
+  inmuneALava: 0
+  deteccion: {fileID: 11400000, guid: 69124c2f72dee55459659af73a977899, type: 2}
+  detectionRadius: 7
+  factorHisteresis: 1.5
+  attackRadius: 1.9
+  alturaAtaque: 2.2
+  attackCooldown: 2.2
+  duracionAtaque: 1.1
+  inicioVentanaGolpe: 0.55
+  finVentanaGolpe: 0.70000005
+  hiperarmadura: 1
+  damagedDuration: 0.2
+  retroceso: {x: 4, y: 3}
+  resistenciaRetroceso: 1
+  deathDelay: 1.5
+  spriteMiraDerecha: 1
+  tinte: {r: 1, g: 1, b: 1, a: 1}

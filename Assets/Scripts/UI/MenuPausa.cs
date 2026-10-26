@@ -26,8 +26,8 @@ namespace Fragmentum.UI
         {
             IconoPausa(columna);
             FabricaUI.Hueco(columna, 8f);
-            FabricaUI.Texto(columna, "Titulo", FabricaUI.Espaciar("PAUSA"), 30, new Color(1f, 1f, 1f, 0.8f));
-            _mundo = TextoAcento(columna, "Mundo", 24);
+            FabricaUI.Titulo(columna, "Titulo", FabricaUI.Espaciar("PAUSA"), 30, new Color(1f, 1f, 1f, 0.8f));
+            _mundo = TextoAcento(columna, "Mundo", 24, deTitulo: true);
             _jefe = FabricaUI.Texto(columna, "Jefe", string.Empty, 18, new Color(1f, 1f, 1f, 0.4f));
             FabricaUI.Hueco(columna, 6f);
             SeparadorAcento(columna);

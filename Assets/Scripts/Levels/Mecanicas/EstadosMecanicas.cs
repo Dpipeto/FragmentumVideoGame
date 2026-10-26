@@ -48,4 +48,75 @@ namespace Fragmentum.Levels.Mecanicas
         /// <summary>Encendida: la llama. Es la única que hace daño.</summary>
         BURNING
     }
+
+    /// <summary>
+    /// El hielo rompible del mundo de la Tristeza. Cada valor será el del parámetro <c>Estado</c>
+    /// de su Animator cuando tenga arte (Intacto, Agrietado y Roto).
+    /// </summary>
+    public enum ESTADOS_HIELO
+    {
+        /// <summary>Intacto: tapa el paso, con la grieta naranja.</summary>
+        INTACT,
+
+        /// <summary>Agrietado: un golpe normal lo resquebraja, pero sigue tapando el paso.</summary>
+        CRACKED,
+
+        /// <summary>Roto: el Ataque Cargado lo parte y deja el hueco abierto.</summary>
+        BROKEN
+    }
+
+    /// <summary>
+    /// Una franja del suelo de la arena de la Doncella del Lamento (<see cref="FranjaInundable"/>):
+    /// se inunda y, en la segunda fase, el agua se congela. Cada valor será el del parámetro
+    /// <c>Estado</c> de su Animator cuando tenga arte.
+    /// </summary>
+    public enum ESTADOS_FRANJA
+    {
+        /// <summary>Seca: el hielo de la arena, sin más.</summary>
+        DRY,
+
+        /// <summary>Aviso: sale agua por las grietas. Todavía no moja.</summary>
+        WARNING,
+
+        /// <summary>Inundada: el agua sube y se queda. No hace daño: es agua.</summary>
+        FLOODED,
+
+        /// <summary>El agua baja. Sigue mojando hasta que se va.</summary>
+        DRAINING,
+
+        /// <summary>La superficie se pone blanca: el aviso de que se congela. Sigue siendo agua.</summary>
+        FREEZING,
+
+        /// <summary>Congelada: brotan las púas en lo que estaba inundado y arriba queda la capa de hielo, que se pisa.</summary>
+        FROZEN
+    }
+
+    /// <summary>
+    /// La antorcha del mundo del Miedo (<see cref="Antorcha"/>). Cada valor será el del parámetro
+    /// <c>Estado</c> de su Animator cuando tenga arte (apagada, encendida y consumida).
+    /// </summary>
+    public enum ESTADOS_ANTORCHA
+    {
+        /// <summary>Apagada: Kael la puede encender con Interactuar (E).</summary>
+        UNLIT,
+
+        /// <summary>Encendida: alumbra su círculo durante su duración; los últimos segundos parpadea.</summary>
+        LIT,
+
+        /// <summary>Consumida: ya ardió. No se vuelve a encender hasta que Kael reaparezca.</summary>
+        SPENT
+    }
+
+    /// <summary>
+    /// El cepo del mundo del Miedo (<see cref="Cepo"/>). Cada valor será el del parámetro
+    /// <c>Estado</c> de su Animator cuando tenga arte (abierto y cerrado).
+    /// </summary>
+    public enum ESTADOS_CEPO
+    {
+        /// <summary>Abierto, escondido entre las hojas: solo se ve de cerca o con luz.</summary>
+        ARMED,
+
+        /// <summary>Cerrado: ya saltó. Inofensivo hasta que Kael reaparezca.</summary>
+        CLOSED
+    }
 }

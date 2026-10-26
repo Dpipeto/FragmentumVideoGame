@@ -182,6 +182,10 @@ namespace Fragmentum.Narrative
                  "estira hasta llenar la pantalla.")]
         public bool escalaEntera;
 
+        [Tooltip("Tamaño de los planos, en píxeles: la rejilla en la que la cámara de cinemáticas dibuja esta. 240 × 135 por " +
+                 "defecto. Las de la Doncella van a 480 × 268: en 1920 × 1080, ×4 con cuatro píxeles de franja arriba y abajo.")]
+        public Vector2Int rejilla = new Vector2Int(240, 135);
+
         [Header("En la rejilla (cinemáticas en pixel art)")]
         [Tooltip("Fuente del texto: bitmap, con sus píxeles del tamaño de los del plano. Sin ella, la de por defecto, que no " +
                  "es bitmap (se avisa).")]
@@ -228,6 +232,12 @@ namespace Fragmentum.Narrative
         public AudioClip musica;
 
         public string Id => string.IsNullOrEmpty(id) ? name : id;
+
+        /// <summary>La rejilla por defecto: la de los planos del Nivel 1.</summary>
+        public static readonly Vector2Int RejillaPorDefecto = new Vector2Int(240, 135);
+
+        /// <summary>La rejilla de sus planos, o la de por defecto si no se le dio una.</summary>
+        public Vector2Int Rejilla => rejilla.x > 0 && rejilla.y > 0 ? rejilla : RejillaPorDefecto;
 
         /// <summary>¿Cada diapositiva es un beat con sus fundidos?</summary>
         public bool PorBeats => montaje == MONTAJES_CINEMATICA.BEATS;

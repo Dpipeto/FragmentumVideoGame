@@ -51,20 +51,41 @@ namespace Fragmentum.EditorTools
             // El Golem, las mecánicas y las cinemáticas del Nivel 1: después del Eco (el Golem usa
             // su material de destello) y antes que los prefabs de las mecánicas, que usan sus clips.
             ok &= ArteNivel1.Construir();
+            // Los enemigos del Mundo 2: también después del Eco, por sus materiales.
+            ok &= ArteMundo2.Enemigos();
+            ok &= ConstructorCinematicasNivel2.Construir();
+            // Las cinemáticas de salida de cada mundo (sus planos y las frases del cierre).
+            ok &= ConstructorPuertas.Construir();
             // El arte de la Centinela va antes que los prefabs de jefes, que lo usan (y usan el
             // material de destello del Eco).
             ok &= ConstructorCentinela.Construir();
+            // Lo mismo con el de la Doncella del Lamento.
+            ok &= ArteMundo2.Jefe();
             // Los efectos de sus ataques (la onda), antes que los patrones, que los llevan.
             ok &= ConstructorEfectos.Construir();
+            // Las mecánicas y los efectos del Mundo 2: antes que los patrones de la Doncella (su
+            // ola) y que los prefabs de las mecánicas (la placa y el tapón).
+            ok &= ArteMundo2.Mecanicas();
             ok &= GeneradorJefes.Construir();
+            // Lo que vale cada enemigo, cada jefe y el tiempo de cada nivel, ya con todos sus assets.
+            ok &= TablaPuntaje.Aplicar();
             // Si algo del arte de la Centinela no cuadra (un sprite reimportado sin sus ajustes,
             // un clip o el prefab tocados a mano), la regeneración falla con su nombre.
             ok &= VerificadorCentinela.Verificar();
+            // La Doncella solo se hiere mientras llora: si una fase se queda sin llanto, no se la
+            // podría vencer. La regeneración falla antes de que eso llegue al juego.
+            ok &= VerificadorDoncella.Verificar();
+            // El Espectro del Pavor solo se hiere cuando se deja ver: si una fase se queda sin su
+            // ventana, o su destello no se viera a oscuras, no se le podría vencer.
+            ok &= VerificadorPavor.Verificar();
             ok &= GeneradorMecanicas.CrearPrefabs();
             // Lo mismo con el arte del Nivel 1 (el Golem, las mecánicas y los planos del jefe), ya
             // con los prefabs de las mecánicas hechos.
             ok &= VerificadorNivel1.Verificar();
             ok &= ConstructorFondoMundo1.Construir();
+            ok &= ConstructorFondoMundo2.Construir();
+            ok &= ConstructorEscenarioMundo2.Construir();
+            ok &= VerificadorNivel2.Verificar();
 
             if (regenerarEscenasDePrueba || !Existe(ConstructorJugador.RutaEscena))
             {

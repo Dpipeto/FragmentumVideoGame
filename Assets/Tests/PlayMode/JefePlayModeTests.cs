@@ -343,7 +343,8 @@ namespace Fragmentum.Tests.PlayMode
         [UnityTest]
         public IEnumerator Derrota_EmiteElEvento_ApagaElDanio_YSinArteSeDesvanece()
         {
-            var jefe = CrearJefe("DoncellaLamento");
+            // El Espectro: de los jefes, uno que sigue sin arte.
+            var jefe = CrearJefe("EspectroDelPavor");
             Assert.IsFalse(jefe.TieneArte);
             yield return CrearJugadorEnSuelo(new Vector2(-10f, 0f));
             var derrotas = 0;

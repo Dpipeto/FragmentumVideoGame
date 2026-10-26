@@ -45,7 +45,10 @@ namespace Fragmentum.Player
         /// <summary>Cambio de modo: (anterior, nuevo).</summary>
         public event Action<MODOS_MOVIMIENTO, MODOS_MOVIMIENTO> OnStateChanged;
 
-        /// <summary>Ruido de carrera: (posición, radio). Lo escuchará la detección por ruido de los enemigos.</summary>
+        /// <summary>
+        /// Ruido de Kael: (posición, radio). El de la carrera y, con <see cref="HacerRuido"/>, el de un
+        /// cepo. Lo escuchan los enemigos que oyen y lo dibujan los anillos de ruido.
+        /// </summary>
         public event Action<Vector2, float> OnRuido;
 
         public MODOS_MOVIMIENTO ModoActual => _maquina != null && _maquina.Iniciada ? _maquina.EstadoActual : MODOS_MOVIMIENTO.NORMAL;
@@ -125,6 +128,19 @@ namespace Fragmentum.Player
 
             _proximoRuido = Time.time + intervaloRuido;
             OnRuido?.Invoke(transform.position, radioRuido);
+        }
+
+        /// <summary>
+        /// Un ruido que hace Kael sin correr: el chasquido de un cepo al pisarlo (mundo del Miedo).
+        /// Lo oyen los mismos enemigos que la carrera, en su propio radio. No depende de
+        /// <see cref="EmitirRuido"/>: no es la carrera, es algo que suena.
+        /// </summary>
+        public void HacerRuido(Vector2 posicion, float radio)
+        {
+            if (radio > 0f)
+            {
+                OnRuido?.Invoke(posicion, radio);
+            }
         }
 
         private void OnDrawGizmosSelected()
