@@ -112,34 +112,42 @@ namespace Fragmentum.EditorTools
 
             // El primer enemigo con arte. Persigue más despacio que el Soldado de lava para que sus
             // piernas no patinen (el ciclo de correr dibujado avanza ~1,3 u/s); la Ira está en el
-            // golpe: anticipación larga y visible y un impacto casi instantáneo.
+            // golpe: anticipación visible y un impacto casi instantáneo. Tras la primera prueba el
+            // golpe era lento: el clip va a 1,6× (ConstructorEcoIra.VelocidadAtaque) y descansa menos.
             Datos("EcoIra", sobrescribir, d =>
             {
                 d.nombreCanonico = "Eco de la Ira";
                 d.descripcion = "Ira (Mundo 1): patrulla con pausas; al ver al jugador lo persigue, carga el golpe a la vista " +
-                                "(a1, 0,35 s) y lo suelta de golpe (a2 y a3). Tocarlo no hace daño: solo el golpe.";
+                                "(a1, 0,22 s) y lo suelta de golpe (a2 y a3). Tocarlo no hace daño: solo el golpe.";
                 d.vidaMaxima = 3; d.danio = 1; d.danioContacto = 0;
                 d.velocidadPatrulla = 1.3f; d.velocidadPersecucion = 2.6f; d.esperaEnWaypoint = 1.6f;
                 d.deteccion = vision; d.detectionRadius = 7f;
-                d.attackRadius = 1.3f; d.attackCooldown = 0.7f;
+                d.attackRadius = 1.3f; d.attackCooldown = 0.45f;
                 // Con arte, la ventana del golpe la marcan los eventos del clip. Estos tiempos (los
-                // del clip a ritmo 1) solo se usan si el prefab se queda sin animación.
-                d.duracionAtaque = 0.73f; d.inicioVentanaGolpe = 0.35f; d.finVentanaGolpe = 0.48f;
+                // del clip a 1,6×) solo se usan si el prefab se queda sin animación.
+                d.duracionAtaque = 0.46f; d.inicioVentanaGolpe = 0.22f; d.finVentanaGolpe = 0.3f;
                 d.damagedDuration = 0.25f; d.resistenciaRetroceso = 0f;
                 d.tinte = Color.white;
             });
 
+            // Con arte (ConstructorGolem): los golpes no lo aturden (hiperarmadura) y la ventana del
+            // golpe la marcan los eventos de A3 y A4; estos tiempos (los del clip) solo se usan si
+            // el prefab se queda sin animación.
             Datos("GolemCeniza", sobrescribir, d =>
             {
                 d.nombreCanonico = "Golem de Ceniza";
-                d.descripcion = "Ira (mini-jefe, vida 10): lento, telegrafía mucho el golpe y apenas retrocede.";
+                d.descripcion = "Ira (mini-jefe, vida 10): lento y pesado. Levanta los puños medio segundo (A1) y golpea el suelo " +
+                                "con una onda baja (A3) que se esquiva saltando. Los golpes no lo detienen. " +
+                                "Es de ceniza y magma: la lava no lo quema y la cruza andando.";
                 d.vidaMaxima = 10; d.danio = 2; d.danioContacto = 1;
                 d.velocidadPatrulla = 1f; d.velocidadPersecucion = 2f; d.esperaEnWaypoint = 1.5f;
+                d.inmuneALava = true;
                 d.deteccion = vision; d.detectionRadius = 6f;
                 d.attackRadius = 1.8f; d.alturaAtaque = 2.2f; d.attackCooldown = 2f;
-                d.duracionAtaque = 0.9f; d.inicioVentanaGolpe = 0.5f; d.finVentanaGolpe = 0.7f;
+                d.duracionAtaque = 0.98f; d.inicioVentanaGolpe = 0.5f; d.finVentanaGolpe = 0.58f;
+                d.hiperarmadura = true;
                 d.damagedDuration = 0.2f; d.resistenciaRetroceso = 0.9f; d.deathDelay = 2f;
-                d.tinte = Hex("5C4033");
+                d.tinte = Color.white;
             });
 
             Datos("Lamento", sobrescribir, d =>

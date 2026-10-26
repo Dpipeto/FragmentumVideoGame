@@ -80,6 +80,15 @@ namespace Fragmentum.Data
         [Tooltip("Se reproduce al superar el nivel, antes del fin de nivel.")]
         public CutsceneData cinematicaCierre;
 
+        [Tooltip("Cinemática corta al entrar en la arena, antes del combate: presenta al jefe y lleva su diálogo. " +
+                 "Se ve la primera vez que se entra en la arena al cargar el nivel; al reintentar tras morir, ya no. " +
+                 "Vacío = el combate empieza al entrar.")]
+        public CutsceneData cinematicaJefe;
+
+        [Tooltip("Cinemática corta cuando el jefe termina de caer, antes de recoger su fragmento (en el Nivel 1, " +
+                 "la sala vacía con la espada clavada). Al terminar se vuelve al juego. Vacío = no hay.")]
+        public CutsceneData cinematicaJefeDerrotado;
+
         [Tooltip("Diálogos internos del mundo: apertura, eco de memoria, antes del jefe y cierre.")]
         public DialogueData dialogos;
 

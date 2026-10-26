@@ -33,6 +33,8 @@ MonoBehaviour:
   habilidadOtorgada: {fileID: 11400000, guid: cb7454d7d761b7446bb40f288a1958dd, type: 2}
   cinematicaEntrada: {fileID: 11400000, guid: 742eaf154aab88b47bf8efd8e21f2a97, type: 2}
   cinematicaCierre: {fileID: 11400000, guid: f5d11cad3d6d90249b0eb7b44dd17af5, type: 2}
+  cinematicaJefe: {fileID: 11400000, guid: bd4f4c537d0b6bf4eaa9a9189a42e6b6, type: 2}
+  cinematicaJefeDerrotado: {fileID: 11400000, guid: 081a5bc87f1bac0409fe25128f3a4832, type: 2}
   dialogos: {fileID: 11400000, guid: bbc17637021c5e645994c034d743586b, type: 2}
   reglas:
     agacharse: 0

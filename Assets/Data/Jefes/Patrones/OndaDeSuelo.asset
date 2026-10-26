@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronOndaSuelo
   nombre: Onda de suelo
   descripcion: 'Golpe al suelo: una onda baja recorre el piso hacia los dos lados. Se esquiva saltando.'
-  aviso: 0.7
+  aviso: 0.6
   danio: 1
   color: {r: 0.8, g: 0.26666668, b: 0, a: 1}
   velocidadOnda: 9
   alcance: 16
   tamanoOnda: {x: 0.8, y: 0.9}
   haciaAmbosLados: 1
+  repeticiones: 1
+  intervalo: 0.55
   recuperacion: 0.6

@@ -1,0 +1,99 @@
+using System.Collections;
+using Fragmentum.Core;
+using UnityEngine;
+
+namespace Fragmentum.Bosses.Patrones
+{
+    /// <summary>
+    /// Espadazo directo (Centinela Ardiente). El jefe se acerca al jugador, avisa levantando la
+    /// espada, la descarga delante de él y la deja clavada en el suelo: mientras tanto queda
+    /// vulnerable (Anexo A: 1,2 s). Es el momento de devolverle el golpe.
+    ///
+    /// El Anexo A lo llama «martillazo directo», pero el arte de la Centinela lleva un mandoble:
+    /// es un tajo descendente. La mecánica es la misma.
+    ///
+    /// Con <see cref="golpes"/> &gt; 1 es un combo: tras cada golpe vuelve a echarse encima del
+    /// jugador y golpea otra vez con un aviso más corto. La espada solo se queda clavada en el
+    /// último: la Ira no deja respirar hasta que se agota.
+    /// </summary>
+    [CreateAssetMenu(menuName = "Fragmentum/Jefes/Patrón: espadazo", fileName = "PatronEspadazo")]
+    public class PatronEspadazo : PatronAtaque
+    {
+        [Tooltip("Distancia horizontal (entre centros) desde la que golpea.")]
+        [Min(0f)] public float alcance = 3f;
+
+        [Tooltip("Segundos máximos acercándose; después golpea igualmente.")]
+        [Min(0f)] public float tiempoAcercamiento = 2.5f;
+
+        [Tooltip("Tamaño de la zona del golpe, delante del jefe.")]
+        public Vector2 tamanoGolpe = new Vector2(2.6f, 2.6f);
+
+        [Min(0.02f)] public float duracionGolpe = 0.15f;
+
+        [Header("Combo")]
+        [Tooltip("Espadazos seguidos. Solo el último deja la espada clavada.")]
+        [Min(1)] public int golpes = 1;
+
+        [Tooltip("Aviso de los golpes que siguen al primero: más corto, pero siempre visible.")]
+        [Min(0f)] public float avisoEncadenado = 0.35f;
+
+        [Tooltip("Segundos máximos para volver a echarse encima del jugador entre golpe y golpe.")]
+        [Min(0f)] public float acercamientoEncadenado = 0.8f;
+
+        [Tooltip("Multiplica su velocidad al echarse encima entre golpes.")]
+        [Min(0.1f)] public float impulsoEncadenado = 1.6f;
+
+        [Header("Ventana vulnerable")]
+        [Tooltip("Con la espada clavada el jefe queda vulnerable.")]
+        public bool abreVentana = true;
+
+        [Tooltip("Duración de la ventana; 0 = la del JefeData.")]
+        [Min(0f)] public float duracionVentana;
+
+        public override IEnumerator Ejecutar(BossController jefe)
+        {
+            for (var golpe = 0; golpe < golpes; golpe++)
+            {
+                var primero = golpe == 0;
+                var ultimo = golpe == golpes - 1;
+                yield return Acercarse(jefe, primero ? tiempoAcercamiento : acercamientoEncadenado, primero ? 1f : impulsoEncadenado);
+
+                jefe.Detener();
+                jefe.MirarAlJugador();
+
+                // Con arte, el golpe sale con E2 (los encadenados empiezan el clip ya avanzado) y el
+                // último deja la espada clavada (C1-C4) en lugar de recuperarse (E3-E4).
+                yield return jefe.Golpear(AnimatorParams.Espadazo, primero ? aviso : avisoEncadenado, ultimo && abreVentana);
+
+                var centro = jefe.PuntoDelante(jefe.MedioAncho + tamanoGolpe.x * 0.5f - 0.3f, tamanoGolpe.y * 0.5f);
+                var zona = jefe.CrearZona("Espadazo", centro, tamanoGolpe, danio, 0f, duracionGolpe, Vector2.zero, color);
+                yield return jefe.TerminarGolpe(zona, duracionGolpe);
+            }
+
+            // Sin arte la ventana se abre aquí. Con arte la abre C2 (la espada clavada) y dura lo
+            // que se ve. En los dos casos el jefe corta el patrón al entrar en ella.
+            if (abreVentana && !jefe.TieneArte)
+            {
+                jefe.AbrirVentanaVulnerable(duracionVentana);
+            }
+
+            yield return new WaitForSeconds(0.3f);
+
+            // Por si el evento de C2 no hubiera llegado.
+            if (abreVentana && jefe.TieneArte)
+            {
+                jefe.AbrirVentanaVulnerable(duracionVentana);
+            }
+        }
+
+        private IEnumerator Acercarse(BossController jefe, float segundos, float impulso)
+        {
+            var limite = Time.time + segundos;
+            while (Time.time < limite && jefe.JugadorVivo && jefe.DistanciaAlJugador > alcance)
+            {
+                jefe.Perseguir(impulso);
+                yield return new WaitForFixedUpdate();
+            }
+        }
+    }
+}

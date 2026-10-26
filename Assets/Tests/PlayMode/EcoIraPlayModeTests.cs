@@ -96,8 +96,13 @@ namespace Fragmentum.Tests.PlayMode
 
             Assert.Greater(ataque.Inicio, 0f, "Debe atacar al jugador que tiene a tiro.");
             Assert.IsEmpty(ataque.ArmaFueraDeA2A3, "El arma solo puede estar abierta mientras se ven a2 y a3.");
-            Assert.AreEqual(0.35f, ataque.Apertura - ataque.Inicio, 0.05f, "La anticipación (a1) dura 0,35 s.");
-            Assert.AreEqual(0.13f, ataque.Cierre - ataque.Apertura, 0.05f, "El golpe (a2 + a3) dura 0,13 s.");
+
+            // Los tiempos del diseño (0,35 s y 0,13 s), a la velocidad de ataque del prefab.
+            var velocidad = _animacion.velocidadAtaque;
+            Assert.Greater(velocidad, 1f, "Tras la primera prueba el golpe va más rápido que los tiempos del diseño.");
+            Assert.AreEqual(0.35f / velocidad, ataque.Apertura - ataque.Inicio, 0.04f, "La anticipación (a1).");
+            Assert.AreEqual(0.13f / velocidad, ataque.Cierre - ataque.Apertura, 0.04f, "El golpe (a2 + a3).");
+            Assert.Greater(ataque.Apertura - ataque.Inicio, 2f * (ataque.Cierre - ataque.Apertura), "La anticipación sigue siendo bastante más larga que el golpe.");
             Assert.That(ataque.FotogramaDelDanio, Is.EqualTo("a2").Or.EqualTo("a3"), "El daño llega durante el golpe.");
         }
 
@@ -114,8 +119,9 @@ namespace Fragmentum.Tests.PlayMode
 
             Assert.AreEqual(0.5f, _animator.speed, 1e-4f);
             Assert.IsEmpty(ataque.ArmaFueraDeA2A3);
-            Assert.AreEqual(0.70f, ataque.Apertura - ataque.Inicio, 0.06f, "A ritmo 0,5 la anticipación dura el doble.");
-            Assert.AreEqual(0.26f, ataque.Cierre - ataque.Apertura, 0.06f, "Y el golpe también.");
+            var velocidad = _animacion.velocidadAtaque;
+            Assert.AreEqual(0.70f / velocidad, ataque.Apertura - ataque.Inicio, 0.06f, "A ritmo 0,5 la anticipación dura el doble.");
+            Assert.AreEqual(0.26f / velocidad, ataque.Cierre - ataque.Apertura, 0.06f, "Y el golpe también.");
         }
 
         [UnityTest]

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Fragmentum.Core;
 using Fragmentum.Core.Juego;
 using Fragmentum.Core.Save;
@@ -112,6 +113,56 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator ConEscalaEntera_ElPlanoMideUnMultiploExactoDeSuTamano_EnPixelesEnteros()
+        {
+            Gestor.Datos.cinematicasVistas.Add("Inicial");
+            yield return EntrarEnNivel1();
+
+            Sprite plano = null;
+#if UNITY_EDITOR
+            plano = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Cinematicas/Nivel1/CinematicaJefe1.png");
+#endif
+            Assert.IsNotNull(plano, "Falta el plano CinematicaJefe1.");
+            Assert.AreEqual(new Vector2(240f, 135f), plano.rect.size);
+
+            var pixelArt = ScriptableObject.CreateInstance<CutsceneData>();
+            pixelArt.id = "PixelArt";
+            pixelArt.escalaEntera = true;
+            pixelArt.diapositivas.Add(new Diapositiva { imagen = plano, duracion = 2f });
+            Assert.IsTrue(Juego.IniciarCinematica(pixelArt));
+            yield return null;
+            yield return null;
+
+            var cinematica = Interfaz.Cinematica;
+            var pantalla = new Vector2(Screen.width, Screen.height);
+            var k = Mathf.Max(1, Mathf.FloorToInt(Mathf.Min(pantalla.x / 240f, pantalla.y / 135f)));
+            Assert.AreEqual(k, cinematica.EscalaEntera, $"El mayor entero que cabe en {pantalla.x} × {pantalla.y}.");
+
+            var rect = cinematica.RectImagenEnPantalla;
+            Assert.AreEqual(k * 240f, rect.width, 0.5f, "Ancho: k veces 240 píxeles de pantalla.");
+            Assert.AreEqual(k * 135f, rect.height, 0.5f, "Alto: k veces 135.");
+            Assert.AreEqual(Mathf.Round(rect.xMin), rect.xMin, 0.05f, "El borde cae en un píxel entero: no se interpola.");
+            Assert.AreEqual(Mathf.Round(rect.yMin), rect.yMin, 0.05f);
+            Assert.AreEqual(pantalla.x / 2f, rect.center.x, 0.51f, "Centrada.");
+
+            Assert.IsTrue(Juego.TerminarCinematica());
+            yield return null;
+
+            // Sin escala entera, la imagen vuelve a llenar la pantalla con su proporción.
+            var libre = ScriptableObject.CreateInstance<CutsceneData>();
+            libre.id = "Libre";
+            libre.diapositivas.Add(new Diapositiva { imagen = plano, duracion = 2f });
+            Assert.IsTrue(Juego.IniciarCinematica(libre));
+            yield return null;
+            Assert.AreEqual(0, cinematica.EscalaEntera);
+            Assert.AreEqual(Mathf.Min(pantalla.x, pantalla.y * 16f / 9f), cinematica.RectImagenEnPantalla.width, 1f, "Escala libre: llena el ancho o el alto.");
+            Assert.IsTrue(Juego.TerminarCinematica());
+
+            Object.Destroy(pixelArt);
+            Object.Destroy(libre);
+        }
+
+        [UnityTest]
         public IEnumerator SinReproductor_LaCinematicaNoBloqueaElJuego()
         {
             Object.DestroyImmediate(Interfaz);
@@ -189,7 +240,7 @@ namespace Fragmentum.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator AntesDelJefe_HablaElArquitecto()
+        public IEnumerator AntesDelJefe_ElArquitectoHablaEnSuPresentacion()
         {
             Gestor.Datos.cinematicasVistas.Add("Inicial");
             yield return EntrarEnNivel1();
@@ -197,6 +248,29 @@ namespace Fragmentum.Tests.PlayMode
             var arena = Object.FindAnyObjectByType<ArenaJefe>();
 
             yield return LlevarJugadorA(new Vector2(arena.transform.position.x, 0.05f));
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar en la arena, la presentación del jefe.");
+            yield return EsperarHasta(() => Interfaz.Cinematica.TextoActual.Contains("CENTINELA ARDIENTE"), 2f, "el nombre del jefe");
+
+            var dialogo = Nivel1.cinematicaJefe.diapositivas.Select(d => d.texto).FirstOrDefault(t => !string.IsNullOrEmpty(t));
+            StringAssert.StartsWith("Centinela Ardiente:", dialogo, "El diálogo antes del combate va en la presentación.");
+            StringAssert.Contains("ira", dialogo, "Y nombra la emoción del mundo.");
+
+            Assert.IsTrue(Juego.TerminarCinematica());
+            yield return null;
+            yield return null;
+            Assert.IsEmpty(Interfaz.Hud.LineaActual, "No se repite en el HUD: ya se dijo en la cinemática.");
+        }
+
+        [UnityTest]
+        public IEnumerator SinPresentacion_LaLineaPreviaAlJefeVaEnElHud()
+        {
+            Gestor.Datos.cinematicasVistas.Add("Inicial");
+            yield return EntrarEnNivel1();
+            DialogueManager.Instancia.Limpiar();
+            var arena = Object.FindAnyObjectByType<ArenaJefe>();
+
+            // Lo que pasa en un nivel cuyo LevelData no tiene cinemática de jefe.
+            arena.IniciarCombate(Jugador);
             yield return EsperarHasta(() => Interfaz.Hud.LineaActual.Length > 0, 2f, "la línea previa al jefe");
 
             Assert.AreEqual("CENTINELA ARDIENTE", Interfaz.Hud.HablanteActual);

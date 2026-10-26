@@ -89,8 +89,9 @@ namespace Fragmentum.Tests
             Assert.IsTrue(enemigos.Any(e => e.transform.position.x < 25f && e.name.Contains(ConstructorEcoIra.NombreDatos) &&
                                             PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(e.gameObject) == ConstructorEcoIra.RutaPrefab),
                 "El Eco de la Ira (con arte) patrulla la sección 1, donde estaba el Soldado de lava provisional.");
-            Assert.IsTrue(enemigos.Any(e => e.transform.position.x > 40f && e.name.Contains("GolemCeniza")),
-                "Anexo A: el checkpoint de x = 40 va antes del Golem.");
+            Assert.IsTrue(enemigos.Any(e => e.transform.position.x > 40f && e.name.Contains(ConstructorGolem.NombreDatos) &&
+                                            PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(e.gameObject) == ConstructorGolem.RutaPrefab),
+                "Anexo A: el checkpoint de x = 40 va antes del Golem, que ya es el de su arte.");
 
             var rutas = enemigos
                 .Select(e => new SerializedObject(e).FindProperty("waypoints").GetArrayElementAtIndex(0).objectReferenceValue as Transform)
@@ -137,9 +138,9 @@ namespace Fragmentum.Tests
             Assert.AreEqual(1, torretas.Count);
             Assert.That(torretas[0].transform.position.x, Is.InRange(0f, 25f), "La torreta es de la sección 1.");
 
-            var calientes = Todos<PlataformaCaliente>(_nivel1);
-            Assert.AreEqual(2, calientes.Count);
-            Assert.IsTrue(calientes.All(c => c.transform.position.x > 25f && c.transform.position.x < 40f), "Antes del checkpoint.");
+            var combustion = Todos<PlataformaCombustion>(_nivel1);
+            Assert.AreEqual(2, combustion.Count);
+            Assert.IsTrue(combustion.All(c => c.transform.position.x > 25f && c.transform.position.x < 40f), "Antes del checkpoint.");
 
             var lavas = Todos<Lava>(_nivel1);
             Assert.AreEqual(2, lavas.Count, "Un río de lava en la sección 2 y lava en el fondo del segundo foso.");
@@ -150,7 +151,7 @@ namespace Fragmentum.Tests
         [Test]
         public void LosPrefabsDeMecanicas_Existen()
         {
-            foreach (var nombre in new[] { GeneradorMecanicas.PlataformaInestable, GeneradorMecanicas.PlataformaCaliente, GeneradorMecanicas.Lava, GeneradorMecanicas.TorretaFuego })
+            foreach (var nombre in new[] { GeneradorMecanicas.PlataformaInestable, GeneradorMecanicas.PlataformaCombustion, GeneradorMecanicas.Lava, GeneradorMecanicas.TorretaFuego, GeneradorMecanicas.BolaDeFuego })
             {
                 Assert.IsNotNull(GeneradorMecanicas.Cargar(nombre), $"Falta el prefab {nombre}.");
             }

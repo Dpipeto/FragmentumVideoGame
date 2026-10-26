@@ -5,44 +5,70 @@ using UnityEngine;
 namespace Fragmentum.Levels.Mecanicas
 {
     /// <summary>
-    /// Plataforma que se desmorona (<c>PlatformCrumble</c> del Anexo A, mundo de la Ira): cuando
-    /// el jugador se apoya encima, tiembla un momento, cae y, al rato, vuelve a su sitio.
+    /// Plataforma inestable (<c>PlatformCrumble</c> del Anexo A, mundo de la Ira), con su arte. El
+    /// suelo te falla: se resuelve moviéndose rápido.
+    ///
+    /// - <b>Intacta</b> hasta que el jugador la pisa.
+    /// - <b>Agrietada</b> (<see cref="retardoRotura"/>): las grietas se encienden. Es el aviso y se
+    ///   sigue pudiendo pisar. Una vez pisada, se rompe aunque el jugador se baje: las grietas no
+    ///   se cierran.
+    /// - <b>Se rompe:</b> el collider se apaga en el acto. Se ve partida en tres trozos y después
+    ///   el polvo, durante <see cref="duracionCaida"/>, y desaparece.
+    /// - A los <see cref="tiempoReaparicion"/> s vuelve intacta, salvo si el jugador está justo
+    ///   donde reaparecería (lo empujaría): entonces espera a que se aparte.
     ///
     /// Detecta al jugador con una caja fina justo encima de su superficie, no con colisiones: así
-    /// no depende del orden de los contactos ni de si el jugador llega saltando o caminando.
+    /// no depende del orden de los contactos ni de si el jugador llega saltando o caminando. El
+    /// pivote está en la superficie: el Transform va donde se apoya el pie.
+    ///
+    /// La plataforma de combustión es otra cosa a propósito, con su propio script: allí el suelo
+    /// no falla, lo que mata es el momento.
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D))]
     public class PlataformaInestable : MonoBehaviour
     {
-        [Tooltip("Segundos que aguanta con el jugador encima antes de caer.")]
-        [Min(0f)]
-        [SerializeField] private float aguante = 0.6f;
+        [Tooltip("Segundos agrietada desde que el jugador la pisa hasta que se rompe. Es el aviso.")]
+        [Min(0f)] public float retardoRotura = 0.6f;
 
-        [Tooltip("Segundos que tarda en volver a su sitio tras caer.")]
-        [Min(0.1f)]
-        [SerializeField] private float reaparicion = 3f;
+        [Tooltip("Segundos que se ve rompiéndose (partida en tres trozos y el polvo) antes de desaparecer.")]
+        [Min(0.25f)] public float duracionCaida = 0.6f;
 
-        [Tooltip("Amplitud del temblor de aviso, en unidades.")]
-        [SerializeField] private float temblor = 0.06f;
+        [Tooltip("Segundos desde que desaparece hasta que vuelve, intacta.")]
+        [Min(0.1f)] public float tiempoReaparicion = 3f;
 
-        [Tooltip("Opcional: el dibujo que tiembla y se oculta.")]
+        [SerializeField] private Animator animator;
+
+        [Tooltip("El dibujo: se esconde al desaparecer.")]
         [SerializeField] private SpriteRenderer visual;
 
         private BoxCollider2D _cuerpo;
         private Bounds _limites;
-        private Vector3 _posicionVisual;
         private readonly Collider2D[] _encima = new Collider2D[2];
         private ContactFilter2D _filtroJugador;
-        private float _pisadaDesde = -1f;
-        private float _vuelveEn = -1f;
+        private float _rompeEn;
+        private float _desapareceEn;
+        private float _vuelveEn;
 
-        /// <summary>Cambió de estado: true = se cayó, false = volvió.</summary>
+        /// <summary>Cambió de estado: true = se rompió, false = volvió.</summary>
         public event Action<bool> OnCaida;
 
-        public bool Caida { get; private set; }
+        public ESTADOS_PLATAFORMA Estado { get; private set; }
 
-        /// <summary>¿Tiene al jugador encima ahora mismo?</summary>
-        public bool Pisada => _pisadaDesde >= 0f;
+        /// <summary>Rota: ya no sostiene (aunque todavía se vean los trozos o el polvo).</summary>
+        public bool Caida => Estado == ESTADOS_PLATAFORMA.BROKEN;
+
+        /// <summary>Se ve (intacta, agrietada o rompiéndose); false cuando ya desapareció.</summary>
+        public bool Visible => visual == null || visual.enabled;
+
+        /// <summary>¿Sostiene al jugador? (Su collider está activo.)</summary>
+        public bool Sostiene => _cuerpo != null && _cuerpo.enabled;
+
+        /// <summary>
+        /// La regla del collider: sostiene intacta y agrietada, y deja de sostener en cuanto se
+        /// rompe (mientras se ve partida en tres trozos, Plataforma_3_rota, y el polvo). La aplica
+        /// este script y la comprueba el verificador del Nivel 1 contra el arte de cada estado.
+        /// </summary>
+        public static bool SostieneEn(ESTADOS_PLATAFORMA estado) => estado != ESTADOS_PLATAFORMA.BROKEN;
 
         private void Awake()
         {
@@ -51,14 +77,14 @@ namespace Fragmentum.Levels.Mecanicas
             // plataforma se acaba de crear la física aún no los ha actualizado.
             var escala = transform.lossyScale;
             _limites = new Bounds(transform.TransformPoint(_cuerpo.offset), new Vector3(_cuerpo.size.x * Mathf.Abs(escala.x), _cuerpo.size.y * Mathf.Abs(escala.y), 1f));
+            if (animator == null)
+            {
+                animator = GetComponentInChildren<Animator>();
+            }
+
             if (visual == null)
             {
                 visual = GetComponentInChildren<SpriteRenderer>();
-            }
-
-            if (visual != null)
-            {
-                _posicionVisual = visual.transform.localPosition;
             }
 
             _filtroJugador = new ContactFilter2D();
@@ -68,46 +94,49 @@ namespace Fragmentum.Levels.Mecanicas
 
         private void FixedUpdate()
         {
-            if (Caida)
+            var ahora = Time.time;
+            switch (Estado)
             {
-                // No vuelve mientras el jugador esté justo donde reaparecería: lo empujaría.
-                if (Time.time >= _vuelveEn && !Hay(_limites.center, _limites.size))
-                {
-                    Recomponer();
-                }
+                case ESTADOS_PLATAFORMA.INTACT:
+                    if (JugadorEncima())
+                    {
+                        Estado = ESTADOS_PLATAFORMA.CRACKED;
+                        _rompeEn = ahora + retardoRotura;
+                    }
 
-                return;
-            }
+                    break;
 
-            if (JugadorEncima())
-            {
-                if (_pisadaDesde < 0f)
-                {
-                    _pisadaDesde = Time.time;
-                }
+                case ESTADOS_PLATAFORMA.CRACKED:
+                    if (ahora >= _rompeEn)
+                    {
+                        Romper(ahora);
+                    }
 
-                if (Time.time - _pisadaDesde >= aguante)
-                {
-                    Caer();
-                }
-            }
-            else
-            {
-                _pisadaDesde = -1f;
+                    break;
+
+                default:
+                    if (Visible && ahora >= _desapareceEn && visual != null)
+                    {
+                        visual.enabled = false;
+                    }
+
+                    // No vuelve mientras el jugador esté justo donde reaparecería: lo empujaría.
+                    if (ahora >= _vuelveEn && !Hay(_limites.center, _limites.size))
+                    {
+                        Recomponer();
+                    }
+
+                    break;
             }
         }
 
         private void Update()
         {
-            if (visual == null || Caida)
+            // Antes de que el Animator se evalúe en este fotograma.
+            if (animator != null && animator.isInitialized)
             {
-                return;
+                AnimatorParams.FijarEntero(animator, AnimatorParams.EstadoMecanica, (int)Estado);
             }
-
-            // Tiembla mientras aguanta al jugador: es el aviso de que va a caer.
-            visual.transform.localPosition = Pisada
-                ? _posicionVisual + new Vector3(Mathf.Sin(Time.time * 60f) * temblor, 0f, 0f)
-                : _posicionVisual;
         }
 
         private bool JugadorEncima() =>
@@ -115,25 +144,19 @@ namespace Fragmentum.Levels.Mecanicas
 
         private bool Hay(Vector2 centro, Vector2 tamano) => Physics2D.OverlapBox(centro, tamano, 0f, _filtroJugador, _encima) > 0;
 
-        private void Caer()
+        private void Romper(float ahora)
         {
-            Caida = true;
-            _pisadaDesde = -1f;
-            _vuelveEn = Time.time + reaparicion;
-            _cuerpo.enabled = false;
-            if (visual != null)
-            {
-                visual.enabled = false;
-                visual.transform.localPosition = _posicionVisual;
-            }
-
+            Estado = ESTADOS_PLATAFORMA.BROKEN;
+            _cuerpo.enabled = SostieneEn(Estado);
+            _desapareceEn = ahora + duracionCaida;
+            _vuelveEn = _desapareceEn + tiempoReaparicion;
             OnCaida?.Invoke(true);
         }
 
         private void Recomponer()
         {
-            Caida = false;
-            _cuerpo.enabled = true;
+            Estado = ESTADOS_PLATAFORMA.INTACT;
+            _cuerpo.enabled = SostieneEn(Estado);
             if (visual != null)
             {
                 visual.enabled = true;

@@ -18,5 +18,5 @@ MonoBehaviour:
   etiquetaMaxima: "Much\xEDsimo"
   pedirComentario: 1
   ayudaComentario: "\xBFAlgo que quieras anotar? (opcional)"
-  pedirParticipante: 1
+  pedirParticipante: 0
   ayudaParticipante: "C\xF3digo de participante (opcional)"

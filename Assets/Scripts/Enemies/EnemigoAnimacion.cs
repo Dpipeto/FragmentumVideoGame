@@ -15,12 +15,15 @@ namespace Fragmentum.Enemies
     ///   <see cref="FinAtaque"/> termina el ataque y <see cref="FinMuerte"/> remata la muerte.
     /// - <see cref="velocidadAnimacion"/> marca el ritmo de todo el Animator: otro Eco con los
     ///   mismos clips va más lento o más rápido sin duplicar animaciones.
+    /// - <see cref="velocidadAtaque"/> acelera además solo el clip de ataque, sin cambiar sus
+    ///   proporciones: la anticipación sigue siendo más larga que el golpe.
     /// - El estado Run va al ritmo de la velocidad real del cuerpo: las piernas no patinan y,
     ///   parado a tiro durante el cooldown, el Eco no corre en el sitio.
-    /// - Al recibir un golpe, el sprite se vuelve una silueta blanca durante 0,1 s. No hay
-    ///   fotogramas de daño: es todo código.
-    /// - Al acabar el clip de muerte apaga los colliders, suelta las partículas desde la
-    ///   cavidad del pecho, funde el sprite y destruye al enemigo.
+    /// - Al recibir un golpe, el sprite se vuelve una silueta (blanca por defecto,
+    ///   <see cref="colorDestello"/>) durante 0,1 s. No hay fotogramas de daño: es todo código.
+    /// - Al acabar el clip de muerte apaga los colliders, suelta las partículas (si las hay),
+    ///   deja los restos en pantalla <see cref="restosEnPantalla"/> s, funde el sprite y destruye
+    ///   al enemigo.
     ///
     /// La FSM del <see cref="EnemyController"/> sigue siendo la que decide: este componente no
     /// cambia de estado por su cuenta, solo le avisa de lo que pasa en el clip.
@@ -32,9 +35,15 @@ namespace Fragmentum.Enemies
         // Margen sobre la duración del clip de muerte antes de rematarla sin su evento.
         private const float MargenSeguridadMuerte = 1f;
 
+        private static readonly int ColorSilueta = Shader.PropertyToID("_Color");
+
         [Tooltip("Ritmo de todas las animaciones (Animator.speed). Los Ecos comparten clips y se distinguen por su ritmo. " +
-                 "También acorta la anticipación del ataque: a1 dura 0,35 s / este valor.")]
+                 "También acorta la anticipación del ataque: a1 dura 0,35 s / (este valor × velocidadAtaque).")]
         [Range(0.4f, 2f)] public float velocidadAnimacion = 1f;
+
+        [Tooltip("Multiplica solo el clip de ataque, encima del ritmo general: a 1,6 la anticipación (a1) dura 0,35 / 1,6 ≈ 0,22 s. " +
+                 "Los eventos del golpe se mueven con el clip, así que la ventana de daño sigue siendo a2 y a3.")]
+        [Range(0.5f, 3f)] public float velocidadAtaque = 1f;
 
         [Tooltip("Velocidad del cuerpo (u/s) a la que el ciclo de correr, a ritmo 1, avanza sin patinar. La mide ConstructorEcoIra en el arte.")]
         [SerializeField, Min(0.01f)] private float velocidadNaturalCarrera = 1.3f;
@@ -45,9 +54,15 @@ namespace Fragmentum.Enemies
 
         [SerializeField, Min(0f)] private float duracionDestello = 0.1f;
 
+        [Tooltip("Color de la silueta. El color del SpriteRenderer solo multiplica y no puede aclarar el sprite; la silueta lo sustituye entero.")]
+        [SerializeField] private Color colorDestello = Color.white;
+
         [Header("Muerte")]
         [Tooltip("Partículas que salen de la cavidad del pecho al acabar el clip de muerte.")]
         [SerializeField] private ParticleSystem estallido;
+
+        [Tooltip("Segundos que el último fotograma de la muerte (los restos) se queda en pantalla antes de desvanecerse.")]
+        [SerializeField, Min(0f)] private float restosEnPantalla;
 
         [Tooltip("Segundos que tarda el sprite en desvanecerse tras el clip de muerte.")]
         [SerializeField, Min(0f)] private float duracionFundido = 0.4f;
@@ -58,7 +73,9 @@ namespace Fragmentum.Enemies
         private Rigidbody2D _cuerpo;
         private Health _vida;
         private Material _materialNormal;
+        private Material _destello;
         private bool _tieneVelocidadCorrer;
+        private bool _tieneVelocidadAtaque;
         private float _finDestello = float.NegativeInfinity;
         private float _duracionAtaque;
         private float _duracionMuerte;
@@ -73,7 +90,7 @@ namespace Fragmentum.Enemies
         public float VelocidadNaturalCarrera => velocidadNaturalCarrera;
 
         /// <summary>Lo que dura el clip de ataque (hasta su evento FinAtaque) al ritmo actual.</summary>
-        public float DuracionAtaque => _duracionAtaque / Ritmo;
+        public float DuracionAtaque => _duracionAtaque / (Ritmo * RitmoAtaque);
 
         /// <summary>Lo que dura el clip de muerte (hasta su evento FinMuerte) al ritmo actual.</summary>
         public float DuracionMuerte => _duracionMuerte / Ritmo;
@@ -81,8 +98,17 @@ namespace Fragmentum.Enemies
         // velocidadAnimacion, a salvo de un 0 puesto por código (el inspector no baja de 0,4).
         private float Ritmo => Mathf.Max(0.01f, velocidadAnimacion);
 
-        /// <summary>El sprite se ve ahora como silueta blanca.</summary>
-        public bool DestelloActivo => materialDestello != null && _sprite != null && _sprite.sharedMaterial == materialDestello;
+        // velocidadAtaque, igual de a salvo. Si el controlador no tiene el parámetro, no se aplica.
+        private float RitmoAtaque => _tieneVelocidadAtaque ? Mathf.Max(0.01f, velocidadAtaque) : 1f;
+
+        /// <summary>El sprite se ve ahora como silueta.</summary>
+        public bool DestelloActivo => _destello != null && _sprite != null && _sprite.sharedMaterial == _destello;
+
+        /// <summary>Color de la silueta del destello.</summary>
+        public Color ColorDestello => colorDestello;
+
+        /// <summary>Segundos que los restos se quedan en pantalla antes de desvanecerse.</summary>
+        public float RestosEnPantalla => restosEnPantalla;
 
         private void Awake()
         {
@@ -92,7 +118,34 @@ namespace Fragmentum.Enemies
             _cuerpo = GetComponentInParent<Rigidbody2D>();
             _vida = GetComponentInParent<Health>();
             _materialNormal = _sprite.sharedMaterial;
+            _destello = MaterialDestello();
             LeerDuraciones();
+        }
+
+        private void OnDestroy()
+        {
+            if (_destello != null && _destello != materialDestello)
+            {
+                Destroy(_destello);
+            }
+        }
+
+        // El material de silueta tal cual o, si el color pedido es otro, una copia propia con él.
+        private Material MaterialDestello()
+        {
+            if (materialDestello == null)
+            {
+                return null;
+            }
+
+            if (!materialDestello.HasProperty(ColorSilueta) || materialDestello.GetColor(ColorSilueta) == colorDestello)
+            {
+                return materialDestello;
+            }
+
+            var copia = new Material(materialDestello) { name = $"{materialDestello.name} ({name})" };
+            copia.SetColor(ColorSilueta, colorDestello);
+            return copia;
         }
 
         private void OnEnable()
@@ -117,12 +170,18 @@ namespace Fragmentum.Enemies
             foreach (var parametro in _animator.parameters)
             {
                 _tieneVelocidadCorrer |= parametro.nameHash == AnimatorParams.VelocidadCorrer.Hash;
+                _tieneVelocidadAtaque |= parametro.nameHash == AnimatorParams.VelocidadAtaque.Hash;
             }
         }
 
         private void Update()
         {
             _animator.speed = Ritmo;
+            if (_tieneVelocidadAtaque)
+            {
+                _animator.SetFloat(AnimatorParams.VelocidadAtaque.Hash, RitmoAtaque);
+            }
+
             if (!_tieneVelocidadCorrer || _cuerpo == null)
             {
                 return;
@@ -246,12 +305,12 @@ namespace Fragmentum.Enemies
 
         private void AlRecibirGolpe(Golpe golpe)
         {
-            if (materialDestello == null || _muerteRematada)
+            if (_destello == null || _muerteRematada)
             {
                 return;
             }
 
-            _sprite.sharedMaterial = materialDestello;
+            _sprite.sharedMaterial = _destello;
             _finDestello = Time.time + duracionDestello;
         }
 
@@ -273,6 +332,11 @@ namespace Fragmentum.Enemies
 
         private IEnumerator FundirYDestruir(GameObject raiz)
         {
+            if (restosEnPantalla > 0f)
+            {
+                yield return new WaitForSeconds(restosEnPantalla);
+            }
+
             var color = _sprite.color;
             var alfaInicial = color.a;
             for (var t = 0f; t < duracionFundido; t += Time.deltaTime)

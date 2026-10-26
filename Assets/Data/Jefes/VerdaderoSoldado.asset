@@ -26,16 +26,19 @@ MonoBehaviour:
     patrones: []
     pausaEntrePatrones: 1
     aleatorio: 0
+    multiplicadorVelocidad: 1
   - nombre: Secciones de cada mundo (60 %)
     umbralVida: 0.6
     patrones: []
     pausaEntrePatrones: 1
     aleatorio: 0
+    multiplicadorVelocidad: 1
   - nombre: "Integraci\xF3n (30 %)"
     umbralVida: 0.3
     patrones: []
     pausaEntrePatrones: 1
     aleatorio: 0
+    multiplicadorVelocidad: 1
   duracionVulnerable: 1.2
   multiplicadorVulnerable: 2
   inmuneFueraDeVulnerable: 0

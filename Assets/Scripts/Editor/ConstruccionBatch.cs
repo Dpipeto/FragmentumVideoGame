@@ -34,6 +34,10 @@ namespace Fragmentum.EditorTools
         {
             ConfiguradorProyecto.ConfigurarTodo();
 
+            // Los ajustes de importación del arte (píxeles por unidad y pivote por carpeta), por
+            // si algo se importó antes de que existiera su regla.
+            TablaArte.AplicarATodo();
+
             var ok = GeneradorProgresion.Construir();
 
             // Los prefabs se regeneran siempre: Unity conserva sus identificadores. El arte de
@@ -42,8 +46,20 @@ namespace Fragmentum.EditorTools
             ok &= ConstructorJugador.CrearPrefab() != null;
             ok &= GeneradorEnemigos.CrearPrefabs() != null;
             ok &= ConstructorEcoIra.Construir();
+            // El Golem, las mecánicas y las cinemáticas del Nivel 1: después del Eco (el Golem usa
+            // su material de destello) y antes que los prefabs de las mecánicas, que usan sus clips.
+            ok &= ArteNivel1.Construir();
+            // El arte de la Centinela va antes que los prefabs de jefes, que lo usan (y usan el
+            // material de destello del Eco).
+            ok &= ConstructorCentinela.Construir();
             ok &= GeneradorJefes.Construir();
+            // Si algo del arte de la Centinela no cuadra (un sprite reimportado sin sus ajustes,
+            // un clip o el prefab tocados a mano), la regeneración falla con su nombre.
+            ok &= VerificadorCentinela.Verificar();
             ok &= GeneradorMecanicas.CrearPrefabs();
+            // Lo mismo con el arte del Nivel 1 (el Golem, las mecánicas y los planos del jefe), ya
+            // con los prefabs de las mecánicas hechos.
+            ok &= VerificadorNivel1.Verificar();
             ok &= ConstructorFondoMundo1.Construir();
 
             if (regenerarEscenasDePrueba || !Existe(ConstructorJugador.RutaEscena))

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Fragmentum.Core.Combate
 {
     /// <summary>
-    /// Zona de daño reutilizable: la espada del jugador, el arma de un enemigo, el martillo
+    /// Zona de daño reutilizable: la espada del jugador, el arma de un enemigo, el mandoble
     /// del jefe o una explosión. Reparte <see cref="Golpe"/> a lo que toque, filtrando por
     /// capa de física en vez de por tag.
     ///

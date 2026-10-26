@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Fragmentum.Core.Combate
 {
     /// <summary>
-    /// Zona de daño temporal creada por código: el martillazo, la onda de suelo o la erupción de
+    /// Zona de daño temporal creada por código: el espadazo, la onda de suelo o la erupción de
     /// un jefe y, más adelante, trampas y proyectiles sencillos (Fases 9 y 10).
     ///
     /// - Puede <b>avisar</b> antes: se ve translúcida y no hace daño.

@@ -19,7 +19,8 @@ namespace Fragmentum.EditorTools
     /// <summary>
     /// El Eco de la Ira, enemigo del Mundo 1, con su arte:
     /// 1. importa los 12 fotogramas de <see cref="CarpetaSprites"/> como pixel art, con el mismo
-    ///    pivote en los pies para todos (si no, el Eco saltaría al cambiar de estado);
+    ///    pivote en los pies para todos (si no, el Eco saltaría al cambiar de estado); los ajustes
+    ///    están en <see cref="TablaArte"/>, con las constantes de aquí;
     /// 2. crea los clips Idle, Run, Attack y Death con los tiempos del diseño, los eventos de la
     ///    ventana de golpe y de la muerte, y el squash del ataque;
     /// 3. arma <c>EcoIra.controller</c> con sus transiciones;
@@ -71,8 +72,6 @@ namespace Fragmentum.EditorTools
         /// <summary>Lo que mide en el mundo un píxel del dibujo (~10 px de la textura).</summary>
         public const float PixelDeArte = 10f / PixelesPorUnidad;
 
-        public const int TamanoMaximo = 2048;
-
         // --- Animaciones ---
 
         /// <summary>Un clip: sus fotogramas (por nombre de archivo) y cuánto dura cada uno.</summary>
@@ -120,6 +119,14 @@ namespace Fragmentum.EditorTools
         /// golpe y se encoge al recuperarse; al acabar el clip vuelve a 1.
         /// </summary>
         public static readonly float[] SquashAtaque = { 1f, 1.15f, 1f, 0.9f };
+
+        /// <summary>
+        /// Velocidad del clip de ataque en el prefab (estado Attack, parámetro VelocidadAtaque).
+        /// Los tiempos de la tabla son los del diseño; en la primera prueba el golpe se sintió
+        /// lento, así que se reproduce a 1,6×: a1 0,22 s, a2 + a3 0,08 s y el ataque entero 0,46 s.
+        /// Las proporciones no cambian: la anticipación sigue durando casi el triple que el golpe.
+        /// </summary>
+        public const float VelocidadAtaque = 1.6f;
 
         /// <summary>
         /// Lo que avanza el cuerpo en una vuelta de r1 a r4 (un paso), medido en el arte: entre la
@@ -239,7 +246,7 @@ namespace Fragmentum.EditorTools
             foreach (var archivo in Archivos)
             {
                 var ruta = RutaSprite(archivo);
-                if (AssetImporter.GetAtPath(ruta) is TextureImporter importador && AjustarImportador(importador))
+                if (AssetImporter.GetAtPath(ruta) is TextureImporter importador && TablaArte.Ajustar(importador))
                 {
                     importador.SaveAndReimport();
                 }
@@ -282,47 +289,6 @@ namespace Fragmentum.EditorTools
 
         /// <summary>El prefab del Eco, o null si todavía no se construyó.</summary>
         public static GameObject Prefab => AssetDatabase.LoadAssetAtPath<GameObject>(RutaPrefab);
-
-        // --- 1. Importación ---
-
-        /// <summary>
-        /// Ajustes de pixel art de un fotograma del Eco. Devuelve si cambió algo. Lo usan
-        /// <see cref="Construir"/> y el importador de la carpeta, que los fija en cada importación.
-        /// </summary>
-        public static bool AjustarImportador(TextureImporter importador)
-        {
-            var antes = new TextureImporterSettings();
-            importador.ReadTextureSettings(antes);
-            var ajustes = new TextureImporterSettings();
-            importador.ReadTextureSettings(ajustes);
-
-            ajustes.textureType = TextureImporterType.Sprite;
-            ajustes.spriteMode = (int)SpriteImportMode.Single;
-            ajustes.spritePixelsPerUnit = PixelesPorUnidad;
-            ajustes.spriteMeshType = SpriteMeshType.FullRect;
-            ajustes.spriteAlignment = (int)SpriteAlignment.Custom;
-            ajustes.spritePivot = Pivote;
-            ajustes.spriteGenerateFallbackPhysicsShape = false;
-            ajustes.filterMode = FilterMode.Point;
-            ajustes.wrapMode = TextureWrapMode.Clamp;
-            ajustes.mipmapEnabled = false;
-            ajustes.alphaIsTransparency = true;
-            ajustes.npotScale = TextureImporterNPOTScale.None;
-            ajustes.readable = false;
-
-            var cambia = !TextureImporterSettings.Equal(antes, ajustes) ||
-                         importador.textureCompression != TextureImporterCompression.Uncompressed ||
-                         importador.maxTextureSize != TamanoMaximo;
-            if (!cambia)
-            {
-                return false;
-            }
-
-            importador.SetTextureSettings(ajustes);
-            importador.textureCompression = TextureImporterCompression.Uncompressed;
-            importador.maxTextureSize = TamanoMaximo;
-            return true;
-        }
 
         // --- 2. Materiales ---
 
@@ -518,7 +484,16 @@ namespace Fragmentum.EditorTools
                 (AnimatorParams.Attack.Nombre, AnimatorControllerParameterType.Bool, 0f),
                 (AnimatorParams.Damage.Nombre, AnimatorControllerParameterType.Bool, 0f),
                 (AnimatorParams.Death.Nombre, AnimatorControllerParameterType.Bool, 0f),
-                (AnimatorParams.VelocidadCorrer.Nombre, AnimatorControllerParameterType.Float, 1f));
+                (AnimatorParams.VelocidadCorrer.Nombre, AnimatorControllerParameterType.Float, 1f),
+                (AnimatorParams.VelocidadAtaque.Nombre, AnimatorControllerParameterType.Float, 1f));
+
+            // Run sigue a la velocidad del cuerpo y Attack a la velocidad de ataque del prefab;
+            // los dos los escribe EnemigoAnimacion en cada fotograma.
+            var parametroDeVelocidad = new Dictionary<string, string>
+            {
+                [Run] = AnimatorParams.VelocidadCorrer.Nombre,
+                [Attack] = AnimatorParams.VelocidadAtaque.Nombre,
+            };
 
             var maquina = controlador.layers[0].stateMachine;
             var estados = new Dictionary<string, AnimatorState>();
@@ -530,8 +505,8 @@ namespace Fragmentum.EditorTools
                 estado.motion = clips[nombre];
                 estado.speed = 1f;
                 estado.writeDefaultValues = true; // al salir de Attack el squash vuelve a 1
-                estado.speedParameterActive = nombre == Run;
-                estado.speedParameter = nombre == Run ? AnimatorParams.VelocidadCorrer.Nombre : string.Empty;
+                estado.speedParameterActive = parametroDeVelocidad.TryGetValue(nombre, out var parametro);
+                estado.speedParameter = parametro ?? string.Empty;
                 estados[nombre] = estado;
             }
 
@@ -677,6 +652,7 @@ namespace Fragmentum.EditorTools
 
                 var animacion = objetoSprite.AddComponent<EnemigoAnimacion>();
                 Asignar(animacion, "velocidadNaturalCarrera", p => p.floatValue = VelocidadNaturalCarrera);
+                Asignar(animacion, nameof(EnemigoAnimacion.velocidadAtaque), p => p.floatValue = VelocidadAtaque);
                 Asignar(animacion, "materialDestello", p => p.objectReferenceValue = destello);
                 Asignar(animacion, "estallido", p => p.objectReferenceValue = estallido);
 

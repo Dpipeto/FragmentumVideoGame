@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7c478bfcaf5c5a4dbc501faed90f0a1, type: 3}
+  m_Name: SaltoAplastante
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronSaltoAplastante
+  nombre: Salto aplastante
+  descripcion: "Salta hacia el jugador; la ca\xEDda se marca en el suelo y quema al aterrizar (2 de da\xF1o), con una onda a cada lado."
+  aviso: 0.5
+  danio: 2
+  color: {r: 0.9098039, g: 0.3647059, b: 0.015686275, a: 1}
+  tiempoVuelo: 0.8
+  tamanoImpacto: {x: 3, y: 1.4}
+  duracionImpacto: 0.15
+  ondas: 1
+  danioOnda: 1
+  velocidadOnda: 8
+  alcanceOnda: 7
+  tamanoOnda: {x: 0.8, y: 0.8}
+  recuperacion: 0.7

@@ -52,6 +52,26 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void SoloElGolemDeCeniza_EsInmuneALaLava()
+        {
+            Assert.IsTrue(Cargar("GolemCeniza").inmuneALava, "Decisión del diseño (PENDIENTES N9): el Golem no muere en la lava.");
+            foreach (var otro in new[] { "Generico", "SoldadoLava", "EcoIra", "Lamento", "Espectro", "CentinelaCiego" })
+            {
+                Assert.IsFalse(Cargar(otro).inmuneALava, $"{otro} sí muere en la lava.");
+            }
+        }
+
+        [Test]
+        public void ElEcoDeLaIra_AtacaMasDeSeguidoQueAntes()
+        {
+            var eco = Cargar("EcoIra");
+            Assert.Less(eco.attackCooldown, 0.7f, "Tras la primera prueba el Eco descansa menos entre golpes.");
+            Assert.Less(eco.duracionAtaque, 0.73f, "Y el golpe sin animación también es más corto.");
+            Assert.Less(eco.inicioVentanaGolpe, eco.finVentanaGolpe);
+            Assert.LessOrEqual(eco.finVentanaGolpe, eco.duracionAtaque);
+        }
+
+        [Test]
         public void Miedo_UsaEstrategiasDeDeteccionPropias()
         {
             Assert.IsInstanceOf<DeteccionEnOscuridad>(Cargar("Espectro").deteccion);

@@ -37,11 +37,26 @@ namespace Fragmentum.Core
         public static readonly Parametro Movement = new Parametro("Movement");
         public static readonly Parametro Walk = new Parametro("Walk");
 
-        // Multiplicador de velocidad del estado Ataque: 1 / duración del golpe en segundos.
+        // Multiplicador de velocidad del estado Ataque. En Kael, 1 / duración del golpe en
+        // segundos; en los Ecos, la velocidadAtaque de su EnemigoAnimacion.
         public static readonly Parametro VelocidadAtaque = new Parametro("VelocidadAtaque");
 
         // Multiplicador del estado Run de los Ecos: velocidad real / la del ciclo dibujado.
         public static readonly Parametro VelocidadCorrer = new Parametro("VelocidadCorrer");
+
+        // La Centinela Ardiente. Andar y morir usan Walk y Death; cada ataque tiene su disparador,
+        // que lo empieza al momento desde cualquier estado.
+        public static readonly Parametro Espadazo = new Parametro("Espadazo");
+        public static readonly Parametro GolpeSuelo = new Parametro("GolpeSuelo");
+        public static readonly Parametro Salto = new Parametro("Salto");
+        public static readonly Parametro Rugido = new Parametro("Rugido");
+
+        // El espadazo acaba con la espada clavada (C1-C4) en vez de recuperarse (E3-E4).
+        public static readonly Parametro Clavar = new Parametro("Clavar");
+
+        // Las mecánicas con arte (torreta, plataformas): el estado de su ciclo, un entero que
+        // pone su script con los valores de su enum (ESTADOS_TORRETA, …).
+        public static readonly Parametro EstadoMecanica = new Parametro("Estado");
 
         /// <summary>¿El Animator tiene este parámetro? Avisa una sola vez por parámetro ausente.</summary>
         public static bool Existe(Animator animator, in Parametro parametro)
@@ -77,6 +92,14 @@ namespace Fragmentum.Core
             if (Existe(animator, parametro))
             {
                 animator.SetFloat(parametro.Hash, valor);
+            }
+        }
+
+        public static void FijarEntero(Animator animator, in Parametro parametro, int valor)
+        {
+            if (Existe(animator, parametro))
+            {
+                animator.SetInteger(parametro.Hash, valor);
             }
         }
 

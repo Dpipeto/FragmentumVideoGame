@@ -8,6 +8,9 @@ namespace Fragmentum.Core.Combate
     ///
     /// Hace daño con un <see cref="Hitbox"/> (respeta capas, i-frames y escudos) y desaparece al
     /// golpear a su objetivo, al tocar el suelo o una pared, o al acabar su alcance.
+    ///
+    /// Se crea por código o como copia de un prefab: la bola de la torreta es un prefab
+    /// (<c>Mecanicas/BolaDeFuego</c>) con sprite provisional hasta que llegue su arte.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(CircleCollider2D), typeof(Hitbox))]
     public class Proyectil : MonoBehaviour
@@ -57,6 +60,28 @@ namespace Fragmentum.Core.Combate
             proyectil._velocidad = velocidad;
             proyectil._muereEn = Time.time + (velocidad.sqrMagnitude > 0f ? alcance / velocidad.magnitude : 0f);
             objeto.SetActive(true);
+            return proyectil;
+        }
+
+        /// <summary>
+        /// Lanza una copia de <paramref name="prefab"/> (la bola de fuego de la torreta): su sprite,
+        /// su radio y su capa son los del prefab. Si vuela hacia la izquierda, el sprite se voltea.
+        /// </summary>
+        public static Proyectil Disparar(Proyectil prefab, Vector2 origen, Vector2 velocidad, int danio, LayerMask objetivos, float alcance)
+        {
+            var proyectil = Instantiate(prefab, origen, Quaternion.identity);
+            proyectil.name = prefab.name;
+            proyectil._hitbox.Danio = danio;
+            proyectil._hitbox.Objetivos = objetivos;
+            proyectil._velocidad = velocidad;
+            proyectil._muereEn = Time.time + (velocidad.sqrMagnitude > 0f ? alcance / velocidad.magnitude : 0f);
+            if (velocidad.x < 0f)
+            {
+                var escala = proyectil.transform.localScale;
+                escala.x = -Mathf.Abs(escala.x);
+                proyectil.transform.localScale = escala;
+            }
+
             return proyectil;
         }
 

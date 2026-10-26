@@ -24,6 +24,12 @@ namespace Fragmentum.UI
     ///   botón o clic la salta entera. Un aviso discreto lo dice.
     /// - <b>Funciona sin arte:</b> una diapositiva sin imagen se ve en negro con su texto, y sin
     ///   texto dice qué falta (criterio de aceptación de la Fase 8).
+    /// - <b>Sobre el juego</b> (<see cref="CutsceneData.sobreElJuego"/>): en vez de negro, un velo
+    ///   y dos franjas de cine sobre la escena congelada. Es la presentación del jefe: se ve la
+    ///   arena con el jefe mientras habla.
+    /// - <b>Escala entera</b> (<see cref="CutsceneData.escalaEntera"/>), para el pixel art: la imagen
+    ///   mide en pantalla su tamaño por el mayor número entero que quepa, centrada y alineada a
+    ///   píxeles enteros. Así no se interpola nada, aunque el Canvas de la interfaz escale libre.
     /// - Cuenta el tiempo sin escala, porque la cinemática para el juego.
     /// - Al terminar se lo dice a la FSM global, que decide a dónde se va.
     /// </summary>
@@ -31,6 +37,9 @@ namespace Fragmentum.UI
     {
         private const int TamanoTexto = 40;
         private const int TamanoTitulo = 76;
+
+        // Alto de cada franja de cine, en fracción de la pantalla, cuando va sobre el juego.
+        private const float AltoFranja = 0.11f;
         private static readonly Color ColorTexto = new Color(0.94f, 0.93f, 0.85f, 1f);
 
         private static readonly HashSet<string> AvisadasSinArte = new HashSet<string>();
@@ -42,6 +51,10 @@ namespace Fragmentum.UI
         }
 
         private AspectRatioFitter _marco;
+        private Canvas _lienzo;
+        private Image _fondo;
+        private Image _franjaArriba;
+        private Image _franjaAbajo;
         private Image _abajo;
         private Image _encima;
         private CanvasGroup _grupoAbajo;
@@ -92,6 +105,44 @@ namespace Fragmentum.UI
 
         public bool Visible => _construida && gameObject.activeSelf;
 
+        /// <summary>
+        /// Con escala entera, por cuánto se multiplica la imagen (en píxeles de pantalla); 0 si la
+        /// cinemática en curso escala libre.
+        /// </summary>
+        public int EscalaEntera { get; private set; }
+
+        /// <summary>El rectángulo de la imagen, en píxeles de pantalla.</summary>
+        public Rect RectImagenEnPantalla
+        {
+            get
+            {
+                var esquinas = new Vector3[4];
+                ((RectTransform)_marco.transform).GetWorldCorners(esquinas);
+                var lienzo = Lienzo;
+                var camara = lienzo != null && lienzo.renderMode != RenderMode.ScreenSpaceOverlay ? lienzo.worldCamera : null;
+                var abajo = RectTransformUtility.WorldToScreenPoint(camara, esquinas[0]);
+                var arriba = RectTransformUtility.WorldToScreenPoint(camara, esquinas[2]);
+                return Rect.MinMaxRect(abajo.x, abajo.y, arriba.x, arriba.y);
+            }
+        }
+
+        private Canvas Lienzo
+        {
+            get
+            {
+                if (_lienzo == null)
+                {
+                    var padre = GetComponentInParent<Canvas>(true);
+                    _lienzo = padre != null ? padre.rootCanvas : null;
+                }
+
+                return _lienzo;
+            }
+        }
+
+        /// <summary>¿Se ve la escena detrás? (Cinemática sobre el juego.)</summary>
+        public bool SobreElJuego => Visible && _fondo != null && _fondo.color.a < 1f;
+
         public void Construir()
         {
             if (_construida)
@@ -104,7 +155,9 @@ namespace Fragmentum.UI
             var raiz = (RectTransform)transform;
             FabricaUI.Estirar(raiz);
 
-            FabricaUI.Panel(raiz, "Fondo", Color.black);
+            _fondo = FabricaUI.Panel(raiz, "Fondo", Color.black);
+            _franjaArriba = Franja(raiz, "FranjaArriba", 1f);
+            _franjaAbajo = Franja(raiz, "FranjaAbajo", 0f);
 
             // El marco tiene la proporción de la imagen y cabe en la pantalla: las franjas negras
             // quedan fuera de él, y los textos se colocan dentro.
@@ -151,8 +204,15 @@ namespace Fragmentum.UI
 
             if (cinematica.FaltaArte && AvisadasSinArte.Add(cinematica.Id))
             {
-                Debug.LogWarning($"[Cinemática] '{cinematica.Id}' tiene diapositivas sin imagen (PENDIENTES B1): se ven en negro con su texto.");
+                Debug.LogWarning(cinematica.sobreElJuego
+                    ? $"[Cinemática] '{cinematica.Id}' tiene diapositivas sin imagen (PENDIENTES B1): se ven sobre la escena con su texto."
+                    : $"[Cinemática] '{cinematica.Id}' tiene diapositivas sin imagen (PENDIENTES B1): se ven en negro con su texto.");
             }
+
+            _fondo.color = new Color(0f, 0f, 0f, cinematica.sobreElJuego ? cinematica.opacidadVelo : 1f);
+            EscalarLibre(!cinematica.escalaEntera);
+            _franjaArriba.enabled = cinematica.sobreElJuego;
+            _franjaAbajo.enabled = cinematica.sobreElJuego;
 
             Linea = new LineaTiempoCinematica(cinematica);
             _inicio = Time.unscaledTime;
@@ -247,6 +307,10 @@ namespace Fragmentum.UI
             var (abajo, encima) = Linea.ImagenesEn(t);
             Pintar(_abajo, _grupoAbajo, abajo);
             Pintar(_encima, _grupoEncima, encima);
+            if (Actual.escalaEntera)
+            {
+                AjustarEscalaEntera(_encima.sprite != null ? _encima.sprite : _abajo.sprite);
+            }
 
             foreach (var ranura in _ranuras.Values)
             {
@@ -287,6 +351,47 @@ namespace Fragmentum.UI
             grupo.alpha = sprite != null ? capa.Alfa : 0f;
         }
 
+        // Escala libre: el marco cabe en la pantalla con la proporción de la imagen.
+        private void EscalarLibre(bool libre)
+        {
+            _marco.enabled = libre;
+            EscalaEntera = 0;
+            if (libre)
+            {
+                FabricaUI.Estirar((RectTransform)_marco.transform);
+            }
+        }
+
+        // Escala entera: el marco mide k veces la imagen en píxeles de pantalla, con k el mayor
+        // entero que cabe, y sus bordes caen en píxeles enteros. El tamaño se pasa a unidades del
+        // Canvas dividiendo por su escala: así da igual cómo escale el resto de la interfaz.
+        private void AjustarEscalaEntera(Sprite imagen)
+        {
+            if (imagen == null)
+            {
+                return;
+            }
+
+            var lienzo = Lienzo;
+            var factor = lienzo != null && lienzo.scaleFactor > 0f ? lienzo.scaleFactor : 1f;
+            var pantalla = lienzo != null ? lienzo.pixelRect.size : new Vector2(Screen.width, Screen.height);
+            var tamano = imagen.rect.size;
+            var k = Mathf.Max(1, Mathf.FloorToInt(Mathf.Min(pantalla.x / tamano.x, pantalla.y / tamano.y)));
+            var enPixeles = tamano * k;
+
+            // Si el borde negro que sobra es impar, medio píxel a la izquierda (o abajo) deja la
+            // imagen en píxeles enteros.
+            var medioPixel = new Vector2(Mathf.Repeat(pantalla.x - enPixeles.x, 2f), Mathf.Repeat(pantalla.y - enPixeles.y, 2f)) * 0.5f;
+
+            var rect = (RectTransform)_marco.transform;
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = enPixeles / factor;
+            rect.anchoredPosition = -medioPixel / factor;
+            EscalaEntera = k;
+        }
+
         private void SonarAudioDe(int indice)
         {
             if (indice == _indiceAudio)
@@ -321,6 +426,19 @@ namespace Fragmentum.UI
         }
 
         // --- Construcción ---
+
+        // Franja negra de cine pegada al borde de arriba (borde = 1) o de abajo (borde = 0).
+        private static Image Franja(RectTransform raiz, string nombre, float borde)
+        {
+            var franja = FabricaUI.Panel(raiz, nombre, Color.black, false);
+            var rect = franja.rectTransform;
+            rect.anchorMin = new Vector2(0f, borde > 0.5f ? 1f - AltoFranja : 0f);
+            rect.anchorMax = new Vector2(1f, borde > 0.5f ? 1f : AltoFranja);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            franja.enabled = false;
+            return franja;
+        }
 
         private static (Image, CanvasGroup) CapaDeImagen(Transform marco, string nombre)
         {

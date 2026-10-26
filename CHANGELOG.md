@@ -9,6 +9,982 @@
 
 ---
 
+## Golem de Ceniza, mecánicas y cinemáticas del Nivel 1 (2026-10-06)
+
+Rama `golem-mecanicas`, que sale de `centinela-arte`. El autor entregó 30 PNG limpios en
+`Tesis/Imagenes/limpios`, con su LEEME:
+
+- 15 fotogramas del Golem de Ceniza;
+- 12 de mecánicas: la lava (y su espejo), la torreta (3), la plataforma inestable (4) y la
+  plataforma de combustión (3);
+- 3 planos de cinemática del Nivel 1.
+
+Con el arte llegó un encargo en cinco fases, parando al final de cada una:
+
+- A: importación;
+- B: clips;
+- C: Animators;
+- D: controladores y prefabs;
+- E: verificación.
+
+### Decisiones que ajustan el encargo
+
+- **Problema.** Como el de la Centinela, el encargo estaba escrito en parte sobre la v1:
+  `playerScript.takeDamage`, el tag `"Weapon"`, un `GolemController` nuevo, `Assets/Editor` y
+  menús en `Tools/`. Además, al medir el arte y leer el proyecto aparecieron seis cosas que no
+  cuadraban.
+- **Solución.** Se le preguntaron al autor, que aceptó las seis recomendaciones:
+  1. **La torreta disparando está dibujada 15 px más a la izquierda** que en reposo y en carga:
+     el bloque ocupa x 1–45 en vez de 16–61 (se midió comparando los ladrillos). Su pivote X
+     pasa de 0,470 a 0,287 y el bloque no salta al disparar. El PNG no se toca.
+  2. **La lava sigue matando**, como dice el Anexo A. El encargo pedía daño continuo «igual que
+     `DeadZone`», pero `DeadZone` mata, en la v1 y en la v2.
+  3. **La plataforma de combustión pasa a un ciclo fijo** (apagada → calienta → encendida) que no
+     depende del jugador, como pide el encargo: la inestable se resuelve moviéndose rápido y esta,
+     esperando. El Anexo A (quema si te quedas encima 2 s) queda desactualizado; lo corrige el
+     autor en el documento.
+  4. **El Golem aguanta los golpes sin interrumpirse:** destella, pero sigue con su ataque. No
+     tiene animación de daño, y con 10 de vida, si cada golpe lo aturdiera, apenas llegaría a
+     atacar. Necesita un cambio mínimo en `EnemyController` (fase D).
+  5. **El destello del golpe es la silueta blanca**, como en el Eco y la Centinela.
+     `SpriteRenderer.color` solo multiplica: no puede aclarar el gris del Golem.
+  6. **`CinematicaFinalLvl1` sale cuando D4 termina de caer.** Después se vuelve al juego para
+     que Kael recoja el fragmento.
+
+  Y, como con la Centinela:
+  - las convenciones de la v2: el editor en `Assets/Scripts/Editor`, los clips en
+    `Assets/Animaciones`, los menús en `Fragmentum/…` y la verificación como menú y pruebas;
+  - el daño de la v2: `Hitbox`, `Golpe` e `IGolpeable`;
+  - el Golem sigue siendo `EnemyController` con su `EnemyData`, vestido como el Eco con
+    `EnemigoAnimacion`. Lo de hacia dónde mira ya lo resuelve `EnemyData.spriteMiraDerecha`;
+  - `Lava`, `TorretaFuego` y `PlataformaInestable` se amplían en vez de escribirse de nuevo.
+- **Una errata del encargo.** 240×135 no escala a 1280×720 sin interpolar: sería ×5,33. Ahí la
+  escala entera es ×5 (1200×675), con un borde negro fino.
+
+### Fase A: importación
+
+- **Los sprites.** Los 30 PNG se copian sin tocar; son idénticos byte a byte a los del arte:
+  - `Assets/Sprites/Enemigos/GolemCeniza`, los 15 del Golem;
+  - `Assets/Sprites/Mecanicas`, los 12 de las mecánicas;
+  - `Assets/Sprites/Cinematicas/Nivel1`, los 3 planos.
+- **Un solo importador, con una tabla.**
+  - **Problema.** Había tres postprocessors: `ImportadorJefes`, `ImportadorEnemigos` e
+    `ImportadorFondos`. El de enemigos repetía, copiados, los ajustes de pixel art de los jefes.
+    Añadir el Golem y las mecánicas habría sumado otro sitio donde se decide lo mismo.
+  - **Solución.** `ImportadorArte` (antes `ImportadorJefes`) es el único. Los ajustes salen de
+    `TablaArte` (antes `ArteJefes`): una fila por carpeta o grupo de archivos, con sus píxeles por
+    unidad y su pivote, y gana la más concreta.
+  - La Centinela y el Eco pasan a la tabla con las constantes de sus constructores; ninguno de
+    sus ajustes cambia, y una prueba lo comprueba. Los fondos, que se ajustan por capa, entran
+    por el mismo importador y siguen ajustándose en su constructor. Kael y la cinemática inicial
+    no tienen regla: los ajusta su constructor.
+  - «Regenerar todo» reaplica la tabla al empezar (`TablaArte.AplicarATodo`), por si algo se
+    importó antes de tener regla.
+- **La escala.** Un píxel de arte mide lo mismo en todo el juego, y la Centinela fijó la
+  referencia (49 px por unidad). Por eso los píxeles por unidad cambian por carpeta:
+
+  | Archivos | Px por unidad | Pivote | Tamaño |
+  |---|---|---|---|
+  | `GolemCeniza/Golem_*` | 24 | (0,443; 0,043), los pies | 2,7 u de alto |
+  | `Mecanicas/Torreta_*` | 24 | (0,470; 0,048), la base del bloque | 1,9 × 1,7 u |
+  | `Mecanicas/Torreta_3_disparo` | 24 | (0,287; 0,048), corrido 15 px | igual |
+  | `Mecanicas/Lava*` | 48 | (0; 1), la costra | 3,15 × 1,33 u |
+  | `Mecanicas/Plataforma_*` | 48 | (0,5; 0,852), la superficie | 3,83 u de ancho |
+  | `Mecanicas/Combustion_*` | 48 | (0,5; 0,708), la superficie | 3,42 u de ancho |
+  | `Cinematicas/Nivel1/*` | — | el centro | 240 × 135 px |
+
+  Todos: sprite único, Point, sin compresión, Full Rect, sin mipmaps y Clamp.
+- **Los pivotes caen donde se pisa**, no en el centro: una plataforma se coloca poniendo su
+  Transform justo donde el jugador apoya el pie. Las pruebas lo comprueban contra los píxeles.
+
+### Notas sobre el arte (no se ha tocado)
+
+- **No hay A2 del Golem:** el ataque va de A1 a A3, y funciona así. El LEEME trae el prompt para
+  rehacerlo.
+- **Falta la bola de fuego** (Fireball3 está por regenerar): el proyectil de la torreta llevará
+  un sprite provisional. **Falta `CinematicaFinalLvl2`**, el segundo plano del final; el LEEME
+  trae su prompt.
+- **El pivote del Golem y el de la torreta** caen en el borde de arriba de su fila más baja, como
+  el de la Centinela: la última fila de píxeles se hunde 1 px de arte en el suelo, que es lo que
+  hace que pise.
+
+### Fase B: clips
+
+- **El menú** *Fragmentum → Niveles → Generar los clips del Golem y de las mecánicas*
+  (`ArteNivel1`) construye los clips desde dos tablas: `ConstructorGolem.Clips` y
+  `ConstructorMecanicas.Mecanicas`. «Regenerar todo» también lo hace, antes de los prefabs que
+  los usarán.
+- **Un solo constructor de clips**, `ClipsDeSprites`, con el criterio de la Centinela:
+  - una clave por fotograma y una de cierre, para que el clip dure exactamente lo de la tabla;
+  - el fotograma que dura 1/60 s se queda en pantalla al acabar el clip;
+  - si el clip ya existe, se rehace sobre el mismo asset y conserva su identificador.
+- **El Golem** (`Assets/Animaciones/Enemigos/GolemCeniza`), con los tiempos del encargo:
+
+  | Clip | Fotogramas y duración (s) | Bucle |
+  |---|---|---|
+  | `Golem_Idle` | I1 0,40 · I2 0,40 · I3 0,40 · I2 0,40 | sí |
+  | `Golem_Andar` | W1 0,13 · W2 0,13 · W3 0,13 · W4 0,13 | sí |
+  | `Golem_Ataque` | **A1 0,50** · **A3 0,08** · A4 0,14 · A5 0,26 | no |
+  | `Golem_Muerte` | D1 0,35 · D2 0,45 · D3 0,50 · D4 se queda | no |
+
+  - **El ataque no se uniforma:** A1, medio segundo con los puños en alto, es la ventana para
+    reaccionar, y A3, el impacto, dura 0,08 s. Sin A2: el salto de A1 a A3 es el golpe.
+- **Las mecánicas** (`Assets/Animaciones/Mecanicas`): un clip por estado.
+  - **Problema.** El encargo no da tiempos por fotograma para las mecánicas: sus tiempos son los
+    del script, públicos para ajustar la dificultad (cuánto avisa la torreta, cuánto aguanta la
+    plataforma, el ciclo de la combustión). Si estuvieran dentro del clip, cambiarlos en el
+    inspector descuadraría el dibujo.
+  - **Solución.** Cada estado es un fotograma que se queda, y el script decide cuánto dura:
+
+    | Mecánica | Estados (clip) |
+    |---|---|
+    | Torreta | `Torreta_Reposo` · `Torreta_Carga` · `Torreta_Disparo` |
+    | Plataforma inestable | `Plataforma_Intacta` · `Plataforma_Agrietada` · `Plataforma_Rompe` |
+    | Combustión | `Combustion_Apagada` · `Combustion_Calienta` · `Combustion_Encendida` |
+
+  - **La rotura es el único clip de dos fotogramas:** se ve partida en tres trozos 0,25 s
+    (`Plataforma_3_rota`) y después el polvo, que se queda hasta que el script la esconde.
+  - **La lava no tiene clip:** es un solo fotograma, que se repite alternando con su espejo.
+- **Para la fase C.** Una vuelta del andar del Golem dura 0,52 s; para que los pies no patinen,
+  el ritmo del clip seguirá la velocidad real, como en el Eco.
+
+### Fase C: Animators
+
+- **El menú** pasa a ser *Fragmentum → Niveles → Generar los clips y los Animators del Golem y
+  de las mecánicas*. Los controladores los arma `ControladoresAnimator`, que reutiliza estados y
+  transiciones por nombre: regenerar no cambia los archivos.
+- **El Golem** (`GolemCeniza.controller`): cuatro estados, movidos por los parámetros que ya
+  escribe la FSM del enemigo (`MovEn`, `Attack`, `Death`) y por el ritmo de andar que escribe
+  `EnemigoAnimacion` (`VelocidadCorrer`):
+
+  | Desde | Hacia | Cuándo |
+  |---|---|---|
+  | Idle | Ataque | `Attack` («Ya a tiro»: la FSM puede llegar a ATTACK sin que se vea `MovEn`) |
+  | Idle | Andar | `MovEn` y ritmo > 0,15 |
+  | Andar | Ataque | `Attack` (va primero) |
+  | Andar | Idle | pierde al jugador, o ritmo < 0,05 (se para) |
+  | Ataque | Idle | al acabar el clip, o si la FSM corta el ataque |
+  | Cualquiera | Muerte | `Death`; sin salida: se queda en D4 |
+
+  - **Problema.** El andar no puede seguir la zancada del dibujo, como en el Eco: el pie de atrás
+    no se mueve en los cuatro fotogramas (columnas 21–33), así que no hay zancada que medir.
+  - **Solución.** La referencia es su velocidad persiguiendo, 2 u/s
+    (`ConstructorGolem.VelocidadNaturalAndar`): persiguiendo anda a los tiempos de la tabla
+    (0,13 s), patrullando a 1 u/s a la mitad de ritmo, y parado respira en Idle. Entre pararse
+    (ritmo < 0,05) y echar a andar (> 0,15) hay margen, para que no parpadee entre los dos.
+    `EnemigoAnimacion` recibe el valor en la fase D.
+  - **Sin estado de daño:** el Golem no tiene animación de daño ni se aturde (decisiones 4 y 5).
+    `Damage` se declara porque la FSM lo apaga al morir.
+- **Las mecánicas** (`Torreta.controller`, `Plataforma.controller` y `Combustion.controller`):
+  un estado por clip y un solo parámetro, el entero `Estado`, que pone su script.
+  - Cada valor es el de un enum nuevo del juego, en `Levels/Mecanicas/EstadosMecanicas.cs`:
+    `ESTADOS_TORRETA` (reposo, carga, disparo), `ESTADOS_PLATAFORMA` (intacta, agrietada, rota)
+    y `ESTADOS_COMBUSTION` (apagada, calienta, encendida). El editor comprueba que haya un clip
+    por valor y en su orden.
+  - Desde cualquier estado se salta al del valor pedido, al instante y nunca a sí mismo; ningún
+    estado cambia solo. Ningún parámetro viene del jugador.
+  - **Por qué no una cadena** reposo → carga → disparo: el script puede saltar (por ejemplo, volver
+    a reposo cuando el nivel se reinicia), y una cadena dejaría el Animator atascado si se salta
+    un paso. El ciclo y sus tiempos viven en el script.
+  - `AnimatorParams` gana `EstadoMecanica` y `FijarEntero`.
+
+### Fase D: scripts y prefabs
+
+- **El menú** pasa a ser *Fragmentum → Niveles → Generar el arte del Golem, las mecánicas y las
+  cinemáticas del Nivel 1* (`ArteNivel1`). En «Regenerar todo» va después del Eco, porque el
+  Golem usa su material de destello, y antes que los prefabs de las mecánicas.
+
+#### El Golem de Ceniza (`Prefabs/Enemigos/GolemCeniza.prefab`, `ConstructorGolem`)
+
+- **Problema.** El encargo pedía un `GolemController` nuevo, con daño por `takeDamage`, el tag
+  `"Weapon"` y el signo de giro al revés que el Eco.
+- **Solución.** Es el mismo `EnemyController` que los demás, vestido como el Eco con
+  `EnemigoAnimacion`. Ya hace lo que pide el encargo: patrulla, persigue, se para a distancia de
+  ataque, golpea con el ciclo entero, espera y repite. Lo que el encargo pedía exponer está en su
+  asset (`GolemCeniza.asset`): vida máxima 10, velocidad 1 patrullando y 2 persiguiendo, rango de
+  detección 6, distancia de ataque 1,8 y 2 s entre ataques. Hacia dónde mira lo resuelve
+  `spriteMiraDerecha`: no hay signos copiados del Eco.
+- **Los golpes salen del dibujo.** Eventos en los clips: `AbrirGolpe` en A3, `CerrarGolpe` en A4,
+  `FinAtaque` al acabar A5 y `FinMuerte` al llegar a D4.
+- **La onda de A3**, ancha y baja: de 0,42 a 2,2 u por delante y 0,6 u de alto. Hace daño solo
+  los 0,08 s de A3 y se esquiva saltando.
+- **El contacto con el cuerpo** hace daño siempre.
+- **Hiperarmadura (decisión 4).** Un campo nuevo, `EnemyData.hiperarmadura`, y una condición en
+  `EnemyController.AlRecibirGolpe`: con ella, el golpe quita vida y destella, pero no pasa a
+  DAMAGED. No hay retroceso ni se corta el ataque.
+- **El destello (decisión 5).** Es la silueta del Eco (`Destello.mat`). `EnemigoAnimacion` gana
+  `colorDestello` (el color de la silueta, blanco por defecto), junto a `duracionDestello`.
+- **La muerte.** D1 a D3, y D4 (los restos) se queda 0,7 s antes de desvanecerse
+  (`restosEnPantalla`, nuevo en `EnemigoAnimacion`; al Eco no le cambia nada).
+- **El andar** va a los tiempos de la tabla a 2 u/s (fase C).
+- **Sus datos.** El constructor deja en el asset lo que cambia con el arte: tinte blanco,
+  hiperarmadura y la ventana del golpe del clip (0,50 a 0,58 de 0,98 s). Esa ventana solo se usa
+  sin animación. Lo demás no se toca.
+- **En el Nivel 1** (`PreparadorNivel`, paso 10), el Golem provisional (la cápsula de la Fase 4)
+  se sustituye por este, en su sitio y con su ruta de patrulla.
+
+#### Las mecánicas (`GeneradorMecanicas`)
+
+- **Con su arte, y medidas en él.** Cada collider sale de los píxeles nativos del encargo
+  (`GeneradorMecanicas.Geometria`), con el pivote de `TablaArte`. El Transform va donde se apoya
+  el pie. Los dibujos van detrás de los tiles del suelo, para que lo que se hunde en el terreno
+  no se vea por delante; la lava va por delante, porque su costra tiene que verse.
+- **Las zonas de daño, apagadas en reposo.** La llama de la torreta solo está activa en el disparo
+  y la de la combustión, encendida.
+- **Lava (decisión 2).** Sigue matando. `tramos` franjas centradas, alternando `Lava` y
+  `Lava_espejo`; las monta el propio componente, también en el editor, sin guardarlas en la
+  escena. El trigger empieza en la costra.
+- **Torreta.** Ciclo fijo: reposo 1,6 s, carga 0,7 s y disparo 0,35 s, los tres públicos; la carga
+  es el aviso.
+  - Al disparar, la llama hace daño y sale una bola.
+  - Dispara hacia donde mira: con la escala X negativa, a la izquierda.
+  - `desfase` evita que dos torretas disparen a la vez.
+  - La bola es un prefab (`BolaDeFuego`) con su Rigidbody2D, su collider y su script. Su sprite
+    es provisional: el círculo del proyecto, en naranja, porque falta Fireball3.
+- **Plataforma inestable.** Retardo antes de romperse 0,6 s, caída 0,6 s y reaparición 3 s, los
+  tres públicos.
+  - Se agrieta al pisarla y se rompe aunque el jugador se baje.
+  - Al romperse, el collider se apaga en el acto.
+  - Reaparece intacta, pero no si el jugador está donde reaparecería.
+- **Plataforma de combustión (decisión 3).** `PlataformaCaliente` pasa a `PlataformaCombustion`
+  (script y prefab con el mismo GUID, así que el Nivel 1 los conserva).
+  - Ciclo fijo: apagada 2 s, calienta 0,8 s (el aviso) y encendida 1 s.
+  - La llama solo hace daño encendida, y el collider no se apaga nunca.
+  - Tiene su propio script, distinto del de la plataforma inestable: allí el suelo falla y aquí
+    no.
+
+#### Las cinemáticas (sección 5 y decisión 6)
+
+- **Escala entera** (`CutsceneData.escalaEntera`, en `PantallaCinematica`). El plano mide en
+  pantalla su tamaño por el mayor entero que cabe, centrado y con los bordes en píxeles enteros.
+  El tamaño se pasa a unidades del Canvas dividiendo por su escala, así que el Canvas del resto
+  de la interfaz no se toca.
+- **La presentación** (`Cinematica_Jefe_Ira`) lleva `CinematicaJefe1` y `CinematicaJefe2`, opaca y
+  a escala entera. Sus textos son del guion (N17) y no se tocan.
+- **La Centinela ruge al empezar el combate**, también en la fase 1: se levanta tras el ojo que
+  se abre.
+- **La derrota** (`Cinematica_Derrota_Ira`, `CinematicaFinalLvl1`). Cuando la Centinela termina de
+  caer (`BossController.OnCaidaTerminada`, nuevo), la arena la reproduce
+  (`LevelData.cinematicaJefeDerrotado`, nuevo) y se vuelve al juego, con el fragmento en la
+  ceniza para recogerlo.
+- **`CinematicaFinalLvl2` entra sola:** al dejar su PNG en la carpeta y regenerar, se añade como
+  segundo plano. Hasta entonces, la regeneración avisa de que falta.
+
+#### Comprobado a ojo
+
+Un render del Nivel 1 en modo batch, con un script temporal que se borró, mostró:
+
+- la torreta sobre el suelo, sin que el bloque salte al disparar;
+- la plataforma inestable a ras del foso, con lo que sobra (mide 3,83 u en un foso de 3 u)
+  escondido tras los tiles;
+- las de combustión como rejillas en el suelo;
+- el Golem apoyado, a 2,7 u;
+- la lava en su pozo.
+
+Las piezas no se movieron. El recorrido sigue siendo el provisional; el definitivo es N10.
+
+### Fase E: verificación
+
+- **El menú** *Fragmentum → Niveles → Verificar el arte del Nivel 1* (`VerificadorNivel1`) revisa
+  los seis puntos del encargo:
+  1. **Los 30 sprites** existen (15 del Golem, 12 de las mecánicas y 3 planos). Cada uno tiene el
+     lienzo, los píxeles por unidad y el pivote de la regla de su carpeta en `TablaArte`, y es
+     pixel art (Point, sin compresión, Full Rect, sin mipmaps, Clamp). Un PNG nuevo en esas
+     carpetas también se revisa contra su regla.
+  2. **Los 13 clips** existen, con sus fotogramas en su sitio, su bucle y la duración de su tabla
+     (margen de 1 ms). Los del Golem llevan exactamente los eventos de su tabla, y ningún clip
+     anima un collider.
+  3. **Los 4 Animators** (Golem, torreta, plataforma inestable y combustión) tienen un estado por
+     clip, ninguno suelto, y ninguna transición rota. Una transición está rota si no tiene
+     destino, si le faltan a la vez condición y tiempo de salida, o si su parámetro no existe o
+     es de otro tipo (un «mayor que» sobre un bool nunca se cumple). En las mecánicas, además,
+     cada valor de `Estado` lleva al estado de su clip.
+  4. **En los 6 prefabs**, lo que hace daño (una hitbox o la capa EnemyWeapon) está apagado en
+     reposo: la onda del Golem y las llamas de la torreta y de la combustión. Quedan fuera, por
+     decisión, el cuerpo del Golem (hace daño siempre) y la bola (solo existe disparada). La lava
+     mata con su propio trigger, no con una hitbox. También comprueba que cada prefab tiene sus
+     zonas de daño y que su dibujo usa su controlador.
+  5. **Cada evento de animación** llama a una función pública que existe en un script del objeto
+     de su Animator: `EnemigoAnimacion` en el Golem. En las mecánicas no hay ninguno.
+  6. **Lo que sostiene:**
+     - **La plataforma inestable.** El estado que muestra `Plataforma_3_rota` es un valor de
+       `Estado` en el que su script apaga el collider. La regla es nueva y pública
+       (`PlataformaInestable.SostieneEn`): el script la aplica y el verificador la compara con el
+       arte de cada estado.
+     - **La combustión.** Sostiene en todos sus fotogramas. Su suelo es el collider sólido de la
+       raíz, encendido. Ningún clip lo toca. La llama, que se enciende y se apaga, está en otro
+       objeto: si estuviera en la raíz, apagarla se llevaría el suelo.
+- **El arte que falta no es un fallo.** `CinematicaFinalLvl2` sale como aviso («Arte pendiente»).
+- **Falla ruidosamente,** con un error por problema y el nombre de lo que falta o está mal. Por
+  ejemplo: «Animator Torreta: Estado = 2 (FIRE) no lleva a Disparo; el dibujo no seguiría al
+  script».
+- **También al final de «Regenerar todo»,** después de los prefabs de las mecánicas. Si algo no
+  cuadra, la regeneración falla y `verificar.ps1 -Unity` también. El menú que genera el arte del
+  Nivel 1 también verifica al terminar.
+
+#### Cambios en lo que ya había
+
+- **Comprobaciones compartidas.** Las del verificador de la Centinela que valen para cualquier
+  arte (sprite, clip, Animator, eventos y daño en reposo) pasan a `ComprobacionesArte`, y los dos
+  verificadores las usan. Los mensajes de la Centinela no cambian, salvo «collider de ataque»,
+  que pasa a ser «collider de daño».
+- **Los eventos se comprueban contra los scripts que los reciben de verdad.** Antes era una clase
+  fija. También se aceptan los parámetros que un evento puede pasar (float, int, string, un
+  objeto o el propio evento).
+- **El lienzo de cada grupo está en `TablaArte`** (`Regla.Lienzo`). Lo usan el verificador y la
+  geometría de las mecánicas, que antes lo tenía repetido.
+
+### Verificación (fase A)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 268 correctas.** Hay 8 nuevas en `GolemMecanicasArteTests`:
+  - los 30 PNG, con el lienzo entero;
+  - cada uno con los píxeles por unidad y el pivote de su carpeta (los valores esperados se
+    copian del encargo, no de la tabla) y los ajustes de pixel art;
+  - los píxeles por unidad cambian por carpeta y los tamaños son los del encargo;
+  - los pivotes caen en el suelo del Golem (fila 88 en los 15) y de la torreta, en la superficie
+    de las plataformas (filas 21 y 26) y en la costra de la lava;
+  - la torreta no salta al disparar;
+  - la tabla da la regla más concreta y una sola por ruta;
+  - la tabla ya está aplicada a todo, también a la Centinela y al Eco;
+  - un PNG nuevo en `Mecanicas` recibe la regla de su grupo.
+- **Pruebas PlayMode: 115 correctas.** No cambian.
+- **Regenerar** no cambia nada más que los sprites nuevos y sus carpetas.
+
+### Verificación (fase B)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 273 correctas.** Hay 5 nuevas en `GolemMecanicasArteTests`:
+  - los 4 clips del Golem duran lo de la tabla del encargo (margen de 1 ms), con su bucle y cada
+    fotograma en su sitio;
+  - el ataque no está uniformado: A1 dura al menos seis veces A3, las cuatro duraciones son
+    distintas y no hay A2;
+  - la muerte se detiene en D4;
+  - los 9 clips de las mecánicas, con el último fotograma que se queda, y la lava sin clip;
+  - regenerar los clips no cambia nada.
+- **Pruebas PlayMode: 115 correctas.** No cambian.
+
+### Verificación (fase C)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 279 correctas.** Hay 6 nuevas en `GolemMecanicasArteTests`:
+  - el Animator del Golem tiene un estado por clip, empieza en Idle y usa los parámetros de la
+    FSM; andar y atacar siguen sus parámetros de velocidad;
+  - ataca desde Idle o andando (atacar va primero) y vuelve a Idle al acabar el clip entero;
+  - parado respira, y entre pararse y echar a andar hay margen;
+  - la muerte interrumpe cualquier estado, no vuelve a sí misma y no tiene salida;
+  - cada mecánica salta al estado que pide su script: un solo parámetro entero, un estado por
+    valor de su enum y en su orden, y ninguno cambia solo;
+  - ningún Animator tiene estados sueltos, transiciones rotas ni mezclas.
+
+  La de regenerar ahora incluye los controladores.
+- **Pruebas PlayMode: 121 correctas.** Hay 6 nuevas en
+  `GolemMecanicasAnimatorPlayModeTests`, con los Animators reproduciendo de verdad:
+  - el Golem respira (I1 · I2 · I3 · I2, 0,40 s), anda a 0,13 s por fotograma a su velocidad
+    natural y al doble a media velocidad, y parado vuelve a respirar;
+  - el ataque: A1 0,50, A3 0,08, A4 0,14, A5 0,26 y vuelta a Idle;
+  - ataca andando, y si la FSM corta el ataque vuelve a Idle;
+  - la muerte interrumpe el ataque y se queda en D4 pase lo que pase;
+  - cada mecánica muestra el fotograma del estado pedido y no cambia sola;
+  - la plataforma se ve partida 0,25 s y después solo el polvo.
+
+### Verificación (fase D)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** monta el Golem y las mecánicas, pone los planos y sustituye el Golem del
+  Nivel 1. Avisa de que falta `CinematicaFinalLvl2`.
+- **Pruebas EditMode: 284 correctas.** Hay 5 nuevas en `GolemMecanicasArteTests`:
+  - el prefab del Golem: sus datos, su arte, su destello, la onda (ancha, baja y apagada) y el
+    contacto (siempre);
+  - sus eventos, en el inicio de A3, A4 y D4 y al acabar A5, a funciones que existen;
+  - los prefabs de las mecánicas, con los colliders medidos en el dibujo (la llama de la torreta
+    llega a la x 81 del disparo) y la bola montada;
+  - en reposo, ninguna zona de ataque encendida;
+  - las cinemáticas del jefe, con sus planos y a escala entera.
+
+  Se adaptan las del Nivel 1: el Golem con arte y la plataforma de combustión. También la de las
+  presentaciones de jefe: opaca si tiene planos.
+- **Pruebas PlayMode: 135 correctas.**
+  - 6 nuevas en `GolemPlayModeTests`, con el prefab, el jugador y la física reales:
+    - la onda solo hace daño en A3, tras 0,5 s de A1, y quita los 2 de su daño;
+    - los golpes no le cortan el ataque, pero destella;
+    - persigue andando y, parado a distancia de ataque, respira;
+    - mira hacia Kael;
+    - el contacto hace daño siempre;
+    - al morir se queda en D4 0,7 s y después se desvanece.
+  - `MecanicasPlayModeTests`, reescritas con 14 pruebas:
+    - la plataforma inestable se rompe aunque te bajes, desaparece y vuelve;
+    - la combustión cicla sola y solo quema encendida;
+    - la lava monta sus franjas alternadas, sin huecos y con el trigger desde la costra;
+    - la torreta cicla sola, la llama quema delante del bloque, la bola hiere y, volteada,
+      dispara a la izquierda.
+  - Una nueva en `NarrativaPlayModeTests`: el plano mide k × 240 por k × 135 píxeles, con los
+    bordes en píxeles enteros.
+  - Una nueva en `CentinelaPlayModeTests`: al empezar el combate ruge y después ataca.
+  - El flujo del Nivel 1 pasa por la cinemática de la derrota antes de recoger el fragmento.
+
+### Verificación (fase E)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** no cambia ningún archivo. Termina con:
+  - «[Centinela] Verificación correcta: 29 sprites, 8 clips…»;
+  - el aviso de `CinematicaFinalLvl2`;
+  - «[Nivel 1] Verificación correcta: 30 sprites, 13 clips, 4 Animators, 6 prefabs y sus eventos;
+    la plataforma inestable no sostiene rota y la de combustión siempre».
+- **Pruebas EditMode: 294 correctas.** Hay 10 nuevas en `VerificadorNivel1Tests`. Lo roto son
+  copias u objetos en memoria:
+  - el proyecto pasa la verificación;
+  - revisa 30 sprites, 13 clips, 4 Animators y 6 prefabs;
+  - un sprite con otro lienzo, 100 píxeles por unidad, filtro bilineal y comprimido se nombra
+    contra la regla del Golem y contra la de la torreta disparando (pivote 0,287);
+  - el ataque del Golem uniformado, con el evento fuera de A3 y un collider animado, se nombra;
+  - una torreta cuyo `Estado = 2` no lleva a Disparo, o con un estado suelto, se nombra;
+  - un «mayor que» sobre el bool `Attack` se nombra;
+  - la onda del Golem encendida se nombra, y el contacto no; una torreta sin llama o sin su
+    controlador, también;
+  - un evento sin función que lo reciba se nombra, en el Golem y en una mecánica;
+  - la plataforma inestable: la regla del collider, la plataforma rota mientras aún sostendría y
+    el prefab sin collider se nombran;
+  - la combustión: con la llama en la raíz o el suelo apagado, se nombra.
+
+  Se adapta una de `VerificadorCentinelaTests` («collider de daño»).
+- **Pruebas PlayMode: 135 correctas.** No cambian.
+
+---
+
+## Arte de la Centinela Ardiente (2026-10-05)
+
+Rama `centinela-arte`, que sale de `ajustes-nivel1`. El autor terminó el arte del jefe: 29 sprites
+limpios y alineados en `Tesis/Jefe1 animaciones/limpios`, con su LEEME. Con el arte llegó un
+encargo para integrarlo en cinco fases, parando al final de cada una:
+
+- A: importación;
+- B: clips;
+- C: Animator;
+- D: controlador y prefab;
+- E: verificación.
+
+### Decisiones que ajustan el encargo
+
+- **Problema.** El encargo (y una segunda versión que llegó después, con las mismas peticiones)
+  estaba escrito en parte sobre la v1:
+  - daño con `PlayerMovement.takeDamage` y el tag `"Weapon"`;
+  - un `CentinelaController` y un prefab nuevos;
+  - scripts en `Assets/Editor`, clips en `Assets/Animations` y menús en `Tools/`.
+
+  En la v2 el daño va por `IGolpeable` y capas de física, y la Centinela ya existe como jefe
+  completo: `BossController`, arena, presentación y recompensa. Seguirlo al pie de la letra
+  habría dejado dos jefes y dos formas de hacer daño.
+- **Solución.** Antes de empezar se le preguntó al autor, que decidió:
+  - **La Centinela que ya existe.** El arte va en `CentinelaArdiente`, no en un controlador
+    nuevo.
+  - **El combate actual.** Se mantienen las tres fases (50 % y 25 %), los combos, las ondas que
+    recorren la arena, las erupciones y el daño doble con la espada clavada. Los clips se
+    ajustan a ese combate.
+  - **Las convenciones de la v2:** editor en `Assets/Scripts/Editor`, clips en
+    `Assets/Animaciones` y menús en `Fragmentum/…`. La verificación será un menú y, además,
+    pruebas automáticas.
+  - **`D4 (2).png` es el D4 definitivo.** Se copia como `D4.png`.
+  - **De la segunda versión se añade lo que encaja con ese combate:**
+    - D4, la ceniza con el fragmento, se queda en pantalla y Kael recoge el fragmento;
+    - la altura del salto la pone el cuerpo, no el sprite;
+    - el forcejeo de la espada clavada, sin fotograma extra;
+    - los golpes salen de eventos de animación.
+
+### Fase A: importación
+
+- **Los sprites.** Los 29 PNG se copian sin tocar a `Assets/Sprites/Jefes/Centinela`; son idénticos
+  byte a byte a los del arte.
+- **El importador.** `ImportadorJefes` es un postprocessor que ajusta todo lo que cae en
+  `Assets/Sprites/Jefes`. Así los ajustes sobreviven a un reimport:
+  - a cualquier jefe, los de pixel art (`ArteJefes.Ajustar`): sprite único, Point, sin
+    compresión ni mipmaps, Clamp y Full Rect;
+  - a la Centinela, además (`ConstructorCentinela.AjustarImportador`): 49 px por unidad, 58 el
+    idle frontal (I1–I3), y el pivote común (0,534; 0,060).
+
+  Sigue el patrón del Eco: `ImportadorEnemigos` llama a `ConstructorEcoIra`. Cuando otro jefe
+  tenga arte, se añade su carpeta.
+- **Escala.** Andando, la Centinela mide 3,4 u: casi el doble que Kael (1,77 u) y lo mismo que su
+  caja de jefe. El idle frontal está dibujado más grande y a 58 px por unidad mide lo mismo.
+
+### Notas sobre el arte (no se ha tocado)
+
+- **A4** es el paso en el aire: la planta queda 3 px por encima del suelo.
+- **G3** baja 8 px por debajo de la línea de suelo: es la onda del golpe.
+- **Densidad.** Un píxel del dibujo mide 1/49 u (1/58 en el idle) y uno de Kael 1/64 u, así que los
+  de la Centinela son un 30 % más gruesos. Es la escala del LEEME y no se cambia.
+
+### Fase B: clips
+
+- **La tabla.** `ConstructorCentinela.Clips` tiene los 8 clips con los tiempos del LEEME, sin
+  normalizar. El menú *Fragmentum → Jefes → Generar los clips de la Centinela* y «Regenerar todo»
+  los crean en `Assets/Animaciones/Jefes/Centinela` (`Centinela_Idle.anim`, etc.). Si cambia un
+  tiempo, se cambia en la tabla y se regeneran.
+
+  | Clip | Fotogramas y duración (s) | Bucle |
+  |---|---|---|
+  | Idle | I1 0,40 · I2 0,40 · I3 0,40 · I2 0,40 | sí |
+  | Andar | A1 0,15 · A2 0,15 · A4 0,15 · A2 0,15 | sí |
+  | Espadazo | **E1 0,55** · E2 0,08 · E3 0,22 · E4 0,30 | no |
+  | EspadaClavada | C1 0,09 · **C2 1,20** · C4 0,18 | no |
+  | GolpeSuelo | **G1 0,50** · G2 0,07 · G3 0,40 | no |
+  | Rugido | R1 0,35 · R2 0,35 · R3 0,20 | no |
+  | Salto | **J1 0,50** · J2 0,10 · J3 0,30 · J4 0,15 · J5 0,45 | no |
+  | Muerte | D1 0,40 · D2 0,50 · D3 1,20 · D4 (se queda) | no |
+
+- **Duración exacta.** Unity alarga un fotograma (1/60 s) los clips de sprites tras su última
+  clave. Como en el Eco, la clave de cierre va un fotograma antes y cada clip dura lo que dice la
+  tabla.
+- **D4 se queda.** La muerte no tiene clave de cierre: D4 aparece a los 2,1 s y el clip, sin bucle,
+  se detiene en él.
+- **El forcejeo de C2.** No hay fotograma extra. El sprite sube 0,02 u (un píxel del dibujo) y vuelve
+  a 0 cada 0,3 s, en escalones (tangentes *Constant*), solo mientras dura C2.
+- **El latido de color va en la fase D, no en el clip.** `BossController` reescribe el color del
+  sprite en cada `LateUpdate` (aviso, ventana, golpe), así que una curva de color en el clip no se
+  vería. Irá en contrafase con el forcejeo, desde el componente que reciba los eventos.
+- **El salto no sube el sprite.** J3 y J4 están anclados al suelo como los demás: la altura la pone
+  el cuerpo del jefe con su tiro parabólico (`BossController.Saltar`). Ningún clip, salvo el
+  forcejeo, mueve el sprite.
+- **Los eventos de animación** (golpes, ventanas y fin de cada clip) se añaden en la fase D, junto
+  con el componente que los recibe.
+
+### Fase C: Animator
+
+- **El controlador.** `CentinelaArdiente.controller` está en la misma carpeta que los clips y
+  tiene un estado por clip. Lo arma `ConstructorCentinela` desde la misma tabla, con el menú
+  *Fragmentum → Jefes → Generar los clips y el Animator de la Centinela* o con «Regenerar todo».
+  Empieza en Idle.
+- **Los parámetros** están en `AnimatorParams`, para que el código del jefe use los mismos nombres:
+
+  | Parámetro | Tipo | Qué hace |
+  |---|---|---|
+  | `Walk` | bool | Idle ↔ Andar mientras se mueve |
+  | `Espadazo`, `GolpeSuelo`, `Salto`, `Rugido` | disparador | empiezan su clip al momento, desde cualquier estado |
+  | `Clavar` | bool | el espadazo acaba con la espada clavada (C1-C4) en vez de E3-E4 |
+  | `Death` | bool | muere desde cualquier estado |
+
+- **El rugido y la muerte interrumpen cualquier estado.** La muerte va la primera y nada la
+  interrumpe: el estado Muerte no tiene salida y se queda en D4.
+- **Los ataques salen de cualquier estado, no solo de Andar.**
+  - **Problema.** El encargo pedía pasar de Caminar al ataque al entrar en rango.
+  - **Por qué no encaja.** En el combate actual los ataques se encadenan (dos o tres espadazos
+    seguidos, la onda doble) y cada golpe tiene que coincidir con su zona de daño. Si el ataque
+    esperara a que acabe el clip anterior, el dibujo iría por detrás del daño.
+  - **Solución.** Salen de cualquier estado. Solo el espadazo y el golpe al suelo pueden volver a
+    empezar sobre sí mismos; el salto, el rugido y la muerte no se reinician.
+- **La espada clavada sale del espadazo.** Con `Clavar`, el espadazo pasa a C1 justo al acabar E2
+  (a los 0,63 s de sus 1,15 s). Sin él sigue con E3 y E4. El jefe lo decide al empezar el último
+  espadazo del combo.
+- **Al acabar, a Idle o a Andar.** Cada ataque vuelve a Idle al acabar su clip, sin corte: E4 es
+  la pose de guardia. Si el jefe ya camina, va directo a Andar, porque el idle es frontal y un
+  solo fotograma suyo entre dos poses de perfil se notaría.
+- **Sin mezclas.** Todas las transiciones duran 0, porque son fotogramas de pixel art. Solo
+  esperan a su clip las de fin de ataque y la de clavar la espada; lo que interrumpe no espera.
+- **Write defaults en todos los estados:** al salir de la espada clavada, el forcejeo vuelve a 0.
+  Para la fase D, el sprite tiene que estar a altura 0 dentro del jefe, porque el forcejeo fija
+  la altura, no la suma.
+
+### Fase D: el arte en el combate
+
+Aprobado por el autor tras la fase C («de acuerdo con todo»). El combate sigue siendo el actual
+(opción B); lo que cambia es que el dibujo marca el ritmo.
+
+- **`AnimacionJefe`** (nuevo, en el objeto del sprite, como `EnemigoAnimacion` en el Eco) une el
+  Animator con `BossController`:
+  - recibe los eventos de los clips y los reenvía al jefe;
+  - pone `Walk` según la velocidad del cuerpo;
+  - al recibir un golpe, el sprite se vuelve una silueta blanca 0,1 s con el material del Eco.
+    Un tinte blanco no se vería sobre el arte.
+- **Los golpes salen con el dibujo (eventos de animación):**
+
+  | Evento | Fotograma | Qué hace |
+  |---|---|---|
+  | `Golpe` | E2, G3, J2 | sale la zona del tajo, las ondas (o la lava) y el salto |
+  | `FinGolpe` | E3, C1 | se apaga la zona del tajo: dura lo que se ve E2 |
+  | `VentanaCorta` | E3 | 0,22 s de daño doble, sin detener al jefe |
+  | `Ventana` | C2 | la ventana vulnerable, 1,2 s: lo que se ve la espada clavada |
+  | `EnElAire` | final de J4 | si aún vuela, J4 se sostiene hasta tocar el suelo |
+  | `Aterrizaje` | J5 | salen las ondas del salto |
+  | `FinMuerte` | D4 | aparece el fragmento |
+
+  Los patrones esperan estos momentos con `BossController.Golpear`, `TerminarGolpe` y
+  `EsperarMomento`. Sin arte (los otros cuatro jefes, todavía cápsulas) siguen yendo por tiempo,
+  como antes.
+- **Los ajustes de tiempo aprobados:**
+  1. **Espadazos encadenados:** su aviso (0,35 o 0,3 s) es más corto que E1 (0,55 s), así que el
+     clip empieza ya avanzado y E1 dura justo el aviso. Los demás fotogramas no cambian.
+  2. **Ventana de furia:** dura lo que C2 (1,2 s) en todas las fases, porque la abre C2. Antes, en
+     la furia, eran 0,9 s.
+  3. **Salto:** J2 y J3 suman 0,4 s, justo lo alto de un vuelo de 0,8 s. J4 se sostiene desde ahí
+     hasta tocar el suelo y J5 llega con el aterrizaje. El vuelo no cambia.
+  4. **Erupciones:** usan GolpeSuelo: la lava brota con G3. El rugido queda solo para los cambios
+     de fase.
+  5. **Muerte:** la derrota dura 2,1 s, lo que tarda en llegar a D4, y D4 se queda: no se
+     desvanece ni desaparece.
+  6. **E3:** ventana corta de daño doble (0,22 s).
+- **Onda doble.** Entre dos golpes al suelo seguidos se ve G3 0,2 s, la pose que mata: el segundo
+  golpe acorta su G1 para no alargar el intervalo.
+- **El fragmento de la ceniza** (`FragmentoJefe`, nuevo):
+  - **Problema.** D4 trae el fragmento blanco dibujado encima de la ceniza, y hasta ahora la arena
+    daba la recompensa al derrotar al jefe.
+  - **Solución.** Al llegar a D4 aparece un trigger que va del suelo al fragmento: basta con que
+    Kael entre en la ceniza, sin saltar.
+  - **Al recogerlo:** `BossController.OnFragmentoRecogido` (evento) y `RecogerFragmento()`
+    (método público) avisan; la arena otorga entonces el fragmento y la habilidad y abre las
+    puertas.
+  - **El dibujo:** una máscara del tamaño del fragmento lo borra de D4 y la ceniza se queda, sin
+    sprite nuevo. El fragmento flota 20 px por encima de la ceniza, así que la máscara no la toca
+    (`ConstructorCentinela.MedirFragmento` lo mide en el PNG).
+- **El latido de la espada clavada** va en contrafase con el forcejeo: con el sprite abajo, brasa;
+  arriba, casi apagado (`CentinelaArdiente.ColorVentana`).
+- **El rugido** del cambio de fase reproduce R1-R3, que dura lo mismo que la espera de la fase
+  (0,9 s).
+- **El prefab** (`Assets/Prefabs/Jefes/CentinelaArdiente.prefab`) lo sigue generando
+  `GeneradorJefes`, que ahora lo viste con `ConstructorCentinela.Vestir`:
+  - el sprite, a altura 0 y escala 1 en el pivote, con I1 y sin la cápsula provisional;
+  - el Animator con su controlador, animando siempre: los eventos llegan aunque el jefe esté fuera
+    de cámara;
+  - `AnimacionJefe`, con la anticipación de cada ataque leída de la tabla;
+  - el fragmento, escondido hasta D4.
+- **Datos:** el arte manda sobre dos: `tinte` blanco y `duracionDerrota` 2,1 s. «Regenerar todo»
+  los fija en `CentinelaArdiente.asset`.
+- **Se mantiene** el destello rojo del aviso durante la anticipación, como hasta ahora.
+- **No se ha tocado** `EnemyController.cs` ni `GameManager.cs`.
+
+### Fase E: verificación
+
+- **El menú** *Fragmentum → Jefes → Verificar Centinela* (`VerificadorCentinela`) revisa los cinco
+  puntos del encargo:
+  1. los 29 sprites existen, con su lienzo de 262×252, sus píxeles por unidad (49; 58 el idle), el
+     pivote de los pies, Point, sin compresión, Full Rect, sin mipmaps y Clamp;
+  2. los 8 clips existen, con sus fotogramas en su sitio y la duración de la tabla (margen de
+     1 ms);
+  3. el Animator tiene los 8 estados con su clip y ninguno suelto, y ninguna transición rota: sin
+     destino, con un parámetro que no existe o sin condición ni tiempo de salida;
+  4. en el prefab, todo lo que hace daño (el contacto, la capa EnemyWeapon) está apagado en
+     reposo, el fragmento está escondido, el sprite está en los pies y lleva su Animator;
+  5. cada evento de animación llama a una función que existe en `AnimacionJefe`.
+- **Falla ruidosamente:** un error en la consola por cada problema, con el nombre de lo que falta
+  o está mal (por ejemplo, «Sprite D4: 100 píxeles por unidad (debe ser 49)»).
+- **También al final de «Regenerar todo».** Si algo no cuadra, la regeneración falla y
+  `verificar.ps1 -Unity` también. El importador ya vuelve a poner los ajustes de los sprites en
+  cada reimportación; el verificador avisa si eso dejara de pasar, o si un clip, el Animator o el
+  prefab se tocan a mano.
+- **Cada comprobación recibe lo que revisa.** Así las pruebas le pasan copias u objetos en memoria
+  rotos a propósito, sin tocar el arte del proyecto.
+
+### Qué probar a mano (fase D)
+
+Desde `Menu_Inicial`, «Nueva partida», hasta la arena del Nivel 1:
+
+- El tajo hace daño mientras se ve E2. En el combo, el segundo espadazo se ve venir menos.
+- Con la espada clavada (C2) late y forcejea, y cada golpe vale el doble. En E3 también, un
+  instante.
+- La onda sale del golpe al suelo y, en la onda doble, se ve G3 entre los golpes.
+- El salto: J4 en el aire hasta caer y J5 al tocar el suelo, con las ondas.
+- Al cambiar de fase ruge.
+- Al morir se queda en la ceniza. La puerta no se abre hasta que Kael entra en ella y recoge el
+  fragmento, que desaparece del dibujo.
+
+### Verificación (fase A)
+
+- **Compilación** con `dotnet build` y en Unity 6000.6.3f1 en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 239 de 239 correctas.** Hay 5 nuevas, en `CentinelaArteTests`:
+  - los 29 se importan como pixel art, con el lienzo entero y el pivote común;
+  - el idle frontal va a 58 px por unidad y el resto a 49;
+  - los pies apoyan en la fila 237 y solo la onda de G3 la cruza;
+  - mide 3,4 u, casi el doble que Kael, y el idle mide lo mismo que andando;
+  - el sprite de un jefe sin ajustes propios recibe igualmente los de pixel art.
+- **Pruebas PlayMode: 99 de 99 correctas.** No cambian: el jefe todavía no usa el arte.
+
+### Verificación (fase B)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 245 de 245 correctas.** Hay 6 nuevas en `CentinelaArteTests`:
+  - la tabla usa los fotogramas del arte y solo C1b se queda fuera;
+  - los clips tienen los tiempos del LEEME, copiados en la prueba y no leídos de la tabla, con
+    margen de 1 ms;
+  - la muerte acaba en D4 y se queda ahí;
+  - en los tres ataques la anticipación es el fotograma más largo y el golpe no pasa de 0,15 s.
+    (El LEEME dice que E2, G2 y J4 son los más cortos, pero en su tabla J2, el despegue, dura
+    0,10 s y J4 0,15 s. Mandan los tiempos de la tabla.);
+  - el forcejeo sube un píxel cada 0,3 s, en escalones y solo en C2;
+  - ningún otro clip mueve el sprite, tampoco el salto.
+- **Pruebas PlayMode: 99 de 99 correctas.** No cambian: el jefe todavía no usa el arte.
+
+### Verificación (fase C)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 250 de 250 correctas.** Hay 5 nuevas en `CentinelaArteTests` sobre el
+  controlador:
+  - un estado por clip, sin acelerar ni frenar, y empieza en Idle;
+  - la muerte y el rugido interrumpen cualquier estado, y la muerte no tiene salida;
+  - el espadazo clava la espada justo al acabar E2;
+  - cada ataque vuelve a Idle al acabar, o a Andar si ya camina;
+  - ningún estado suelto, ninguna transición rota (sin destino o con un parámetro que no existe)
+    y ninguna mezcla.
+- **Pruebas PlayMode: 104 de 104 correctas.** Hay 5 nuevas en `CentinelaAnimatorPlayModeTests`, con
+  el Animator reproduciendo de verdad:
+  - cada ataque pasa por sus fotogramas con los tiempos del LEEME (margen de 0,05 s) y vuelve al
+    idle;
+  - con `Clavar`, de E2 a C1; C2 dura 1,2 s y solo ahí el sprite sube un píxel y baja;
+  - un segundo espadazo durante E3 vuelve a empezar en E1;
+  - si ya camina, de G3 pasa a andar sin ver el idle;
+  - el rugido corta el espadazo, la muerte corta el rugido y, después, nada la saca de D4.
+
+### Verificación (fase D)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Regenerar dos veces** deja el prefab de la Centinela y la escena del Nivel 1 idénticos.
+- **Pruebas EditMode: 254 de 254 correctas.** Hay 4 nuevas en `CentinelaArteTests`:
+  - los eventos caen al empezar su fotograma, con los tiempos copiados del diseño, y las ventanas
+    duran lo que se ven;
+  - cada evento llama a una función que existe en `AnimacionJefe` (punto 5 de la verificación del
+    encargo);
+  - el prefab lleva el arte, con el sprite en los pies, sin cápsula y con el contacto apagado en
+    reposo;
+  - la máscara del fragmento tapa todos sus píxeles y ninguno de la ceniza.
+- **Pruebas PlayMode: 115 de 115 correctas.** Hay 11 nuevas en `CentinelaPlayModeTests`, con el
+  prefab, el jugador y la física reales:
+  - el tajo solo hace daño mientras se ve E2, y la ventana es C2 y dura 1,2 s;
+  - en la furia, E1 se acorta en los encadenados (0,45 y 0,3 s), E2 no cambia y la ventana sigue
+    durando 1,2 s;
+  - E3 da daño doble y E1, normal;
+  - las ondas salen con G3 y, en la onda doble, se ve G3 entre los golpes;
+  - la lava brota con G3;
+  - el salto despega con J2, J4 dura 0,4 s y J5 llega con el suelo, con las ondas;
+  - al cambiar de fase ruge;
+  - un golpe recibido pone la silueta blanca 0,1 s;
+  - el latido va en contrafase con el forcejeo;
+  - al caer se queda en D4 y la recompensa espera al fragmento: Kael lo recoge entrando en la
+    ceniza y la máscara lo borra;
+  - al reiniciar vuelve al idle.
+
+  Cambian 3:
+  - el Animator solo de la fase C recibe ahora los eventos con un receptor vacío;
+  - la derrota que se desvanece se prueba con un jefe sin arte (la Doncella);
+  - el flujo del Nivel 1 recoge el fragmento antes de comprobar la recompensa.
+
+### Verificación (fase E)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** termina con «[Centinela] Verificación correcta: 29 sprites, 8 clips, el
+  Animator, el prefab y los eventos».
+- **Pruebas EditMode: 260 de 260 correctas.** Hay 6 nuevas en `VerificadorCentinelaTests`:
+  - el proyecto pasa la verificación;
+  - un sprite con otro lienzo, 100 píxeles por unidad, el pivote en el centro, filtro bilineal y
+    comprimido se nombra con cada problema (y el idle pide 58);
+  - un clip igualado a 0,25 s y con E3 donde va E2 se nombra;
+  - una copia del Animator sin Salto, con un estado suelto, una transición a un parámetro que no
+    existe y otra sin condición se nombra;
+  - el prefab con el contacto encendido, el fragmento visible y el sprite fuera de los pies se
+    nombra;
+  - un evento a una función que no existe, o que no es un evento válido, se nombra.
+- **Pruebas PlayMode: 115 de 115 correctas.** No cambian.
+
+---
+
+## Ajustes tras la primera prueba del Nivel 1 (2026-10-02)
+
+Rama `ajustes-nivel1`, que sale de `enemigo-eco-ira`. El autor jugó el Nivel 1 y contestó a
+`PENDIENTES.md`:
+
+- el control, la hitbox de la espada y el fondo están bien;
+- la tecla E se pulsa, no se mantiene;
+- el registro emocional no debe pedir código de participante;
+- el golpe del Eco es demasiado lento;
+- el Golem de Ceniza no debe morir en la lava;
+- la Centinela se siente fácil: tiene que transmitir la ira;
+- al entrar en la arena tiene que haber una cinemática corta con el diálogo del jefe.
+
+Además dio el visto bueno para fusionar las ramas que había (N6). Después señaló que los
+conceptos de la Centinela llevan espada, no martillo (sección 6).
+
+### 1. El golpe del Eco de la Ira era lento
+
+- **Problema.** En la prueba, el ataque del Eco se sentía demasiado lento.
+- **Causa.** El clip seguía los tiempos del encargo: 0,73 s en total, con 0,35 s de anticipación.
+  Después del golpe, el Eco descansaba 0,7 s más.
+- **Solución.** El estado Attack tiene ahora su propio multiplicador de velocidad.
+  - **Velocidad.** El parámetro `VelocidadAtaque` del controlador lo escribe
+    `EnemigoAnimacion.velocidadAtaque`, que en el prefab vale 1,6. Así a1 dura 0,22 s, a2 + a3
+    duran 0,08 s y el ataque entero 0,46 s.
+  - **Proporciones.** Siguen igual: la anticipación casi triplica el golpe.
+  - **Ventana de daño.** Los eventos se mueven con el clip, así que el daño sigue llegando solo en
+    a2 y a3.
+  - **Descanso.** Baja de 0,7 s a 0,45 s.
+  - **Tiempos del encargo.** No se tocan: la tabla de `ConstructorEcoIra` sigue igual. Para
+    volver a ellos basta con poner `velocidadAtaque` a 1.
+
+### 2. El Golem de Ceniza moría en la lava
+
+- **Problema.** La lava de la sección 2 está a ras de suelo, y el Golem persigue al jugador por el
+  suelo, así que la pisaba y moría. El autor decidió que no debe morir en ella (N9).
+- **Solución.**
+  - **El dato.** Nuevo `EnemyData.inmuneALava`, que solo tiene el Golem.
+  - **La regla.** `EnemyController` implementa la interfaz nueva `IInmuneALava`
+    (`Core/Combate`), y `Lava` no quema a quien la cumple. Así la lava no depende de los enemigos.
+  - **El vacío.** Caer al vacío sigue matándolo.
+
+### 3. La Centinela Ardiente se sentía fácil
+
+- **Problema.** El combate no transmitía la ira del mundo.
+- **Causa.**
+  - Un solo ataque cada vez, con pausas de 0,9 s.
+  - El espadazo, que es el que abre la ventana, era siempre el mismo.
+  - La fase 2 solo añadía erupciones.
+  - Con 24 de vida y una ventana de 1,2 s a doble daño, caía en unas cuatro ventanas.
+- **Solución.** Casi todo son datos. Solo hay un patrón nuevo, el salto, y tres campos nuevos.
+  - **Patrones ampliados:**
+    - `PatronEspadazo.golpes`: el espadazo es un combo y solo el último deja la espada
+      clavada;
+    - `PatronOndaSuelo.repeticiones`: hay que saltar una onda detrás de otra.
+  - **Patrón nuevo, `PatronSaltoAplastante`:**
+    - salta hacia el jugador y marca en el suelo dónde caerá desde que despega;
+    - al aterrizar quema ese tramo (2 de daño) y suelta una onda a cada lado;
+    - el salto es un tiro parabólico (`BossController.Saltar`) que cae justo cuando la marca
+      empieza a quemar.
+  - **Tres fases.** Cada una persigue más rápido (nuevo `FaseJefe.multiplicadorVelocidad`) y
+    descansa menos:
+
+    | Fase | Desde | Velocidad | Pausa | Ataques, en orden |
+    |---|---|---|---|---|
+    | 1 | 100 % | ×1 (2,4 u/s) | 0,7 s | espadazo ×2, onda, salto, espadazo ×2, onda |
+    | 2 · Furia | 50 % | ×1,3 | 0,5 s | onda doble, espadazo ×3, erupción (4), salto, espadazo ×3, erupción |
+    | 3 · Ira desatada | 25 % | ×1,6 | 0,3 s | onda doble, ráfaga de erupciones (6), salto, espadazo ×3, salto, onda doble, espadazo ×3 |
+
+  - **El rugido.** Al empezar las fases 2 y 3 ruge 0,9 s, quieta y sin atacar: es la señal de que
+    el combate cambia. Lo hace el nuevo paso `EsperaAlEmpezarFase` del Template Method. En la
+    fase 3, además, se pone al rojo.
+  - **Vida y velocidad.** La vida sube de 24 a 30 y la velocidad de 2,2 a 2,4 u/s.
+  - **Ventana vulnerable.** En la fase 1 sigue durando 1,2 s, como pide el Anexo A. En las fases 2
+    y 3, el espadazo de furia la deja en 0,9 s.
+  - **Límites, para que siga siendo justo:**
+    - ningún aviso baja de 0,3 s;
+    - cada fase tiene un espadazo que abre la ventana, así que siempre hay por dónde ganarle.
+  - **Para la tesis.** La tercera fase no está en el Anexo A: hay que anotarla en el capítulo de
+    diseño.
+
+### 4. La presentación del jefe
+
+- **Problema.** El autor quería que, al entrar en la arena, una cinemática corta diera el diálogo
+  del jefe. La FSM global ya admitía PLAYING → CUTSCENE → PLAYING para «memoria, jefe o cierre»,
+  pero nada la pedía al llegar al jefe.
+- **Solución.**
+  - **Dónde va.** Nuevo campo `LevelData.cinematicaJefe`. El generador de narrativa crea
+    `Cinematica_Jefe_Ira`, `_Tristeza`, `_Miedo` y `_Culpa`, con el nombre del jefe como título y
+    una línea pendiente de guion. El final no tiene: ya se presenta en su cinemática de entrada.
+  - **El flujo.** `ArenaJefe.Entrar` cierra las puertas y pide la cinemática.
+    - **La cámara.** Se desliza hasta encuadrar a la Centinela (`CameraMovement.Presentar`). Usa
+      tiempo sin escala, porque la cinemática para el juego.
+    - **El combate.** Empieza al volver a PLAYING, tanto si la cinemática termina como si se salta.
+    - **Cuándo se ve.** Una vez por cada carga del nivel: al reintentar tras morir, el combate
+      empieza directamente.
+  - **Cómo se ve.** Nuevo `CutsceneData.sobreElJuego`: en vez de fondo negro, un velo al 55 % y
+    dos franjas de cine sobre la escena congelada. Así se ve la arena con el jefe mientras habla,
+    aunque todavía no haya imágenes. Si se dibujan, las imágenes la tapan como en cualquier otra
+    cinemática.
+  - **El diálogo.** El diálogo antes del jefe va en la cinemática. Las líneas «antes del jefe» del
+    HUD solo se usan en un nivel sin presentación, para no decir lo mismo dos veces.
+
+### 5. Decisiones del autor aplicadas
+
+- **Tecla E (N4):** la acción `Interact` ya no lleva la interacción *Hold* de fábrica, así que basta
+  con pulsar.
+- **Registro emocional (N12):** `pedirParticipante` está apagado. La pregunta se queda como estaba.
+- **Sin cambios:** la hitbox de la espada (N13), el control (N1) y el fondo (N14) se quedan como
+  están.
+- **Ramas (N6):** `main` avanzó hasta `enemigo-eco-ira` (70f32b1).
+  - No hizo falta un commit de fusión, porque cada rama sale de la anterior.
+  - Las ramas de cada fase se conservan.
+  - No se ha subido nada al remoto.
+- **Cambio del autor en el Nivel 1:** el primer Eco, en x = 12,5, tiene escala 1,8 × 1,5. Se
+  conserva tal cual; la pregunta va en PENDIENTES (N18).
+
+### 6. La Centinela lleva espada, no martillo
+
+- **Problema.** El autor señaló que los conceptos de la Centinela (`Referencias/Arte/Jefes`) llevan
+  un mandoble, mientras el juego hablaba de martillazos.
+- **Causa.** El Anexo A describe la fase 1 como «martillazo directo». Se tomó al pie de la letra:
+  el patrón se llamó `PatronMartillazo` y la ficha de arte pedía un martillo.
+- **Solución.** Solo cambian los nombres: la mecánica funciona igual con cualquier arma.
+  - **El golpe.** Es un tajo de arriba abajo y la espada queda clavada en el suelo: esa es la
+    ventana vulnerable.
+  - **Los nombres.** `PatronMartillazo` pasa a `PatronEspadazo`, y los assets `Martillazo` y
+    `MartillazoFuria` a `Espadazo` y `EspadazoFuria`. Se renombraron con su `.meta`: el GUID no
+    cambia y `CentinelaArdiente.asset` los sigue encontrando.
+  - **El alcance.** La zona del golpe (2,6 × 2,6 u delante) ya cubre un mandoble del largo de sus
+    piernas, como el de los conceptos. No se toca.
+  - **El arte.** La ficha de B5 en `PENDIENTES.md` describe la espada y dice qué pose de los
+    conceptos sirve para cada clip. Los conceptos no se importan: el autor los va a trabajar
+    siguiendo la ficha.
+  - **Entradas anteriores.** Las de este CHANGELOG conservan el nombre antiguo.
+- **Para la tesis.** Anotar que el «martillazo» del Anexo A se implementó como espadazo.
+- **Verificación.** Tras el cambio se repitió todo: compilación sin errores ni avisos, 234 de 234
+  pruebas EditMode y 99 de 99 PlayMode. La regeneración no creó assets nuevos.
+
+### Verificación
+
+- **Compilación** con `dotnet build`: 0 errores y 0 avisos.
+- **Compilación y regeneración** en Unity 6000.6.3f1 en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 234 de 234 correctas.** Hay 6 nuevas:
+  - la Centinela tiene tres fases;
+  - cada fase es más rápida y descansa menos;
+  - ningún aviso baja de 0,3 s;
+  - todas las fases abren la ventana y tienen salto;
+  - solo el Golem es inmune a la lava, y el Eco descansa menos;
+  - cada jefe, salvo el final, tiene su presentación sobre el juego, con su nombre y su diálogo;
+  - el registro no pide código;
+  - `Interact` no lleva *Hold*;
+  - el controlador del Eco tiene `VelocidadAtaque` en el estado Attack.
+- **Pruebas PlayMode: 99 de 99 correctas.** Hay 5 nuevas y 3 ampliadas:
+  - el espadazo son dos golpes y la ventana solo se abre tras el segundo;
+  - el salto marca la caída bajo el jugador, no hace daño en el aire, cae donde marcó, suelta
+    las ondas y quema al jugador que no se apartó;
+  - la fase 3 llega al 25 % (1 → 2 → 3), ruge sin atacar, persigue más rápido y se pone al rojo;
+  - el Golem pisa la lava sin perder vida;
+  - el golpe del Eco dura la anticipación y la ventana del diseño divididas entre 1,6, con el
+    daño solo en a2 y a3;
+  - al entrar en la arena del Nivel 1:
+    - primero la presentación, con las puertas cerradas, el jefe quieto, la arena visible
+      detrás y la cámara en el jefe;
+    - al terminar, el combate y la cámara de vuelta;
+    - el diálogo va en la presentación y no se repite en el HUD;
+    - sin presentación, la línea va en el HUD.
+- **Dos fallos en la primera pasada (98 de 100), los dos de las propias pruebas:**
+  - `MorirEnLaArena_ReiniciaElCombate` no sabía de la presentación: esperaba el Game Over con el
+    juego todavía en la cinemática;
+  - la prueba nueva de «la presentación no se repite» volvía a meter al jugador en la arena sin
+    pasos de física entre medias, y Box2D no registraba la salida del trigger. La prueba antigua
+    ya documentaba ese caso.
+
+  Las dos quedan unidas en `MorirEnLaArena_ReiniciaElCombate_SinRepetirLaPresentacion`, que salta
+  la presentación y espera esos pasos. La segunda pasada completa dio 99 de 99.
+- **Regenerar todo otra vez** solo vuelve a tocar `TorretaFuego.prefab` y `ProjectSettings.asset`,
+  que se reescriben solos en cada regeneración y se descartan.
+
+### Qué probar a mano (desde `Menu_Inicial`, «Nueva partida»)
+
+- **Eco (x ≈ 12):** el golpe sale mucho antes. Sigue viéndose venir (a1 con las grietas
+  encendidas), pero ya no da tiempo a pasearse delante de él.
+- **Golem (sección 2):** si te persigue hasta la lava, la cruza sin morir.
+- **Arena:**
+  - al cruzar la entrada se cierra la puerta, la cámara va hacia la Centinela y aparece su nombre
+    sobre la arena oscurecida;
+  - pasado 1 s, cualquier tecla la salta;
+  - al terminar, empieza el combate;
+  - si mueres y vuelves, ya no sale.
+- **Centinela:**
+  - el espadazo son dos golpes y solo después se queda clavada la espada;
+  - el salto marca en el suelo dónde caerá: apártate y salta la onda;
+  - al 50 % ruge y se acelera;
+  - al 25 % ruge otra vez, se pone al rojo y apenas descansa.
+  - Si se pasa de difícil, dime en qué ataque mueres.
+- **Tecla E:** una pulsación basta (se notará en la Fase 10, con antorchas y memorias).
+- **Fin del nivel:** el registro emocional ya no pide código de participante.
+
+---
+
 ## Eco de la Ira: el primer enemigo con arte (2026-10-02)
 
 Rama `enemigo-eco-ira`, que sale de `fondo-mundo1`. Llegaron los 12 fotogramas del enemigo del

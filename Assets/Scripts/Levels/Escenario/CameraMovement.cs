@@ -10,6 +10,9 @@ namespace Fragmentum.Levels.Escenario
     /// no tenía límites, así que enseñaba el vacío fuera del mapa. Los límites se aplican al
     /// área visible (no solo al centro), teniendo en cuenta el tamaño ortográfico y la
     /// proporción de pantalla.
+    ///
+    /// Durante una presentación (<see cref="Presentar"/>: la del jefe) deja de seguir al jugador y
+    /// se desliza hasta otro punto con tiempo sin escala, porque las cinemáticas paran el juego.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class CameraMovement : MonoBehaviour
@@ -23,6 +26,9 @@ namespace Fragmentum.Levels.Escenario
         [Tooltip("Segundos aproximados que tarda en alcanzar al objetivo.")]
         [SerializeField] private float suavizado = 0.15f;
 
+        [Tooltip("Segundos aproximados que tarda en llegar al punto de una presentación (la del jefe).")]
+        [SerializeField] private float suavizadoPresentacion = 0.35f;
+
         [Header("Límites del área visible")]
         [SerializeField] private bool limitar = true;
         [SerializeField] private Vector2 minimo = new Vector2(-20f, -8f);
@@ -31,6 +37,10 @@ namespace Fragmentum.Levels.Escenario
         private Camera _camara;
         private Vector3 _velocidad;
         private bool _avisado;
+        private Vector3? _foco;
+
+        /// <summary>¿Está enseñando otro punto en lugar de seguir al jugador?</summary>
+        public bool Presentando => _foco.HasValue;
 
         private void Awake()
         {
@@ -39,6 +49,14 @@ namespace Fragmentum.Levels.Escenario
 
         private void LateUpdate()
         {
+            if (_foco.HasValue)
+            {
+                var punto = _foco.Value + desplazamiento;
+                transform.position = Vector3.SmoothDamp(transform.position, limitar ? Limitar(punto) : punto, ref _velocidad,
+                    suavizadoPresentacion, Mathf.Infinity, Time.unscaledDeltaTime);
+                return;
+            }
+
             if (objetivo == null && !BuscarObjetivo())
             {
                 return;
@@ -65,6 +83,15 @@ namespace Fragmentum.Levels.Escenario
             transform.position = limitar ? Limitar(deseada) : deseada;
             _velocidad = Vector3.zero;
         }
+
+        /// <summary>
+        /// Deja de seguir al jugador y se desliza hasta <paramref name="punto"/> (sin salirse de
+        /// los límites), aunque el juego esté parado. Lo usa la arena para presentar al jefe.
+        /// </summary>
+        public void Presentar(Vector2 punto) => _foco = new Vector3(punto.x, punto.y, 0f);
+
+        /// <summary>Termina la presentación: vuelve a seguir al jugador con su suavizado normal.</summary>
+        public void TerminarPresentacion() => _foco = null;
 
         /// <summary>Cambia el objetivo (el LevelManager lo usa con el jugador que hace aparecer).</summary>
         public void FijarObjetivo(Transform nuevo)

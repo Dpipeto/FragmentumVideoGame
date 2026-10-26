@@ -245,6 +245,13 @@ namespace Fragmentum.Tests
 
             Assert.IsTrue(estados["Run"].speedParameterActive, "Las piernas van al ritmo del cuerpo.");
             Assert.AreEqual(AnimatorParams.VelocidadCorrer.Nombre, estados["Run"].speedParameter);
+            Assert.IsTrue(estados["Attack"].speedParameterActive, "El golpe va a la velocidad de ataque del prefab.");
+            Assert.AreEqual(AnimatorParams.VelocidadAtaque.Nombre, estados["Attack"].speedParameter);
+            Assert.IsFalse(estados["Idle"].speedParameterActive);
+            Assert.IsFalse(estados["Death"].speedParameterActive);
+            CollectionAssert.AreEquivalent(
+                new[] { "MovEn", "Attack", "Damage", "Death", AnimatorParams.VelocidadCorrer.Nombre, AnimatorParams.VelocidadAtaque.Nombre },
+                Controlador().parameters.Select(p => p.name));
 
             string Descripcion(AnimatorStateTransition t) =>
                 $"{t.destinationState.name}:{t.hasExitTime}:" + string.Join(",", t.conditions.Select(c => $"{c.mode}{c.parameter}"));
@@ -309,6 +316,7 @@ namespace Fragmentum.Tests
             Assert.AreEqual(ConstructorEcoIra.ShaderDestello, destello.shader.name);
             Assert.AreEqual(ConstructorEcoIra.VelocidadNaturalCarrera, animacionSerializada.FindProperty("velocidadNaturalCarrera").floatValue, 1e-4f);
             Assert.AreEqual(1f, animacion.velocidadAnimacion);
+            Assert.AreEqual(ConstructorEcoIra.VelocidadAtaque, animacion.velocidadAtaque, 1e-4f, "El golpe se aceleró tras la primera prueba.");
 
             var arma = prefab.transform.Find("Pivote/Arma");
             Assert.IsNotNull(arma);

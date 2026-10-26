@@ -509,84 +509,10 @@ Transform:
   - {fileID: 1582034159}
   - {fileID: 1299305704}
   - {fileID: 889836290}
-  - {fileID: 139885895}
+  - {fileID: 678937270}
   - {fileID: 863888108}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &139885894
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 122470753}
-    m_Modifications:
-    - target: {fileID: 110162599683656680, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_Name
-      value: Enemigo_GolemCeniza
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 46
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5357383956959854578, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: waypoints.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5357383956959854578, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: 'waypoints.Array.data[0]'
-      value: 
-      objectReference: {fileID: 1949098176}
-    - target: {fileID: 5357383956959854578, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-      propertyPath: 'waypoints.Array.data[1]'
-      value: 
-      objectReference: {fileID: 1328220242}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
---- !u!4 &139885895 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 972729516020741971, guid: 3718e40181e88fa4d8f41789806f9f90, type: 3}
-  m_PrefabInstance: {fileID: 139885894}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &173632390
 GameObject:
   m_ObjectHideFlags: 0
@@ -1825,6 +1751,7 @@ MonoBehaviour:
   objetivo: {fileID: 0}
   desplazamiento: {x: 0, y: 1.5, z: -10}
   suavizado: 0.15
+  suavizadoPresentacion: 0.35
   limitar: 1
   minimo: {x: -20, y: -8}
   maximo: {x: 100, y: 30}
@@ -2128,6 +2055,80 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!1001 &678937269
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 122470753}
+    m_Modifications:
+    - target: {fileID: 4750334649862143677, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_Name
+      value: GolemCeniza
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 46
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7804823579162189214, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: waypoints.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7804823579162189214, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: 'waypoints.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1949098176}
+    - target: {fileID: 7804823579162189214, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+      propertyPath: 'waypoints.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1328220242}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+--- !u!4 &678937270 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6166126538598305820, guid: b3469963c0e63b64085c037ed99642dc, type: 3}
+  m_PrefabInstance: {fileID: 678937269}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &723823826
 GameObject:
   m_ObjectHideFlags: 0
@@ -2407,6 +2408,14 @@ PrefabInstance:
     - target: {fileID: 3558274055848475688, guid: f7db2c8661bbeb34c93fedb9753d0041, type: 3}
       propertyPath: m_Name
       value: EcoIra
+      objectReference: {fileID: 0}
+    - target: {fileID: 5551342067718451771, guid: f7db2c8661bbeb34c93fedb9753d0041, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5551342067718451771, guid: f7db2c8661bbeb34c93fedb9753d0041, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 5551342067718451771, guid: f7db2c8661bbeb34c93fedb9753d0041, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3390,7 +3399,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1328220242}
   m_Layer: 0
-  m_Name: Enemigo_GolemCeniza_B
+  m_Name: GolemCeniza_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11585,7 +11594,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1949098176}
   m_Layer: 0
-  m_Name: Enemigo_GolemCeniza_A
+  m_Name: GolemCeniza_A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11689,6 +11698,8 @@ MonoBehaviour:
   - {fileID: 1031675016}
   limites: {x: 60, y: 85}
   esperaTrasDerrota: 2
+  camara: {fileID: 0}
+  encuadreJefe: 0.65
 --- !u!61 &2023301880
 BoxCollider2D:
   m_ObjectHideFlags: 0

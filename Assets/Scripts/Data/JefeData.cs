@@ -23,6 +23,9 @@ namespace Fragmentum.Data
 
         [Tooltip("Elige los patrones al azar en lugar de en orden.")]
         public bool aleatorio;
+
+        [Tooltip("Multiplica la velocidad del jefe al perseguir durante esta fase: la Ira acelera según pierde vida.")]
+        [Min(0.1f)] public float multiplicadorVelocidad = 1f;
     }
 
     /// <summary>
@@ -62,7 +65,7 @@ namespace Fragmentum.Data
         public List<FaseJefe> fases = new List<FaseJefe>();
 
         [Header("Ventana vulnerable")]
-        [Tooltip("Segundos que dura la ventana si el patrón no dice otra cosa (Anexo A: 1,2 s de martillo clavado).")]
+        [Tooltip("Segundos que dura la ventana si el patrón no dice otra cosa (Anexo A: 1,2 s de espada clavada).")]
         [Min(0f)] public float duracionVulnerable = 1.2f;
 
         [Tooltip("Multiplica el daño recibido durante la ventana.")]
@@ -72,10 +75,11 @@ namespace Fragmentum.Data
         public bool inmuneFueraDeVulnerable;
 
         [Header("Derrota")]
-        [Tooltip("Segundos que dura la «explosión» antes de desaparecer.")]
+        [Tooltip("Sin arte, segundos que dura la «explosión» antes de desaparecer. Con arte, lo que tarda la muerte en llegar a su último fotograma (la Centinela, 2,1 s hasta D4).")]
         [Min(0f)] public float duracionDerrota = 2f;
 
         [Header("Aspecto provisional (sin arte, PENDIENTES B5)")]
+        [Tooltip("Color del sprite. Con arte, blanco: los colores son los del dibujo.")]
         public Color tinte = Color.white;
 
         public Vector2 tamano = new Vector2(2f, 3.2f);

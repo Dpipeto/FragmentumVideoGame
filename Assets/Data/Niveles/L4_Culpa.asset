@@ -33,6 +33,7 @@ MonoBehaviour:
   habilidadOtorgada: {fileID: 11400000, guid: 0e1fee6fee1f3a0419812d9308641eb5, type: 2}
   cinematicaEntrada: {fileID: 0}
   cinematicaCierre: {fileID: 11400000, guid: 1e36dd902ec8e8e4aa0d1952dd8dfa96, type: 2}
+  cinematicaJefe: {fileID: 11400000, guid: a4f40ac0b4b347246840450af8a9340a, type: 2}
   dialogos: {fileID: 11400000, guid: 4fbfd3b0fa45d844db73d576ef0336a6, type: 2}
   reglas:
     agacharse: 1

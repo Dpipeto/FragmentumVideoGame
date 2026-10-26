@@ -16,31 +16,51 @@ MonoBehaviour:
   emocion: {fileID: 11400000, guid: 17175354203dda045bb8bcb704495762, type: 2}
   descripcion: Arquitecto del Alma del mundo de la Ira.
   concepto: {fileID: 0}
-  vidaMaxima: 24
+  vidaMaxima: 30
   invulnerabilidad: 0.15
   danioContacto: 1
-  velocidad: 2.2
+  velocidad: 2.4
   fases:
-  - nombre: Martillazo y onda de suelo
+  - nombre: Espadazo y onda de suelo
     umbralVida: 1
     patrones:
     - {fileID: 11400000, guid: 3130ca1e98550ce4ab1db9f94e3a2524, type: 2}
     - {fileID: 11400000, guid: 6c7563efd3fd41b429758b1214103699, type: 2}
-    pausaEntrePatrones: 0.9
+    - {fileID: 11400000, guid: 132c7c90ef23c534d964a6af5578d278, type: 2}
+    - {fileID: 11400000, guid: 3130ca1e98550ce4ab1db9f94e3a2524, type: 2}
+    - {fileID: 11400000, guid: 6c7563efd3fd41b429758b1214103699, type: 2}
+    pausaEntrePatrones: 0.7
     aleatorio: 0
-  - nombre: "Plataformas en erupci\xF3n (50 %)"
+    multiplicadorVelocidad: 1
+  - nombre: "Furia: plataformas en erupci\xF3n (50 %)"
     umbralVida: 0.5
     patrones:
-    - {fileID: 11400000, guid: 3130ca1e98550ce4ab1db9f94e3a2524, type: 2}
+    - {fileID: 11400000, guid: f76a2b07aa6176e44b8a4435505b941b, type: 2}
+    - {fileID: 11400000, guid: fdec94b56ccd3cd4191f0c093a019a02, type: 2}
     - {fileID: 11400000, guid: 64d4534f1a9808442b302297d23ab088, type: 2}
-    - {fileID: 11400000, guid: 6c7563efd3fd41b429758b1214103699, type: 2}
+    - {fileID: 11400000, guid: 132c7c90ef23c534d964a6af5578d278, type: 2}
+    - {fileID: 11400000, guid: fdec94b56ccd3cd4191f0c093a019a02, type: 2}
     - {fileID: 11400000, guid: 64d4534f1a9808442b302297d23ab088, type: 2}
-    pausaEntrePatrones: 0.6
+    pausaEntrePatrones: 0.5
     aleatorio: 0
+    multiplicadorVelocidad: 1.3
+  - nombre: Ira desatada (25 %)
+    umbralVida: 0.25
+    patrones:
+    - {fileID: 11400000, guid: f76a2b07aa6176e44b8a4435505b941b, type: 2}
+    - {fileID: 11400000, guid: 9e24cf5043ee9d541804f8f158e63ac4, type: 2}
+    - {fileID: 11400000, guid: 132c7c90ef23c534d964a6af5578d278, type: 2}
+    - {fileID: 11400000, guid: fdec94b56ccd3cd4191f0c093a019a02, type: 2}
+    - {fileID: 11400000, guid: 132c7c90ef23c534d964a6af5578d278, type: 2}
+    - {fileID: 11400000, guid: f76a2b07aa6176e44b8a4435505b941b, type: 2}
+    - {fileID: 11400000, guid: fdec94b56ccd3cd4191f0c093a019a02, type: 2}
+    pausaEntrePatrones: 0.3
+    aleatorio: 0
+    multiplicadorVelocidad: 1.6
   duracionVulnerable: 1.2
   multiplicadorVulnerable: 2
   inmuneFueraDeVulnerable: 0
-  duracionDerrota: 2
-  tinte: {r: 0.8, g: 0.26666668, b: 0, a: 1}
+  duracionDerrota: 2.1000001
+  tinte: {r: 1, g: 1, b: 1, a: 1}
   tamano: {x: 2.2, y: 3.4}
   spriteMiraDerecha: 1

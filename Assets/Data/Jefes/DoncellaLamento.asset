@@ -26,11 +26,13 @@ MonoBehaviour:
     patrones: []
     pausaEntrePatrones: 1
     aleatorio: 0
+    multiplicadorVelocidad: 1
   - nombre: Congelamiento (50 %)
     umbralVida: 0.5
     patrones: []
     pausaEntrePatrones: 1
     aleatorio: 0
+    multiplicadorVelocidad: 1
   duracionVulnerable: 1.2
   multiplicadorVulnerable: 2
   inmuneFueraDeVulnerable: 0
