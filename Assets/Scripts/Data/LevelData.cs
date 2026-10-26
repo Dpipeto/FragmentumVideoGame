@@ -21,6 +21,10 @@ namespace Fragmentum.Data
 
         [Tooltip("Radio de la luz propia del jugador cuando hay oscuridad (Anexo A: 3 u).")]
         public float radioLuzJugador;
+
+        [Tooltip("Color del velo de los bordes de la pantalla bajo el agua. Transparente: el azul de la Tristeza " +
+                 "(la ciénaga del Miedo lo lleva verde pantanoso).")]
+        public Color colorVeloAgua;
     }
 
     /// <summary>Tramo del layout del nivel (Anexo A). Se dibuja como guía en la vista Scene.</summary>

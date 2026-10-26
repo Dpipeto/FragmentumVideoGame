@@ -4,20 +4,21 @@ using UnityEngine;
 namespace Fragmentum.Bosses.Patrones
 {
     /// <summary>
-    /// Embestida de sombra (Espectro del Pavor). Aparece junto a la pared más lejana a Kael, avisa
-    /// con su destello y cruza la arena entera a ras de suelo (<see cref="alto"/> u, a
-    /// <see cref="velocidad"/> u/s) hasta la pared de enfrente. Al otro lado se queda
-    /// <see cref="visibleAlFinal"/> s a la vista: se le puede golpear. Se esquiva saltándola o
-    /// esperándola en una rama.
+    /// Embestida de sombra (Espectro del Pavor). Aparece junto a la pared más lejana a Kael, a su
+    /// altura (a ras de suelo o, si Kael está en una rama, a la de esa rama:
+    /// <see cref="EspectroDelPavor.AlturaDeKael"/>), avisa con su destello y cruza la arena entera
+    /// (<see cref="alto"/> u, a <see cref="velocidad"/> u/s) hasta la pared de enfrente. Al otro lado
+    /// se queda <see cref="visibleAlFinal"/> s a la vista: se le puede golpear. Se esquiva saltándola,
+    /// o bajándose de la rama si viene por ella.
     ///
     /// Con otro jefe, la embestida sale de donde esté hacia la pared que tiene delante.
     /// </summary>
     [CreateAssetMenu(menuName = "Fragmentum/Jefes/Patrón: embestida de sombra", fileName = "PatronEmbestidaSombra")]
     public class PatronEmbestidaSombra : PatronAtaque
     {
-        [Min(0.1f)] public float velocidad = 11f;
+        [Min(0.1f)] public float velocidad = 16f;
 
-        [Tooltip("Alto de la embestida: a ras de suelo, para poder saltarla.")]
+        [Tooltip("Alto de la embestida, desde donde pisa Kael: bajo, para poder saltarla.")]
         [Min(0.1f)] public float alto = 1.6f;
 
         [Tooltip("Al otro lado se queda a la vista estos segundos.")]
@@ -30,12 +31,13 @@ namespace Fragmentum.Bosses.Patrones
             float desde, hasta, suelo;
             if (pavor != null)
             {
+                // Busca a Kael: si está en una rama, embiste por ella.
+                suelo = pavor.AlturaDeKael();
                 desde = pavor.ParedParaLaEmbestida();
-                pavor.Aparecer(desde);
+                pavor.Aparecer(desde, suelo);
                 hasta = pavor.ParedDeEnfrente(desde);
                 pavor.Mirar(hasta >= desde ? 1 : -1);
-                pavor.Destellar(aviso);
-                suelo = pavor.Suelo;
+                pavor.Destellar(aviso, GESTOS_PAVOR.AVISO_EMBESTIDA);
             }
             else
             {

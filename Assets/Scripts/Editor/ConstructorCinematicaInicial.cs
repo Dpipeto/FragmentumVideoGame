@@ -130,6 +130,7 @@ namespace Fragmentum.EditorTools
             cinematica.id = "Inicial";
             cinematica.saltable = true;
             cinematica.soloPrimeraVez = true;
+            cinematica.musica = MusicaNiveles.DeCinematica(cinematica.id);
             cinematica.diapositivas = new List<Diapositiva>();
 
             foreach (var plano in Guion)

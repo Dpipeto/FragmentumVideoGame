@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8cc9c01086404941be2926b211636da, type: 3}
+  m_Name: Companero
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronCompanero
+  nombre: "El compa\xF1ero (la placa)"
+  descripcion: "Abre la capa: las placas salen volando en tres r\xE1fagas, rectas a la cabeza de Kael, como los disparos de los Artilleros. Agacharse tras uno de los dos escombros."
+  aviso: 1
+  danio: 1
+  color: {r: 0.66, g: 0.62, b: 0.55, a: 1}
+  dibujarZona: 1
+  memoria: 2
+  recuperacion: 0.8
+  rafagas: 3
+  placasPorRafaga: 3
+  entrePlacas: 0.12
+  entreRafagas: 0.9
+  velocidad: 12
+  radio: 0.15
+  alturaSalida: 2.4
+  alcance: 30
+  placa: {fileID: 8860578550339213290, guid: b23a96fd03c6f724fa20b391af198fb9, type: 3}

@@ -27,6 +27,9 @@ namespace Fragmentum.UI
         [Tooltip("Opcional: abre la guía de mecánicas, que crece con las habilidades integradas.")]
         [SerializeField] private Button botonMecanicas;
 
+        [Tooltip("Opcional: abre las opciones (el volumen).")]
+        [SerializeField] private Button botonOpciones;
+
         [SerializeField] private Button botonSalir;
 
         [Tooltip("Opcional: resumen del progreso guardado.")]
@@ -39,6 +42,7 @@ namespace Fragmentum.UI
             Enganchar(botonSelector, SeleccionarNivel);
             Enganchar(botonYoReconstruido, VerYoReconstruido);
             Enganchar(botonMecanicas, VerMecanicas);
+            Enganchar(botonOpciones, VerOpciones);
             Enganchar(botonSalir, Salir);
             Refrescar();
         }
@@ -105,6 +109,14 @@ namespace Fragmentum.UI
             if (UIManager.Instancia != null)
             {
                 UIManager.Instancia.MostrarMecanicas();
+            }
+        }
+
+        public void VerOpciones()
+        {
+            if (UIManager.Instancia != null)
+            {
+                UIManager.Instancia.MostrarOpciones();
             }
         }
 

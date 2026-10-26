@@ -3,7 +3,9 @@ using System.Linq;
 using Fragmentum.Data;
 using UnityEngine;
 using Bloque = Fragmentum.EditorTools.DisenoNivel1.Bloque;
+using MEDIOS = Fragmentum.EditorTools.DisenoNivel2.MEDIOS;
 using Pisada = Fragmentum.EditorTools.DisenoNivel1.Pisada;
+using Zona = Fragmentum.EditorTools.DisenoNivel2.Zona;
 
 namespace Fragmentum.EditorTools
 {
@@ -28,6 +30,11 @@ namespace Fragmentum.EditorTools
     /// bajo una rama le cortaba el salto); las copas llevan sus ramas a una unidad entera unas de
     /// otras; y el callejón no tiene techo de raíces: la pared de raíces, que no agarra y sube hasta
     /// el puesto del vigía, ya lo cierra.
+    ///
+    /// <b>La ciénaga</b> (2026-10-19, sección 10 del documento): entre el CP2 y el claro, dos
+    /// túneles bajo las raíces de un árbol hundido, con marañas que solo cruza el Dash Acuático
+    /// (<see cref="Maranas"/>) y un tocón para respirar entre ellos. Todo lo que había desde x 84 se
+    /// corrió 28 u.
     /// </summary>
     public static class DisenoNivel3
     {
@@ -37,9 +44,22 @@ namespace Fragmentum.EditorTools
         /// Sube al cambiar el recorrido: <see cref="PreparadorNivel"/> lo vuelve a montar entero. La 3
         /// es la fase B: la oscuridad, las antorchas, los cepos, las ramas que ceden y las cintas. La 4,
         /// la fase C: el Acechador y los árboles del claro (el sueño de los Espectros y el oído de los
-        /// Centinelas van en sus prefabs).
+        /// Centinelas van en sus prefabs). La 5, la fase E: el arte (el tileset del bosque, las ramas,
+        /// las cintas, los árboles y el atrezo, <see cref="Decorados"/>). La 6, sus puertas: la verja,
+        /// los checkpoints y la puerta de salida dibujados (la salida, media unidad a la izquierda). La
+        /// 7, el tamaño de los Espectros (<see cref="EscalaEspectro"/>). La 8, la ciénaga: su agua, sus
+        /// túneles, sus marañas, su tocón, su antorcha y su pista; lo de después, 28 u más allá. La 9,
+        /// el interior oscuro de sus túneles: a través del agua se veía el bosque del fondo, y la
+        /// maraña se confundía con él.
         /// </summary>
-        public const int Version = 4;
+        public const int Version = 9;
+
+        /// <summary>
+        /// Escala de los Espectros: son los Ecos de este mundo y van al tamaño que el diseñador dio a
+        /// los Ecos de la Ira en el Nivel 1 (<see cref="DisenoNivel1.EscalaEco"/>, PENDIENTES N18),
+        /// como los Lamentos del Nivel 2.
+        /// </summary>
+        public static readonly Vector2 EscalaEspectro = DisenoNivel1.EscalaEco;
 
         /// <summary>Base de todos los bloques: por debajo de lo que enseña la cámara (−7).</summary>
         public const float Fondo = -8f;
@@ -57,7 +77,7 @@ namespace Fragmentum.EditorTools
         public const float ZonaMortal = -12f;
 
         /// <summary>Hasta dónde llega la zona mortal, a cada lado del nivel.</summary>
-        public static readonly Vector2 AnchoZonaMortal = new Vector2(-20f, 155f);
+        public static readonly Vector2 AnchoZonaMortal = new Vector2(-20f, 183f);
 
         /// <summary>Alto de Kael (su cápsula).</summary>
         public const float AltoKael = DisenoNivel2.AltoKael;
@@ -104,6 +124,16 @@ namespace Fragmentum.EditorTools
         /// <summary>La luz propia de Kael (Anexo A).</summary>
         public const float RadioLuzKael = 3f;
 
+        /// <summary>
+        /// Lo que queda la superficie del agua por debajo de lo que se pisa al salir, como en el Nivel 2
+        /// (<see cref="DisenoNivel2.BajoLaSuperficie"/>): a ras, Kael de pie en la orilla seguiría
+        /// rozando el agua.
+        /// </summary>
+        public const float BajoLaSuperficie = DisenoNivel2.BajoLaSuperficie;
+
+        /// <summary>El velo de los bordes de la pantalla bajo el agua de la ciénaga: verde pantanoso (#1A2E1A, más oscuro).</summary>
+        public static readonly Color ColorVeloAgua = new Color(0.03f, 0.1f, 0.05f, 1f);
+
         public enum TIPOS_ENEMIGO
         {
             ESPECTRO,
@@ -132,17 +162,22 @@ namespace Fragmentum.EditorTools
             public float Hasta { get; }
         }
 
-        /// <summary>Un salto del recorrido, de una pisada a otra. Todos se dan caminando.</summary>
+        /// <summary>
+        /// Un salto del recorrido, de una pisada a otra. Los de fuera del agua se dan caminando; los
+        /// de la ciénaga, bajo el agua (<see cref="MEDIOS.AGUA"/>).
+        /// </summary>
         public readonly struct Paso
         {
-            public Paso(string desde, string hasta)
+            public Paso(string desde, string hasta, MEDIOS medio = MEDIOS.SECO)
             {
                 Desde = desde;
                 Hasta = hasta;
+                Medio = medio;
             }
 
             public string Desde { get; }
             public string Hasta { get; }
+            public MEDIOS Medio { get; }
 
             public override string ToString() => $"{Desde} → {Hasta}";
         }
@@ -167,28 +202,28 @@ namespace Fragmentum.EditorTools
         }
 
         // --- Sección 1 (−6 a 36): la linde. Luz de luna, dos antorchas, el barranco, dos Espectros y tres cepos ---
-        // --- Sección 2 (36 a 84): el bosque cerrado. La trinchera, la bifurcación, las copas y la hondonada ---
-        // --- Sección 3 (84 a 112): el claro, con el Acechador, y la antesala ---
-        // --- Arena (112 a 139): el Espectro del Pavor, en una sala de 25 × 15 u a oscuras ---
+        // --- Sección 2 (36 a 112): el bosque cerrado. La trinchera, la bifurcación, las copas, la hondonada y la ciénaga ---
+        // --- Sección 3 (112 a 140): el claro, con el Acechador, y la antesala ---
+        // --- Arena (140 a 167): el Espectro del Pavor, en una sala de 25 × 15 u a oscuras ---
 
         /// <summary>
         /// Los tramos del <c>LevelData</c> (desde, hasta). De ellos sale lo que enseña la cámara,
         /// que llega 6 u más allá de cada extremo: de la pared de la izquierda (−6) a la del fondo
-        /// de la arena (139). Los pone <see cref="GeneradorProgresion"/>.
+        /// de la arena (167). Los pone <see cref="GeneradorProgresion"/>.
         /// </summary>
         public static readonly Vector2[] Secciones =
         {
             new Vector2(0f, 36f),
-            new Vector2(36f, 84f),
-            new Vector2(84f, 112f),
-            new Vector2(112f, 133f),
+            new Vector2(36f, 112f),
+            new Vector2(112f, 140f),
+            new Vector2(140f, 161f),
         };
 
         /// <summary>Nombre y contenido de cada tramo, en el mismo orden que <see cref="Secciones"/>.</summary>
         public static readonly (string nombre, string contenido)[] TextosDeLasSecciones =
         {
             ("Sección 1", "La linde, con luz de luna: el tutorial de las antorchas, un barranco con una rama podrida, 2 Espectros y 3 cepos."),
-            ("Sección 2", "El bosque cerrado, a oscuras: la trinchera, la bifurcación (las copas o la hondonada, que acaba en un callejón), 3 Centinelas Ciegos y 4 Espectros."),
+            ("Sección 2", "El bosque cerrado, a oscuras: la trinchera, la bifurcación (las copas o la hondonada, que acaba en un callejón), 3 Centinelas Ciegos, 4 Espectros y la ciénaga, que se cruza con el Dash Acuático."),
             ("Sección 3", "El claro, con luz de luna: el Acechador entre tres árboles. Y la antesala."),
             ("Arena del jefe", "Oscuridad total: solo la luz de Kael."),
         };
@@ -206,11 +241,64 @@ namespace Fragmentum.EditorTools
             new Bloque("SueloDelBosque", 46f, 58f, Fondo, 0f),
             new Bloque("FondoDeLaHondonada", 58f, 73f, Fondo, -4f),
             new Bloque("EscalonDeLaHondonada", 58f, 60f, -4f, -2f),
-            new Bloque("SueloTrasLasCopas", 74f, 89f, Fondo, 0f),
-            new Bloque("Claro", 89f, 106f, Fondo, 0f),
-            new Bloque("Antesala", 106f, 112f, Fondo, 0f),
-            new Bloque("SueloArena", 112f, 139f, Fondo, 0f),
+            new Bloque("SueloTrasLasCopas", 74f, 86f, Fondo, 0f),
+            new Bloque("FondoDeLaCienaga1", 86f, 96f, Fondo, FondoCienaga),
+            new Bloque("Tocon", 96f, 98f, Fondo, 0f),
+            new Bloque("FondoDeLaCienaga2", 98f, 110f, Fondo, FondoCienaga),
+            new Bloque("SueloTrasLaCienaga", 110f, 117f, Fondo, 0f),
+            new Bloque("Claro", 117f, 134f, Fondo, 0f),
+            new Bloque("Antesala", 134f, 140f, Fondo, 0f),
+            new Bloque("SueloArena", 140f, 167f, Fondo, 0f),
         };
+
+        // --- La ciénaga (84 a 112) ---
+
+        /// <summary>
+        /// El fondo de la ciénaga: 3,5 u bajo la orilla. Más hondo, lo que sobra del doble salto bajo
+        /// el agua no sube a Kael a la orilla (lo mide <c>DisenoNivel3Tests</c>, como en el Nivel 2).
+        /// </summary>
+        public const float FondoCienaga = -3.5f;
+
+        /// <summary>El techo de los dos túneles: las raíces del árbol hundido. Debajo quedan 2,5 u.</summary>
+        public const float TechoTuneles = -1f;
+
+        /// <summary>Hasta dónde suben las raíces del árbol hundido: más de lo que llega ningún salto.</summary>
+        public const float AltoRaicesHundidas = 7f;
+
+        /// <summary>Las raíces del árbol hundido: el techo de los dos túneles de la ciénaga.</summary>
+        public static IEnumerable<Bloque> RaicesDelArbolHundido => Paredes.Where(p => p.Nombre.StartsWith("RaicesDelArbolHundido"));
+
+        /// <summary>
+        /// El agua de la ciénaga: la del primer túnel (con su poza) y la del segundo (con su poza y su
+        /// salida). El tocón queda fuera: encima se respira. La superficie, a
+        /// <see cref="BajoLaSuperficie"/> de las orillas y del tocón.
+        /// </summary>
+        public static readonly Zona[] Aguas =
+        {
+            new Zona("AguaDelPrimerTunel", 86f, 96f, FondoCienaga, 0f - BajoLaSuperficie),
+            new Zona("AguaDelSegundoTunel", 98f, 110f, FondoCienaga, 0f - BajoLaSuperficie),
+        };
+
+        /// <summary>
+        /// Las marañas de raíces: llenan su túnel del fondo al techo. Para salir de una, Kael (0,8 u de
+        /// ancho) tiene que cruzarla y sacar el cuerpo: la primera (2 u) se cruza con un dash (2,9 u) y
+        /// la segunda (4 u), con dos. Más anchas, pedirían un dash más. Su dibujo mide 2 u: la segunda
+        /// lleva dos.
+        /// </summary>
+        public static readonly Zona[] Maranas =
+        {
+            new Zona("Marana1", 91f, 93f, FondoCienaga, TechoTuneles),
+            new Zona("Marana2", 101f, 105f, FondoCienaga, TechoTuneles),
+        };
+
+        /// <summary>Lo que mide un dibujo de la maraña: cuelga del techo del túnel. La de 4 u lleva dos, el segundo en espejo.</summary>
+        public const float AnchoDibujoMarana = 2f;
+
+        /// <summary>El ancho de Kael (su cápsula): para salir de una maraña hay que sacar el cuerpo entero.</summary>
+        public const float AnchoKael = 0.8f;
+
+        /// <summary>Delante del agua, Kael dice que las raíces se cruzan con el Dash Acuático.</summary>
+        public static readonly Zona PistaDeLaCienaga = new Zona("PistaDeLaCienaga", 84f, 86f, 0f, 3f);
 
         /// <summary>
         /// Las ramas sanas (capa del suelo): las del barranco, las de las copas, el puesto del vigía
@@ -248,39 +336,49 @@ namespace Fragmentum.EditorTools
         {
             new Bloque("ParedIzquierda", -7f, -6f, Fondo, Tope),
             new Bloque("RaicesDelCallejon", 73f, 74f, Fondo, 4f),
-            new Bloque("ParedArena", 138f, 139f, 0f, Tope),
-            new Bloque("TechoArena", 112f, 139f, 15f, Tope),
+            new Bloque("RaicesDelArbolHundido1", 89f, 95f, TechoTuneles, AltoRaicesHundidas),
+            new Bloque("RaicesDelArbolHundido2", 100f, 107f, TechoTuneles, AltoRaicesHundidas),
+            new Bloque("ParedArena", 166f, 167f, 0f, Tope),
+            new Bloque("TechoArena", 140f, 167f, 15f, Tope),
         };
 
         /// <summary>
         /// Las paredes en las que Kael no se agarra (<see cref="Fragmentum.Core.SinAgarre"/>): las
-        /// raíces del callejón, húmedas y podridas. Con el salto de pared, la trampa tendría salida.
+        /// raíces del callejón y las del árbol hundido de la ciénaga, húmedas y podridas. Con el salto
+        /// de pared, la trampa tendría salida y la ciénaga se saltaría por arriba.
         /// </summary>
-        public static bool NoAgarra(string bloque) => bloque == "RaicesDelCallejon";
+        public static bool NoAgarra(string bloque) => bloque == "RaicesDelCallejon" || bloque.StartsWith("RaicesDelArbolHundido");
 
         /// <summary>
-        /// Las dos ramas de la arena: se alcanzan con el doble salto y libran la embestida. A 7 u del
+        /// Las dos ramas de la arena: se alcanzan con el doble salto. Ya no libran la embestida: si Kael
+        /// está en una, el Pavor embiste por ella (v0.67; <c>EspectroDelPavor.AlturaDeKael</c>). A 7 u del
         /// jefe por cada lado; la de la derecha acaba antes de la puerta de salida (v2: en la v1
         /// llegaba hasta x 135 y se montaba sobre ella).
         /// </summary>
         public static readonly Bloque[] PlataformasArena =
         {
-            Rama("RamaArenaIzquierda", 117f, 120f, 3.5f),
-            Rama("RamaArenaDerecha", 131f, 134f, 3.5f),
+            Rama("RamaArenaIzquierda", 145f, 148f, 3.5f),
+            Rama("RamaArenaDerecha", 159f, 162f, 3.5f),
         };
 
         /// <summary>
         /// Las antorchas, por el punto de su pie. La primera, en la linde, es el tutorial: su luz
         /// alcanza el primer cepo y el primer Espectro. La de la bifurcación enseña las cintas de las
-        /// copas; la del claro, al Acechador.
+        /// copas; la de la orilla, la primera maraña de la ciénaga; la del claro, al Acechador.
         /// </summary>
         public static readonly Vector2[] Antorchas =
         {
             new Vector2(7f, 0f),
             new Vector2(30f, 0f),
             new Vector2(55f, 0f),
-            new Vector2(86f, 0f),
+            new Vector2(85f, 0f),
+            new Vector2(114f, 0f),
         };
+
+        /// <summary>La antorcha de la orilla de la ciénaga y la del claro, por su sitio en <see cref="Antorchas"/>.</summary>
+        public const int AntorchaDeLaOrilla = 3;
+
+        public const int AntorchaDelClaro = 4;
 
         /// <summary>
         /// Los cepos, por su centro en el suelo: tres en la linde (Anexo A: «3 trampas ocultas
@@ -323,16 +421,17 @@ namespace Fragmentum.EditorTools
         /// La luz de cada tramo (la luz global de la escena, que cambia según dónde esté Kael). La
         /// linde, con luna (Anexo A: «luz moderada»); el bosque cerrado, a oscuras («oscuridad
         /// completa»); el claro y la antesala, con luna otra vez, porque el claro no tiene copas; y la
-        /// arena, con la oscuridad total: solo la luz de Kael. La luna del claro empieza donde se abre
-        /// el claro (x 89), no al empezar la sección 3 (x 84): la antorcha del claro, en x 86, queda a
-        /// oscuras, y por eso sirve para ver al Acechador antes de entrar.
+        /// arena, con la oscuridad total: solo la luz de Kael. La ciénaga es parte del bosque cerrado:
+        /// a oscuras. La luna del claro empieza donde se abre el claro (x 117), no al empezar la
+        /// sección 3 (x 112): la antorcha del claro, en x 114, queda a oscuras, y por eso sirve para
+        /// ver al Acechador antes de entrar.
         /// </summary>
         public static readonly Luz[] Luces =
         {
             new Luz("La linde: luz de luna", -7f, 36f, LuzDeLuna, 0.55f),
-            new Luz("El bosque cerrado: oscuridad completa", 36f, 89f, Penumbra, 0.08f),
-            new Luz("El claro y la antesala: luz de luna", 89f, 112f, LuzDeLuna, 0.45f),
-            new Luz("La arena: oscuridad total", 112f, 139f, Penumbra, 0.03f),
+            new Luz("El bosque cerrado y la ciénaga: oscuridad completa", 36f, 117f, Penumbra, 0.08f),
+            new Luz("El claro y la antesala: luz de luna", 117f, 140f, LuzDeLuna, 0.45f),
+            new Luz("La arena: oscuridad total", 140f, 167f, Penumbra, 0.03f),
         };
 
         /// <summary>
@@ -340,7 +439,8 @@ namespace Fragmentum.EditorTools
         /// Ciegos y cuatro Espectros (Anexo A): uno de cada en la salida de la trinchera, un
         /// Centinela en el puesto del vigía, un Espectro en la bajada y, en la hondonada, la
         /// trampa, un Centinela y dos Espectros. En el claro, el Acechador, el mini-jefe, que merodea
-        /// entre sus tres árboles.
+        /// entre sus tres árboles. El de la bajada duerme en x 76 (antes, 78): la antorcha de la orilla
+        /// de la ciénaga no lo alcanza. En la ciénaga no hay enemigos.
         /// </summary>
         public static readonly Enemigo[] Enemigos =
         {
@@ -349,11 +449,11 @@ namespace Fragmentum.EditorTools
             new Enemigo("CentinelaCiego_1", TIPOS_ENEMIGO.CENTINELA_CIEGO, 51f, 0f, 47.5f, 54.5f),
             new Enemigo("Espectro_3", TIPOS_ENEMIGO.ESPECTRO, 56.5f, 0f, 55.5f, 57.5f),
             new Enemigo("CentinelaCiego_2", TIPOS_ENEMIGO.CENTINELA_CIEGO, 71f, 4.5f, 69f, 73f),
-            new Enemigo("Espectro_4", TIPOS_ENEMIGO.ESPECTRO, 78f, 0f, 76.5f, 79.5f),
+            new Enemigo("Espectro_4", TIPOS_ENEMIGO.ESPECTRO, 76f, 0f, 75f, 77.5f),
             new Enemigo("CentinelaCiego_3", TIPOS_ENEMIGO.CENTINELA_CIEGO, 63.5f, -4f, 61.5f, 66f),
             new Enemigo("Espectro_5", TIPOS_ENEMIGO.ESPECTRO, 69f, -4f, 68f, 70f),
             new Enemigo("Espectro_6", TIPOS_ENEMIGO.ESPECTRO, 71.5f, -4f, 70.5f, 72.5f),
-            new Enemigo("Acechador", TIPOS_ENEMIGO.ACECHADOR, 100f, 0f, 91f, 105f),
+            new Enemigo("Acechador", TIPOS_ENEMIGO.ACECHADOR, 128f, 0f, 119f, 133f),
         };
 
         /// <summary>
@@ -361,10 +461,77 @@ namespace Fragmentum.EditorTools
         /// que embiste a ciegas hacia el ruido, se estrella contra ellos. Entre uno y otro caben él
         /// (2 u de largo) y la carrera para embestir.
         /// </summary>
-        public static readonly float[] Arboles = { 93f, 98f, 103f };
+        public static readonly float[] Arboles = { 121f, 126f, 131f };
 
         /// <summary>Lo que mide el tronco de un árbol del claro: de ancho y de alto.</summary>
         public static readonly Vector2 TamanoArbol = new Vector2(1.2f, 6f);
+
+        /// <summary>
+        /// Una pieza del tileset o de los props colocada de adorno: su pivote en (X, Y). No se pisa
+        /// ni choca. Las que cuelgan delante de una rama o de un muro van por delante de los bloques.
+        /// </summary>
+        public readonly struct Decorado
+        {
+            public Decorado(string nombre, ConstructorEscenarioMundo3.Pieza pieza, float x, float y, bool volteado = false, bool delante = false)
+            {
+                Nombre = nombre;
+                Pieza = pieza;
+                X = x;
+                Y = y;
+                Volteado = volteado;
+                Delante = delante;
+            }
+
+            public string Nombre { get; }
+            public ConstructorEscenarioMundo3.Pieza Pieza { get; }
+            public float X { get; }
+            public float Y { get; }
+
+            /// <summary>Dibujado en espejo, para que dos iguales no se vean iguales.</summary>
+            public bool Volteado { get; }
+
+            /// <summary>Por delante de los bloques (cuelga de una rama o tapa un muro), no por detrás.</summary>
+            public bool Delante { get; }
+
+            public Vector2 Posicion => new Vector2(X, Y);
+        }
+
+        /// <summary>
+        /// El atrezo: el bosque de noche y la trinchera olvidada del soldado. La idea de cada cosa:
+        /// - <b>la tumba</b> del soldado (el fusil clavado y el casco) es lo primero que se ve, detrás
+        ///   del inicio: el mundo del Miedo empieza en una guerra que no acabó;
+        /// - <b>la trinchera</b> (el primer checkpoint, el del eco de memoria) tiene su refugio, sus
+        ///   sacos y una caja de munición: ahí se escondía;
+        /// - <b>el bosque cerrado</b>: un casco entre las hojas y helechos junto a la antorcha de la
+        ///   bifurcación; las lianas cuelgan sobre el barranco;
+        /// - <b>el puesto del vigía</b>, sobre las copas: su lámpara apagada y una lona podrida;
+        /// - <b>el claro</b>: helechos a la entrada y un tronco caído entre los árboles del Acechador;
+        /// - <b>la antesala</b>: el último casco antes de la arena, que queda vacía y a oscuras.
+        /// </summary>
+        public static readonly Decorado[] Decorados =
+        {
+            // La linde: la tumba, detrás del inicio; las lianas, bajo la segunda rama del barranco.
+            new Decorado("Tumba", ConstructorEscenarioMundo3.Tumba, -2.5f, 0f),
+            new Decorado("Lianas_Barranco", ConstructorEscenarioMundo3.Lianas, 25.3f, -GrosorRama, delante: true),
+
+            // La trinchera.
+            new Decorado("Sacos_Trinchera", ConstructorEscenarioMundo3.Sacos, 39.3f, -2f),
+            new Decorado("Refugio_Trinchera", ConstructorEscenarioMundo3.Refugio, 43.5f, -2f),
+            new Decorado("Caja_Trinchera", ConstructorEscenarioMundo3.Caja, 45.3f, -2f),
+
+            // El bosque cerrado.
+            new Decorado("Casco_Bosque", ConstructorEscenarioMundo3.Casco, 50.5f, 0f),
+            new Decorado("Helechos_Bosque", ConstructorEscenarioMundo3.Helechos, 53f, 0f),
+
+            // El puesto del vigía: cuelgan de su rama, por delante.
+            new Decorado("Lampara_Vigia", ConstructorEscenarioMundo3.Lampara, 70.6f, 4.5f - GrosorRama, delante: true),
+            new Decorado("Lona_Vigia", ConstructorEscenarioMundo3.Lona, 72.7f, 4.5f - GrosorRama, delante: true),
+
+            // El claro y la antesala.
+            new Decorado("Helechos_Claro", ConstructorEscenarioMundo3.Helechos, 118.5f, 0f, volteado: true),
+            new Decorado("TroncoCaido_Claro", ConstructorEscenarioMundo3.TroncoCaido, 128.6f, 0f),
+            new Decorado("Casco_Antesala", ConstructorEscenarioMundo3.Casco, 135.3f, 0f, volteado: true),
+        };
 
         /// <summary>El territorio del Acechador: el claro. Embistiendo, frena al llegar a un extremo.</summary>
         public static Vector2 LimitesAcechador => new Vector2(PisadaDe("Claro").Desde, PisadaDe("Claro").Hasta);
@@ -373,33 +540,38 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// Los checkpoints (también en <c>LevelData.puntosDeControl</c>): en el fondo de la
-        /// trinchera, con el eco de memoria; tras las copas; y en la antesala. Curan.
+        /// trinchera, con el eco de memoria; tras las copas, a 3,5 u del agua de la ciénaga (quien se
+        /// ahoga vuelve ahí); y en la antesala. Curan.
         /// </summary>
         public static readonly Vector2[] Checkpoints =
         {
             new Vector2(41f, -2f),
             new Vector2(82.5f, 0f),
-            new Vector2(109f, 0f),
+            new Vector2(137f, 0f),
         };
 
         public const float SueloArena = 0f;
         public const float TechoArena = 15f;
 
         /// <summary>La puerta que se cierra detrás del jugador, en el borde de la arena.</summary>
-        public const float PuertaDesde = 112f;
-        public const float PuertaHasta = 113f;
+        public const float PuertaDesde = 140f;
+        public const float PuertaHasta = 141f;
 
         /// <summary>El trigger de entrada: el jugador ya ha pasado la puerta.</summary>
-        public const float Entrada = 115f;
+        public const float Entrada = 143f;
 
-        public const float Jefe = 125.5f;
-        public const float Salida = 136f;
+        public const float Jefe = 153.5f;
+        /// <summary>
+        /// La puerta de salida: un árbol de 4,7 u de ancho con las raíces abiertas. En 163,5 cabe
+        /// entera entre la rama de la derecha de la arena (acaba en 162) y la pared (166).
+        /// </summary>
+        public const float Salida = 163.5f;
 
         /// <summary>Por dentro de la puerta y de la pared de la derecha.</summary>
         public static Vector2 LimitesArena => new Vector2(PuertaHasta, Paredes.Single(p => p.Nombre == "ParedArena").Desde);
 
         /// <summary>
-        /// Los saltos del recorrido, en orden. Todos se dan caminando (Alt): ninguno obliga a correr.
+        /// Los saltos del recorrido, en orden. Todos se dan caminando (Ctrl): ninguno obliga a correr.
         /// Bajar a la trinchera y a la hondonada no es un salto: es dejarse caer.
         /// </summary>
         public static readonly Paso[] Pasos =
@@ -427,8 +599,12 @@ namespace Fragmentum.EditorTools
             new Paso("FondoDeLaHondonada", "EscalonDeLaHondonada"),
             new Paso("EscalonDeLaHondonada", "SueloDelBosque"),
 
+            // La ciénaga: se baja al agua dejándose caer; se sale al tocón y a la otra orilla bajo el agua.
+            new Paso("FondoDeLaCienaga1", "Tocon", MEDIOS.AGUA),
+            new Paso("FondoDeLaCienaga2", "SueloTrasLaCienaga", MEDIOS.AGUA),
+
             // Hasta la arena y sus ramas.
-            new Paso("SueloTrasLasCopas", "Claro"),
+            new Paso("SueloTrasLaCienaga", "Claro"),
             new Paso("Claro", "Antesala"),
             new Paso("Antesala", "SueloArena"),
             new Paso("SueloArena", "RamaArenaIzquierda"),

@@ -44,6 +44,9 @@ namespace Fragmentum.EditorTools
         /// <summary>El radio de la luz de Kael en el prefab; cada nivel a oscuras pone el suyo (Anexo A: 3 u).</summary>
         public const float RadioLuzPorDefecto = 3f;
 
+        /// <summary>El escudo de la Defensa Reforzada, por delante de Kael (10).</summary>
+        public const int OrdenEscudo = 11;
+
         // --- Menús ---
 
         [MenuItem("Fragmentum/Jugador/Crear prefab del jugador", priority = 40)]
@@ -142,7 +145,7 @@ namespace Fragmentum.EditorTools
                 var controlador = raiz.AddComponent<PlayerController>();
                 var modo = raiz.AddComponent<PlayerModoMovimiento>();
 
-                // Interactuar (E): encender las antorchas del mundo del Miedo.
+                // Interactuar (W): encender las antorchas del mundo del Miedo.
                 raiz.AddComponent<InteraccionJugador>();
 
                 // Los anillos de ruido (Miedo): solo hay ruido donde el nivel pide sigilo.
@@ -169,6 +172,12 @@ namespace Fragmentum.EditorTools
 
                 var visual = raiz.AddComponent<PlayerVisual>();
                 var animacion = raiz.AddComponent<PlayerAnimacion>();
+
+                // Sus efectos de sonido: el salto, el dash, el tajo y el daño (Sonidos/Kael).
+                var sonidos = raiz.AddComponent<SonidosKael>();
+                Asignar(sonidos, "jugador", p => p.objectReferenceValue = controlador);
+                Asignar(sonidos, "vida", p => p.objectReferenceValue = vida);
+                SonidosDelJuego.PonerEnKael(sonidos);
 
                 // Pivote: lo que se voltea al girar (sprite y espada).
                 var pivote = new GameObject("Pivote").transform;
@@ -207,6 +216,32 @@ namespace Fragmentum.EditorTools
                 Asignar(provisional, "assetPendiente", p => p.stringValue = "Sprites y animaciones de Kael (PENDIENTES B3)");
                 Asignar(provisional, "color", p => p.colorValue = ColorJugador);
                 Asignar(provisional, "tamano", p => p.vector2Value = new Vector2(0.8f, 1.8f));
+
+                // La Defensa Reforzada: su dibujo, oculto hasta que el escudo se recarga o para un golpe. No va en el
+                // pivote: se pone del lado del golpe, no del que mira Kael.
+                var dibujosEscudo = ConstructorArteKael.DibujosEscudo;
+                if (dibujosEscudo != null)
+                {
+                    var objetoEscudo = new GameObject("Escudo");
+                    objetoEscudo.layer = raiz.layer;
+                    objetoEscudo.transform.SetParent(raiz.transform, false);
+                    var dibujoEscudo = objetoEscudo.AddComponent<SpriteRenderer>();
+                    dibujoEscudo.sprite = dibujosEscudo[0];
+                    dibujoEscudo.sortingOrder = OrdenEscudo;
+                    dibujoEscudo.enabled = false;
+                    var escudo = objetoEscudo.AddComponent<EscudoDibujado>();
+                    Asignar(escudo, "vida", p => p.objectReferenceValue = vida);
+                    Asignar(escudo, "jugador", p => p.objectReferenceValue = controlador);
+                    Asignar(escudo, "dibujo", p => p.objectReferenceValue = dibujoEscudo);
+                    Asignar(escudo, "dibujos", p =>
+                    {
+                        p.arraySize = dibujosEscudo.Length;
+                        for (var i = 0; i < dibujosEscudo.Length; i++)
+                        {
+                            p.GetArrayElementAtIndex(i).objectReferenceValue = dibujosEscudo[i];
+                        }
+                    });
+                }
 
                 // Espada: hitbox en la capa PlayerWeapon que solo golpea a la capa Enemy.
                 var objetoEspada = new GameObject("Espada");

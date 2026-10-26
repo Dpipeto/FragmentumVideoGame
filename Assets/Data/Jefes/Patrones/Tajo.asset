@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Tajo
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronTajo
   nombre: Tajo
-  descripcion: "Aparece a 2,5 u de Kael, a su espalda (o delante, contra una pared), destella 1 s y lanza un tajo de 3 u. Despu\xE9s jadea 1,5 s, visible: la ventana."
-  aviso: 1
+  descripcion: "Aparece a 2,5 u de Kael, a su espalda (o delante, contra una pared), destella 0,6 s y lanza un tajo de 3 u. Despu\xE9s jadea 1,5 s, visible: la ventana."
+  aviso: 0.6
   danio: 2
   color: {r: 0.55, g: 0.9, b: 0.55, a: 1}
-  dibujarZona: 1
+  dibujarZona: 0
   distancia: 2.5
   alcance: 3
   alto: 2.6

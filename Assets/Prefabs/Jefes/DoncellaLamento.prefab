@@ -215,6 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.FragmentoJefe
   dibujo: {fileID: 1048341785920226802}
   mascara: {fileID: 3916127171642717635}
+  gema: {fileID: 0}
 --- !u!1 &3894747345222433405
 GameObject:
   m_ObjectHideFlags: 0

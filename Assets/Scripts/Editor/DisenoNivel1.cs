@@ -39,7 +39,7 @@ namespace Fragmentum.EditorTools
         /// Versión del recorrido. Al subirla, <see cref="PreparadorNivel"/> vuelve a montar entero
         /// el de la escena (lo que se haya movido a mano en él se pierde).
         /// </summary>
-        public const int Version = 2;
+        public const int Version = 3;
 
         /// <summary>Base de todos los bloques: muy por debajo de lo que enseña la cámara (−6).</summary>
         public const float Fondo = -8f;
@@ -226,12 +226,17 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// Las plataformas de la arena, a tres alturas (Anexo A). Son finas (vigas) y el jefe las
-        /// atraviesa (<c>ArenaJefe.plataformas</c>): sirven para esquivar el salto y las ondas.
+        /// atraviesa (<c>ArenaJefe.plataformas</c>): sirven para esquivar el salto y las ondas. Kael
+        /// las atraviesa saltando desde abajo y las pisa al caer (<c>PlataformaDeUnSentido</c>).
+        ///
+        /// Las más bajas, a 3,5 u del suelo (v3): a 3 u, la cabeza de la Centinela (3,4 u) asomaba
+        /// por encima y la espada de Kael, que baja hasta 0,25 u bajo sus pies, la alcanzaba desde
+        /// arriba sin que ningún ataque de ella llegara allí.
         /// </summary>
         public static readonly Bloque[] PlataformasArena =
         {
-            new Bloque("Plataforma8Izquierda", 104f, 108f, 7.5f, 8f),
-            new Bloque("Plataforma8Derecha", 118f, 122f, 7.5f, 8f),
+            new Bloque("Plataforma8Izquierda", 104f, 108f, 8f, 8.5f),
+            new Bloque("Plataforma8Derecha", 118f, 122f, 8f, 8.5f),
             new Bloque("Plataforma11", 110f, 115f, 10.5f, 11f),
             new Bloque("Plataforma14Izquierda", 106f, 109f, 13.5f, 14f),
             new Bloque("Plataforma14Derecha", 117f, 120f, 13.5f, 14f),

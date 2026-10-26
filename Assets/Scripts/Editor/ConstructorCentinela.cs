@@ -625,6 +625,22 @@ namespace Fragmentum.EditorTools
         /// </summary>
         public static (Vector2 centro, Vector2 tamano)? MedirFragmento(string ruta, Vector2 pivoteNormalizado, float pixelesPorUnidad)
         {
+            if (!(CajaDelFragmento(ruta) is { } medida))
+            {
+                return null;
+            }
+
+            var (caja, lienzo) = medida;
+            var pivote = new Vector2(pivoteNormalizado.x * lienzo.x, pivoteNormalizado.y * lienzo.y);
+            return ((caja.center - pivote) / pixelesPorUnidad, (Vector2)caja.size / pixelesPorUnidad);
+        }
+
+        /// <summary>
+        /// El fragmento del último fotograma de la muerte en píxeles de su PNG (la fila 0 es la de
+        /// abajo, como en la textura), con el tamaño del lienzo; null si no hay fragmento separado.
+        /// </summary>
+        public static (RectInt caja, Vector2Int lienzo)? CajaDelFragmento(string ruta)
+        {
             var textura = new Texture2D(2, 2);
             try
             {
@@ -662,10 +678,7 @@ namespace Fragmentum.EditorTools
                     }
                 }
 
-                var pivote = new Vector2(pivoteNormalizado.x * ancho, pivoteNormalizado.y * alto);
-                var centro = (new Vector2(izquierda + derecha + 1, abajo + arriba + 1) * 0.5f - pivote) / pixelesPorUnidad;
-                var tamano = new Vector2(derecha - izquierda + 1, arriba - abajo + 1) / pixelesPorUnidad;
-                return (centro, tamano);
+                return (new RectInt(izquierda, abajo, derecha - izquierda + 1, arriba - abajo + 1), new Vector2Int(ancho, alto));
             }
             finally
             {

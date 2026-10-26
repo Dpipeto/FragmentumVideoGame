@@ -29,3 +29,7 @@ MonoBehaviour:
     texto: "El Miedo no se fue: dej\xF3 de decidir por m\xED. Puedo andar en la sombra sin perderme en ella."
     momento: 3
     duracion: 4.5
+  - hablante: Kael
+    texto: "Ra\xEDces bajo el agua. Si dudo entre ellas, me atrapan. Tengo que cruzarlas de golpe: con el Dash Acu\xE1tico."
+    momento: 4
+    duracion: 4.5

@@ -31,7 +31,7 @@ namespace Fragmentum.EditorTools
         public const string RutaEscena = "Assets/Scenes/Pruebas/PruebaEnemigos.unity";
 
         /// <summary>Variantes con prefab propio (la genérica usa el prefab base).</summary>
-        public static readonly string[] Variantes = { "SoldadoLava", "GolemCeniza", "Lamento", "Escultura", "Planidera", "Espectro", "CentinelaCiego", "Acechador" };
+        public static readonly string[] Variantes = { "SoldadoLava", "GolemCeniza", "Lamento", "Escultura", "Planidera", "Espectro", "CentinelaCiego", "Acechador", "Penitente", "Artillero", "Verdugo" };
 
         /// <summary>La Medusa de Hielo no es un <see cref="EnemyController"/>: tiene su propio prefab.</summary>
         public const string Medusa = "MedusaHielo";
@@ -40,6 +40,15 @@ namespace Fragmentum.EditorTools
 
         /// <summary>El cuerpo de la Plañidera: del capuchón al borde de la túnica (la cola de agua no cuenta).</summary>
         public static readonly Vector2 TamanoPlanidera = new Vector2(1.2f, 2.8f);
+
+        /// <summary>El cuerpo del Artillero, arrodillado tras sus sacos: de ancho y de alto.</summary>
+        public static readonly Vector2 TamanoArtillero = new Vector2(0.8f, 1.5f);
+
+        /// <summary>El cuerpo del Verdugo, un Penitente enorme: de ancho y de alto.</summary>
+        public static readonly Vector2 TamanoVerdugo = new Vector2(1.3f, 3f);
+
+        /// <summary>La línea roja del aviso del Artillero: fina y de rojo apagado.</summary>
+        public static readonly Color ColorLineaDeTiro = new Color(0.8f, 0.15f, 0.15f, 0.8f);
 
         /// <summary>El cuerpo del Acechador, un lobo enorme de sombra: de la cola al hocico y de las patas al lomo.</summary>
         public static readonly Vector2 TamanoAcechador = new Vector2(2f, 1.4f);
@@ -267,6 +276,63 @@ namespace Fragmentum.EditorTools
                 d.hiperarmadura = true;
                 d.damagedDuration = 0.2f; d.resistenciaRetroceso = 1f; d.deathDelay = 1.5f;
                 d.tinte = Hex("5A4E6E");
+            });
+
+            // Mundo 4 (Nivel4_Diseno.md, sección 5): el Eco de la Culpa. Lento, arrastra sus cadenas; ve
+            // (ConVision), así que con la Invisibilidad lo pierde y vuelve a su ronda. El ataque, con el
+            // ritmo de los Ecos desde el principio: el clip a 1,6× (0,8 s → 0,5 s) y 0,45 s de descanso.
+            Datos("Penitente", sobrescribir, d =>
+            {
+                d.nombreCanonico = "Penitente";
+                d.descripcion = "Culpa (Mundo 4): el Eco de este mundo. Encorvado, con placas de identificación en el pecho, " +
+                                "arrastra las cadenas de sus grilletes. Patrulla a 1 u/s y persigue a 2,2. Va en grupos de dos " +
+                                "y tres: para eso están los barriles. Si Kael se vuelve invisible, lo pierde y vuelve a su ronda. " +
+                                "Tocarlo no hace daño: solo el golpe.";
+                d.vidaMaxima = 3; d.danio = 1; d.danioContacto = 0;
+                d.velocidadPatrulla = 1f; d.velocidadPersecucion = 2.2f; d.esperaEnWaypoint = 1.5f;
+                d.deteccion = vision; d.detectionRadius = 6f;
+                d.attackRadius = 1.3f; d.attackCooldown = 0.45f;
+                d.duracionAtaque = 0.5f; d.inicioVentanaGolpe = 0.28125f; d.finVentanaGolpe = 0.375f;
+                d.damagedDuration = 0.3f; d.resistenciaRetroceso = 0.3f;
+                d.tinte = Hex("5C3D1E");
+            });
+
+            // Mundo 4 (Nivel4_Diseno.md, sección 5): arrodillado tras sus sacos, no se mueve; lo lleva todo su
+            // pieza (Artillero). Su controlador solo está para morir por su camino.
+            Datos("Artillero", sobrescribir, d =>
+            {
+                d.nombreCanonico = "Artillero";
+                d.descripcion = "Culpa (Mundo 4): un soldado arrodillado tras sus sacos terreros que no se mueve. Ve a Kael hasta " +
+                                "14 u por delante; apunta 0,8 s a su cabeza (una línea roja), dispara tres balas y recarga 2 s. " +
+                                "Solo agachado tras una cobertura no le alcanza. Si Kael llega a 1,5 u, le da un culatazo. " +
+                                "Invisible, Kael no existe para él.";
+                d.vidaMaxima = 3; d.danio = 1; d.danioContacto = 0;
+                d.velocidadPatrulla = 0f; d.velocidadPersecucion = 0f; d.esperaEnWaypoint = 0f;
+                d.deteccion = vision; d.detectionRadius = DisenoNivel4.VisionArtillero;
+                d.attackRadius = 0f; d.attackCooldown = 1f;
+                d.duracionAtaque = 0.5f; d.inicioVentanaGolpe = 0.2f; d.finVentanaGolpe = 0.35f;
+                d.damagedDuration = 0.25f; d.resistenciaRetroceso = 1f;
+                d.tinte = Hex("4A5C2E");
+            });
+
+            // Mundo 4: el mini-jefe. Camina despacio hacia Kael (su controlador, con hiperarmadura y sin
+            // ataque propio); el hachazo, el barrido, la cadena y las rodillas los lleva Verdugo.
+            Datos("Verdugo", sobrescribir, d =>
+            {
+                d.nombreCanonico = "El Verdugo";
+                d.descripcion = "Culpa (mini-jefe, vida 16): un Penitente enorme con capucha, hacha y garfio. Camina despacio " +
+                                "hacia Kael. Hachazo por delante (avisa 0,8 s, quita 2); barrido si Kael está a su espalda o " +
+                                "pegado (avisa 0,6 s, quita 1); cadena si se aleja más de 6 u (pasa por encima de Kael agachado). " +
+                                "Una explosión cerca lo deja de rodillas 2,5 s: los golpes valen el doble. Los golpes no lo " +
+                                "interrumpen. Si Kael se vuelve invisible, va a donde lo vio y barre a ciegas.";
+                d.vidaMaxima = 16; d.danio = 2; d.danioContacto = 0;
+                d.velocidadPatrulla = 0.8f; d.velocidadPersecucion = 1.6f; d.esperaEnWaypoint = 2f;
+                d.deteccion = vision; d.detectionRadius = 10f;
+                d.attackRadius = 0f; d.alturaAtaque = 3f; d.attackCooldown = 2f;
+                d.duracionAtaque = 1f; d.inicioVentanaGolpe = 0.8f; d.finVentanaGolpe = 1f;
+                d.hiperarmadura = true;
+                d.damagedDuration = 0.2f; d.resistenciaRetroceso = 1f; d.deathDelay = 1.5f;
+                d.tinte = Hex("3C2E1E");
             });
 
             // Los datos del Espectro y del Centinela Ciego existen desde la Fase 4: lo que cambió en la fase C
@@ -521,6 +587,14 @@ namespace Fragmentum.EditorTools
                 {
                     PrepararAcechador(instancia, controlador);
                 }
+                else if (nombre == "Artillero")
+                {
+                    PrepararArtillero(instancia, controlador);
+                }
+                else if (nombre == "Verdugo")
+                {
+                    PrepararVerdugo(instancia, controlador);
+                }
 
                 PrefabUtility.SaveAsPrefabAsset(instancia, $"{CarpetaPrefabs}/Enemigo_{nombre}.prefab");
             }
@@ -683,6 +757,151 @@ namespace Fragmentum.EditorTools
             var oido = instancia.AddComponent<CentinelaCiego>();
             Asignar(oido, "pivote", p => p.objectReferenceValue = serializado.FindProperty("pivote").objectReferenceValue);
             Asignar(oido, "sprite", p => p.objectReferenceValue = serializado.FindProperty("sprite").objectReferenceValue);
+        }
+
+        /// <summary>
+        /// El Artillero: arrodillado (<see cref="TamanoArtillero"/>), sin daño por contacto, la culata
+        /// delante (el arma del controlador) y la línea roja del aviso (un LineRenderer sin luz). Mira a
+        /// la izquierda y no patrulla: su pieza lleva el mando.
+        /// </summary>
+        private static void PrepararArtillero(GameObject instancia, EnemyController controlador)
+        {
+            var serializado = new SerializedObject(controlador);
+            var sprite = serializado.FindProperty("sprite").objectReferenceValue as SpriteRenderer;
+            var arma = serializado.FindProperty("arma").objectReferenceValue as Hitbox;
+            var contacto = serializado.FindProperty("contacto").objectReferenceValue as Hitbox;
+            var pivote = serializado.FindProperty("pivote").objectReferenceValue as Transform;
+            var mitad = TamanoArtillero.y * 0.5f;
+
+            var cuerpo = instancia.GetComponent<CapsuleCollider2D>();
+            cuerpo.size = TamanoArtillero;
+            cuerpo.offset = new Vector2(0f, mitad);
+            if (sprite != null)
+            {
+                // La cápsula provisional mide 1 × 2.
+                sprite.transform.localPosition = new Vector3(0f, mitad, 0f);
+                sprite.transform.localScale = new Vector3(TamanoArtillero.x, mitad, 1f);
+            }
+
+            if (arma != null)
+            {
+                arma.transform.localPosition = new Vector3(0.9f, 0.8f, 0f);
+                arma.GetComponent<BoxCollider2D>().size = new Vector2(1.2f, 1f);
+            }
+
+            if (contacto != null)
+            {
+                contacto.gameObject.SetActive(false);
+            }
+
+            var artillero = instancia.AddComponent<Artillero>();
+            AjustarArtillero(artillero, CrearLineaDeTiro(instancia));
+            Asignar(artillero, "pivote", p => p.objectReferenceValue = pivote);
+            Asignar(artillero, "sprite", p => p.objectReferenceValue = sprite);
+        }
+
+        /// <summary>La línea roja del aviso del Artillero: un LineRenderer sin luz, apagado hasta que apunta.</summary>
+        internal static LineRenderer CrearLineaDeTiro(GameObject raiz)
+        {
+            var objetoLinea = new GameObject("LineaDeTiro");
+            objetoLinea.transform.SetParent(raiz.transform, false);
+            var linea = objetoLinea.AddComponent<LineRenderer>();
+            linea.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(GeneradorJefes.RutaMaterialSinLuz);
+            linea.useWorldSpace = true;
+            linea.positionCount = 2;
+            linea.widthMultiplier = 0.04f;
+            linea.startColor = ColorLineaDeTiro;
+            linea.endColor = ColorLineaDeTiro;
+            linea.numCapVertices = 0;
+            linea.sortingOrder = 9;
+            linea.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            linea.receiveShadows = false;
+            linea.enabled = false;
+            return linea;
+        }
+
+        /// <summary>Los tiempos, la vista y el cañón del Artillero (los de <see cref="DisenoNivel4"/>) y su línea de tiro.</summary>
+        internal static void AjustarArtillero(Artillero artillero, LineRenderer linea)
+        {
+            artillero.vision = DisenoNivel4.VisionArtillero;
+            artillero.tiempoApuntar = DisenoNivel4.ApuntaArtillero;
+            artillero.balas = DisenoNivel4.BalasPorRafaga;
+            artillero.entreBalas = DisenoNivel4.EntreBalas;
+            artillero.recarga = DisenoNivel4.RecargaArtillero;
+            artillero.bajoLaCabeza = DisenoNivel4.BajoLaCabeza;
+            artillero.canon = new Vector2(DisenoNivel4.CanonDelante, DisenoNivel4.AlturaCanon);
+            Asignar(artillero, "linea", p => p.objectReferenceValue = linea);
+        }
+
+        /// <summary>
+        /// El Verdugo: un cuerpo grande (<see cref="TamanoVerdugo"/>), sin daño por contacto, las zonas de
+        /// daño del hachazo (por delante) y del barrido (a su alrededor), apagadas hasta que golpea, y el
+        /// garfio de su cadena (sin arte, un rectángulo).
+        /// </summary>
+        private static void PrepararVerdugo(GameObject instancia, EnemyController controlador)
+        {
+            var serializado = new SerializedObject(controlador);
+            var sprite = serializado.FindProperty("sprite").objectReferenceValue as SpriteRenderer;
+            var contacto = serializado.FindProperty("contacto").objectReferenceValue as Hitbox;
+            var pivote = serializado.FindProperty("pivote").objectReferenceValue as Transform;
+            var mitad = TamanoVerdugo.y * 0.5f;
+
+            var cuerpo = instancia.GetComponent<CapsuleCollider2D>();
+            cuerpo.size = TamanoVerdugo;
+            cuerpo.offset = new Vector2(0f, mitad);
+            if (sprite != null)
+            {
+                sprite.transform.localPosition = new Vector3(0f, mitad, 0f);
+                sprite.transform.localScale = new Vector3(TamanoVerdugo.x, mitad, 1f);
+            }
+
+            if (contacto != null)
+            {
+                contacto.gameObject.SetActive(false);
+            }
+
+            var verdugo = instancia.AddComponent<Verdugo>();
+            ArmarGolpesDelVerdugo(instancia, pivote, verdugo);
+
+            var garfio = new GameObject("Garfio");
+            garfio.transform.SetParent(instancia.transform, false);
+            garfio.transform.localScale = new Vector3(verdugo.radioGarfio * 2f, verdugo.radioGarfio * 2f, 1f);
+            var dibujoGarfio = garfio.AddComponent<SpriteRenderer>();
+            dibujoGarfio.sprite = SpriteCuadrado;
+            dibujoGarfio.color = new Color(0.4f, 0.32f, 0.27f, 1f);
+            dibujoGarfio.sortingOrder = 6;
+            garfio.SetActive(false);
+
+            Asignar(verdugo, "garfio", p => p.objectReferenceValue = garfio.transform);
+            Asignar(verdugo, "pivote", p => p.objectReferenceValue = pivote);
+            Asignar(verdugo, "sprite", p => p.objectReferenceValue = sprite);
+        }
+
+        /// <summary>Las zonas de daño del hachazo (por delante, se voltea con él) y del barrido (a su alrededor).</summary>
+        internal static void ArmarGolpesDelVerdugo(GameObject raiz, Transform pivote, Verdugo verdugo)
+        {
+            var alcance = verdugo.alcanceHachazo;
+            var hachazo = ZonaDeGolpe(pivote != null ? pivote : raiz.transform, "Hachazo",
+                new Vector2(TamanoVerdugo.x * 0.5f + alcance * 0.5f - 0.3f, 1.25f), new Vector2(alcance, 2.5f), 2);
+            var barrido = ZonaDeGolpe(raiz.transform, "Barrido", new Vector2(0f, 0.9f), new Vector2(verdugo.radioBarrido * 2f, 1.8f), 1);
+            Asignar(verdugo, "hachazo", p => p.objectReferenceValue = hachazo);
+            Asignar(verdugo, "barrido", p => p.objectReferenceValue = barrido);
+        }
+
+        // Una zona de daño apagada (capa EnemyWeapon) que solo golpea a Kael.
+        private static Hitbox ZonaDeGolpe(Transform padre, string nombre, Vector2 centro, Vector2 tamano, int danio)
+        {
+            var objeto = new GameObject(nombre) { layer = Capa(Capas.EnemyWeapon) };
+            objeto.transform.SetParent(padre, false);
+            objeto.transform.localPosition = centro;
+            var caja = objeto.AddComponent<BoxCollider2D>();
+            caja.isTrigger = true;
+            caja.size = tamano;
+            var zona = objeto.AddComponent<Hitbox>();
+            Asignar(zona, "objetivos", p => p.intValue = Capas.Mascara(Capas.Player));
+            Asignar(zona, "danio", p => p.intValue = danio);
+            objeto.SetActive(false);
+            return zona;
         }
 
         /// <summary>

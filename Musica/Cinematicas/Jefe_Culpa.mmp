@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+<!DOCTYPE lmms-project>
+<lmms-project version="1.0" creator="LMMS" creatorversion="1.2.2" type="song">
+  <head bpm="75" timesig_numerator="4" timesig_denominator="4" mastervol="100" masterpitch="0" />
+  <song>
+    <trackcontainer type="song">
+      <track name="Organo" type="0" muted="0" solo="0">
+        <instrumenttrack vol="60" pan="0" fxch="2" basenote="45" pitch="2" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="instruments/church_organ01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0.0632456" hold="0" dec="0" sustain="1" rel="0.264575" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Organo" pos="0" len="768" steps="16" muted="0" type="1">
+          <note pos="300" len="96" key="38" vol="110" pan="0" />
+          <note pos="300" len="96" key="41" vol="110" pan="0" />
+          <note pos="300" len="96" key="45" vol="110" pan="0" />
+          <note pos="300" len="96" key="50" vol="110" pan="0" />
+          <note pos="396" len="72" key="36" vol="105" pan="0" />
+          <note pos="396" len="72" key="40" vol="105" pan="0" />
+          <note pos="396" len="72" key="43" vol="105" pan="0" />
+          <note pos="396" len="72" key="48" vol="105" pan="0" />
+          <note pos="468" len="48" key="34" vol="105" pan="0" />
+          <note pos="468" len="48" key="38" vol="105" pan="0" />
+          <note pos="468" len="48" key="41" vol="105" pan="0" />
+          <note pos="468" len="48" key="46" vol="105" pan="0" />
+          <note pos="516" len="72" key="33" vol="105" pan="0" />
+          <note pos="516" len="72" key="37" vol="105" pan="0" />
+          <note pos="516" len="72" key="40" vol="105" pan="0" />
+          <note pos="516" len="72" key="45" vol="105" pan="0" />
+        </pattern>
+      </track>
+      <track name="Pedal" type="0" muted="0" solo="0">
+        <instrumenttrack vol="65" pan="0" fxch="2" basenote="33" pitch="5" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="instruments/church_organ02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0.1" hold="0" dec="0" sustain="1" rel="0.282843" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Pedal" pos="0" len="768" steps="16" muted="0" type="1">
+          <note pos="18" len="282" key="26" vol="80" pan="0" />
+          <note pos="300" len="96" key="26" vol="100" pan="0" />
+          <note pos="396" len="72" key="24" vol="100" pan="0" />
+          <note pos="468" len="48" key="22" vol="100" pan="0" />
+          <note pos="516" len="72" key="21" vol="100" pan="0" />
+        </pattern>
+      </track>
+      <track name="Campana" type="0" muted="0" solo="0">
+        <instrumenttrack vol="200" pan="0" fxch="3" basenote="38" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="misc/dong02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.447214" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Campana" pos="0" len="576" steps="16" muted="0" type="1">
+          <note pos="18" len="144" key="26" vol="110" pan="0" />
+          <note pos="162" len="144" key="26" vol="90" pan="0" />
+          <note pos="300" len="180" key="26" vol="110" pan="0" />
+        </pattern>
+      </track>
+      <track name="Gran casa" type="0" muted="0" solo="0">
+        <instrumenttrack vol="200" pan="0" fxch="3" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="drums/bassdrum_acoustic02.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.244949" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Gran casa" pos="0" len="576" steps="16" muted="0" type="1">
+          <note pos="300" len="120" key="57" vol="115" pan="0" />
+        </pattern>
+      </track>
+      <track name="Caja" type="0" muted="0" solo="0">
+        <instrumenttrack vol="161" pan="0" fxch="3" basenote="57" pitch="0" pitchrange="1" usemasterpitch="1">
+          <instrument name="audiofileprocessor">
+            <audiofileprocessor src="drums/snare_acoustic01.ogg" amp="100" looped="0" sframe="0" eframe="1" lframe="0" reversed="0" stutter="0" interp="1" />
+          </instrument>
+          <eldata fcut="14000" fres="0.5" ftype="0" fwet="0">
+            <elvol pdel="0" att="0" hold="0" dec="0" sustain="1" rel="0.1" amt="1" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elcut pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+            <elres pdel="0" att="0" hold="0" dec="0.5" sustain="0.5" rel="0.1" amt="0" lpdel="0" latt="0" lspd="0.1" lshp="0" lamt="0" x100="0" ctlenvamt="0" userwavefile="" syncmode="0" lspd_numerator="4" lspd_denominator="4" />
+          </eldata>
+          <chordcreator chord="0" chordrange="1" chord-enabled="0" />
+          <arpeggiator arp="0" arprange="1" arptime="100" arpgate="100" arpdir="0" arpmode="0" arptime_numerator="4" arptime_denominator="4" syncmode="0" arp-enabled="0" />
+          <fxchain numofeffects="0" enabled="0" />
+        </instrumenttrack>
+        <pattern name="Caja" pos="0" len="768" steps="16" muted="0" type="1">
+          <note pos="480" len="6" key="57" vol="40" pan="0" />
+          <note pos="486" len="6" key="57" vol="44" pan="0" />
+          <note pos="492" len="6" key="57" vol="48" pan="0" />
+          <note pos="498" len="6" key="57" vol="52" pan="0" />
+          <note pos="504" len="6" key="57" vol="56" pan="0" />
+          <note pos="510" len="6" key="57" vol="60" pan="0" />
+          <note pos="516" len="6" key="57" vol="64" pan="0" />
+          <note pos="522" len="6" key="57" vol="68" pan="0" />
+          <note pos="528" len="6" key="57" vol="72" pan="0" />
+          <note pos="534" len="6" key="57" vol="76" pan="0" />
+          <note pos="540" len="6" key="57" vol="80" pan="0" />
+          <note pos="546" len="6" key="57" vol="84" pan="0" />
+          <note pos="552" len="6" key="57" vol="88" pan="0" />
+          <note pos="558" len="6" key="57" vol="92" pan="0" />
+          <note pos="564" len="6" key="57" vol="96" pan="0" />
+          <note pos="570" len="6" key="57" vol="100" pan="0" />
+          <note pos="576" len="6" key="57" vol="104" pan="0" />
+          <note pos="582" len="6" key="57" vol="108" pan="0" />
+        </pattern>
+      </track>
+    </trackcontainer>
+    <fxmixer>
+      <fxchannel num="0" name="Master" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+      </fxchannel>
+      <fxchannel num="1" name="Reverb" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="1" enabled="1">
+          <effect name="reverbsc" on="1" wet="1" gate="0" autoquit="8000" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <ReverbSCControls input_gain="0" size="0.92" color="6000" output_gain="0" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+      </fxchannel>
+      <fxchannel num="2" name="Organo" volume="1" muted="0" soloed="0">
+        <fxchain numofeffects="1" enabled="1">
+          <effect name="dualfilter" on="1" wet="1" gate="0" autoquit="1" autoquit_numerator="4" autoquit_denominator="4" syncmode="0">
+            <DualFilterControls enabled1="1" filter1="1" cut1="90" res1="0.5" gain1="100" enabled2="0" filter2="0" cut2="14000" res2="0.5" gain2="100" mix="-1" />
+            <key />
+          </effect>
+        </fxchain>
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.5" />
+      </fxchannel>
+      <fxchannel num="3" name="Golpes" volume="0.8" muted="0" soloed="0">
+        <fxchain numofeffects="0" enabled="0" />
+        <send channel="0" amount="1" />
+        <send channel="1" amount="0.35" />
+      </fxchannel>
+    </fxmixer>
+    <timeline lp0pos="0" lp1pos="588" lpstate="0" />
+    <controllers />
+    <projectnotes>La presentación del Juez Silente (9,8 s). El pedal del órgano y la campana sobre la plaza; con su primer plano, el órgano entero en Re menor, y el bajo que baja (Re, Do, Si bemol, La) con un redoble de caja, hasta el primer compás de su tema.</projectnotes>
+  </song>
+</lmms-project>

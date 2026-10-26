@@ -36,7 +36,7 @@ namespace Fragmentum.Tests
         // --- Prefabs y datos ---
 
         [Test]
-        public void ElEspectro_EmpiezaDormido_YSuGolpeAvisaMedioSegundo()
+        public void ElEspectro_EmpiezaDormido_YAtacaAlRitmoDelEco_SinQueDejeDeVerseVenir()
         {
             var prefab = Prefab("Espectro");
             var espectro = prefab.GetComponent<Espectro>();
@@ -52,7 +52,10 @@ namespace Fragmentum.Tests
 
             var datos = Datos("Espectro");
             Assert.IsInstanceOf<DeteccionEnOscuridad>(datos.deteccion, "Despierto, solo se acerca a oscuras.");
-            Assert.AreEqual(0.5f, datos.inicioVentanaGolpe, 1e-4f, "Solo se le ve entero al atacar: el golpe avisa medio segundo.");
+            Assert.AreEqual(ConstructorEspectro.InicioDelGolpe, datos.inicioVentanaGolpe, 1e-4f, "Avisa con a1 al ritmo del Eco (1,6×): 0,31 s.");
+            Assert.AreEqual(0.5f / ConstructorEcoIra.VelocidadAtaque, datos.inicioVentanaGolpe, 1e-4f);
+            Assert.Less(1f / espectro.velocidadFundido + 0.1f, datos.inicioVentanaGolpe,
+                "Solo se le ve entero al atacar: aparece del todo al menos una décima antes del golpe.");
             Assert.Greater(datos.finVentanaGolpe, datos.inicioVentanaGolpe);
             Assert.LessOrEqual(datos.finVentanaGolpe, datos.duracionAtaque);
             Assert.AreEqual(2, datos.vidaMaxima, "Frágil.");

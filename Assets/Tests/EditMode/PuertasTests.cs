@@ -14,7 +14,7 @@ namespace Fragmentum.Tests
 {
     /// <summary>
     /// El arte de lo que abre y cierra cada nivel (tanda del 2026-10-13): la puerta de salida, la
-    /// verja de la arena, el checkpoint y la cinemática de salida, en los dos mundos montados.
+    /// verja de la arena, el checkpoint y la cinemática de salida, en los tres mundos montados.
     /// </summary>
     public class PuertasTests
     {
@@ -37,7 +37,9 @@ namespace Fragmentum.Tests
                     Assert.IsNotNull(dibujo, $"Falta un dibujo de la puerta de {juego.Clave}: python Herramientas/traer_arte_puertas.py.");
                     Assert.AreEqual(juego.PixelesPorUnidadPuerta, dibujo.pixelsPerUnit, 1e-3f, dibujo.name);
                     Assert.AreEqual(juego.LienzoPuerta, new Vector2Int((int)dibujo.rect.width, (int)dibujo.rect.height), "No se recorta ni se reescala.");
-                    Assert.That(dibujo.bounds.size.y, Is.InRange(3.9f, 4.1f), $"{dibujo.name}: algo más del doble que Kael.");
+                    // Lo que mide por encima del suelo: la de la Culpa, al abrirse, deja caer sus cadenas a su pie.
+                    Assert.That(juego.AltoPuerta, Is.InRange(3.9f, 4.1f), $"{dibujo.name}: algo más del doble que Kael.");
+                    Assert.LessOrEqual(dibujo.bounds.size.y - juego.AltoPuerta, 0.3f, $"{dibujo.name}: bajo el suelo, como mucho sus cadenas.");
                     Assert.AreEqual(dibujo.rect.width * 0.5f, dibujo.pivot.x, 0.6f, $"{dibujo.name}: el pivote en el centro…");
                     Assert.AreEqual(dibujo.rect.height - juego.SueloPuerta, dibujo.pivot.y, 0.01f, "…y en la fila en que apoya.");
                     Assert.AreEqual(FilterMode.Point, dibujo.texture.filterMode, "Pixel art.");
@@ -71,6 +73,8 @@ namespace Fragmentum.Tests
 
         [TestCase(1)]
         [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
         public void LaSalida_EsLaPuertaDelMundo_CerradaYDentroDeLaArena(int id)
         {
             var nivel = Nivel(id);
@@ -93,7 +97,8 @@ namespace Fragmentum.Tests
                 var limites = puerta.GetComponent<SpriteRenderer>().bounds;
                 Assert.GreaterOrEqual(limites.min.x, arena.Limites.x, "La puerta cabe en la arena…");
                 Assert.LessOrEqual(limites.max.x, arena.Limites.y, "…sin meterse en su pared.");
-                Assert.AreEqual(salida.transform.position.y, limites.min.y, 0.05f, "De pie en el suelo.");
+                var bajoElSuelo = (juego.LienzoPuerta.y - juego.SueloPuerta) / juego.PixelesPorUnidadPuerta;
+                Assert.AreEqual(salida.transform.position.y, limites.min.y + bajoElSuelo, 0.05f, "De pie en el suelo (debajo, solo las cadenas que caen al abrirse).");
 
                 var zona = salida.GetComponent<BoxCollider2D>();
                 Assert.That(zona.bounds.center.x, Is.InRange(limites.min.x, limites.max.x), "Se sale cruzando la puerta.");
@@ -106,6 +111,8 @@ namespace Fragmentum.Tests
 
         [TestCase(1)]
         [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
         public void LosCheckpoints_LlevanElDibujoDelMundo_EnLugarDeLaBandera(int id)
         {
             var nivel = Nivel(id);
@@ -132,6 +139,8 @@ namespace Fragmentum.Tests
 
         [TestCase(1)]
         [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
         public void LaPuertaDeLaArena_EsLaVerjaDelMundo_YLlegaAlTecho(int id)
         {
             var nivel = Nivel(id);

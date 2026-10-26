@@ -77,7 +77,8 @@ namespace Fragmentum.UI
                 return;
             }
 
-            _texto.text = $"{_tecla} · {candidato.Accion}";
+            // Lo que no se puede usar ahora solo dice por qué (una memoria con Kael invisible).
+            _texto.text = candidato.Usable ? $"{_tecla} · {candidato.Accion}" : candidato.Accion;
             _texto.rectTransform.anchoredPosition = local;
             if (!_texto.gameObject.activeSelf)
             {

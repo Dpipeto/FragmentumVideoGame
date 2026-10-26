@@ -222,12 +222,28 @@ namespace Fragmentum.Tests.PlayMode
             yield return CrearJugadorEnSuelo(new Vector2(-6f, 0f));
             Assert.IsFalse(rama.Delatada, "A oscuras, como las demás.");
 
+            var dibujo = rama.GetComponentInChildren<SpriteRenderer>();
             Jugador.Motor.Teletransportar(new Vector2(0f, 0.05f));
             yield return EsperarHasta(() => plataforma.Estado == ESTADOS_PLATAFORMA.CRACKED, 0.3f, "que cruja al pisarla");
             var pisadaEn = Time.time;
+            if (rama.ConArte)
+            {
+                yield return null;
+                Assert.AreEqual(rama.DibujoDe(ESTADOS_PLATAFORMA.CRACKED, false, 0f, 1f), dibujo.sprite, "Con arte, crujiendo se ve podrida.");
+            }
+
             yield return EsperarHasta(() => plataforma.Caida, 1f, "que se parta");
             Assert.AreEqual(0.3f, Time.time - pisadaEn, Margen, "Cruje 0,3 s.");
             var rotaEn = Time.time;
+            if (rama.ConArte)
+            {
+                yield return null;
+                Assert.AreEqual(rama.DibujoDe(ESTADOS_PLATAFORMA.BROKEN, false, 0f, plataforma.duracionCaida), dibujo.sprite, "Se dobla…");
+                yield return new WaitForSeconds(plataforma.duracionCaida * 0.6f);
+                Assert.AreEqual(rama.DibujoDe(ESTADOS_PLATAFORMA.BROKEN, false, plataforma.duracionCaida, plataforma.duracionCaida), dibujo.sprite,
+                    "…y se deshace en astillas.");
+            }
+
             yield return new WaitForSeconds(0.5f);
             Assert.Less(Jugador.transform.position.y, -1f, "Kael cae.");
 
@@ -237,7 +253,15 @@ namespace Fragmentum.Tests.PlayMode
             Luz(new Vector2(2.5f, 0f));
             yield return DosFotogramas();
             Assert.IsTrue(rama.Delatada, "Con la luz de una antorcha, se delata.");
-            Assert.AreEqual(rama.ColorPodrida, rama.GetComponentInChildren<SpriteRenderer>().color);
+            if (rama.ConArte)
+            {
+                Assert.AreEqual(rama.DibujoDe(ESTADOS_PLATAFORMA.INTACT, true, 0f, 1f), dibujo.sprite, "Con arte, se ve podrida.");
+                Assert.AreEqual(Color.white, dibujo.color, "Sin teñirla: es su dibujo.");
+            }
+            else
+            {
+                Assert.AreEqual(rama.ColorPodrida, dibujo.color);
+            }
         }
 
         // --- Anillos de ruido y luz de Kael ---

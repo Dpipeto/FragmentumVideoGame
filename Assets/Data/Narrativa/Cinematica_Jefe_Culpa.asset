@@ -16,38 +16,41 @@ MonoBehaviour:
   diapositivas:
   - imagen: {fileID: 0}
     texto: 
-    carteles:
-    - texto: JUEZ SILENTE
-      inicio: 0.2
-      duracion: 2.8
-      posicion: 1
-      titulo: 1
-      sinFundido: 0
-      enPunto: 0
-      punto: {x: 0, y: 0}
-      alineacion: 0
-    - texto: Campos de Batalla Arrasados
-      inicio: 0.6
-      duracion: 2.4
-      posicion: 2
-      titulo: 0
-      sinFundido: 0
-      enPunto: 0
-      punto: {x: 0, y: 0}
-      alineacion: 0
-    duracion: 3
+    carteles: []
+    duracion: 0.3
     audio: {fileID: 0}
     fundidoEntrada: 0
     fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
+  - imagen: {fileID: 21300000, guid: d58ec7882cf118f48a83062458403e38, type: 3}
+    texto: 
+    carteles:
+    - texto: No dicto sentencia.
+      inicio: 0.9
+      duracion: 3.3
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 300, y: 250}
+      alineacion: 1
+    duracion: 3.5
+    audio: {fileID: 0}
+    fundidoEntrada: 0.7
+    fundidoSalida: 0.3
     desplazamiento: {x: 0, y: 0}
     temblores: []
     brasas: 0
     flashFinal: 0
     cues: []
   - imagen: {fileID: 0}
-    texto: "Juez Silente: No dicto sentencia. Solo te muestro lo que \xE9l se neg\xF3 a mirar."
+    texto: 
     carteles: []
-    duracion: 4.5
+    duracion: 0.2
     audio: {fileID: 0}
     fundidoEntrada: 0
     fundidoSalida: 0
@@ -56,15 +59,55 @@ MonoBehaviour:
     brasas: 0
     flashFinal: 0
     cues: []
+  - imagen: {fileID: 21300000, guid: d1b565859b93fa4409a88a775f1c8f08, type: 3}
+    texto: 
+    carteles:
+    - texto: "Solo te muestro lo que \xE9l se neg\xF3 a mirar."
+      inicio: 0.5
+      duracion: 2.7
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 244}
+      alineacion: 1
+    - texto: JUEZ SILENTE
+      inicio: 3.2
+      duracion: 1.5
+      posicion: 2
+      titulo: 1
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 230}
+      alineacion: 1
+    - texto: Campos de Batalla Arrasados
+      inicio: 3.2
+      duracion: 1.5
+      posicion: 2
+      titulo: 0
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 240, y: 252}
+      alineacion: 1
+    duracion: 3.9
+    audio: {fileID: 0}
+    fundidoEntrada: 0.6
+    fundidoSalida: 0.3
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   saltable: 1
-  soloPrimeraVez: 0
+  soloPrimeraVez: 1
   llevaDialogoDelJefe: 1
-  montaje: 0
-  sobreElJuego: 1
+  montaje: 1
+  sobreElJuego: 0
   opacidadVelo: 0.55
-  escalaEntera: 0
+  escalaEntera: 1
+  rejilla: {x: 480, y: 268}
   fuente: {fileID: 0}
-  tamanoFuente: 8
+  tamanoFuente: 10
   interlineado: 0
   colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
   temblorPixeles: 1
@@ -72,8 +115,8 @@ MonoBehaviour:
   fundidoImagen: 0.4
   fundidoTexto: 0.4
   margenTexto: 0.8
-  bloqueoSalto: 1
-  avisoSaltar: Pulsa cualquier tecla para saltar
+  bloqueoSalto: 0.5
+  avisoSaltar: 
   finAviso: 4
   opacidadAviso: 0.45
-  musica: {fileID: 0}
+  musica: {fileID: 8300000, guid: 27aee725e65f93a469d9af331a367d3d, type: 3}

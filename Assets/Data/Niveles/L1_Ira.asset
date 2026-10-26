@@ -26,8 +26,8 @@ MonoBehaviour:
   - {r: 0.101960786, g: 0.03137255, b: 0, a: 1}
   - {r: 0.36078432, g: 0.2509804, b: 0.2, a: 1}
   icono: {fileID: 0}
-  musica: {fileID: 0}
-  musicaJefe: {fileID: 0}
+  musica: {fileID: 8300000, guid: a34f72189a0af374fb2a28c16bb77e37, type: 3}
+  musicaJefe: {fileID: 8300000, guid: 57a7d74ddc006464e9efc2bb1678cf33, type: 3}
   jefe: {fileID: 11400000, guid: 8d7b89ccb6d5f614bbf73fbedc31e570, type: 2}
   fragmento: {fileID: 11400000, guid: c2fece0311d407b4d8381aab994e3ff7, type: 2}
   habilidadOtorgada: {fileID: 11400000, guid: cb7454d7d761b7446bb40f288a1958dd, type: 2}
@@ -41,6 +41,7 @@ MonoBehaviour:
     sigilo: 0
     oscuridad: 0
     radioLuzJugador: 0
+    colorVeloAgua: {r: 0, g: 0, b: 0, a: 0}
   secciones:
   - nombre: "Secci\xF3n 1"
     desdeX: 0

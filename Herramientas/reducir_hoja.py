@@ -13,6 +13,10 @@ Uso:
 FOTOGRAMAS es cuántos fotogramas tiene la tira exportada (en horizontal). --conservar deja solo
 los N primeros: sirve para quitar la vuelta de una exportación en ping-pong.
 
+--escala E fija la escala cuando no es entera (el daño de Kael llegó a 7,5×: cada píxel de arte mide
+7 u 8 píxeles, alternos). Se toma el píxel del centro de cada bloque y se comprueba que, ampliando la
+reducción otra vez a E×, sale la imagen exportada píxel a píxel: si no, no se guarda nada.
+
 Requiere Pillow y numpy (pip install pillow numpy).
 """
 
@@ -42,6 +46,7 @@ def main() -> int:
     parser.add_argument("fotogramas", type=int)
     parser.add_argument("salida")
     parser.add_argument("--conservar", type=int, default=None, help="deja solo los N primeros fotogramas")
+    parser.add_argument("--escala", type=float, default=None, help="la escala de la exportación, si no es entera")
     args = parser.parse_args()
 
     imagen = np.array(Image.open(args.entrada).convert("RGBA"))
@@ -51,17 +56,37 @@ def main() -> int:
         return 1
 
     ancho_fotograma = ancho // args.fotogramas
-    n = escala_de(imagen, ancho_fotograma)
-    nativa = imagen[::n, ::n]
+    if args.escala:
+        n = args.escala
+        nativa = reducir_no_entera(imagen, n)
+        if nativa is None:
+            print(f"A {n}x no sale exacta: la exportación no es una ampliación por vecino más cercano.", file=sys.stderr)
+            return 1
+    else:
+        n = escala_de(imagen, ancho_fotograma)
+        nativa = imagen[::n, ::n]
 
+    ancho_nativo = int(round(ancho_fotograma / n))
     conservar = args.conservar or args.fotogramas
-    nativa = nativa[:, : conservar * (ancho_fotograma // n)]
+    nativa = nativa[:, : conservar * ancho_nativo]
 
     Image.fromarray(nativa).save(args.salida)
     # Sin "×": la consola de Windows no siempre lo muestra.
-    print(f"{args.entrada}: escala {n}x, {conservar} fotogramas de "
-          f"{ancho_fotograma // n}x{alto // n} px -> {args.salida}")
+    print(f"{args.entrada}: escala {n:g}x, {conservar} fotogramas de "
+          f"{ancho_nativo}x{nativa.shape[0]} px -> {args.salida}")
     return 0
+
+
+def reducir_no_entera(imagen: np.ndarray, escala: float):
+    """Reduce una exportación a escala no entera tomando el centro de cada bloque; None si no es exacta."""
+    alto, ancho, _ = imagen.shape
+    nx, ny = int(round(ancho / escala)), int(round(alto / escala))
+    xs = np.floor((np.arange(nx) + 0.5) * escala).astype(int)
+    ys = np.floor((np.arange(ny) + 0.5) * escala).astype(int)
+    nativa = imagen[ys][:, xs]
+    cx = np.minimum((np.arange(ancho) / escala).astype(int), nx - 1)
+    cy = np.minimum((np.arange(alto) / escala).astype(int), ny - 1)
+    return nativa if (nativa[cy][:, cx] == imagen).all() else None
 
 
 if __name__ == "__main__":

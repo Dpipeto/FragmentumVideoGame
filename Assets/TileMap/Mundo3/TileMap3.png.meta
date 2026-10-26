@@ -1,0 +1,392 @@
+fileFormatVersion: 2
+guid: 796f47c40b0ec744a9bcdf44b4f8897c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1400625492866471944
+    second: TileMap3_0
+  - first:
+      213: -6631607292366397049
+    second: TileMap3_1
+  - first:
+      213: 3868183326501921228
+    second: TileMap3_2
+  - first:
+      213: 3660588619070608619
+    second: TileMap3_3
+  - first:
+      213: 830107470754496782
+    second: TileMap3_4
+  - first:
+      213: -2792350633577383920
+    second: TileMap3_5
+  - first:
+      213: -2588813148724417388
+    second: TileMap3_6
+  - first:
+      213: 6004331155204211458
+    second: TileMap3_7
+  - first:
+      213: 3499516932451068609
+    second: TileMap3_8
+  - first:
+      213: 5243847004202142195
+    second: TileMap3_9
+  - first:
+      213: 4412921467589311696
+    second: TileMap3_10
+  - first:
+      213: 1298359327632273088
+    second: TileMap3_11
+  - first:
+      213: -8199628650757030151
+    second: TileMap3_12
+  - first:
+      213: 2888484147796619282
+    second: TileMap3_13
+  - first:
+      213: 4044095731427958669
+    second: TileMap3_14
+  - first:
+      213: -5393698106868345909
+    second: TileMap3_15
+  - first:
+      213: -8834935891538842929
+    second: TileMap3_16
+  - first:
+      213: -5689332032007465831
+    second: TileMap3_17
+  - first:
+      213: -3812073328245258815
+    second: TileMap3_18
+  - first:
+      213: -3988644508836904736
+    second: TileMap3_19
+  - first:
+      213: 7181151620566551824
+    second: TileMap3_20
+  - first:
+      213: 4983562504539980917
+    second: TileMap3_21
+  - first:
+      213: 8402840208237750807
+    second: TileMap3_22
+  - first:
+      213: -6752780727531887094
+    second: TileMap3_23
+  - first:
+      213: -6405864380032853479
+    second: TileMap3_24
+  - first:
+      213: -7660685153461590741
+    second: TileMap3_25
+  - first:
+      213: -4809026719886053255
+    second: TileMap3_26
+  - first:
+      213: 3008138344293809065
+    second: TileMap3_27
+  - first:
+      213: -7118192171583275366
+    second: TileMap3_28
+  - first:
+      213: 8480516967898170002
+    second: TileMap3_29
+  - first:
+      213: -4565400988122130548
+    second: TileMap3_30
+  - first:
+      213: -6019525834998752734
+    second: TileMap3_31
+  - first:
+      213: -8886120819305827427
+    second: TileMap3_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tierra
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 227
+        width: 32
+        height: 32
+      alignment: 9
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ead0686f4a53607418ec21c9631646f1
+      internalID: -369764231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Musgo
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 257
+        width: 45
+        height: 10
+      alignment: 9
+      pivot: {x: 0, y: 0.6}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea3de5ff1af14f7498843cec13df0844
+      internalID: 1581411115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raices
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 141
+        width: 39
+        height: 38
+      alignment: 9
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd57f57ee72581a4abd71bd14b78dffe
+      internalID: -1471771495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tumba
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 4
+        width: 89
+        height: 77
+      alignment: 9
+      pivot: {x: 0.5, y: 0.025974026}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 469f9f46d75a4d043a807fc5be61f90b
+      internalID: 1652757269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Lampara
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 90
+        width: 28
+        height: 43
+      alignment: 9
+      pivot: {x: 0.5, y: 0.9767442}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eac0212139eec04459dea151f8cd58f0
+      internalID: -1524234229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Lona
+      rect:
+        serializedVersion: 2
+        x: 252
+        y: 68
+        width: 72
+        height: 58
+      alignment: 9
+      pivot: {x: 0.5, y: 0.94827586}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8d5c213f6efdf84c9c7b3846d1ac87d
+      internalID: 1799685052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Lianas
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 74
+        width: 47
+        height: 57
+      alignment: 9
+      pivot: {x: 0.5, y: 0.98245615}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef3026f265e768c4f911a0b7f3ea6ad5
+      internalID: 467204380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 6b6f865a4a4c9c248963daf984bb20bd
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Lampara: -1524234229
+      Lianas: 467204380
+      Lona: 1799685052
+      Musgo: 1581411115
+      Raices: -1471771495
+      Tierra: -369764231
+      Tumba: 1652757269
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

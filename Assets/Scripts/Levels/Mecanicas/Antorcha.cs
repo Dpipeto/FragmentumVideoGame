@@ -9,9 +9,10 @@ namespace Fragmentum.Levels.Mecanicas
     /// La antorcha del mundo del Miedo (la <c>Torch</c> del Anexo A). La luz enseña lo que hay, pero
     /// despierta lo que dormía: cada antorcha es una decisión.
     ///
-    /// - <b>Apagada</b>: Kael la enciende con Interactuar (E) a <see cref="distanciaEncender"/> de su pie.
+    /// - <b>Apagada</b>: Kael la enciende con Interactuar (W) a <see cref="distanciaEncender"/> de su pie.
     /// - <b>Encendida</b>: alumbra <see cref="radio"/> u durante <see cref="duracion"/> s (Anexo A: 8 u y
-    ///   15 s) y parpadea los <see cref="parpadeo"/> últimos. Su círculo cuenta como iluminado
+    ///   15 s) y parpadea los <see cref="parpadeo"/> últimos. Al encenderse suena un golpe de cuerdas
+    ///   (<see cref="SonidoAlEncender"/>, el «stinger» del Anexo A). Su círculo cuenta como iluminado
     ///   (<see cref="Iluminacion"/>): ahí se ven los cepos y las ramas podridas, y los Espectros no se
     ///   acercan a Kael. Al encenderse lo anuncia (<see cref="AlEncenderse"/>), para que despierten
     ///   los Espectros que duermen en su radio (fase C).
@@ -20,7 +21,8 @@ namespace Fragmentum.Levels.Mecanicas
     ///   estar a salvo para siempre.
     ///
     /// Es la versión completa de <see cref="ZonaIluminada"/>, el círculo de luz fijo de la Fase 4.
-    /// La luz que se ve es una luz 2D; la que cuenta para el juego es su círculo.
+    /// La luz que se ve es una luz 2D; la que cuenta para el juego es su círculo. Con arte, su
+    /// Animator sigue su estado (el entero «Estado»): apagada, la llama y el tocón consumido.
     /// </summary>
     [DisallowMultipleComponent]
     public class Antorcha : MonoBehaviour, IFuenteLuz, IInteractuable
@@ -48,8 +50,17 @@ namespace Fragmentum.Levels.Mecanicas
 
         [SerializeField] private float intensidad = 1.2f;
 
-        [Tooltip("Lo que cambia de color con su estado (la cabeza de la antorcha). Sin arte, un rectángulo.")]
+        [Tooltip("Lo que cambia de color con su estado (la cabeza de la antorcha). Sin arte, un rectángulo; con arte, vacío.")]
         [SerializeField] private SpriteRenderer cabeza;
+
+        [Tooltip("Con arte: el Animator de su dibujo, que sigue su estado (el entero «Estado»).")]
+        [SerializeField] private Animator animator;
+
+        [Tooltip("Lo que suena al encenderla (Anexo A: «stinger de cuerdas»). Vacío = nada.")]
+        [SerializeField] private AudioClip sonidoAlEncender;
+
+        [Range(0f, 1f)]
+        [SerializeField] private float volumenSonido = 0.6f;
 
         [SerializeField] private Color colorApagada = new Color(0.25f, 0.22f, 0.2f, 1f);
         [SerializeField] private Color colorEncendida = new Color(1f, 0.62f, 0.25f, 1f);
@@ -57,6 +68,7 @@ namespace Fragmentum.Levels.Mecanicas
 
         private SeguimientoJugador _kael;
         private float _apagaEn;
+        private AudioSource _fuente;
 
         /// <summary>Una antorcha se acaba de encender. Para despertar a los Espectros de su radio (fase C).</summary>
         public static event Action<Antorcha> AlEncenderse;
@@ -73,6 +85,11 @@ namespace Fragmentum.Levels.Mecanicas
         public bool Parpadea => Estado == ESTADOS_ANTORCHA.LIT && Restante <= parpadeo;
 
         public Light2D Luz => luz;
+
+        public AudioClip SonidoAlEncender => sonidoAlEncender;
+
+        /// <summary>Por donde suenan sus cuerdas (null hasta que suenan por primera vez).</summary>
+        public AudioSource Fuente => _fuente;
 
         // --- IFuenteLuz ---
 
@@ -141,6 +158,12 @@ namespace Fragmentum.Levels.Mecanicas
             // Solo para estar enganchada a Kael y enterarse de cuándo reaparece.
             _ = _kael.Jugador;
 
+            // Antes de que el Animator se evalúe en este fotograma.
+            if (animator != null && animator.isInitialized)
+            {
+                AnimatorParams.FijarEntero(animator, AnimatorParams.EstadoMecanica, (int)Estado);
+            }
+
             if (Estado != ESTADOS_ANTORCHA.LIT)
             {
                 return;
@@ -168,8 +191,29 @@ namespace Fragmentum.Levels.Mecanicas
 
             _apagaEn = Time.time + duracion;
             Cambiar(ESTADOS_ANTORCHA.LIT);
+            Sonar();
             AlEncenderse?.Invoke(this);
             return true;
+        }
+
+        // Las cuerdas, sin posición: suenan igual estén donde estén.
+        private void Sonar()
+        {
+            if (sonidoAlEncender == null)
+            {
+                return;
+            }
+
+            if (_fuente == null)
+            {
+                _fuente = gameObject.AddComponent<AudioSource>();
+                _fuente.playOnAwake = false;
+                _fuente.spatialBlend = 0f;
+            }
+
+            _fuente.clip = sonidoAlEncender;
+            _fuente.volume = volumenSonido * AjustesAudio.Efectos;
+            _fuente.Play();
         }
 
         /// <summary>Vuelve a estar apagada y lista. Lo hace sola cuando Kael reaparece.</summary>

@@ -17,7 +17,7 @@ namespace Fragmentum.Data
         [TextArea(2, 4)] public string descripcion;
 
         [Tooltip("Teclas, para la pantalla «Mecánicas». Las acciones van entre llaves y se leen del asset de input: " +
-                 "«Mantén {Attack}» → «Mantén CLIC / ENTER». Sin llaves, el texto tal cual («Pasiva»).")]
+                 "«Mantén {Attack}» → «Mantén CLIC / J». Sin llaves, el texto tal cual («Pasiva»).")]
         public string controles;
 
         [Tooltip("Segundos de efecto (0 = permanente o instantánea).")]

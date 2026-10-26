@@ -97,6 +97,9 @@ namespace Fragmentum.Player
         public float DuracionAtaqueEnCurso =>
             _ataque != null && EstadoActual == ESTADOS_JUGADOR.ATTACK ? _ataque.Duracion : parametros.duracionAtaque;
 
+        /// <summary>¿Salió cargado el ataque en curso? Fuera de ATTACK, no (para el sonido).</summary>
+        public bool AtaqueEnCursoCargado => _ataque != null && EstadoActual == ESTADOS_JUGADOR.ATTACK && _ataque.Cargado;
+
         /// <summary>Hacia dónde mira: 1 derecha, -1 izquierda.</summary>
         public int Mirando { get; private set; } = 1;
 

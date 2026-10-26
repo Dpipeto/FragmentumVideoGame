@@ -1,14 +1,22 @@
 # Prompts del Mundo 3 · Miedo
 
-Todas las imágenes de `Nivel3_Diseno.md` (sección 8), en dos tandas:
+Todas las imágenes de `Nivel3_Diseno.md` (sección 8), en tres tandas:
 
 - **Primera tanda (2026-10-13): los enemigos y el jefe**, apartados A a D. El Espectro del Pavor va
   por **Google AI Studio** (apartado B); todo lo demás, por **Gemini**.
 - **Segunda tanda (2026-10-14), con el diseño ya aprobado: el escenario, las mecánicas, el fondo,
   las cinemáticas y las puertas**, apartados E a J. Todo por Gemini.
+- **Tercera tanda (2026-10-19): la ciénaga**, apartado K (sección 10 de `Nivel3_Diseno.md`).
+  Recibida y montada el mismo día.
 
 El diseño se aprobó entero el 2026-10-14 («haz lo que recomiendas»): el Centinela Ciego con su
 máscara de gas y el Acechador se pueden pedir ya, como todo lo demás.
+
+> **Montado en el juego (fases E y F, 2026-10-15 y 2026-10-16):** todo, de A a H, y
+> `DerrotaEspectro2` repetida el 2026-10-17 con el prompt del apartado G. El sigilo de Kael (I) no
+> se hará. Opcionales, si quieres repetirlos: el ataque del Espectro con los
+> ojos verdes (`a1`-`a4`), su `D3` y `Hoja2`, que salieron a otra escala
+> (`Tesis/Imagenes/limpios/Mundo3/LEEME.md`).
 
 Los prompts están en inglés porque Gemini sigue mejor las medidas así. Las explicaciones van en
 español.
@@ -418,8 +426,7 @@ NO soft edges, NO transparency checkerboard, NO text, NO border.
 
 Después, editando **Hoja1** con la plantilla de edición:
 - **Hoja2:** «the same leaf, turned a quarter turn as it spins, still falling, tip down-left».
-- **Hoja3:** «the leaf SHATTERING against the ground: five or six small black fragments flying
-  apart sideways from the bottom center; no leaf left».
+- **Hoja3:** «the leaf SHATTERING against the ground: five or six small black fragments flying apart sideways from the bottom center; no leaf left».
 
 ### C2. El aviso de las hojas (2) → `Mundo3/Hojas/Aviso1.png`, `Aviso2.png`
 
@@ -696,6 +703,25 @@ Y siguen con:
 | `Cinematicas/DerrotaEspectro1.jpg` | «The guardian breaking apart into a storm of black leaves in the centre of the clearing, his cracked mask falling, pale green light leaking from its cracks. Around him the darkness is thinning: grey-violet tree trunks begin to appear. The hero, tiny, at the bottom left, watching.» |
 | `Cinematicas/DerrotaEspectro2.jpg` | «The same forest seen with light for the first time: soft silver moonlight falls into the clearing, the trees are dark green and violet, low mist on the ground, a few firefly pixels. The hero, tiny, in the centre, holding a small dark violet gem that glows.» |
 
+### Para repetir `DerrotaEspectro2` (2026-10-16)
+
+Salió con el jefe de pie y entero a la derecha, con el ojo encendido, justo después de deshacerse
+en hojas en `DerrotaEspectro1`; y la gema de Kael, verde. **Adjunta `DerrotaEspectro2.jpg`** y
+pide:
+
+```text
+Edit the attached image. Keep EXACTLY the same canvas, the same art-pixel size (the same blocks),
+the same style, the same forest, the same moonlight and the same hero in the same place. Change
+only two things:
+1. Remove the dark guardian standing on the right COMPLETELY: where he was, continue the same
+   trunks, roots and low mist that are around him. Nothing of him remains, not even his eye.
+2. The small gem the hero holds up glows DARK VIOLET, with a lighter violet glint, not green.
+Hard-edged pixels, NO blur, NO text, NO border.
+```
+
+Guárdala con el mismo nombre, `Mundo3/Cinematicas/DerrotaEspectro2.jpg`. ✔ *Repetida el
+2026-10-17: sin el jefe y con la gema violeta.*
+
 ## H. Las puertas de este mundo (como las de los otros dos)
 
 ### Decisiones mías, por si quieres cambiarlas antes de generar
@@ -752,8 +778,8 @@ Después, **editando siempre `Puerta1.jpg`** con la plantilla de edición de
 ### H2. La verja de la arena → `Mundo3/Verja/Verja.jpg`
 
 Con el prompt de la verja de `Prompts_Puertas.md` (A3), adjuntando el tileset del bosque, y con
-`<TEMA>` = «A wall of black THORNY ROOTS and brambles grown over an old wooden palisade: twisted
-black roots, sharp grey thorns, a few pale green #7FE6B0 fungus pixels. No warm colours.»
+  `<TEMA>` = «A wall of black THORNY ROOTS and brambles grown over an old wooden palisade: twisted
+  black roots, sharp grey thorns, a few pale green #7FE6B0 fungus pixels. No warm colours.»
 
 ### H3. El checkpoint → `Mundo3/Checkpoint/Checkpoint1.jpg`, `Checkpoint2.jpg`
 
@@ -815,3 +841,90 @@ bajos, pasos cortos y la mano cerca de la espada. Exporta la tira a 1× a
 **Orden recomendado para esta tanda:** el tileset (E1) primero, porque la puerta, la verja y el
 checkpoint lo adjuntan; luego las mecánicas (E3 a E6), que son pequeñas; el fondo; y al final
 las cinemáticas, que necesitan al jefe y la puerta.
+
+---
+
+# Tercera tanda (2026-10-19): la ciénaga
+
+La parte de agua donde hace falta el Dash Acuático (`Nivel3_Diseno.md`, sección 10). Son dos piezas
+y siete imágenes, todas por Gemini.
+
+> **Recibida y montada (2026-10-19).** La maraña llegó como `marana1` a `Marana4` y se limpió con los
+> nombres de abajo; a `Agua3` le faltaba una columna y el agua se cortó a 179 de ancho (lo detalla
+> `Tesis/Imagenes/limpios/Mundo3/LEEME.md`). En el juego, la maraña mide 2 × 2 u (no 2,5) y cuelga
+> del techo del túnel. Las raíces del techo de los túneles son las del callejón (el
+tileset) y el tocón es el de los árboles del claro: no hace falta pedirlos.
+
+## K. El agua y las marañas
+
+### K1. El agua de la ciénaga (3 en bucle) → `Mundo3/Agua/Agua1.jpg` … `Agua3.jpg`
+
+Es la tira de la superficie, como el agua del Mundo 2: el juego la repite a lo ancho y pinta debajo
+el cuerpo del agua, de un color. Por eso se pide **editando la del Mundo 2**: así sale con el mismo
+lienzo, el mismo píxel y la misma forma de tira.
+
+**Adjunta:** `Tesis/Imagenes/Mundo2/Agua/agua1.jpg`.
+
+```text
+Edit the attached image. Keep EXACTLY the same canvas size, the same flat #FF00FF magenta
+background, the same art-pixel size (the same blocks), the same strip shape, the same position
+and the same straight flat bottom row. Do NOT zoom in, do NOT crop, do NOT redraw it bigger.
+Change ONLY the colours and the surface details: it is now the still, dark water of a SWAMP in a
+night forest, not icy water. The top 3-4 rows are the surface: a thin broken line of murky pale
+green (#4E6B4A) with a few tiny round DUCKWEED leaves (#5E7F4E) floating on it and one or two
+pale green #7FE6B0 pixels where moonlight touches it. Below it, very dark swamp green #1A2E1A
+water with a few darker #0A0A0F bands and two or three tiny bubbles. No blue, no white foam.
+The left and right edges must still match so the strip can repeat side by side.
+Hard-edged fully opaque pixels only. NO blur, NO glow, NO gradient, NO transparency
+checkerboard, NO text, NO border.
+```
+
+Después, con la plantilla de edición del apartado 0, **adjuntando siempre `Agua1`**:
+**`Agua2`:** «the duckweed leaves and the ripples shifted 4 art pixels to the right».
+**`Agua3`:** «the duckweed leaves and the ripples shifted 8 art pixels to the right».
+
+### K2. La maraña de raíces (4) → `Mundo3/Marana/Marana1.jpg`, `Marana2.jpg`, `Atrapa1.jpg`, `Atrapa2.jpg`
+
+Llena el túnel del fondo al techo: mide **2,5 × 2,5 u**, y la de 5 u son dos seguidas, así que **sus
+lados tienen que poder tocarse** sin que se note el corte. Bajo el agua solo se ve con la luz de
+Kael o la de la antorcha. **Tiene que leerse como algo que agarra**, no como una pared: huecos
+entre las raíces, puntas que se curvan hacia dentro.
+
+**Adjunta:** `Tesis/Imagenes/Mundo3/Rama/Rama.jpg`, para el tamaño del píxel y el estilo del bosque
+(la rama mide 2 u: 48 píxeles de arte).
+
+#### La maestra → `Marana1.jpg`
+
+```text
+Pixel art game sprite, side view, flat solid #FF00FF magenta background, the same art-pixel size
+and hard dark outline style as the attached branch (only a size and style reference).
+A dense TANGLE of submerged ROOTS and long swamp weeds that fills a SQUARE of about 60 x 60 art
+pixels, centered on the canvas with a wide magenta margin around it. Thick black #0A0A0F and dark
+violet #2D1B4E roots twist and cross each other from the top edge of the square down to its
+bottom edge; thin swamp green #1A2E1A and murky green #4E6B4A weeds hang between them; the tips
+of several thin roots CURL INWARD like fingers. There are small gaps between the roots where the
+magenta background shows through, so it reads as something that grabs, not as a wall. A few
+pale green #7FE6B0 pixels on some root tips. The left side and the right side of the square must
+be able to touch another copy of it with no visible seam.
+Hard-edged fully opaque pixels. NO blur, NO glow halo, NO transparency checkerboard, NO text,
+NO border. Nothing touches the canvas edges.
+```
+
+#### Los demás, editando siempre `Marana1.jpg` (plantilla del apartado 0)
+
+- **`Marana2.jpg`:** «the weeds and the thin curled root tips swayed slightly to the right, as if
+  moved by a slow current; the thick roots do not move».
+- **`Atrapa1.jpg`:** «the thin roots and the curled tips TIGHTEN toward the centre of the square,
+  like fingers closing; the gaps between them become smaller; the thick roots do not move».
+- **`Atrapa2.jpg`:** «the thin roots closed even tighter around the centre, almost no gaps left in
+  the middle, the pale green tips pointing inward».
+
+## L. Dónde va cada cosa (tercera tanda)
+
+| Carpeta en `Tesis/Imagenes/Mundo3/` | Archivos | Herramienta |
+|---|---|---|
+| `Agua/` | `Agua1` … `Agua3` | Gemini (editando el agua del Mundo 2) |
+| `Marana/` | `Marana1`, `Marana2`, `Atrapa1`, `Atrapa2` | Gemini (editando `Marana1`) |
+
+**Orden recomendado:** la maraña primero (es la pieza nueva y la que más se ve en el agua) y
+después el agua.

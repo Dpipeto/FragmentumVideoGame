@@ -10,8 +10,10 @@ namespace Fragmentum.Levels.Mecanicas
     /// componente le pone lo que tiene de Miedo:
     ///
     /// - <b>A oscuras es igual que las demás ramas.</b> Bajo la luz de una antorcha se delata: se ve
-    ///   gris (y, con su arte, agrietada).
-    /// - <b>Cruje:</b> mientras está agrietada, el dibujo tiembla. Es el aviso para saltar ya.
+    ///   gris (y, con su arte, podrida: <see cref="spritePodrida"/>).
+    /// - <b>Cruje:</b> mientras está agrietada, el dibujo tiembla (y, con arte, se ve podrida). Es el
+    ///   aviso para saltar ya.
+    /// - Con arte, <b>al partirse</b> se dobla por la mitad y se deshace en astillas.
     /// </summary>
     [RequireComponent(typeof(PlataformaInestable))]
     [DisallowMultipleComponent]
@@ -29,9 +31,24 @@ namespace Fragmentum.Levels.Mecanicas
         [Tooltip("Lo que tiembla el dibujo mientras cruje, en unidades.")]
         [SerializeField] private float temblor = 0.05f;
 
+        [Header("Con arte (vacíos: el rectángulo cambia de color)")]
+        [Tooltip("La rama sana: como se ve a oscuras.")]
+        [SerializeField] private Sprite spriteSana;
+
+        [Tooltip("La rama podrida: como se ve bajo una antorcha y mientras cruje.")]
+        [SerializeField] private Sprite spritePodrida;
+
+        [Tooltip("Partiéndose: la primera mitad de su caída.")]
+        [SerializeField] private Sprite spriteRota;
+
+        [Tooltip("Las astillas: el resto de su caída.")]
+        [SerializeField] private Sprite spriteAstillas;
+
         private PlataformaInestable _plataforma;
         private BoxCollider2D _cuerpo;
         private Vector3 _posicionDibujo;
+        private ESTADOS_PLATAFORMA _estadoAnterior;
+        private float _rotaDesde;
 
         /// <summary>¿La alumbra una antorcha? Entonces se ve que está podrida.</summary>
         public bool Delatada { get; private set; }
@@ -41,6 +58,9 @@ namespace Fragmentum.Levels.Mecanicas
         public Color ColorSana => colorSana;
 
         public Color ColorPodrida => colorPodrida;
+
+        /// <summary>¿Lleva su arte? Entonces lo que cambia es el dibujo, no el color.</summary>
+        public bool ConArte => spriteSana != null && spritePodrida != null && spriteRota != null && spriteAstillas != null;
 
         private void Awake()
         {
@@ -65,12 +85,44 @@ namespace Fragmentum.Levels.Mecanicas
                 return;
             }
 
-            visual.color = Delatada ? colorPodrida : colorSana;
+            var estado = _plataforma.Estado;
+            if (estado == ESTADOS_PLATAFORMA.BROKEN && _estadoAnterior != ESTADOS_PLATAFORMA.BROKEN)
+            {
+                _rotaDesde = Time.time;
+            }
+
+            _estadoAnterior = estado;
+            if (ConArte)
+            {
+                visual.color = Color.white;
+                visual.sprite = DibujoDe(estado, Delatada, Time.time - _rotaDesde, _plataforma.duracionCaida);
+            }
+            else
+            {
+                visual.color = Delatada ? colorPodrida : colorSana;
+            }
 
             // Cruje: el dibujo tiembla mientras está agrietada; el collider no se mueve.
-            var cruje = _plataforma.Estado == ESTADOS_PLATAFORMA.CRACKED;
+            var cruje = estado == ESTADOS_PLATAFORMA.CRACKED;
             var desplazamiento = cruje ? new Vector3(Mathf.Sin(Time.time * 90f) * temblor, 0f, 0f) : Vector3.zero;
             visual.transform.localPosition = _posicionDibujo + desplazamiento;
+        }
+
+        /// <summary>
+        /// El dibujo que le toca con arte: entera, la sana a oscuras y la podrida con luz; crujiendo,
+        /// la podrida; partida, la rota la primera mitad de su caída y las astillas después.
+        /// </summary>
+        public Sprite DibujoDe(ESTADOS_PLATAFORMA estado, bool delatada, float desdeQueSeRompio, float caida)
+        {
+            switch (estado)
+            {
+                case ESTADOS_PLATAFORMA.CRACKED:
+                    return spritePodrida;
+                case ESTADOS_PLATAFORMA.BROKEN:
+                    return desdeQueSeRompio < caida * 0.5f ? spriteRota : spriteAstillas;
+                default:
+                    return delatada ? spritePodrida : spriteSana;
+            }
         }
 
         // Se mira su superficie en tres puntos: el centro y cerca de cada punta.

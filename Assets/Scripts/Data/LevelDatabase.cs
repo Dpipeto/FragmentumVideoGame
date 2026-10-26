@@ -19,6 +19,9 @@ namespace Fragmentum.Data
         public ReferenciaEscena escenaMenu = new ReferenciaEscena();
         public ReferenciaEscena escenaSelector = new ReferenciaEscena();
 
+        [Tooltip("La música del menú inicial y del selector (la misma en los dos). Vacío = en silencio.")]
+        public AudioClip musicaMenu;
+
         [Header("Niveles, en orden")]
         public List<LevelData> niveles = new List<LevelData>();
 

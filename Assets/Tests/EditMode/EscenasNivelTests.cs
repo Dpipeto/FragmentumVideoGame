@@ -213,6 +213,17 @@ namespace Fragmentum.Tests
         }
 
         [Test]
+        public void LasPlataformasDelNivel1_SeAtraviesanDesdeAbajo_YElSueloNo()
+        {
+            var arena = Todos<ArenaJefe>(_nivel1).Single();
+            Assert.IsTrue(arena.Plataformas.All(PlataformaDeUnSentido.Es), "Las de la arena se atraviesan saltando desde abajo.");
+            Assert.IsTrue(Todos<PlataformaInestable>(_nivel1).All(p => PlataformaDeUnSentido.Es(p.GetComponent<Collider2D>())), "Las inestables, también.");
+            Assert.IsTrue(Todos<PlataformaCombustion>(_nivel1).All(p => PlataformaDeUnSentido.Es(p.GetComponent<Collider2D>())), "Y las de combustión.");
+            var suelo = Todos<Collider2D>(_nivel1).Single(c => c.name == "SueloArena");
+            Assert.IsFalse(PlataformaDeUnSentido.Es(suelo), "El suelo sigue siendo sólido.");
+        }
+
+        [Test]
         public void LosPrefabsDeMecanicas_Existen()
         {
             foreach (var nombre in new[] { GeneradorMecanicas.PlataformaInestable, GeneradorMecanicas.PlataformaCombustion, GeneradorMecanicas.Lava, GeneradorMecanicas.TorretaFuego, GeneradorMecanicas.BolaDeFuego })

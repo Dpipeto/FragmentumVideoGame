@@ -226,6 +226,12 @@ namespace Fragmentum.Player
         /// <summary>Segundos de espera restantes (0 si está lista), para la UI.</summary>
         public float EsperaInvisibilidad => Mathf.Max(0f, _proximaInvisibilidad - Reloj());
 
+        /// <summary>Lo que dura la Invisibilidad.</summary>
+        public float DuracionInvisibilidad => duracionInvisibilidad;
+
+        /// <summary>Lo que tarda en volver a estar lista desde que se acaba (para la UI).</summary>
+        public float CooldownInvisibilidad => cooldownInvisibilidad;
+
         /// <summary>Activa la invisibilidad si está desbloqueada y lista. Devuelve si se activó.</summary>
         public bool ActivarInvisibilidad()
         {

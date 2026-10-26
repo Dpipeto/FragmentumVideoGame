@@ -54,6 +54,7 @@ namespace Fragmentum.Player
         public const string AgachadoBucle = "AgachadoBucle";
         public const string Levantarse = "Levantarse";
         public const string Morir = "Morir";
+        public const string Danio = "Danio";
 
         [SerializeField] private PlayerController jugador;
 
@@ -68,7 +69,7 @@ namespace Fragmentum.Player
 
         /// <summary>
         /// Tabla con el arte que existe hoy: idle, correr, salto (subida y caída), ataque, dash,
-        /// agacharse y morir. Los estados sin clip propio usan el más parecido; están en
+        /// agacharse, el daño y morir. Los estados sin clip propio usan el más parecido; están en
         /// PENDIENTES.md (apartado B3).
         /// </summary>
         public static List<ClipDeEstado> TablaPorDefecto() => new List<ClipDeEstado>
@@ -83,7 +84,7 @@ namespace Fragmentum.Player
             new ClipDeEstado(ESTADOS_JUGADOR.WALL_JUMP, Salto, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.DASH, Dash, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.ATTACK, Ataque, reiniciar: true),
-            new ClipDeEstado(ESTADOS_JUGADOR.DAMAGED, string.Empty),
+            new ClipDeEstado(ESTADOS_JUGADOR.DAMAGED, Danio, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.DEAD, Morir, reiniciar: true),
         };
 
@@ -152,6 +153,12 @@ namespace Fragmentum.Player
                 // Igual con el dash: su clip dura 1 s y ocupa el dash entero, dure lo que dure.
                 var duracion = Mathf.Max(0.05f, jugador.Parametros.dashDuration);
                 AnimatorParams.FijarFloat(animator, AnimatorParams.VelocidadDash, 1f / duracion);
+            }
+            else if (nuevo == ESTADOS_JUGADOR.DAMAGED)
+            {
+                // Y con el golpe: sus cuatro fotogramas ocupan el retroceso entero.
+                var duracion = Mathf.Max(0.05f, jugador.Parametros.damagedDuration);
+                AnimatorParams.FijarFloat(animator, AnimatorParams.VelocidadDanio, 1f / duracion);
             }
 
             var paso = ClipDePaso(anterior, nuevo);

@@ -155,10 +155,14 @@ namespace Fragmentum.EditorTools
             .Concat(ConstructorCentinela.FotogramasIdle.Select(fotograma =>
                 new Regla(ConstructorCentinela.RutaSprite(fotograma), ConstructorCentinela.PixelesPorUnidadIdle, ConstructorCentinela.Pivote,
                     "Centinela, idle frontal: dibujado más grande; a 58 mide lo mismo que en combate.")))
-            // Mundo 2 (Tristeza): cada constructor lleva las reglas de su arte.
+            // Mundo 2 (Tristeza), Mundo 3 (Miedo) y Mundo 4 (Culpa): cada constructor lleva las reglas de su arte.
             .Concat(ArteMundo2.Reglas)
+            .Concat(ArteMundo3.Reglas)
+            .Concat(ArteMundo4.Reglas)
             // Las puertas de salida, las verjas, los checkpoints y los planos de salida de cada mundo.
             .Concat(ConstructorPuertas.Reglas)
+            // El escudo de Kael (la Defensa Reforzada): sus hojas no tienen regla, las corta su constructor.
+            .Concat(ConstructorArteKael.ReglasEscudo)
             .ToArray();
 
         public static IReadOnlyList<Regla> Reglas => Tabla;

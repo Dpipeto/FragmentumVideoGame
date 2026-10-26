@@ -18,6 +18,7 @@ MonoBehaviour:
   escenaSelector:
     escena: {fileID: 102900000, guid: 5352cbeceb681a5459e55d5cf11bf3a8, type: 3}
     ruta: Assets/Scenes/Niveles.unity
+  musicaMenu: {fileID: 8300000, guid: 48bf368a0f982854081b80ce9ec81c7f, type: 3}
   niveles:
   - {fileID: 11400000, guid: f8baf98eccd7a7246898e378f11f3cd5, type: 2}
   - {fileID: 11400000, guid: 77b9b1ca99164c54ea84470b7daebe0e, type: 2}

@@ -45,7 +45,7 @@ MonoBehaviour:
   duracionVulnerable: 1.5
   multiplicadorVulnerable: 2
   inmuneFueraDeVulnerable: 0
-  duracionDerrota: 2
-  tinte: {r: 0.41960785, g: 0.30980393, b: 0.627451, a: 1}
+  duracionDerrota: 1.4
+  tinte: {r: 1, g: 1, b: 1, a: 1}
   tamano: {x: 2, y: 3.2}
   spriteMiraDerecha: 1

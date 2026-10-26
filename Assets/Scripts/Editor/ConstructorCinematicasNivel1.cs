@@ -98,7 +98,7 @@ namespace Fragmentum.EditorTools
             cinematica.tamanoFuente = 5;
             cinematica.temblorPixeles = 1;
             cinematica.temblorFotogramas = 4;
-            cinematica.musica = null;
+            cinematica.musica = MusicaNiveles.DeCinematica(cinematica.id);
             cinematica.diapositivas = new List<Diapositiva>
             {
                 // 0,0 – 0,5: negro. Queda solo el zumbido grave, que sube hasta el final.
@@ -241,6 +241,14 @@ namespace Fragmentum.EditorTools
             }
 
             var cambia = false;
+
+            // Su música (Musica/Cinematicas), si la tiene.
+            var musica = MusicaNiveles.DeCinematica(cinematica.Id);
+            if (cinematica.musica != musica)
+            {
+                cinematica.musica = musica;
+                cambia = true;
+            }
             var planos = new[] { Imagen(Final1), Imagen(Final2) }.Where(p => p != null).ToList();
             foreach (var plano in planos)
             {

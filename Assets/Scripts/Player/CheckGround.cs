@@ -84,6 +84,7 @@ namespace Fragmentum.Player
                 var (centro, tamano) = CajaDeteccion(cuerpo.bounds);
                 Physics2D.OverlapBox(centro, tamano, 0f, _filtro, _contactos);
                 QuitarColliderPropio();
+                QuitarLasQueSeAtraviesan();
             }
 
             EnSuelo = _contactos.Count > 0;
@@ -116,6 +117,19 @@ namespace Fragmentum.Player
             for (var i = _contactos.Count - 1; i >= 0; i--)
             {
                 if (_contactos[i] == null || _contactos[i].attachedRigidbody == propio)
+                {
+                    _contactos.RemoveAt(i);
+                }
+            }
+        }
+
+        // Una plataforma que se atraviesa desde abajo solo es suelo con los pies encima: subiendo a
+        // través de ella, la caja la toca y el jugador recuperaría los saltos en el aire.
+        private void QuitarLasQueSeAtraviesan()
+        {
+            for (var i = _contactos.Count - 1; i >= 0; i--)
+            {
+                if (!PlataformaDeUnSentido.LaPisa(_contactos[i], cuerpo))
                 {
                     _contactos.RemoveAt(i);
                 }

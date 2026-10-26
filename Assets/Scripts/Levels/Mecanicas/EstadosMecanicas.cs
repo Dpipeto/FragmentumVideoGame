@@ -18,6 +18,22 @@ namespace Fragmentum.Levels.Mecanicas
     }
 
     /// <summary>
+    /// El barril explosivo del mundo de la Culpa: intacto, con la mecha encendida (el aviso) y
+    /// quemado (ya estalló; vuelve cuando Kael reaparece).
+    /// </summary>
+    public enum ESTADOS_BARRIL
+    {
+        /// <summary>Intacto: solo lo enciende el Ataque Cargado, otra explosión o un disparo.</summary>
+        INTACT,
+
+        /// <summary>La mecha: parpadea en rojo apagado. Es el aviso.</summary>
+        FUSE,
+
+        /// <summary>Quemado: ya estalló.</summary>
+        BURNT
+    }
+
+    /// <summary>
     /// La plataforma inestable. Cada valor es el del parámetro <c>Estado</c> de su Animator
     /// (<c>Plataforma.controller</c>): Intacta, Agrietada y Rompe.
     /// </summary>
@@ -97,7 +113,7 @@ namespace Fragmentum.Levels.Mecanicas
     /// </summary>
     public enum ESTADOS_ANTORCHA
     {
-        /// <summary>Apagada: Kael la puede encender con Interactuar (E).</summary>
+        /// <summary>Apagada: Kael la puede encender con Interactuar (W).</summary>
         UNLIT,
 
         /// <summary>Encendida: alumbra su círculo durante su duración; los últimos segundos parpadea.</summary>

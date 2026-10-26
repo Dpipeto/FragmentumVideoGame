@@ -139,8 +139,21 @@ namespace Fragmentum.Levels.Mecanicas
             }
         }
 
-        private bool JugadorEncima() =>
-            Hay(new Vector2(_limites.center.x, _limites.max.y + 0.06f), new Vector2(_limites.size.x * 0.95f, 0.1f));
+        // Si se atraviesa desde abajo, el jugador que sube a través de ella pasa por la caja sin pisarla.
+        private bool JugadorEncima()
+        {
+            var cuantos = Physics2D.OverlapBox(new Vector2(_limites.center.x, _limites.max.y + 0.06f),
+                new Vector2(_limites.size.x * 0.95f, 0.1f), 0f, _filtroJugador, _encima);
+            for (var i = 0; i < cuantos; i++)
+            {
+                if (PlataformaDeUnSentido.LaPisa(_cuerpo, _encima[i]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private bool Hay(Vector2 centro, Vector2 tamano) => Physics2D.OverlapBox(centro, tamano, 0f, _filtroJugador, _encima) > 0;
 

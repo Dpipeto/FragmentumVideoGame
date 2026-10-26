@@ -5,6 +5,7 @@ using Fragmentum.Player;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using MEDIOS = Fragmentum.EditorTools.DisenoNivel2.MEDIOS;
 using TIPOS = Fragmentum.EditorTools.DisenoNivel3.TIPOS_ENEMIGO;
 
 namespace Fragmentum.Tests
@@ -12,7 +13,8 @@ namespace Fragmentum.Tests
     /// <summary>
     /// El recorrido de diseño del Nivel 3 (<see cref="DisenoNivel3"/>) se puede cruzar
     /// <b>caminando</b>, sin hacer ruido; la hondonada es de verdad un callejón; cumple los recuentos
-    /// del Anexo A; y bajo cada rama por la que se pasa cabe Kael. Lo comprueba sobre los datos;
+    /// del Anexo A; bajo cada rama por la que se pasa cabe Kael; y la ciénaga se cruza bajo el agua,
+    /// pero sus marañas solo con el Dash Acuático. Lo comprueba sobre los datos;
     /// <see cref="EscenaNivel3Tests"/> comprueba que la escena los sigue.
     /// </summary>
     public class DisenoNivel3Tests
@@ -27,6 +29,20 @@ namespace Fragmentum.Tests
         private static float AlturaSalto => Kael.velocidadSalto * Kael.velocidadSalto / (2f * Gravedad);
         private static float AlturaDobleSalto => AlturaSalto + Kael.velocidadDobleSalto * Kael.velocidadDobleSalto / (2f * Gravedad);
         private static float VelocidadCaminando => Kael.velocidadMaxima * DisenoNivel3.FactorCaminar;
+
+        // Bajo el agua, como en DisenoNivel2Tests: al cruzar la superficie, lo que quede de impulso
+        // tiene que subir a Kael al menos esto por encima del borde.
+        private const float MargenAlSalirDelAgua = 0.25f;
+
+        private static ModificadorMovimiento Agua => ModificadorMovimiento.BajoElAgua;
+        private static float GravedadAgua => Gravedad * Agua.gravedad;
+        private static float AlturaDobleSaltoAgua =>
+            Mathf.Pow(Kael.velocidadSalto * Agua.salto, 2f) / (2f * GravedadAgua) + Mathf.Pow(Kael.velocidadDobleSalto * Agua.salto, 2f) / (2f * GravedadAgua);
+
+        /// <summary>Lo que recorre un dash: no lo frena el agua (fija su propia velocidad).</summary>
+        private static float Dash => Kael.velocidadDash * Kael.dashDuration;
+
+        private static DisenoNivel2.Zona AguaBajo(float x) => DisenoNivel3.Aguas.Single(a => x >= a.Desde && x <= a.Hasta);
 
         /// <summary>
         /// Distancia que avanza Kael caminando con el doble salto hasta caer en algo
@@ -65,7 +81,8 @@ namespace Fragmentum.Tests
         [Test]
         public void CadaPaso_SeDaCaminando()
         {
-            foreach (var paso in DisenoNivel3.Pasos)
+            // Los de la ciénaga se dan bajo el agua: los comprueba LaCienaga_SeSaleDelAgua_AlToconYALaOrilla.
+            foreach (var paso in DisenoNivel3.Pasos.Where(p => p.Medio == MEDIOS.SECO))
             {
                 var desde = DisenoNivel3.PisadaDe(paso.Desde);
                 var hasta = DisenoNivel3.PisadaDe(paso.Hasta);
@@ -288,7 +305,7 @@ namespace Fragmentum.Tests
             }
 
             Assert.IsFalse(DisenoNivel3.Arboles.Any(x => Mathf.Abs(x - acechador.X) < mitad + largo * 0.5f), "Empieza entre dos árboles, sin tocarlos.");
-            Assert.Less(Mathf.Abs(DisenoNivel3.Antorchas[3].x - DisenoNivel3.Arboles[0]), DisenoNivel3.RadioAntorcha,
+            Assert.Less(Mathf.Abs(DisenoNivel3.Antorchas[DisenoNivel3.AntorchaDelClaro].x - DisenoNivel3.Arboles[0]), DisenoNivel3.RadioAntorcha,
                 "La antorcha del claro alumbra el primer árbol: deja ver al Acechador antes de entrar.");
         }
 
@@ -315,7 +332,8 @@ namespace Fragmentum.Tests
         [Test]
         public void LasAntorchas_YLosCepos_EstanEnElSuelo_YLaPrimeraAntorchaEsElTutorial()
         {
-            Assert.AreEqual(4, DisenoNivel3.Antorchas.Length);
+            Assert.AreEqual(5, DisenoNivel3.Antorchas.Length, "Las cuatro del bosque y la de la orilla de la ciénaga.");
+            Assert.AreEqual(DisenoNivel3.Antorchas.OrderBy(a => a.x).ToList(), DisenoNivel3.Antorchas.ToList(), "De izquierda a derecha.");
             foreach (var antorcha in DisenoNivel3.Antorchas)
             {
                 Assert.AreEqual(antorcha.y, DisenoNivel3.SueloBajo(antorcha.x, antorcha.y), 1e-4f, $"La antorcha de x {antorcha.x}, en el suelo.");
@@ -359,7 +377,7 @@ namespace Fragmentum.Tests
             Assert.AreEqual(DisenoNivel3.PuertaDesde, arena.Desde, 1e-4f, "Desde la puerta de la arena.");
 
             // La antorcha del claro queda a oscuras: por eso sirve para ver al Acechador antes de entrar.
-            var delClaro = DisenoNivel3.Antorchas[3];
+            var delClaro = DisenoNivel3.Antorchas[DisenoNivel3.AntorchaDelClaro];
             Assert.Less(delClaro.x, claro.Desde);
             Assert.Greater(delClaro.x, DisenoNivel3.Secciones[2].x);
         }
@@ -383,6 +401,126 @@ namespace Fragmentum.Tests
             var bifurcacion = DisenoNivel3.Antorchas[2];
             var llama = bifurcacion + new Vector2(0f, GeneradorMecanicas.AlturaLlama);
             Assert.Less(Vector2.Distance(llama, DisenoNivel3.Cintas[0]), DisenoNivel3.RadioAntorcha);
+        }
+
+        [Test]
+        public void LaCienaga_SeSaleDelAgua_AlToconYALaOrilla()
+        {
+            var pasos = DisenoNivel3.Pasos.Where(p => p.Medio == MEDIOS.AGUA).ToList();
+            Assert.AreEqual(2, pasos.Count, "Del primer túnel al tocón, y del segundo a la otra orilla.");
+            var sobre = Agua.gravedad;
+            foreach (var paso in pasos)
+            {
+                var desde = DisenoNivel3.PisadaDe(paso.Desde);
+                var hasta = DisenoNivel3.PisadaDe(paso.Hasta);
+                var agua = AguaBajo((desde.Desde + desde.Hasta) * 0.5f);
+                Assert.AreEqual(agua.Abajo, desde.Y, 1e-4f, $"{paso}: sale del fondo del agua.");
+                Assert.AreEqual(agua.Arriba + DisenoNivel3.BajoLaSuperficie, hasta.Y, 1e-4f, $"{paso}: a ras del agua (por encima, se respira).");
+                Assert.LessOrEqual(hasta.Y - desde.Y, AlturaDobleSaltoAgua * MargenAltura, $"{paso}: con el doble salto bajo el agua.");
+                Assert.AreEqual(0f, Mathf.Max(hasta.Desde - desde.Hasta, desde.Desde - hasta.Hasta, 0f), 1e-4f, $"{paso}: junto al agua.");
+
+                // Bajo el agua sube hasta la superficie; lo que sobra, fuera, cubre lo que queda hasta el borde.
+                var sobrante = (AlturaDobleSaltoAgua - (agua.Arriba - desde.Y)) * sobre - DisenoNivel3.BajoLaSuperficie;
+                Assert.GreaterOrEqual(sobrante, MargenAlSalirDelAgua, $"{paso}: al cruzar la superficie no llega al borde.");
+            }
+
+            // El tocón queda fuera del agua: encima se respira. Y las dos aguas no se solapan.
+            var tocon = DisenoNivel3.PisadaDe("Tocon");
+            Assert.IsFalse(DisenoNivel3.Aguas.Any(a => a.Desde < tocon.Hasta && a.Hasta > tocon.Desde), "Sobre el tocón no hay agua.");
+            Assert.AreEqual(DisenoNivel3.Aguas[0].Hasta, tocon.Desde, 1e-4f);
+            Assert.AreEqual(DisenoNivel3.Aguas[1].Desde, tocon.Hasta, 1e-4f);
+            Assert.AreEqual(DisenoNivel3.PisadaDe("SueloTrasLasCopas").Hasta, DisenoNivel3.Aguas[0].Desde, 1e-4f, "Se entra desde la orilla, dejándose caer.");
+            Assert.AreEqual(DisenoNivel3.PisadaDe("SueloTrasLaCienaga").Desde, DisenoNivel3.Aguas[1].Hasta, 1e-4f);
+        }
+
+        [Test]
+        public void BajoLasRaicesDelArbolHundido_CabeKael_YNoSeSaltanPorArriba()
+        {
+            var raices = DisenoNivel3.Paredes.Where(p => p.Nombre.StartsWith("RaicesDelArbolHundido")).ToList();
+            Assert.AreEqual(2, raices.Count, "El techo de los dos túneles.");
+            foreach (var techo in raices)
+            {
+                Assert.IsTrue(DisenoNivel3.NoAgarra(techo.Nombre), $"{techo.Nombre}: no agarran.");
+                foreach (var x in new[] { techo.Desde + 0.05f, (techo.Desde + techo.Hasta) * 0.5f, techo.Hasta - 0.05f })
+                {
+                    var fondo = DisenoNivel3.SueloBajo(x, techo.Abajo - 0.01f);
+                    Assert.AreEqual(DisenoNivel3.FondoCienaga, fondo, 1e-4f, $"{techo.Nombre} en x {x:0.##}: debajo, el fondo de la ciénaga.");
+                    Assert.GreaterOrEqual(techo.Abajo - fondo, DisenoNivel3.HuecoBajoUnaRama, $"{techo.Nombre} en x {x:0.##}: Kael no pasa por debajo.");
+                }
+
+                Assert.Greater(techo.Arriba, AlturaDobleSalto, $"{techo.Nombre}: desde la orilla o el tocón no se salta por encima.");
+                Assert.Greater(techo.Arriba - DisenoNivel3.FondoCienaga, AlturaDobleSaltoAgua, $"{techo.Nombre}: ni desde el fondo del agua.");
+                Assert.AreEqual(1, DisenoNivel3.Aguas.Count(a => techo.Desde >= a.Desde && techo.Hasta <= a.Hasta), $"{techo.Nombre}: sobre el agua.");
+            }
+        }
+
+        [Test]
+        public void LasMaranas_LlenanSuTunel_YSoloSeCruzanConElDash()
+        {
+            Assert.AreEqual(2.88f, Dash, 0.01f, "Un dash recorre 2,9 u, también bajo el agua.");
+            var marana = ModificadorMovimiento.Marana;
+            Assert.AreEqual(0f, marana.salto, 1e-4f, "Dentro no se salta.");
+            var nadando = Kael.velocidadMaxima * Agua.velocidad * marana.velocidad;
+
+            float aire;
+            var objeto = new GameObject("Aire");
+            try
+            {
+                aire = new SerializedObject(objeto.AddComponent<OxigenoJugador>()).FindProperty("capacidad").floatValue;
+            }
+            finally
+            {
+                Object.DestroyImmediate(objeto);
+            }
+
+            var maranas = DisenoNivel3.Maranas;
+            Assert.AreEqual(2, maranas.Length);
+            for (var i = 0; i < maranas.Length; i++)
+            {
+                var m = maranas[i];
+                Assert.AreEqual(DisenoNivel3.FondoCienaga, m.Abajo, 1e-4f, $"{m.Nombre}: del fondo…");
+                Assert.AreEqual(DisenoNivel3.TechoTuneles, m.Arriba, 1e-4f, $"{m.Nombre}: …al techo: no se salta por encima.");
+                var techo = DisenoNivel3.Paredes.Single(p => p.Nombre.StartsWith("RaicesDelArbolHundido") && m.Desde > p.Desde && m.Hasta < p.Hasta);
+                Assert.GreaterOrEqual(m.Desde - techo.Desde, 1f, $"{m.Nombre}: se llega a ella ya dentro del túnel.");
+                Assert.IsNotNull(AguaBajo(m.Desde), $"{m.Nombre}: bajo el agua.");
+                Assert.AreEqual(0f, (m.Hasta - m.Desde) % DisenoNivel3.AnchoDibujoMarana, 1e-4f, "Sus dibujos la llenan entera.");
+
+                // Para salir hay que cruzarla y sacar el cuerpo: desde que la toca, su ancho y el de Kael.
+                var ancho = m.Hasta - m.Desde;
+                var recorrido = ancho + DisenoNivel3.AnchoKael;
+                Assert.Greater(recorrido / nadando, aire, $"{m.Nombre}: sin el dash se acaba el aire antes de cruzarla.");
+                var dashes = i + 1;
+                Assert.LessOrEqual(recorrido, Dash * dashes, $"{m.Nombre}: se cruza con {dashes} dash(es), aun desde el borde.");
+                Assert.Greater(recorrido, Dash * (dashes - 1), $"{m.Nombre}: y no con menos.");
+            }
+        }
+
+        [Test]
+        public void LaPistaDeLaCienaga_EstaEnLaOrilla_YLaAntorchaDeLaOrillaAlumbraLaPrimeraMarana()
+        {
+            var pista = DisenoNivel3.PistaDeLaCienaga;
+            var cp2 = DisenoNivel3.Checkpoints[1];
+            Assert.Greater(pista.Desde, cp2.x, "Pasado el CP2…");
+            Assert.AreEqual(DisenoNivel3.Aguas[0].Desde, pista.Hasta, 1e-4f, "…y justo antes del agua.");
+            Assert.LessOrEqual(DisenoNivel3.Aguas[0].Desde - cp2.x, 4f, "Quien se ahoga vuelve a unos pasos del agua.");
+
+            var orilla = DisenoNivel3.Antorchas[DisenoNivel3.AntorchaDeLaOrilla];
+            Assert.That(orilla.x, Is.InRange(pista.Desde, pista.Hasta), "La antorcha, en la orilla.");
+            Assert.AreEqual(0f, DisenoNivel3.SueloBajo(orilla.x, orilla.y), 1e-4f, "De pie en su suelo.");
+            var llama = orilla + new Vector2(0f, GeneradorMecanicas.AlturaLlama);
+            var primera = DisenoNivel3.Maranas[0];
+            Assert.Less(Vector2.Distance(llama, new Vector2(primera.Desde, primera.Arriba)), DisenoNivel3.RadioAntorcha,
+                "Su luz llega a la primera maraña: se ve antes de meterse.");
+
+            // Sin Espectros que despertar (los despierta la luz que los alcanza, desde la llama hasta su pecho).
+            foreach (var espectro in DisenoNivel3.Enemigos.Where(e => e.Tipo == TIPOS.ESPECTRO))
+            {
+                Assert.Greater(Vector2.Distance(llama, new Vector2(espectro.X, espectro.Y + 1f)), DisenoNivel3.RadioAntorcha,
+                    $"La antorcha de la orilla no despierta a {espectro.Nombre}.");
+            }
+
+            Assert.IsFalse(DisenoNivel3.Enemigos.Any(e => e.Hasta > DisenoNivel3.Aguas[0].Desde && e.Desde < DisenoNivel3.Aguas[1].Hasta),
+                "En la ciénaga no hay enemigos.");
         }
 
         [Test]

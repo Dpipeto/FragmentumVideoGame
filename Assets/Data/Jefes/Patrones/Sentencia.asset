@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f76323ddfbd164409ae5983da02e6d6, type: 3}
+  m_Name: Sentencia
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronSentencia
+  nombre: La carta (la sentencia)
+  descripcion: 'Camina hasta Kael, alza la espada con las dos manos (1 s) y la clava: una onda sale por el suelo hacia los dos lados. Dos veces. Saltar la onda.'
+  aviso: 1
+  danio: 2
+  color: {r: 0.54509807, g: 0.2, b: 0.2, a: 1}
+  dibujarZona: 1
+  memoria: 3
+  recuperacion: 0.8
+  golpes: 2
+  tiempoAcercarse: 2.5
+  distancia: 1.5
+  tamanoGolpe: {x: 2, y: 2.5}
+  duracionGolpe: 0.2
+  velocidadOnda: 8
+  altoOnda: 0.8
+  anchoOnda: 1
+  alcanceOnda: 12
+  entreGolpes: 0.6
+  dibujarGolpe: 0
+  efecto: {fileID: 4955602338513727285, guid: 41071da2a19c274438c4bfeeba5a0319, type: 3}

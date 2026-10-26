@@ -16,7 +16,8 @@ namespace Fragmentum.UI
     /// Interfaz persistente del juego (plan, §3.6: «qué canvas está activo» es un efecto de la
     /// FSM global). Escucha los cambios de estado de <see cref="GameStateMachine"/> y muestra:
     /// - PLAYING: el HUD (solo en los niveles del juego).
-    /// - PAUSED: el HUD y el <see cref="MenuPausa"/>, que puede abrir la <see cref="PantallaMecanicas"/>.
+    /// - PAUSED: el HUD y el <see cref="MenuPausa"/>, que puede abrir la <see cref="PantallaMecanicas"/> y las
+    ///   <see cref="PantallaOpciones"/> (el volumen; también desde el menú principal).
     /// - GAME_OVER: la <see cref="PantallaGameOver"/>.
     /// - LEVEL_COMPLETE: la <see cref="PantallaFinNivel"/>.
     ///
@@ -25,7 +26,8 @@ namespace Fragmentum.UI
     /// respondería. No toca <c>Time.timeScale</c> ni carga escenas: eso es de la FSM global.
     ///
     /// Vive en <c>Resources/Sistemas.prefab</c> y construye sus pantallas por código al
-    /// arrancar. Si faltara, la FSM global hace avanzar sola el Game Over y el fin de nivel.
+    /// arrancar. También pone la música del menú y del selector (<see cref="MusicaMenu"/>), que así no
+    /// se corta al pasar de uno a otro. Si faltara, la FSM global hace avanzar sola el Game Over y el fin de nivel.
     /// </summary>
     [DisallowMultipleComponent]
     public class UIManager : MonoBehaviour
@@ -54,6 +56,8 @@ namespace Fragmentum.UI
         private PantallaFinNivel _finNivel;
         private PantallaYoReconstruido _yo;
         private PantallaMecanicas _mecanicas;
+        private PantallaOpciones _opciones;
+        private MusicaMenu _musicaMenu;
         private PantallaCinematica _cinematica;
         private CamaraCinematica _camaraCinematica;
         private GameObject _sistemaEventos;
@@ -76,6 +80,11 @@ namespace Fragmentum.UI
         public PantallaYoReconstruido YoReconstruido => _yo;
 
         public PantallaMecanicas Mecanicas => _mecanicas;
+
+        public PantallaOpciones Opciones => _opciones;
+
+        /// <summary>La música del menú y del selector.</summary>
+        public MusicaMenu MusicaMenu => _musicaMenu;
 
         public PantallaCinematica Cinematica => _cinematica;
 
@@ -144,6 +153,17 @@ namespace Fragmentum.UI
             _mecanicas.Mostrar(_gestor != null ? _gestor.NivelActual : null);
         }
 
+        /// <summary>
+        /// Abre las opciones (desde el menú principal o la pausa). En la pausa la tapa y, al cerrarlas, la
+        /// pausa vuelve.
+        /// </summary>
+        public void MostrarOpciones()
+        {
+            AjustarSistemaEventos();
+            _pausa.Ocultar();
+            _opciones.Mostrar(_gestor != null ? _gestor.NivelActual : null);
+        }
+
         private void OnEnable() => _pausaAccion?.Enable();
 
         private void OnDisable() => _pausaAccion?.Disable();
@@ -196,7 +216,7 @@ namespace Fragmentum.UI
 
         /// <summary>
         /// Esc o Start: pausa si se está jugando y reanuda si está en pausa. En una cinemática la
-        /// salta, y con «yo reconstruido» o las mecánicas abiertas las cierra.
+        /// salta, y con «yo reconstruido», las mecánicas o las opciones abiertas las cierra.
         /// </summary>
         public void AlternarPausa()
         {
@@ -209,6 +229,12 @@ namespace Fragmentum.UI
             if (_mecanicas.Visible)
             {
                 _mecanicas.Cerrar();
+                return;
+            }
+
+            if (_opciones.Visible)
+            {
+                _opciones.Cerrar();
                 return;
             }
 
@@ -251,6 +277,9 @@ namespace Fragmentum.UI
             _mecanicas.Acciones = acciones;
             _mecanicas.Construir();
             _mecanicas.Cerrada += AlCerrarMecanicas;
+            _opciones = Crear<PantallaOpciones>(lienzo.transform, "Opciones");
+            _opciones.Cerrada += AlCerrarMecanicas;
+            _musicaMenu = gameObject.AddComponent<MusicaMenu>();
 
             // La cinemática va encima de todo lo demás.
             _cinematica = FabricaUI.Objeto("Cinematica", lienzo.transform).gameObject.AddComponent<PantallaCinematica>();
@@ -294,6 +323,7 @@ namespace Fragmentum.UI
             Alternar(_finNivel, estado == ESTADOS_JUEGO.LEVEL_COMPLETE, nivel);
             _yo.Ocultar();
             _mecanicas.Ocultar();
+            _opciones.Ocultar();
 
             if (estado == ESTADOS_JUEGO.CUTSCENE)
             {
@@ -308,7 +338,7 @@ namespace Fragmentum.UI
             }
         }
 
-        // Abierta desde la pausa, al cerrarla se vuelve a la pausa.
+        // Las mecánicas o las opciones, abiertas desde la pausa: al cerrarlas se vuelve a la pausa.
         private void AlCerrarMecanicas()
         {
             if (_juego != null && _juego.EstadoActual == ESTADOS_JUEGO.PAUSED)

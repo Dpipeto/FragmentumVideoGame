@@ -43,6 +43,14 @@ COPIAS = [
     ("Mundo2/Verja", "*", "Assets/Sprites/Mecanicas/Puertas/Tristeza/Verja"),
     ("Mundo2/Checkpoint", "*", "Assets/Sprites/Mecanicas/Puertas/Tristeza/Checkpoint"),
     ("Mundo2/Cinematicas", ["SalidaTristeza1.png", "SalidaTristeza2.png"], "Assets/Sprites/Cinematicas/Nivel2"),
+    ("Mundo3/Puerta", "*", "Assets/Sprites/Mecanicas/Puertas/Miedo/Puerta"),
+    ("Mundo3/Verja", "*", "Assets/Sprites/Mecanicas/Puertas/Miedo/Verja"),
+    ("Mundo3/Checkpoint", "*", "Assets/Sprites/Mecanicas/Puertas/Miedo/Checkpoint"),
+    ("Mundo3/Cinematicas", ["SalidaMiedo1.png", "SalidaMiedo2.png"], "Assets/Sprites/Cinematicas/Nivel3"),
+    ("Mundo4/Puerta", "*", "Assets/Sprites/Mecanicas/Puertas/Culpa/Puerta"),
+    ("Mundo4/Verja", "*", "Assets/Sprites/Mecanicas/Puertas/Culpa/Verja"),
+    ("Mundo4/Checkpoint", "*", "Assets/Sprites/Mecanicas/Puertas/Culpa/Checkpoint"),
+    ("Mundo4/Cinematicas", ["SalidaCulpa1.png", "SalidaCulpa2.png"], "Assets/Sprites/Cinematicas/Nivel4"),
     # La portada del menú (N41). Después, en Unity: Fragmentum → Progresión → Crear escenas de menú y selector.
     ("Portada", ["FondoMenu.png"], "Assets/Sprites/Interfaz"),
 ]

@@ -22,8 +22,10 @@ namespace Fragmentum.Tests.PlayMode
     /// oscuridad cambia por tramos con Kael llevando su luz, y la primera antorcha, con su aviso, se
     /// enciende y enseña el primer cepo (fase B); esa antorcha despierta al primer Espectro, que
     /// espera en el borde de su luz (fase C); y el Espectro del Pavor espera visible en su arena, se
-    /// desvanece al empezar el combate y, al vencerlo, la oscuridad retrocede (fase D). El Nivel 1
-    /// sigue con luz. Las medidas las
+    /// desvanece al empezar el combate y, al vencerlo, la oscuridad retrocede (fase D); y se presenta
+    /// y cae con sus cinemáticas, y la puerta del árbol se abre al recoger su fragmento (fase F). En
+    /// la ciénaga, la maraña sujeta a Kael y solo el Dash Acuático la cruza. El Nivel 1 sigue con luz.
+    /// Las medidas las
     /// comprueban <c>DisenoNivel3Tests</c> y <c>EscenaNivel3Tests</c>; aquí, que funcionan en el
     /// juego.
     /// </summary>
@@ -233,8 +235,124 @@ namespace Fragmentum.Tests.PlayMode
             yield return new WaitForSeconds(0.1f);
             Assert.IsTrue(pavor.Derrotado);
             Assert.IsTrue(oscuridad.Retrocedida, "Al vencerlo, la oscuridad retrocede…");
+
+            // Cuando termina de caer, la cinemática de su derrota, que para el tiempo: se salta.
+            yield return Hasta(() => Juego.EstadoActual == ESTADOS_JUEGO.CUTSCENE, 4f, "la cinemática de su derrota");
+            yield return SaltarCinematicaSiHay();
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual);
             yield return new WaitForSeconds(pavor.SubidaAlMorir + 0.3f);
             Assert.AreEqual(pavor.LuzAlMorir, oscuridad.LuzGlobal.intensity, 0.02f, "…y en 3 s el bosque se ve entero.");
+        }
+
+        [UnityTest]
+        public IEnumerator ElPavor_SePresentaYCaeConSusCinematicas_YLaPuertaDelArbolSeAbreAlRecogerSuFragmento()
+        {
+            yield return EntrarEnNivel3();
+            ApagarEnemigos();
+            var arena = Object.FindAnyObjectByType<ArenaJefe>();
+            var pavor = (EspectroDelPavor)arena.Jefe;
+            var salida = Object.FindAnyObjectByType<SalidaNivel>();
+            var puerta = salida.Puerta;
+            Assert.IsNotNull(puerta, "La salida es la puerta del árbol.");
+            Assert.IsFalse(puerta.Abierta, "Cerrada mientras él viva.");
+
+            // Al cruzar la entrada, su presentación: sus planos, opacos y en su rejilla.
+            yield return LlevarJugadorA(EnElSuelo(arena.transform.position));
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Al entrar, la presentación del Pavor.");
+            Assert.IsNotNull(Nivel3.cinematicaJefe);
+            Assert.AreSame(Nivel3.cinematicaJefe, Juego.CinematicaActual);
+            Assert.IsFalse(Interfaz.Cinematica.SobreElJuego, "Con sus planos, es opaca.");
+            Assert.AreEqual(new Vector2Int(480, 268), Interfaz.CamaraCinematica.Rejilla, "Sus planos de 480 × 268, en su rejilla.");
+            yield return SaltarCinematicaSiHay();
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual);
+            Assert.IsTrue(pavor.EnCombate);
+            Assert.IsFalse(pavor.Fragmento.GetComponent<BrilloDeFragmento>().Encendido, "Mientras pelea, su fragmento no brilla.");
+
+            // Cae en su montón de hojas con el fragmento encima; su cinemática, y de vuelta al juego.
+            pavor.Vida.Matar();
+            yield return Hasta(() => pavor.Fragmento.Disponible, 5f, "que el fragmento aparezca sobre su montón de hojas");
+            Assert.AreEqual(ESTADOS_JUEGO.CUTSCENE, Juego.EstadoActual, "Cuando termina de caer, la cinemática de su derrota.");
+            Assert.IsNotNull(Nivel3.cinematicaJefeDerrotado);
+            Assert.AreSame(Nivel3.cinematicaJefeDerrotado, Juego.CinematicaActual);
+            yield return SaltarCinematicaSiHay();
+            Assert.AreEqual(ESTADOS_JUEGO.PLAYING, Juego.EstadoActual, "Y se vuelve al juego, con el fragmento en el montón.");
+            Assert.IsFalse(salida.Abierta, "Sin el fragmento, la puerta sigue cerrada.");
+            var brillo = pavor.Fragmento.GetComponent<BrilloDeFragmento>();
+            Assert.IsTrue(brillo.Encendido, "El fragmento brilla sobre el montón.");
+            Assert.IsNotNull(brillo.Copia.sprite, "Con sus píxeles, recortados de M5.");
+            Assert.IsTrue(brillo.Destello.enabled, "Y su silueta destella con el latido.");
+            Assert.AreSame(brillo.Copia.sprite, brillo.Destello.sprite);
+
+            yield return LlevarJugadorA(new Vector2(pavor.Fragmento.Centro.x, arena.transform.position.y + 0.05f));
+            yield return Hasta(() => salida.Abierta, 4f, "que la arena se abra tras recoger el fragmento");
+            CollectionAssert.Contains(Gestor.Datos.fragmentos, "MIEDO");
+            Assert.IsTrue(puerta.Abierta, "Al recoger el fragmento, la puerta del árbol se abre.");
+            Assert.IsFalse(brillo.Encendido, "Recogido, deja de brillar.");
+            Assert.IsFalse(brillo.Destello.enabled, "Ni destella.");
+        }
+
+        private static IEnumerator Hasta(System.Func<bool> condicion, float maximo, string que)
+        {
+            var limite = Time.unscaledTime + maximo;
+            while (!condicion())
+            {
+                if (Time.unscaledTime > limite)
+                {
+                    Assert.Fail($"Tiempo agotado esperando {que}.");
+                }
+
+                yield return null;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator LaCienaga_LaMaranaSujetaAKael_YSoloElDashAcuaticoLaCruza()
+        {
+            yield return EntrarEnNivel3();
+            ApagarEnemigos();
+            Jugador.Habilidades.Desbloquear(HABILIDADES.DASH_ACUATICO);
+
+            // En el fondo del primer túnel, a 1 u de la primera maraña, nadando hacia ella.
+            var marana = Object.FindObjectsByType<Marana>(FindObjectsInactive.Exclude).Single(m => m.name == "Marana1");
+            var caja = marana.GetComponent<BoxCollider2D>().bounds;
+            yield return LlevarJugadorA(new Vector2(caja.min.x - 1f, caja.min.y + 0.05f));
+            var entrada = new InputSimulado();
+            Jugador.FijarFuenteInput(entrada);
+            entrada.EjeHorizontal = 1f;
+            yield return new WaitForSeconds(1.5f);
+            Assert.IsTrue(Jugador.Motor.BajoElAgua, "Bajo el agua de la ciénaga.");
+            Assert.IsTrue(marana.Sujetando, "Nadando, la maraña lo sujeta.");
+            Assert.Less(Jugador.transform.position.x, caja.center.x, "Y casi no avanza: no llega ni a la mitad.");
+            StringAssert.StartsWith("Atrapa", marana.Dibujos[0].sprite.name, "Se cierra sobre él.");
+
+            // De golpe: un Dash Acuático la cruza entera, con el cuerpo.
+            entrada.PulsarDash();
+            yield return new WaitForSeconds(0.4f);
+            Assert.IsFalse(marana.Sujetando, "Ya no lo sujeta.");
+            Assert.Greater(Jugador.transform.position.x, caja.max.x, "Está al otro lado.");
+            Assert.IsTrue(Jugador.Motor.BajoElAgua, "Todavía bajo el agua: el túnel sigue.");
+            entrada.EjeHorizontal = 0f;
+        }
+
+        [UnityTest]
+        public IEnumerator SinElDashAcuatico_LaMaranaNoSeCruza()
+        {
+            yield return EntrarEnNivel3();
+            ApagarEnemigos();
+            Assert.IsFalse(Jugador.Habilidades.Tiene(HABILIDADES.DASH_ACUATICO), "Sin terminar el Mundo 2, Kael no lo tiene.");
+
+            var marana = Object.FindObjectsByType<Marana>(FindObjectsInactive.Exclude).Single(m => m.name == "Marana1");
+            var caja = marana.GetComponent<BoxCollider2D>().bounds;
+            yield return LlevarJugadorA(new Vector2(caja.min.x - 1f, caja.min.y + 0.05f));
+            var entrada = new InputSimulado();
+            Jugador.FijarFuenteInput(entrada);
+            entrada.EjeHorizontal = 1f;
+            yield return new WaitForSeconds(1f);
+            entrada.PulsarDash();
+            yield return new WaitForSeconds(0.6f);
+            Assert.IsTrue(marana.Sujetando, "Bajo el agua no hay dash sin el Dash Acuático: sigue sujeto.");
+            Assert.Less(Jugador.transform.position.x, caja.center.x);
+            entrada.EjeHorizontal = 0f;
         }
 
         [UnityTest]

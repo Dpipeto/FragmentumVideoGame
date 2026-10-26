@@ -43,6 +43,13 @@ namespace Fragmentum.UI
     /// </summary>
     public class PantallaCinematica : MonoBehaviour
     {
+        /// <summary>
+        /// El volumen de la música de una cinemática: el mismo que la del nivel (<c>LevelManager</c>), porque
+        /// las dos salen igual de fuertes de <c>Herramientas/exportar_musica.py</c>. Encima, el de la música
+        /// de las opciones (<see cref="AjustesAudio"/>).
+        /// </summary>
+        public const float VolumenMusica = 0.6f;
+
         private const int TamanoTexto = 40;
         private const int TamanoTitulo = 76;
 
@@ -98,6 +105,9 @@ namespace Fragmentum.UI
         public LineaTiempoCinematica Linea { get; private set; }
 
         public bool Reproduciendo { get; private set; }
+
+        /// <summary>Por donde suena la música de la cinemática (<c>CutsceneData.musica</c>).</summary>
+        public AudioSource Musica => _musica;
 
         /// <summary>La cámara de las cinemáticas en pixel art. La pone el UIManager.</summary>
         public CamaraCinematica Camara { get; set; }
@@ -238,6 +248,7 @@ namespace Fragmentum.UI
 
             _audio = NuevaFuente();
             _musica = NuevaFuente();
+            _musica.volume = VolumenMusica;
         }
 
         /// <summary>Empieza a reproducir. Sin datos o sin diapositivas, termina en el acto.</summary>
@@ -297,6 +308,7 @@ namespace Fragmentum.UI
             if (cinematica.musica != null)
             {
                 _musica.clip = cinematica.musica;
+                _musica.volume = VolumenMusica * AjustesAudio.Musica;
                 _musica.Play();
             }
 

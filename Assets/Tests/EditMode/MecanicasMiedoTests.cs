@@ -63,7 +63,13 @@ namespace Fragmentum.Tests
             Assert.IsNull(prefab.GetComponentInChildren<Collider2D>(true), "Nota a Kael por su caja, sin collider: ni lo frena ni lo sostiene.");
             Assert.AreEqual(GeneradorMecanicas.TamanoCepo, cepo.Zona.size);
             Assert.AreEqual(0f, cepo.Zona.yMin - prefab.transform.position.y, 1e-4f, "El pivote está en el suelo.");
-            Assert.IsNotNull(prefab.GetComponentInChildren<SpriteRenderer>(true), "Sin arte, un rectángulo.");
+            Assert.IsNotNull(prefab.GetComponentInChildren<SpriteRenderer>(true), "Su dibujo (sin arte, un rectángulo).");
+            if (ConstructorMecanicasMundo3.CepoAbierto != null)
+            {
+                var serializado = new SerializedObject(cepo);
+                Assert.AreEqual(ConstructorMecanicasMundo3.CepoAbierto, serializado.FindProperty("spriteAbierto").objectReferenceValue, "Con arte, abierto…");
+                Assert.AreEqual(ConstructorMecanicasMundo3.CepoCerrado, serializado.FindProperty("spriteCerrado").objectReferenceValue, "…y cerrado.");
+            }
         }
 
         [Test]
@@ -84,6 +90,15 @@ namespace Fragmentum.Tests
             Assert.IsNotNull(rama);
             Assert.AreEqual(GeneradorMecanicas.ColorRamaSinArte, rama.ColorSana, "A oscuras, del color de las sanas.");
             Assert.AreNotEqual(rama.ColorSana, rama.ColorPodrida, "Bajo una antorcha, se delata.");
+            if (ConstructorMecanicasMundo3.HayRamas)
+            {
+                Assert.IsTrue(rama.ConArte, "Con arte, lleva sus cuatro dibujos.");
+                Assert.AreEqual(ConstructorMecanicasMundo3.RamaSana, rama.DibujoDe(ESTADOS_PLATAFORMA.INTACT, false, 0f, 1f), "A oscuras, es la sana.");
+                Assert.AreEqual(ConstructorMecanicasMundo3.RamaPodrida, rama.DibujoDe(ESTADOS_PLATAFORMA.INTACT, true, 0f, 1f), "Con luz, la podrida.");
+                Assert.AreEqual(ConstructorMecanicasMundo3.RamaPodrida, rama.DibujoDe(ESTADOS_PLATAFORMA.CRACKED, false, 0f, 1f), "Crujiendo se delata, aun a oscuras.");
+                Assert.AreEqual(ConstructorMecanicasMundo3.RamaRota, rama.DibujoDe(ESTADOS_PLATAFORMA.BROKEN, false, 0.1f, 1f), "Al partirse, se dobla…");
+                Assert.AreEqual(ConstructorMecanicasMundo3.Astillas, rama.DibujoDe(ESTADOS_PLATAFORMA.BROKEN, false, 0.6f, 1f), "…y se deshace en astillas.");
+            }
         }
 
         [Test]
@@ -152,8 +167,9 @@ namespace Fragmentum.Tests
             Assert.AreEqual(0, LuzDelNivel.TramoEn(tramos, 2f), "El inicio, en la linde.");
             Assert.AreEqual(1, LuzDelNivel.TramoEn(tramos, 36f), "Cada tramo empieza donde acaba el anterior.");
             Assert.AreEqual(1, LuzDelNivel.TramoEn(tramos, 41f), "La trinchera, a oscuras.");
-            Assert.AreEqual(2, LuzDelNivel.TramoEn(tramos, 95f), "El claro.");
-            Assert.AreEqual(3, LuzDelNivel.TramoEn(tramos, 125f), "La arena.");
+            Assert.AreEqual(1, LuzDelNivel.TramoEn(tramos, DisenoNivel3.Maranas[0].Desde), "La ciénaga, a oscuras: es parte del bosque cerrado.");
+            Assert.AreEqual(2, LuzDelNivel.TramoEn(tramos, DisenoNivel3.Arboles[1]), "El claro.");
+            Assert.AreEqual(3, LuzDelNivel.TramoEn(tramos, DisenoNivel3.Jefe), "La arena.");
             Assert.AreEqual(0, LuzDelNivel.TramoEn(tramos, -50f), "Fuera del nivel, el más cercano.");
             Assert.AreEqual(3, LuzDelNivel.TramoEn(tramos, 500f));
             Assert.AreEqual(-1, LuzDelNivel.TramoEn(new TramoDeLuz[0], 3f));

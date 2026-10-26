@@ -1,5 +1,6 @@
 using System.Collections;
 using Fragmentum.Core;
+using Fragmentum.Core.Combate;
 using Fragmentum.Player;
 using NUnit.Framework;
 using UnityEngine;
@@ -133,6 +134,54 @@ namespace Fragmentum.Tests.PlayMode
 
             yield return EsperarClip(ESTADOS_JUGADOR.RUN, 0.5f);
             Assert.IsTrue(Suena(PlayerAnimacion.Correr), "Sigue corriendo: vuelve al clip de correr.");
+        }
+
+        [UnityTest]
+        public IEnumerator Danio_ReproduceSuClip_EstiradoAlRetroceso()
+        {
+            Suelo(-10f, 10f);
+            yield return CrearJugadorEnSuelo(Vector2.zero);
+
+            Jugador.Vida.RecibirGolpe(new Golpe(1, PiesJugador + Vector2.left));
+            yield return EsperarClip(ESTADOS_JUGADOR.DAMAGED, 0.5f);
+            Assert.IsTrue(Suena(PlayerAnimacion.Danio), "El golpe tiene su clip.");
+            Assert.AreEqual(1f / Jugador.Parametros.damagedDuration, Animador.GetFloat(AnimatorParams.VelocidadDanio.Hash), 0.01f,
+                "El clip de 1 s ocupa justo el retroceso.");
+
+            var sprite = Animador.GetComponent<SpriteRenderer>();
+            var vistos = new System.Collections.Generic.List<string>();
+            while (Jugador.EstadoActual == ESTADOS_JUGADOR.DAMAGED)
+            {
+                if (!vistos.Contains(sprite.sprite.name)) vistos.Add(sprite.sprite.name);
+                yield return null;
+            }
+
+            Assert.IsTrue(vistos.TrueForAll(n => n.StartsWith("Kael_Danio_")), string.Join(", ", vistos));
+            Assert.GreaterOrEqual(vistos.Count, 3, "Mientras dura el retroceso se ven sus fotogramas, no solo el primero.");
+        }
+
+        [UnityTest]
+        public IEnumerator ElEscudo_ParaElGolpeDelLadoDelQueViene_YSeRompe()
+        {
+            Suelo(-10f, 10f);
+            yield return CrearJugadorEnSuelo(Vector2.zero);
+            var escudo = Jugador.GetComponentInChildren<EscudoDibujado>(true);
+            Assert.IsNotNull(escudo, "El jugador lleva el dibujo de su escudo.");
+            Assert.IsFalse(escudo.Visible, "Sin la Defensa Reforzada, no se ve.");
+
+            Jugador.Vida.EscudoDesbloqueado = true;
+            var vida = Jugador.Vida.Vida;
+            Jugador.Vida.RecibirGolpe(new Golpe(1, PiesJugador + Vector2.left * 2f));
+            Assert.AreEqual(vida, Jugador.Vida.Vida, "El escudo para el golpe.");
+            Assert.IsTrue(escudo.Visible, "Y se ve parándolo…");
+            Assert.AreEqual(-1, escudo.Lado, "…del lado de donde viene.");
+            Assert.AreEqual("Escudo2", escudo.DibujoActual.name);
+            Assert.Less(escudo.Dibujo.transform.position.x, PiesJugador.x, "Delante de Kael, a su izquierda.");
+
+            yield return new WaitForSeconds(escudo.duracionGolpe + 0.05f);
+            Assert.AreEqual("Escudo3", escudo.DibujoActual.name, "Después se rompe…");
+            yield return new WaitForSeconds(escudo.duracionRotura);
+            Assert.IsFalse(escudo.Visible, "…y se va.");
         }
 
         [UnityTest]

@@ -36,7 +36,7 @@ namespace Fragmentum.Bosses.Patrones
             if (pavor != null)
             {
                 pavor.Aparecer(pavor.LugarParaElTajo(distancia));
-                pavor.Destellar(aviso);
+                pavor.Destellar(aviso, GESTOS_PAVOR.AVISO_TAJO);
             }
             else
             {
@@ -46,6 +46,11 @@ namespace Fragmentum.Bosses.Patrones
 
             yield return new WaitForSeconds(aviso);
             Tajo(jefe, jefe.Centro.x, pavor != null ? pavor.Suelo : jefe.SueloY, jefe.Mirando);
+            if (pavor != null)
+            {
+                pavor.Gesto(GESTOS_PAVOR.TAJO);
+            }
+
             yield return new WaitForSeconds(duracionGolpe);
 
             if (jadeo > 0f)

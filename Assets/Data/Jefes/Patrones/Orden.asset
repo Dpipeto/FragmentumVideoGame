@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe6f1a3fc3d81fd4caa1f7ec51e5263a, type: 3}
+  m_Name: Orden
+  m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronOrden
+  nombre: La orden (la radio)
+  descripcion: "Se\xF1ala al frente con la espada: seis explosiones de artiller\xEDa caen una tras otra, avanzando por la plaza desde su lado. Cada una marca el suelo 0,8 s antes. Quedarse entre dos marcas o saltar."
+  aviso: 1
+  danio: 1
+  color: {r: 0.54509807, g: 0.2, b: 0.2, a: 1}
+  dibujarZona: 1
+  memoria: 0
+  recuperacion: 0.8
+  explosiones: 6
+  separacion: 2.2
+  entreExplosiones: 0.6
+  marca: 0.8
+  ancho: 1.8
+  alto: 3
+  duracionGolpe: 0.3
+  efecto: {fileID: 6216019590151852575, guid: 1ea56766d0d8f60469e20b22ce7a88e0, type: 3}

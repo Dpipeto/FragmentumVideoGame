@@ -40,10 +40,12 @@ MonoBehaviour:
     cues: []
   saltable: 1
   soloPrimeraVez: 0
+  llevaDialogoDelJefe: 0
   montaje: 0
   sobreElJuego: 0
   opacidadVelo: 0.55
   escalaEntera: 1
+  rejilla: {x: 240, y: 135}
   fuente: {fileID: 0}
   tamanoFuente: 8
   interlineado: 0
@@ -57,4 +59,4 @@ MonoBehaviour:
   avisoSaltar: Pulsa cualquier tecla para saltar
   finAviso: 4
   opacidadAviso: 0.45
-  musica: {fileID: 0}
+  musica: {fileID: 8300000, guid: 9bc10206ddbd56d4e94a7f807a56f459, type: 3}

@@ -29,3 +29,15 @@ MonoBehaviour:
     texto: "Mirarlo no me destruy\xF3. La Culpa es un peso, no un nombre. Puedo cargarlo y seguir de pie."
     momento: 3
     duracion: 4.5
+  - hablante: Kael
+    texto: "Ese barril\u2026 Un Ataque Cargado y no quedar\xEDa nada a su alrededor. Ni yo, si me quedo cerca."
+    momento: 4
+    duracion: 4.5
+  - hablante: Kael
+    texto: "Ni un escombro hasta la torre: si me ven, no llego. Con la Invisibilidad no me ver\xE1n\u2026 pero dura poco: hay que correr."
+    momento: 5
+    duracion: 4.5
+  - hablante: Kael
+    texto: Volamos el puente para que nadie nos siguiera. Ahora el que tiene que cruzar soy yo.
+    momento: 6
+    duracion: 4.5

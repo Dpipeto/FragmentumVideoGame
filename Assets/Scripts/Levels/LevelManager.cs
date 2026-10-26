@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Fragmentum.Bosses;
 using Fragmentum.Core;
+using Fragmentum.Core.Juego;
 using Fragmentum.Data;
 using Fragmentum.Levels.Escenario;
 using Fragmentum.Narrative;
@@ -20,6 +21,8 @@ namespace Fragmentum.Levels
     /// - <b>Configuración:</b> fondo de cámara con la paleta, límites de cámara desde las
     ///   secciones del Anexo A y música del nivel. Lo que falte (música, prefab) se avisa por
     ///   consola y el nivel sigue funcionando.
+    /// - <b>Música:</b> la del nivel, en bucle (<see cref="MusicaDelNivel"/>). Calla en las
+    ///   cinemáticas y sigue al volver; en la arena cambia a la del jefe. Siempre fundiendo.
     /// - <b>Oscuridad:</b> si las reglas del nivel la piden (el Miedo), activa la luz de cada tramo
     ///   de la escena (<see cref="LuzDelNivel"/>) y enciende la luz propia de Kael.
     /// - <b>Reaparición:</b> tras un Game Over, la FSM global pide reintentar
@@ -68,6 +71,11 @@ namespace Fragmentum.Levels
         [Range(0f, 1f)]
         [SerializeField] private float volumenMusica = 0.6f;
 
+        [Tooltip("Lo que tarda la música en callar o en volver: en las cinemáticas y al cambiar a la del jefe.")]
+        [Min(0f)]
+        [SerializeField] private float fundidoMusica = 0.6f;
+
+        private MusicaDelNivel _musica;
         private CheckpointManager _checkpoints;
         private MarcadorNivel _marcador;
         private PlayerController _jugador;
@@ -94,6 +102,13 @@ namespace Fragmentum.Levels
         public MarcadorNivel Marcador => _marcador;
 
         public bool Completado => _completado;
+
+        /// <summary>La música del nivel (null si el nivel no tiene).</summary>
+        public MusicaDelNivel Musica => _musica;
+
+        // Las cinemáticas callan la música del nivel.
+        private static bool EnCinematica =>
+            GameStateMachine.Instancia != null && GameStateMachine.Instancia.EstadoActual == ESTADOS_JUEGO.CUTSCENE;
 
         // En un nivel del juego la muerte la lleva la FSM global (Game Over → reintentar).
         private static bool LaMuerteEsDelJuego =>
@@ -162,6 +177,10 @@ namespace Fragmentum.Levels
                 DialogueManager.Instancia.Reproducir(nivel.dialogos, MOMENTOS_DIALOGO.APERTURA);
             }
         }
+
+        // Sin escalar: las cinemáticas paran el juego, y es entonces cuando la música calla. El volumen de la
+        // música de las opciones se aplica al momento (también en la pausa).
+        private void Update() => _musica?.Avanzar(Time.unscaledDeltaTime, EnCinematica, volumenMusica * AjustesAudio.Musica, fundidoMusica);
 
         private void OnDestroy()
         {
@@ -240,7 +259,10 @@ namespace Fragmentum.Levels
             OnJefeDerrotado?.Invoke(jefe);
         }
 
-        /// <summary>Cambia entre la música del nivel y la del jefe (<c>LevelData.musicaJefe</c>), si existen.</summary>
+        /// <summary>
+        /// Cambia entre la música del nivel y la del jefe (<c>LevelData.musicaJefe</c>), si existen:
+        /// la que suena se apaga y la otra empieza desde el principio.
+        /// </summary>
         public void MusicaDeJefe(bool enCombate)
         {
             if (nivel == null)
@@ -254,19 +276,23 @@ namespace Fragmentum.Levels
                 return;
             }
 
+            CrearMusica();
+            _musica.Pedir(clip);
+        }
+
+        private void CrearMusica()
+        {
+            if (_musica != null)
+            {
+                return;
+            }
+
             if (fuenteMusica == null)
             {
                 fuenteMusica = gameObject.AddComponent<AudioSource>();
-                fuenteMusica.loop = true;
-                fuenteMusica.playOnAwake = false;
-                fuenteMusica.volume = volumenMusica;
             }
 
-            if (fuenteMusica.clip != clip)
-            {
-                fuenteMusica.clip = clip;
-                fuenteMusica.Play();
-            }
+            _musica = new MusicaDelNivel(fuenteMusica);
         }
 
         // --- Preparación ---
@@ -409,16 +435,8 @@ namespace Fragmentum.Levels
                 return;
             }
 
-            if (fuenteMusica == null)
-            {
-                fuenteMusica = gameObject.AddComponent<AudioSource>();
-            }
-
-            fuenteMusica.clip = nivel.musica;
-            fuenteMusica.loop = true;
-            fuenteMusica.playOnAwake = false;
-            fuenteMusica.volume = volumenMusica;
-            fuenteMusica.Play();
+            CrearMusica();
+            _musica.Empezar(nivel.musica, volumenMusica * AjustesAudio.Musica);
         }
 
         // --- Muerte fuera de los niveles del juego ---

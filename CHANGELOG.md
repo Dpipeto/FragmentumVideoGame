@@ -9,6 +9,1018 @@
 
 ---
 
+## Lo que encontró el segundo tester: la Centinela, las plataformas y los controles (2026-10-25)
+
+Rama `nivel4-recorrido`. El segundo tester encontró un «cheese» en el jefe del Nivel 1: «si te paras en una plataforma
+y el jefe está abajo tuyo le puedes hacer daño libremente sin que él te haga daño». El autor pidió corregirlo, que las
+plataformas del nivel «se puedan traspasar si saltas abajo de ellas» pero se pisen igual al caer, y cambiar los
+controles: interactuar con W, agacharse con S, caminar con Ctrl izquierdo, atacar con J y saltar también con K.
+
+### 1. El «cheese» de la Centinela
+
+- **Problema:** desde las dos plataformas bajas de la arena se le pegaba a la Centinela sin que ella alcanzara.
+- **Causa:** las plataformas estaban a 3 u del suelo y la Centinela mide 3,4 u: su cabeza asomaba 0,4 u por encima. La
+  espada de Kael baja hasta 0,25 u bajo sus pies, así que desde la plataforma le daba en la cabeza; ninguno de sus
+  ataques llega allí (el espadazo mide 2,6 u, y las ondas y el salto van por el suelo).
+- **Solución:** las dos plataformas bajas suben a 3,5 u (de y 8 a 8,5). Desde ninguna se alcanza a la Centinela y
+  siguen sirviendo para esquivar el salto y las ondas, como pide el diseño. Se suben con el doble salto, como antes.
+  `DisenoNivel1.Version` pasa a 3 y la escena se vuelve a montar. `DisenoNivel1Tests` comprueba, con la espada del
+  prefab de Kael y la altura de la Centinela, que desde ninguna plataforma se le alcanza.
+
+### 2. Plataformas que se atraviesan desde abajo
+
+- Las plataformas del Nivel 1 (las de la arena, las inestables y las de combustión) llevan un `PlatformEffector2D` de
+  un sentido: se atraviesan saltando desde abajo y se pisan al caer. El suelo sigue siendo sólido.
+- **Problema:** para la física eso basta, pero el suelo de Kael (`CheckGround`) y la plataforma inestable preguntan
+  «¿hay algo encima?» con una consulta. **Causa:** mientras Kael atraviesa una plataforma subiendo, sus pies están
+  dentro de ella: la habría pisado en el aire (y recuperado los saltos), y la inestable se habría agrietado sin que la
+  tocara. **Solución:** `PlataformaDeUnSentido` dice si un cuerpo está de verdad encima (los pies en su cara de arriba y
+  sin subir); `CheckGround` y `PlataformaInestable` solo cuentan las de un sentido así.
+
+### 3. Los controles
+
+- En `InputSystem_Actions`: interactuar, W (antes E); agacharse, S (antes C o Ctrl izquierdo); caminar, Ctrl izquierdo
+  (antes Alt); atacar, J (antes Enter; el clic sigue valiendo); y saltar, también K. El mando no cambia, y en los menús
+  Enter sigue eligiendo.
+- La guía de mecánicas y los avisos del HUD leen las teclas del asset: dicen las nuevas sin tocarlos. W y S son también
+  arriba y abajo en WASD, pero el eje vertical no lo usa nada del juego.
+
+### 4. Verificación
+
+- Pruebas nuevas: desde ninguna plataforma de la arena la espada alcanza a la Centinela (`DisenoNivel1Tests`); las
+  plataformas del Nivel 1 se atraviesan y el suelo no (`EscenasNivelTests`); y, con física real, Kael atraviesa la
+  inestable saltando desde abajo sin pisarla ni agrietarla y la agrieta al caer encima (`MecanicasPlayModeTests`).
+  `GuiaMecanicasTests`, con las teclas nuevas. **EditMode 738, PlayMode 306**.
+
+## El Espectro del Pavor, más rápido y también por las ramas (2026-10-24)
+
+Rama `nivel4-recorrido`. Mientras termina la tesis, el autor pidió que el jefe del Mundo 3 fuera «más rápido tanto en
+su ataque como en la carga» y que pudiera «cargar también en las plataformas de arriba», detectando dónde está Kael,
+«para que genere ese miedo que se dice del mundo 3».
+
+### 1. Más rápido
+
+- El tajo y las sombras avisan 0,6 s en vez de 1 s. La embestida avisa 0,6 s y cruza a 16 u/s en vez de 11. Las hojas
+  siguen en 1 s. Ningún aviso baja de los 0,5 s que exige `VerificadorPavor` para que se lea.
+- Cambian sus datos (`Tajo`, `Sombras` y `EmbestidaSombra`) y lo que pone `GeneradorJefes` al crearlos o
+  restablecerlos.
+
+### 2. La embestida busca a Kael
+
+- **Problema:** en las ramas de la arena, Kael estaba a salvo de la embestida, que siempre iba a ras de suelo (el diseño
+  decía «saltarla o esperarla en una rama»). En el mundo del miedo había un sitio seguro.
+- **Solución:** `EspectroDelPavor.AlturaDeKael` mira lo que pisa Kael, o lo que tiene debajo si salta. Usa el mismo rayo
+  con el que los jefes ponen sus erupciones bajo él (`BossController.SueloEn`). Si Kael está más de 0,3 u por encima del
+  suelo de la arena, la embestida aparece y cruza a esa altura, en el aire: el Pavor ni cae ni choca. Debajo de una
+  rama, Kael pisa el suelo y la embestida va a ras de suelo.
+- Se esquiva saltándola o bajándose de la rama.
+- Si muere en el aire, tras embestir por una rama, cae al suelo de su arena: su montón de hojas y su fragmento quedan
+  donde Kael puede recogerlos. Sin eso, el fragmento se quedaba flotando junto a la pared.
+
+### 3. Verificación
+
+- Pruebas nuevas en `EspectroDelPavorPlayModeTests`: con Kael en una rama, la embestida aparece y cruza a la altura de
+  la rama y le alcanza, y si muere en el aire cae al suelo; con Kael debajo de una rama, va a ras de suelo. Las de los tiempos, al día (el tajo avisa
+  0,6 s; la embestida, a 16 u/s). **EditMode 735, PlayMode 305**.
+
+## Los efectos de sonido de Kael, con LMMS (2026-10-23)
+
+Rama `nivel4-recorrido`. El autor preguntó si con LMMS se podían hacer los efectos de sonido y las voces (los efectos,
+sí; las voces, solo sin palabras), y pidió empezar por los de Kael: «comienza con eso» (el salto, el dash, el ataque y
+el daño).
+
+### 1. Los sonidos
+
+- `componer_sonidos_kael.py` escribe un proyecto de LMMS por efecto, en `Sonidos/Kael`: el salto, el doble salto, el
+  dash, el tajo, el tajo cargado y el daño. Cada uno, en capas: el aire (ruido por un filtro de banda que se abre y
+  se cierra), los golpes graves (Kicker), el filo de la espada y el quejido del daño (sfxr, el generador de efectos de
+  los juegos retro, que trae LMMS) y el metal de la hoja (una muestra).
+- **Problema:** el aire salía como un siseo (su centro, a 6-9 kHz). **Causa:** el filtro de banda ancho deja pasar
+  casi todo el ruido blanco, y la envolvente sube el filtro (barrido² × 6000) Hz, más de lo que parecía. **Solución:**
+  se midió cómo sube (calibrando el filtro con ruido) y se estrechó la banda: `aire()` se da en hercios («de 250 a
+  1400 Hz») y cada capa queda en su sitio (el aire, a 1,5-3 kHz; los golpes, a 110-240 Hz).
+- **Problema:** el golpe sordo del tajo cargado se cortaba en seco. **Causa:** la distorsión de Kicker sostiene el seno
+  hasta el final de su caída. **Solución:** menos distorsión y una envolvente de volumen que lo apaga.
+- **Problema:** el quejido del daño acababa en chasquidos sueltos. **Causa:** caía tanto que bajaba de 30 Hz. **Solución:**
+  cae una octava, no tres.
+- `exportar_sonidos.py` los pasa a WAV mono de 44,1 kHz (lo que pedía PENDIENTES): los corta donde se apagan y los
+  normaliza por lo más fuerte en 50 ms, cada uno a su nivel (el salto, que se oye a cada rato, más bajo; el daño, más
+  alto). Duran de 0,17 a 0,34 s.
+
+### 2. En el juego
+
+- `SonidosKael` (patrón Observer, como `PlayerAnimacion`) escucha a la FSM de Kael y a su vida: suena al entrar en
+  JUMP o WALL_JUMP (el salto), DOUBLE_JUMP, DASH y ATTACK (el normal o el cargado: `PlayerController.AtaqueEnCursoCargado`),
+  y al recibir un golpe que quita vida; el que para el escudo no suena a daño. Cada vez, hasta un 5 % más agudo o más
+  grave, con un azar propio (el de Unity lo siembran algunas pruebas). Cuatro voces a la vez.
+- Se importan descomprimidos y cargados antes (`SonidosDelJuego`): suenan en el mismo frame que su acción.
+- **Las opciones** tienen un tercer volumen, **«Efectos»** (`AjustesAudio.Efectos`), que baja también el golpe de la
+  antorcha. Un archivo de ajustes de antes, sin él, lo deja al 100 %.
+
+### 3. Verificación
+
+- Pruebas nuevas: `SonidosTests` (cada efecto es corto, mono y se carga descomprimido; Kael lleva los suyos, cada uno
+  en su estado; los proyectos de LMMS están junto al juego) y `SonidosKaelPlayModeTests` (con el input simulado:
+  el salto y el doble salto, el dash, el tajo y el cargado, el daño pero no el del escudo, y el volumen de «Efectos»).
+  `OpcionesTests` y `OpcionesPlayModeTests` prueban el tercer volumen. **EditMode 735, PlayMode 303**.
+
+## La música del menú y las opciones de volumen (2026-10-23)
+
+Rama `nivel4-recorrido`. El autor: «lo único que faltaría sería la música para el menú inicial y añadir un apartado de
+opciones para bajar el volumen tanto en el menú inicial como en el menú de pausa», y «la música del menú inicial es
+igual a la de selector de niveles».
+
+### 1. La música del menú
+
+- `componer_menu.py`: el tema de Kael, tranquilo (Re menor, 60 BPM, 96 s en bucle): un colchón y notas sueltas; el tema
+  en el piano; en las cuerdas, con el piano en arpegios; un puente; y la cabeza del tema, hacia el principio.
+- **Problema:** el menú y el selector son dos escenas: una música puesta en cada una se cortaría al pasar de una a otra.
+  **Solución:** `MusicaMenu` vive con los sistemas (la crea el `UIManager`): suena en `MAIN_MENU` y `LEVEL_SELECT`, y
+  también durante la carga entre ellas; al entrar en un nivel o en una cinemática se apaga, y al volver al menú empieza
+  otra vez. El clip, en la `LevelDatabase` (`musicaMenu`).
+
+### 2. Las opciones
+
+- `AjustesAudio`: el volumen general (el del `AudioListener`: todo lo que suena) y el de la música (sobre el 0,6 de la del
+  menú, la de los niveles y la de las cinemáticas), de 0 a 1. **Problema:** si fuera en la partida guardada, «Nueva
+  partida» lo devolvería al 100 %. **Solución:** va en su propio archivo, `fragmentum_ajustes.json`, junto al guardado;
+  si falta o está roto, todo a su volumen. Las pruebas lo llevan a su carpeta temporal, para no tocar el del jugador.
+- `PantallaOpciones` (como «Mecánicas»): dos deslizadores de 10 en 10 % (`FabricaUI.Deslizador`, finos y del color del
+  mundo) y «Volver». Se mueven con el ratón o con ← y →, y se oyen al momento: en el menú, con su música; en la pausa,
+  con la del nivel. Se abre desde el menú principal (botón «Opciones») y desde la pausa (entre «Mecánicas» y «Menú
+  principal»); al cerrarla desde la pausa, la pausa vuelve, y Esc la cierra.
+
+### 3. Verificación
+
+- Pruebas nuevas: `OpcionesTests` (los ajustes empiezan al 100 %, se quedan entre 0 y 1, se guardan y se leen, y un archivo
+  roto no rompe nada; el botón del menú) y `OpcionesPlayModeTests` (desde el menú, el volumen se oye al momento y se
+  guarda aparte, y una partida nueva no lo toca; la música del menú sigue en el selector sin cortarse y se apaga en el
+  nivel; desde la pausa, baja la música del nivel y al cerrar vuelve la pausa). **EditMode 720, PlayMode 298**.
+
+## La música de los mundos 1 a 3, de sus jefes y de las cinemáticas, con LMMS (2026-10-23)
+
+Rama `nivel4-recorrido`. El autor: «sigue generando la música; también sería ideal tener la música para
+cinemáticas». Con lo hecho para el Nivel 4 (`musica_lmms.py`, `exportar_musica.py`), 20 piezas más: la música de los
+niveles 1, 2 y 3 y de sus jefes, la de las 13 cinemáticas con arte y el golpe de cuerdas de la antorcha.
+
+### 1. Lo que pide el Anexo A, en LMMS
+
+- **La Ira** (`componer_nivel1.py`): percusión industrial pesada y un sinte distorsionado, sin melodía. Mi frigio,
+  160 BPM: bombo distorsionado, metal en semicorcheas, un bajo ácido (LB302) y golpes de quinta por un *bitcrush*. **La
+  Centinela**, lo mismo más pesado (168 BPM): doble bombo, un riff de quintas y un yunque de forja a contratiempo.
+- **La Tristeza** (`componer_nivel2.py`): una caja de música (sintetizada) que se tuerce como una cinta vieja (un eco
+  muy corto que oscila), bajo el agua (sin agudos), y un piano de verdad (`piano02`) con una reverb enorme. Si menor,
+  70 BPM. **La Doncella**, un vals en 3/4: el lamento en las cuerdas, la caja de música y el coro.
+- **El Miedo** (`componer_nivel3.py`): casi silencio, a -30 dB. Un zumbido que va y viene, viento a ratos y, cada 8 a 16
+  s, un ruido del bosque; al azar pero siempre el mismo azar, en un bucle de 192 s para que no se note. **El Espectro**:
+  toms en grupos de 3 y 2 que no caen donde se espera, cuerdas en trémolo y racimos graves. **La antorcha**: un golpe de
+  cuerdas al encenderla.
+- **Las cinemáticas** (`componer_cinematicas.py`): una pieza por cinemática, que dura lo que ella y golpea donde cambia
+  el plano. **El tema de Kael** (Re menor) es el tema principal: lo presenta la cinemática inicial (siguiendo su guion:
+  se corta en seco con «Le sacaron todo lo que pesaba»; las cuatro emociones toman forma una a una) y vuelve en cada
+  cierre de mundo con los instrumentos de ese mundo, para resolver en Re mayor cuando Kael integra el fragmento. Las
+  presentaciones crecen hasta el combate; la del Juez baja Re, Do, Si bemol, La y resuelve en el primer compás de su
+  tema. Las memorias de la Culpa, en silencio (Anexo A).
+
+### 2. Las herramientas
+
+- `musica_lmms.py`: compases de 3/4; piezas que miden segundos justos (a 75 BPM un tick es 1/60 s); patrones en
+  cualquier tick; y **los instrumentos medidos**: la nota en que está grabada cada muestra de LMMS, medida en su espectro
+  (el piano en Do 3, la caja de música sintetizada, las campanas en Re…).
+- `exportar_musica.py` distingue los **bucles** (la barra de bucle de LMMS encendida) de las **piezas que suenan una vez**
+  (apagada): estas se cortan en la marca de fin y se apagan en sus últimos 0,3 s. Cada tema puede pedir su volumen (el
+  Miedo, -30 dB); las cinemáticas, a -20.
+- **Problema:** al releer un OGG de 14 s, LMMS daba 12,8. **Causa:** corta en el último compás entero una pista de audio
+  que no mide compases enteros. **Solución:** los proyectos de audio del exportador miden compases enteros.
+- **Problema:** exportando una pista sola, LMMS dejó 16 muestras rotas (infinitas) al empezar. La mezcla salió limpia, pero
+  el exportador ahora para si ve muestras rotas, en vez de llevarlas al juego.
+- **Problema:** dos sonidos no se oían al medirlos: el chelo en trémolo (repetido en fusas, solo sonaba su ataque, que
+  es silencioso) y el aliento al revés (la muestra lleva silencio al final). **Solución:** cuerdas repetidas en
+  semicorcheas y un ruido de aliento que crece.
+- La mezcla de cada pieza se ajustó a lo medido, pista a pista (en las cinemáticas, en la tabla `MEZCLA`): sobraban los
+  zumbidos y los colchones, y faltaban los golpes de cada cambio de plano.
+
+### 3. En el juego
+
+- `MusicaNiveles`: la música de los niveles 1 a 4 y de sus jefes, puesta en su `LevelData`; la de cada cinemática, en su
+  `CutsceneData` (los constructores de cinemáticas y un paso de `ConstruccionBatch`, que también llega a la inicial). Los
+  bucles se leen del disco; las piezas cortas se cargan antes, para sonar a la vez que su imagen.
+- `PantallaCinematica` toca su música a 0,6, como la del nivel.
+- `MusicaDelNivel`: si se pide una música justo al acabar una cinemática (el tema del jefe tras su presentación), entra
+  de golpe: la presentación ya la ha preparado. **Problema:** si la presentación se saltaba enseguida, la del nivel aún no
+  se había apagado y el tema del jefe entraba fundiendo. **Solución:** cuenta que la música se estaba callando por una
+  cinemática, aunque no hubiera llegado al silencio.
+- `Antorcha`: suena al encenderse (`sonidoAlEncender`, puesto en su prefab).
+
+### 4. Verificación
+
+- `MusicaTests` (sustituye a `MusicaNivel4Tests`): cada bucle dura sus compases justos y se lee del disco; cada nivel
+  tiene su música y la de su jefe; cada cinemática, la suya, que dura lo que ella; las memorias, en silencio; la
+  antorcha, su golpe. En PlayMode, la entrada de golpe tras una cinemática, la música de la presentación del Juez y el
+  golpe de la antorcha. **EditMode 710/710, PlayMode 295/295**.
+- **No está comprobado que suene bien:** eso solo se oye (N53).
+
+## Mundo 4: la música, hecha con los sonidos de LMMS (2026-10-23)
+
+Rama `nivel4-recorrido`. El autor: «hazlo con los sonidos de LMMS, empieza por el nivel 4». Hasta ahora no había
+ni un audio en la v2 (B8). El Anexo A pide para la Culpa una «marcha militar lenta y distorsionada», silencio en las
+memorias y, para el jefe, «órgano de iglesia + bajo profundo».
+
+### 1. Componer para LMMS desde Python
+
+- **Problema:** LMMS no se maneja desde fuera, y la música no se puede oír al hacerla. **Solución:**
+  `Herramientas/musica_lmms.py` escribe el proyecto de LMMS (`.mmp`, XML) entero: pistas, patrones, instrumentos,
+  mezclador y efectos. LMMS lo exporta sin abrir su ventana (`lmms render`). El `.mmp` se abre y se edita en LMMS.
+- **Calibrado midiendo el audio**, antes de componer: la numeración de las notas (el La 4 es el 57), la nota en que
+  está grabada cada muestra de LMMS (la trompeta, en La 4 y con un zumbido de 50 Hz; los órganos, en La 3 y La 2; la
+  campana, en Re 3…), cómo cuentan el tiempo sus envolventes (5 × valor² segundos, y el nivel al cuadrado), y que la
+  reverb y el *bitcrush* actúan (el *bitcrush*, con ganancia de entrada y recorte, distorsiona).
+- **`componer_nivel4.py`, la partitura.** Los dos temas en Re menor:
+  - **La marcha** (64 BPM, 32 compases, 120 s): tambores y campana; el tema en la trompeta; el tema con otra
+    trompeta debajo; y un eco lejano que se apaga y vuelve a crecer hasta el principio. La trompeta va sin agudos y
+    algo rota, como en un disco viejo.
+  - **El Juez** (96 BPM, 32 compases, 80 s): sobre un bajo que baja de Re a La, el órgano a golpes; el tema de la
+    marcha en el órgano; el tema arriba con el coro; y el pedal solo, que vuelve a crecer.
+  Sin `--forzar` no pisa un `.mmp` que ya exista, por si se editó en LMMS.
+- **Comprobado por pistas** (`lmms rendertracks`): cada instrumento suena en su nota (medido en su espectro) y la
+  mezcla se ajustó a lo medido (la trompeta salía 10 dB por encima de lo que debía).
+
+### 2. Un bucle sin costura (`Herramientas/exportar_musica.py`)
+
+- **Problema:** exportado tal cual, el principio del tema no lleva la cola de la reverb ni de las notas del final, y al
+  repetirse se corta. **Solución:** LMMS lo toca dos veces seguidas y se guarda la segunda vuelta.
+- **Problema:** aun así, la costura del Juez saltaba cinco veces más que el paso natural. **Causa:** la reverb de LMMS
+  (ReverbSC) mueve sus ecos al azar; las dos vueltas no suenan igual. **Solución:** el último segundo se funde con el
+  final de la primera vuelta, que es el que de verdad va antes del principio. Lo seco es igual en las dos: solo se
+  mezclan las colas. Ahora la costura salta lo mismo que el paso entre las dos vueltas.
+- **Problema:** el OGG perdía las últimas 64 muestras. **Causa:** el codificador de OGG de LMMS tira el último bloque
+  de 256 si queda a medias (cambiar el tamaño de bloque en su configuración no sirvió). **Solución:** se codifica con
+  un poco de más y se corta el OGG en la página donde se llega al final, con el número de muestras justo en su
+  cabecera, como prevé Vorbis. Unity lo respeta: 5 292 000 muestras la marcha y 3 528 000 el Juez.
+- **Problema:** LMMS apuntaba cada exportación en la lista de proyectos recientes del usuario. **Solución:** se le
+  llama con una copia de su configuración sin recientes; la lista se limpió.
+- Se normaliza: los dos temas a la misma fuerza (RMS de unos -19 dB, pico de -1 dB).
+- **Lo que no es exacto:** para codificarlo, LMMS lo toca como una muestra y lo adelanta media muestra. Es igual en
+  todo el bucle; solo las diez primeras muestras (0,2 ms) no ven lo que sonaba antes, unos -35 dB en el golpe del
+  compás 1.
+
+### 3. En el juego
+
+- **`MusicaDelNivel`** (la lleva el `LevelManager`). **Problema:** la música seguía sonando bajo las cinemáticas
+  (también las de las memorias) y el cambio a la del jefe era en seco. **Solución:** calla en todas las cinemáticas
+  (se apaga en 0,6 s y se para) y al volver sigue donde iba; el cambio a la del jefe, y de vuelta, funde. Así el
+  Anexo A tiene su silencio en las memorias, y la marcha no suena bajo la presentación ni la derrota del Juez.
+- **`MusicaNiveles`**: la música de `Assets/Audio/Musica` se lee del disco mientras suena (*Streaming*, Vorbis) y
+  `GeneradorProgresion` la pone en `L4_Culpa` (`musica` y `musicaJefe`), sin pisar lo que se ponga a mano.
+- Los proyectos, en `Musica/Nivel4`, con su `Musica/LEEME.md`: cómo cambiar un tema en LMMS y volver a exportarlo.
+
+### 4. Verificación
+
+- Pruebas nuevas: la duración justa de cada tema, su importación y su sitio en el nivel (`MusicaNivel4Tests`); el
+  fundido paso a paso (`MusicaPlayModeTests`); y, en el Nivel 4, que la marcha calla al recordar una memoria y en la
+  plaza suena el Juez. **EditMode 671/671, PlayMode 293/293**.
+- **No está comprobado que suene bien:** eso solo se oye (N53).
+
+## Mundo 4, cierre de las fases E y F: las puertas, el escudo y el daño de Kael, y lo último del Artillero y del Juez (2026-10-23)
+
+Rama `nivel4-recorrido`. El autor: «ya están todas las imágenes que me solicitaste: termina la fase E y F», y
+«en Imágenes Kael ya está la de recibir daño». Llegaron las otras tres puertas, la verja, los dos checkpoints y la
+salida de la Culpa (I), el escudo de Kael (J), lo opcional (K: el aviso del culatazo y el abrigo vacío del
+Artillero, y la onda de «La sentencia»), `PresentacionJuez2` y `DerrotaJuez1` repetidas, y el daño de Kael.
+**El Mundo 4 tiene todo su arte.**
+
+### 1. La limpieza
+
+- **Las puertas** (`limpiar_puertas.py`, `Mundo4`): las cuatro en el lienzo de la primera. **La verja** se repite hacia
+  arriba: se le quitan las filas vacías de arriba y de abajo (`repite_alto`), que serían una raya en cada juntura.
+- **Problema:** el aviso del culatazo y el abrigo vacío se guardaron como `G1.jpg` y `M3.jpg`, encima de las fuentes de
+  la recarga y de la caída del Artillero. **Solución:** `R1.png` y `M1.png` se quedan como salieron el 2026-10-21 y su
+  grupo se congela (`congelado`: sin esas fuentes, su lienzo común cambiaría, y con él el pivote de todos). Los dos
+  nuevos llegaron en otro lienzo con el mismo píxel de arte: van en su grupo, con el ancla de los demás llevada a
+  ellos al encajarlos sobre `K1` y sobre `M2` (`pivotes_artillero_nuevos`).
+- **La onda** (una nube rosa suelta en `Onda2`, borrada), **el escudo** (de `Imagenes Kael/Escudo`) y las dos
+  cinemáticas repetidas, ya sin el bosque del Mundo 3.
+- **El daño de Kael:** `Daño.pxo` se exportó a 7,5×, una escala que `reducir_hoja.py` no sabía bajar. **Solución:** la
+  opción `--escala`, que toma el píxel del centro de cada bloque y comprueba que, ampliado otra vez, sale la exportación
+  píxel a píxel (si no, no guarda nada).
+
+### 2. Las puertas de la Culpa (`ConstructorPuertas.Culpa`)
+
+- La salida es la puerta de la iglesia (4 × 3 u): se abre como las de los otros mundos. Al abrirse, sus cadenas caen
+  0,26 u bajo el suelo: las pruebas de las puertas miden ahora lo que queda por encima del suelo.
+- La verja, en tramos de 4 u repetidos hasta el techo; el checkpoint, la bandera blanca, de 3,3 u (se pidió de 2,8;
+  los de los otros mundos miden de 3 a 3,6); la cinemática de salida, con sus dos planos y las frases del cierre.
+
+### 3. Lo último del Artillero y del Juez
+
+- **El Artillero** avisa del culatazo con la culata en alto (G1) y muere hasta que solo queda su abrigo (M3), que es el
+  que se desvanece. Cada uno, con su lienzo y su ancla (`ConstructorArtillero.Sueltos`).
+- **La onda de «La sentencia»**, dibujada (`OndaDeLaSentencia`, como la ola de fuego): la tierra se levanta 0,8 u, lo
+  que su zona, y rueda; su franja de tierra va metida en el suelo. `PatronSentencia.efecto`, como `PatronPueblo`.
+- **La presentación del Juez:** en el nuevo plano de cerca el cielo es claro, así que lo que dice y su rótulo van
+  abajo, uno detrás de otro (la plaza 0,3 s menos y el plano de cerca 0,3 más: sigue en 9,8 s).
+
+### 4. Kael
+
+- **El daño** (`Danio`): cuatro fotogramas que ocupan el retroceso entero (0,3 s), como el dash (`VelocidadDanio`). Hasta
+  ahora, en DAMAGED seguía el clip anterior.
+- **El escudo** de la Defensa Reforzada (`EscudoDibujado`): no se ve hasta que hace algo. Al recargarse aparece un
+  momento delante de Kael; al parar un golpe, del lado del golpe, lo para y se rompe. Escucha los eventos que
+  `PlayerHealth` ya tenía.
+
+### 5. Verificación
+
+- `DisenoNivel4` sube a la versión 10 (la escena se vuelve a montar con la puerta, la verja y los checkpoints).
+- `VerificadorNivel4` revisa también la onda de la sentencia. Pruebas nuevas: el aviso y el abrigo del Artillero, la
+  onda, el escudo (en el prefab y parando un golpe), el daño de Kael (su clip y en juego), las tres de las puertas
+  para el Nivel 4 y la presentación del Juez sin carteles que se pisen. **EditMode 664/664, PlayMode 288/288**.
+- Capturas en `Docs/Diseno/Nivel4_Puertas_*.png` y `Docs/Cinematicas/Culpa_Salida_*`.
+
+## Mundo 4, fases E y F: las memorias, el fondo y las cinemáticas del Juez con su arte (2026-10-22)
+
+Rama `nivel4-recorrido`. El autor: «limpia e implementa todas las imágenes nuevas». Llegaron, con los
+prompts corregidos (sin adjuntar el tileset), las cuatro memorias apagadas y brillando y su losa (E9), las
+siete capas del fondo (F), las cuatro cinemáticas del Juez (G), las cuatro imágenes de las memorias (H) y la
+puerta cerrada (I1). Faltan las otras tres puertas, la verja, el checkpoint, la salida y el escudo de Kael.
+
+### 1. La limpieza (`limpiar_mundo4.py`, `limpiar_puertas.py`)
+
+- **Las memorias**, cada pareja en su grupo (la encendida se editó sobre la apagada y cae encima píxel a
+  píxel). Se pidieron en un lienzo de 64 y salieron con 100 a lo ancho: más píxeles de arte de los pedidos.
+  La losa, a 64.
+- **El fondo y las cinemáticas**, a 480 × 268, como los del Mundo 3. **El primer plano de abajo** trajo,
+  como el del Mundo 3, el cielo de nubes con lluvia de la capa que se editó, y dos hojas de helecho: se
+  borran (`SIN_NUBES`), como se decidió entonces.
+- **La puerta cerrada**, en `limpiar_puertas.py` (`Mundo4`): no se monta hasta que lleguen las otras tres,
+  porque la puerta necesita sus cuatro dibujos para abrirse.
+
+### 2. Las memorias con su arte (`ConstructorMecanicasMundo4`, `PreparadorNivelCulpa`)
+
+- **Problema:** Gemini dibujó las memorias con un píxel más fino del pedido. **Solución:** como con las otras
+  piezas, cada una va a la escala que le da lo que se pidió que midiera (`DibujoMemoria`): la radio y la
+  carta, 1 u de ancho; la campana, 1,06; el casco, 1,5 de alto; la losa, el ancho de una marca.
+- **En el camino**, el objeto apagado lleva encima el mismo brillando: el brillo late (su borde ámbar y sus
+  chispas) y, al recordarla, se va. Sin código nuevo: `MemoriaInteractuable` ya pintaba su brillo con un
+  color y lo apagaba.
+- **En la plaza**, cada memoria espera sobre su losa: la losa apagada, a ras del suelo; encima, la
+  encendida, que solo se ve mientras la marca brilla; y sobre ella, el objeto. **Problema:** sin arte, cada
+  marca tenía el color de su memoria para saber cuál era la verdadera; con las losas dibujadas, las cuatro son
+  iguales. **Solución:** el objeto encima de cada losa dice de quién es; el color pasa a blanco (el del dibujo).
+
+### 3. La pared del Juez (`JuezSilente`)
+
+- Proyecta **la imagen de la memoria** de cada ataque (`imagenes`, las de sus cinemáticas), desvaída, a lo
+  ancho de la pared y sin deformarla. Cuando son las cuatro a la vez (la condena y la caída), pasan una tras
+  otra (`segundosPorImagen`, 0,375 s). Sin imágenes, el rectángulo de color de antes.
+- **Problema:** en las capturas, la pared no se veía. **Causa:** estaba de 6 a 12 u sobre el suelo de la plaza
+  (fase D) y, con Kael en el suelo, la cámara enseña hasta unas 6,3 u. **Solución:** baja a 0,3-5,9 u, detrás
+  del Juez (`DisenoNivel4.Proyeccion`), con una prueba que lo comprueba contra el tamaño de la cámara.
+
+### 4. Las cinemáticas (`ConstructorCinematicasNivel4`)
+
+- **La presentación del Juez**, con la estructura y la duración de la del Pavor (9,8 s): la plaza con la
+  primera frase de su línea, y de cerca la segunda arriba (sobre la copa oscura) y su rótulo abajo.
+- **La derrota**, sus dos planos sin texto, enlazada al Nivel 4 como las de los otros jefes.
+- **Las cuatro memorias**: su imagen, 5 s, con la línea de Kael abajo. **Problema:** el texto de las
+  cinemáticas no se ajusta solo y la línea no cabe en el plano. **Solución:** `EnDosLineas` la parte por el
+  final de frase más cercano a su mitad.
+
+### 5. El fondo (`ConstructorFondoMundo4`)
+
+- Como el del Mundo 3: cinco capas que siguen a la cámara (el cielo de humo, el pueblo lejano, el campo
+  cercano, el humo y los cables, estos en espejo porque sus bordes no casan), la alambrada anclada al suelo
+  como los helechos, y el campanario como hito, centrado sobre la plaza. **Aquí es de día**: sin
+  `FondoConLaLuz`. `PreparadorNivel` lo pone en las escenas de la Culpa.
+
+### 6. Verificación
+
+- `DisenoNivel4` sube a la versión 9 (la escena se vuelve a montar con las memorias, las losas y la pared).
+- `VerificadorNivel4` revisa también las memorias (sus dos dibujos, con el mismo lienzo y pivote), el fondo
+  (sus siete capas con dibujo) y las cinemáticas (sus planos y que el Nivel 4 las lleve).
+- Pruebas nuevas: 4 en `ArteMundo4Tests` (las medidas de las memorias, el fondo, las cinemáticas del Juez y
+  `EnDosLineas`), 3 en `EscenaNivel4Tests` (las memorias del camino, las losas y la pared de la plaza, y el
+  fondo) y 1 en `DisenoNivel4Tests` (la pared, a la vista desde el suelo). Cambian `MecanicasCulpaTests` (la cinemática de cada memoria lleva su imagen) y
+  `JuezPlayModeTests` (la pared enseña la imagen de la memoria del ataque, y al caer, todas).
+  **EditMode 657/657, PlayMode 286/286**.
+- Capturas en `Docs/Diseno/Nivel4_Memorias_*.png` y `Docs/Cinematicas/Juez_*` y `Culpa_Memoria_*`.
+
+## Mundo 4, fase E (segunda tanda): el escenario y sus mecánicas con su arte (2026-10-22)
+
+Rama `nivel4-recorrido`. El autor: «ve adaptando las imágenes que ya están descargadas». De la segunda
+tanda habían llegado los apartados E1 a E8 de `Prompts_Mundo4.md` (20 imágenes): el tileset y los props,
+las coberturas, el barril, la mina, el agua del río, la alambrada y el campanario. Faltan las memorias y
+su losa (E9), el fondo (F), las cinemáticas (G y H), las puertas (I), el escudo de Kael (J) y lo opcional
+(K): esas piezas siguen con su bloque provisional.
+
+### 1. La limpieza (`limpiar_mundo4.py`, «La segunda tanda»)
+
+- Cada imagen, con su píxel y su lienzo (`anclas.json`): el tileset (462 × 268) y los props (469 × 265),
+  a la rejilla de los del Mundo 3; el barril (4), la mina (2), el agua (3), la alambrada (4) y el campanario.
+- **Una opción nueva, `caja`**: lo de fuera se borra. Las coberturas venían en tres imágenes: el escombro,
+  el tanque y `todos.jpg` (los sacos largos, los bajos, la chimenea y un segundo tanque); de `todos` salen
+  tres piezas con su caja, y el segundo tanque no se usa.
+- **El agua**, recortada a lo común de sus tres fotogramas (180 × 37): las cenizas de la superficie dejaban
+  filas a medias. Y un fantasma más borrado, en los props.
+
+### 2. Las mecánicas con su arte (`ConstructorMecanicasMundo4`)
+
+- **El barril** (`BarrilExplosivo`): intacto, la mecha que parpadea (sus dos fotogramas, alternos) y
+  quemado; sin arte, el rectángulo de antes.
+- **La mina** (`Mina`): la bola dibujada parpadea cuando Kael está a menos de 2 u (`distanciaAviso`); la
+  cadena es la del Verdugo, en mosaico del fondo a la bola.
+- **El agua del río**: su superficie en bucle sobre un cuerpo pardo, como la de la ciénaga.
+- **Las alambradas**: su dibujo cuelga del techo del ojo y lo llena; se mece y se cierra al atrapar, como
+  la maraña.
+- **Las coberturas**: cada bloque lleva su dibujo, con su pie en el del bloque y lo alto en lo alto del
+  bloque (los escombros, los sacos del refugio, los de los Artilleros, las chimeneas y el tanque volcado).
+
+### 3. El escenario vestido (`ConstructorEscenarioMundo4`, `PreparadorNivelCulpa`)
+
+- **El tileset y los props, cortados** en 17 piezas (`SpriteRect` con su pivote; la viga del tejado, con
+  bordes para alargarse por el centro).
+- **La escena**, vestida como las de los otros mundos: los suelos de tierra quemada con su ceniza, los
+  muros y el pilar de piedra, los tejados con su viga y sus tejas, el campanario (que dibuja la torre, el
+  arco y el balcón) y el atrezo (`DisenoNivel4.Decorados`): la cruz del inicio, el árbol, los cráteres,
+  las alambradas caídas y el casco de la tierra de nadie, las casas, la farola, la cortina y los cables
+  de la calle, el montón de ladrillos y la viga caída. Cada bloque apaga su rectángulo de color.
+- **La tierra, sin rayas.** En la hoja es un bloque con su propio marco; el primer recorte cogía la sombra
+  de bajo la ceniza, y al repetirse salía una raya cada 0,875 u. Se cortó su interior (filas 9-34).
+
+### 4. Lo que cambió en el diseño (`DisenoNivel4`, versión 7; `Nivel4_Diseno.md`, sección 10)
+
+El campanario se montó como lo dibuja su arte: **el balcón sale 1,3 u de la torre** (de x 61,7 a 63; era
+de 61), **el arco mide 2,9 u** (era 2,5) y **la torre, 10,5** (era 12). Los Artilleros del balcón pasan a
+x 62 y 62,7 (eran 61,6 y 62,5), y siguen sin ver el refugio. El balcón ya no empieza en una unidad entera:
+como las coberturas, lo dibuja su pieza y no el tileset.
+
+### 5. Verificación
+
+- `VerificadorNivel4` revisa también las mecánicas (sus reglas, los dibujos del barril y de la mina) y que
+  el tileset y los props estén cortados en todas sus piezas.
+- Pruebas nuevas: 5 en `ArteMundo4Tests` (el barril, la mina, las coberturas, el campanario contra el
+  diseño y el tileset) y 2 en `EscenaNivel4Tests` (la escena vestida; el río y las alambradas).
+  **EditMode 649/649, PlayMode 286/286**.
+- Capturas del Nivel 4 vestido en `Docs/Diseno/Nivel4_Vestido_*.png`, hechas con una prueba temporal que ya
+  no está.
+
+## Mundo 4, fase E (primera tanda): los enemigos y el Juez Silente con su arte (2026-10-22)
+
+Rama `nivel4-recorrido`. El autor: «ya están todas las imágenes en su carpeta; necesito que me des los
+prompts para la fase F que no estaban en el archivo de `Prompts_Mundo4.md`; limpia las imágenes e
+impleméntalas». Tres cosas: la limpieza de lo que llegó, su montaje en el juego y la segunda tanda de
+prompts.
+
+### 1. La limpieza (`Tesis/Imagenes/limpios/script/limpiar_mundo4.py`)
+
+- **Lo que lanza y lo que deja el Juez** (apartado C), limpio: la placa (2), la explosión (4) y su marca
+  (2), la ola de fuego (2), el garfio y la cadena, la bala y el Fragmento de la Culpa. La placa salió de
+  su base con el píxel del Juez; lo demás, con uno el doble de grande, todo igual entre sí: cada pieza
+  lleva en el juego sus píxeles por unidad.
+- **Restos que se borraron**, como los fantasmas de antes: el humo a medio deshacer de `Explosion4`, una
+  voluta de humo en `Marca1`, la ola de fuego que había debajo del garfio (Gemini editó `Ola1`) y un
+  garfio suelto bajo la cadena.
+- **Los repetidos del Juez:** `K1` y `K2`, arrodillado más bajo; `M2` y `M3`, a la altura de antes.
+  **`M5`** volvió a salir con el Juez de pie encima del montón: se queda el montón (que salió bien) y la
+  gema que flota encima es `Fragmento1`, aparte. El Juez queda completo: 31 fotogramas.
+
+### 2. Los enemigos con su arte
+
+- **`ConstructorPenitente`**: el Eco de la Culpa, como el Lamento y el Espectro: los 12 fotogramas del
+  Eco, cada uno con su ancla y su escala (`anclas.json`), con el controlador y el cuerpo del Eco, y su
+  ritmo de ataque (1,6×, 0,45 s de descanso) desde el principio. Muere en tierra seca y ceniza.
+- **`ConstructorArtillero`**: 11 fotogramas a 42 px/u (1,5 u arrodillado), un clip por lo que se le ve
+  hacer (`POSES_ARTILLERO`: reposo, apunta, dispara con el fogonazo, recarga, alza la culata, culatazo,
+  golpeado) y la muerte. Dispara su **bala dibujada** (`Artillero.bala`) desde la boca de su fusil.
+- **`ConstructorVerdugo`**: 18 fotogramas a 44 px/u (3 u), quieto y andar (los de su controlador) y una
+  pose por golpe (`POSES_VERDUGO`). Lanza **el garfio dibujado** y **la cadena**, un tramo en mosaico
+  que baja de su mano (donde la lanza en el dibujo, a 2 u) hasta el garfio, que sigue volando a 1,4 u
+  (`Verdugo.cadena`, `manoCadena`, `alturaMano`): agachado, le pasa por encima.
+- `GeneradorEnemigos` comparte con ellos lo que ya montaba sin arte (`CrearLineaDeTiro`,
+  `AjustarArtillero`, `ArmarGolpesDelVerdugo`): el nivel usa los prefabs con arte (`CargarPrefab`).
+
+### 3. El Juez Silente con su arte
+
+- **`ConstructorJuez`**: 31 fotogramas a 54 px/u (3,4 u, como la Centinela y el Pavor; la maestra en su
+  propio lienzo, con el mismo punto de apoyo), un clip por gesto, andar, la condena y la muerte.
+- **`GESTOS_JUEZ`** y **`JuezSilente.Gesto`**, como los del Pavor: cada patrón pide su aviso y su golpe
+  (la orden señala, el pueblo hace sonar la balanza, el compañero abre la capa y la cierra, la sentencia
+  baja la espada, la clava y la saca) y, al acabar, vuelve al reposo. Arrodillado mientras dura su
+  ventana; la condena es su grito (F1-F3, 1,5 s).
+- **El fragmento va aparte** (`FragmentoJefe.gema`): flota sobre el montón de M5 y se apaga al recogerlo.
+- **La trampa dibuja sus cadenas** sobre Kael mientras lo sujeta (dos tramos cruzados).
+- **Sus ataques llevan su dibujo**: la orden, la marca y la explosión (`PatronOrden.efecto`); el pueblo,
+  la ola de fuego (`PatronPueblo.efecto`); el compañero, las placas que giran (`PatronCompanero.placa`).
+  La espada clavada de la sentencia ya se ve en su dibujo: su rectángulo no se pinta
+  (`PatronSentencia.dibujarGolpe`); la onda sí, que todavía no tiene dibujo.
+
+### 4. Lo que lanzan y lo que dejan (`ConstructorEfectosMundo4`)
+
+- **`ExplosionDibujada`**: la explosión del barril y de la mina, una vez (estallido, bola de fuego, humo
+  y cráter), nacida en el suelo y escalada a su alcance; sin arte, el destello de antes
+  (`Explosiones.Estallar` la recibe de `BarrilExplosivo` y de `Mina`).
+- La **artillería de «La orden»** (`ArtilleriaDeLaOrden`): la marca late mientras su zona avisa y estalla
+  al quemar, como la erupción de la Centinela. La **ola** (`OlaDelPueblo`), la **placa** (`PlacaDelJuez`)
+  y la **bala** (`BalaDelArtillero`), con sus prefabs.
+
+### 5. Lo que cambió en el diseño (`DisenoNivel4`, versión 6; `Nivel4_Diseno.md`, sección 10)
+
+- **El cañón del Artillero**, el de su dibujo: 1,55 u por delante y a 1,06 de alto (era 1,3 y 1,5).
+- **Sus sacos**, 0,9 u de alto (decidido el 2026-10-21) y de su x − 1,3 a su x − 0,45.
+- **Apunta a lo alto de la cabeza** (0,1 u bajo lo alto; era 0,25). Con el cañón más bajo, de pie tras
+  la cobertura más cercana a cada Artillero la bala daba en ella; así se cumple otra vez la decisión 2
+  (hacen falta agacharse y la cobertura). El margen tras esas dos coberturas es pequeño: conviene jugarlo.
+
+### 6. La segunda tanda de prompts (`Prompts_Mundo4.md`, apartados E a L)
+
+El tileset del campo y sus props (editando los del Mundo 3), las cinco coberturas, el barril, la mina,
+el agua del río y la alambrada (editando la maraña), el campanario, las cuatro memorias con su losa, el
+fondo, las cinemáticas del Juez, las cuatro imágenes de las memorias, la puerta, la verja, el checkpoint,
+la salida y el escudo de Kael; y, opcionales, los dos fotogramas que le faltan al Artillero y la onda de
+la sentencia. Con lo aprendido en el apartado C: nada se pide editando una imagen con otra figura dentro,
+y lo que brilla se dibuja con píxeles sólidos.
+
+### 7. Verificación
+
+- **`VerificadorNivel4`** (Fragmentum → Niveles → Verificar el arte del Nivel 4, y al final de «Regenerar
+  todo»): sprites, clips, Animators, prefabs y sus eventos, el fragmento y la cadena del Juez, el cañón
+  del Artillero contra su dibujo, el garfio del Verdugo y la explosión del barril y de la mina.
+- Pruebas nuevas: `ArteMundo4Tests` (12) y `ArteMundo4PlayModeTests` (8). `JefePlayModeTests` usaba al Juez como el jefe
+  que seguía sin arte: ahora es el Verdadero Soldado (con la integración completada, porque a él no se le vence
+  quitándole la vida). **EditMode 642/642, PlayMode 286/286**.
+- Seis capturas del Nivel 4 con el arte, en `Docs/Diseno/Nivel4_ConArte_*.png` (el Artillero apuntando, el barril,
+  la cadena del Verdugo, la orden y el compañero del Juez, y la gema sobre el montón), hechas con una prueba temporal
+  que ya no está.
+
+## Mundo 4, fases A a D: el recorrido de la Culpa, sus mecánicas, sus enemigos y el Juez Silente (2026-10-20)
+
+Rama nueva, `nivel4-recorrido` (sale de `nivel3-recorrido`, con el Mundo 3 todavía sin commit). El
+autor aprobó el diseño del Mundo 4 (N48: «me gusta el diseño que se le dio al mundo») y pidió avanzar
+«lo más que se pueda de la fase A a la D mientras genero las imágenes». Todo va sin arte: bloques de
+color y cápsulas, como en los otros mundos antes de su fase E.
+
+### 1. Fase A: el recorrido
+
+- **`DisenoNivel4`**, la tabla de medidas de `Nivel4_Diseno.md`: el campo arrasado (el cráter con la
+  radio, el tanque, el barril del tutorial, los tres escombros y el refugio), la tierra de nadie, el
+  campanario con su arco y su balcón, la bifurcación, los tejados y la calle, la convergencia, el río
+  bajo el puente volado (dos ojos, un pilar, dos alambradas y una mina), la carta, el patio del
+  Verdugo, la antesala y la plaza del Juez (25 × 15 u). Unas 200 u, tres checkpoints (el refugio con
+  el eco de memoria, la convergencia y la antesala) y 16 min con bono.
+- **`PreparadorNivelCulpa`** monta la escena `Nivel4` (nueva, en Build Settings) desde la tabla y la
+  vuelve a montar cuando sube `DisenoNivel4.Version` (va por la 4, una por fase). La torre del
+  campanario y los restos del puente no agarran (`SinAgarre`); las coberturas son suelo (las balas
+  se paran contra ellas); el agua y las alambradas son las del Mundo 3 (una alambrada es una maraña).
+- `GeneradorProgresion` le da su escena, sus tramos, sus checkpoints y el velo pardo bajo el agua del
+  río; el Nivel 4 deja de estar «en construcción» (lo está ahora el 5).
+
+### 2. Fase B: las mecánicas
+
+- **`BarrilExplosivo`**: solo lo enciende el Ataque Cargado (`Golpe.Cargado`), otra explosión o una
+  bala de Artillero; golpeado sin cargar, solo suena. Mecha de 0,6 s y **`Explosiones.Estallar`**:
+  3 a los enemigos y 1 a Kael en 2,5 u, y enciende los barriles a menos de 3 u (la cadena del último
+  tejado). Quemado, vuelve cuando Kael reaparece, como las antorchas del Mundo 3. Es un bloque en la
+  capa de los enemigos: la espada lo golpea y la matriz de colisión no lo junta con Kael ni con ellos.
+- **`Mina`**: sube y baja 2 u cada 3 s (abajo un tercio, arriba otro); estalla al tocarla o al
+  golpearla (1,5 u, 1 a Kael). La nota con una consulta y no con un trigger: Kael y la capa de los
+  enemigos no chocan entre sí.
+- **`MemoriaInteractuable`**: brilla en ámbar; con E, su cinemática (de momento, la línea de Kael) y
+  el brillo se apaga. **Invisible no se recuerda**: el aviso dice «Para recordar, déjate ver»
+  (`IInteractuable.Usable`, nuevo, con valor por defecto: la antorcha no cambia).
+- **`SistemaConsecuencias`**: al recordar una memoria, los enemigos de su zona se vuelven un 20 % más
+  agresivos sin tocar `EnemyController`: cada uno toma una copia de sus datos con los valores subidos
+  (`FijarDatos`, que ya existía) sin curarse, y lo que lleva su propia pieza lo sube ella
+  (`IAgravable`). Al volver de la cinemática, destellan en rojo apagado.
+- **`IndicadorInvisibilidad`** en el HUD, junto a la vida: la Q que se rellena mientras espera.
+- Las dos pistas y la línea del río (`MOMENTOS_DIALOGO.PISTA_INVISIBILIDAD` y `ORILLA`, nuevos) y las
+  cuatro memorias, en `GuionMundos`; `GeneradorNarrativa` crea sus líneas y las cuatro cinemáticas.
+
+### 3. Fase C: los enemigos
+
+- **El Penitente**, el Eco de la Culpa: el controlador de siempre, con el ritmo de ataque de los Ecos
+  desde el principio y a su escala (la regla del enemigo común). Ve: invisible, lo pierde.
+- **`Artillero`**: no se mueve. Ve a 14 u por delante si nada se interpone; apunta 0,8 s con una línea
+  roja hasta la cabeza de Kael, dispara tres balas y recarga 2 s; culatazo a 1,5 u. Invisible, baja el
+  arma. Los dos del campanario se turnan (el segundo empieza 1,6 s después). Lleva el mando siempre: su
+  controlador solo despierta para morir por su camino, como el del Acechador.
+- **`Verdugo`**, el mini-jefe (16 de vida, hiperarmadura, 800 puntos): hachazo, barrido, cadena a la
+  altura del pecho (agachado le pasa por encima), de rodillas 2,5 s con una explosión cerca (los
+  golpes valen el doble) y, si Kael se vuelve invisible, va a donde lo vio y barre a ciegas.
+
+### 4. Fase D: el Juez Silente
+
+- **Cada ataque es una memoria** (`PatronMemoria`): `PatronOrden` (la artillería que avanza),
+  `PatronPueblo` (la ola de fuego, desde un lado y después desde el otro), `PatronCompanero` (las
+  placas a la cabeza, en tres ráfagas) y `PatronSentencia` (camina hasta Kael, clava la espada y la
+  onda sale hacia los dos lados). Mientras dura, el Juez la proyecta en la pared del fondo y su marca
+  brilla (`MarcaDeMemoria`); mirarla con E lo arrodilla 3 s. Inmune fuera de esa ventana.
+- **La segunda fase** (50 %): la condena (las cuatro memorias a la vez) y, en cada ataque, una marca
+  trampa que sujeta a Kael 1 s, le quita 1 y deja el ataque sin cortar.
+- **Sin memorias en el camino, 36 de vida y no 28**, y su barra enseña el tramo de más en rojo
+  apagado (`SaludJefe.VidaBase`). Sus ataques van a donde vio a Kael por última vez. Al caer, todas
+  las memorias se iluminan.
+- **`VerificadorJuez`**, al final de «Regenerar todo»: falla si una fase se queda sin alguna de las
+  cuatro memorias o sin su ventana.
+
+### 5. Lo que cambió frente a la propuesta
+
+Está en la sección «Lo que cambió al montarlo» de `Nivel4_Diseno.md`. Lo principal: el río tiene
+3,5 u de hondo y el pilar va a ras del agua (con 4 u no se salía a la orilla); las alambradas miden
+2 u (una de 2,5 pedía dos dashes); los sacos del refugio van de 47,5 a 49 (tras ellos, los Artilleros
+del campanario no ven a Kael) y la tierra de nadie mide 14 u (2,3 s corriendo); el CP2 está a 3,5 u
+del agua; el cañón del Artillero asoma por delante de sus sacos; y los escombros de la bifurcación,
+a 1 u del arco (bajo la torre no se salta).
+
+### Pruebas
+
+- `DisenoNivel4Tests` (24): los saltos, las dos rutas, la línea de tiro tras cada cobertura (de pie
+  le da, agachado no), la tierra de nadie (se cruza invisible; sin ella, al menos una ráfaga), el
+  balcón que no se alcanza, el río (se sale a las orillas, bajo los techos cabe Kael, cada alambrada
+  con un dash, la mina, el aire), los barriles, las memorias, las pistas, los enemigos y la plaza.
+- `EscenaNivel4Tests`: la escena sigue al diseño, también los barriles, la mina, las memorias, las
+  pistas, los enemigos y las marcas de la plaza. `MecanicasCulpaTests`, `EnemigosCulpaTests` y
+  `JuezSilenteTests`, sin jugar.
+- `Nivel4PlayModeTests`, `MecanicasCulpaPlayModeTests`, `EnemigosCulpaPlayModeTests` y
+  `JuezPlayModeTests`, jugando: agacharse tras un escombro, el refugio, el arco, la alambrada y el
+  Dash Acuático, el barril y su cadena, la mina, la memoria (y que invisible no se recuerda), el
+  indicador del HUD, el Artillero (de pie le da, agachado no, baja el arma, culatazo), el Penitente
+  que pierde a Kael, el Verdugo (rodillas, cadena, búsqueda a ciegas) y el Juez (su marca, la trampa,
+  la vida de más y su caída).
+- Cambiaron `DatosProgresionTests` y `ProgresionPlayModeTests` (el «en construcción» es ahora el
+  Nivel 5) y `JefePlayModeTests` (el Juez ya no es un esqueleto: arrodillado, el golpe vale lo de
+  siempre).
+- **630 EditMode y 278 PlayMode en verde.**
+
+---
+
+## Mundo 3: la ciénaga, donde se usa el Dash Acuático (2026-10-19)
+
+Misma rama `nivel3-recorrido`. El autor pidió que cada mundo use lo que Kael ha ido aprendiendo:
+«en el mundo 3 también apliquemos las mecánicas que Kael ha ido obteniendo, como el dash acuático:
+añádele una parte de agua en la que sea necesario este dash». Se propuso la ciénaga (sección 10 de
+`Nivel3_Diseno.md`) y la aprobó el mismo día («por el momento lo apruebo; espero verificaciones del
+otro tester»), con su arte: el agua (3) y la maraña (4).
+
+### 1. Lo que es
+
+- **Entre el CP2 y el claro, dos túneles bajo las raíces de un árbol hundido.** Bajo el agua hay
+  **marañas de raíces que sujetan a quien avanza despacio**: dentro, Kael va al 5 % de su velocidad
+  y no salta, y el aire se acaba. Solo se cruzan de golpe, con el dash, que fija su propia
+  velocidad. La primera (2 u) se cruza con uno; la segunda (4 u), con dos. Entre los túneles, un
+  tocón a ras del agua para respirar; en la orilla, una antorcha y la pista de Kael.
+- **Sin el Dash Acuático no se cruza**: bajo el agua no hay dash sin él (ya era así desde la Fase
+  3), y nadando, la primera maraña cuesta 16 s de los 10 de aire.
+- Todo lo que había desde x 84 (la antorcha del claro, el claro, la antesala y la arena) se corrió
+  28 u. El nivel mide unos 173 u y lleva 16 min con bono (eran 15).
+
+### 2. Cómo se hizo
+
+- **La maraña es una zona como el agua y el hielo.** `ZonaModificadorMovimiento` gana el tipo
+  `MARANA` (`ModificadorMovimiento.Marana`: velocidad ×0,05 y salto ×0; se suma al del agua).
+  `Marana` (nueva, en `Levels/Mecanicas`) la dibuja: se mece en reposo, se cierra mientras sujeta y
+  avisa (`OnSujetaDemasiado`) si tiene a Kael sujeto 2 s. Ni `PlayerController` ni el motor
+  cambian: el dash ya ignoraba los multiplicadores.
+- **La pista** es una `ZonaDeDialogo`, como la del tapón de hielo del Mundo 2, que ahora puede
+  escuchar a unas marañas y volver a decir su línea cuando una sujeta a Kael. La línea está en
+  `GuionMundos` («Raíces bajo el agua. Si dudo entre ellas, me atrapan. Tengo que cruzarlas de
+  golpe: con el Dash Acuático.»); `GeneradorNarrativa` la añade a los diálogos del Nivel 3, que ya
+  existían.
+- **El agua** se monta con lo del Mundo 2: la zona de agua y la superficie dibujada en bucle sobre
+  un cuerpo liso (`DibujarAgua`, que ahora recibe el color, el fondo de la superficie y el ritmo de
+  cada mundo). **El velo del HUD bajo el agua** es por nivel (`ReglasNivel.colorVeloAgua`, que el
+  HUD aplica al enseñar el nivel): verde en la ciénaga, el azul de siempre en la Tristeza.
+- **Los datos**, en `DisenoNivel3` (versiones 8 y 9): `Aguas`, `Maranas`, `PistaDeLaCienaga`, el fondo, el
+  techo de los túneles, las raíces del árbol hundido (que no agarran) y los pasos bajo el agua
+  (`Paso.Medio`, como en el Nivel 2).
+- **El arte**: `limpiar_mundo3.py` limpia el agua y la maraña; `traer_arte_mundo3.py` las trae a
+  `Assets/Sprites/Mecanicas/Mundo3/{Agua,Marana}`; `ConstructorMecanicasMundo3` las importa (el agua,
+  a 43 px/u como la del Mundo 2; la maraña, a 37,5, colgada del techo) y `PreparadorNivelMiedo` las
+  coloca. `VerificadorNivel3` las cuenta.
+
+### 3. Lo que cambió frente a la propuesta
+
+- **Problema.** Con el agua a 4 u de hondo, salir a la orilla no tenía margen.
+  **Causa.** Al cruzar la superficie vuelve la gravedad de fuera: lo que sobraba del doble salto
+  subía a Kael 0,23 u sobre el borde, y la regla del Mundo 2 pide 0,25.
+  **Solución.** 3,5 u de hondo (sobran 0,38) y el tocón a ras del agua, como el último rellano de la
+  torre.
+- **Problema.** Una maraña de 2,5 u habría pedido dos dashes, y la de 5, tres.
+  **Causa.** El dash recorre 2,9 u, pero para salir hay que sacar también el cuerpo de Kael (0,8 u).
+  **Solución.** Miden 2 y 4 u. Su dibujo, el mismo, va a 37,5 px/u (2 × 2 u) y cuelga del techo.
+- **Problema.** La antorcha de la orilla despertaba al Espectro de la bajada de las copas.
+  **Causa.** Dormía a 7 u de su llama y la antorcha despierta a los que alcanza (8 u).
+  **Solución.** Duerme en x 76, a 9 u (era x 78). La decisión era «sin Espectros cerca».
+- **Problema.** A `Agua3` le faltaba la última columna en la mitad de abajo: al repetirla, una raya.
+  **Solución.** Al limpiarla, las tres se cortan a las columnas que tienen todas (179 en lugar de
+  180). No se escala ni se repinta nada.
+- **Problema.** En las fotos, la maraña no se distinguía.
+  **Causa.** A través del agua del túnel se veía el bosque del fondo: raíces oscuras sobre raíces
+  oscuras.
+  **Solución.** Detrás de cada túnel, el interior del árbol hundido: las raíces del tileset,
+  oscurecidas, por detrás de Kael (`DisenoNivel3.Version` 9).
+
+### Pruebas
+
+- `DisenoNivel3Tests`: de la ciénaga se sale al tocón y a la orilla con el doble salto bajo el agua
+  y con impulso; bajo las raíces cabe Kael y no se saltan por arriba; cada maraña llena su túnel y se
+  cruza con uno o dos dashes, y no sin ellos; la pista está en la orilla y la antorcha alumbra la
+  primera maraña sin despertar a ningún Espectro. Las demás, con las posiciones corridas.
+- `EscenaNivel3Tests`: la escena tiene el agua con su superficie, las marañas con su dibujo, la
+  pista que las escucha, las raíces que no agarran, el velo verde y los 16 min.
+- `MecanicasMiedoTests`: la luz de cada tramo se mide en sitios del diseño (la ciénaga, a oscuras),
+  no en números escritos a mano.
+- `Nivel3PlayModeTests`: jugando, la maraña sujeta a Kael y se cierra, y un Dash Acuático la cruza;
+  sin el Dash Acuático, no.
+- **578 EditMode y 254 PlayMode en verde.**
+
+---
+
+## Mundo 3: lo que salió al jugarlo (2026-10-17)
+
+Misma rama `nivel3-recorrido`. El autor contestó lo que quedaba abierto: «n47: las decisiones están
+bien», «n46: el nivel por el momento se siente bien» y «n45: la nueva imagen ya está en la posición
+que decías». Y señaló dos cosas: «el recuadro verde que se ve tanto en la carga como en el ataque,
+que no se vea» y «la gema que aparece al derrotar el jefe no se visualiza mucho, haz que brille
+más».
+
+### 1. La derrota, repetida
+
+- `DerrotaEspectro2` llegó repetida con el prompt de edición: el bosque con luz, sin el jefe y con
+  la gema violeta. Vino a tamaño completo (2752 × 1536) y en la misma rejilla de 480, así que se
+  limpió y se trajo como las demás (`limpiar_mundo3.py Cinematicas`, `traer_arte_mundo3.py`). La
+  derrota la usa sin tocar nada más: es el mismo archivo.
+
+### 2. Sin el recuadro verde
+
+- **Problema.** En el aviso y en el golpe de sus ataques se veía un rectángulo verde.
+- **Causa.** Era la zona de daño de sus patrones (el tajo, la embestida, las hojas y las sombras),
+  pintada en su color (`dibujarZona`). En la fase D, sin arte, era el aviso. Con su arte no se
+  apagó, como sí se hizo con la Centinela.
+- **Solución.** Con el arte del Pavor, `GeneradorJefes` apaga `dibujarZona` en sus cuatro patrones:
+  el tajo y la embestida los enseñan sus gestos (las sombras lanzan su mismo tajo), y las hojas,
+  el suelo que brilla. El daño no cambia.
+
+### 3. La gema que brilla
+
+- **Problema.** El fragmento del Miedo, azul oscuro sobre el montón de hojas, apenas se veía.
+- **Causa.** Está dibujado en M5, el último fotograma de su muerte, con el material que no recibe
+  luz: se ve con los colores del dibujo, que son oscuros.
+- **Solución.** `BrilloDeFragmento`, en el fragmento del Pavor. No es arte nuevo:
+  - **Una copia de sus mismos píxeles** (recortados de M5 con `ConstructorCentinela.CajaDelFragmento`)
+    va encima del fragmento dibujado, con el material que recibe luz.
+  - **Una luz suya**, casi blanca con un toque lavanda, de 3,2 u y con el centro ancho (1,2 u), la
+    enciende y alumbra el suelo de alrededor (la gema flota a unos 2 u). Late de 2,5 a 6 de
+    intensidad cada 1,4 s.
+  - **Su silueta**, blanca lavanda, encima de la copia y con el material del destello de los golpes
+    (`SiluetaSprite`): aparece y se apaga con el latido, hasta un 65 % de opacidad. En lo alto del
+    latido, la gema destella.
+  - **Al recogerlo**, la copia, la silueta y la luz se apagan y la máscara de siempre lo borra del dibujo.
+- **Al mirarlo en fotos, la luz no alumbraba nada.** Se añade al fragmento, que está apagado hasta
+  que aparece, y una luz añadida a un objeto apagado no se prepara sola: se quedaba sin capas que
+  alumbrar. Ahora se le dicen todas, como las que tienen la antorcha y la luz de Kael
+  (`ConstructorPavor.AlumbraLaCapa` lo comprueba). Ya alumbrando, la primera medida (violeta, 1,8 u,
+  de 1,6 a 3,2) no llegaba al suelo: se cambió por la de arriba. Y la gema seguía sin pasar de su
+  azul: la luz 2D del proyecto no aclara un dibujo por encima de sus propios colores. De ahí la
+  silueta. Y `BrilloDeFragmento.Encendido` mira también que el fragmento haya aparecido: antes
+  decía «encendido» mientras el jefe peleaba, aunque no se veía.
+- La medida del fragmento se separó en dos: su caja en píxeles y, a partir de ella, su centro y su
+  tamaño. El de la Centinela y el de la Doncella miden lo mismo que antes.
+
+### Pruebas
+
+- **Cambiadas:**
+  - `DatosJefesTests`: los patrones del Pavor no pintan su rectángulo.
+  - `ArteMundo3Tests`: el fragmento del Pavor lleva su brillo (la copia, por delante del jefe y con
+    el material que recibe luz, recorta su fragmento de M5), su luz alumbra la capa de la copia y
+    la del suelo, y su silueta va encima, con el material del destello.
+  - `Nivel3PlayModeTests`: en el combate entero, el fragmento no brilla mientras el jefe pelea,
+    brilla y destella sobre el montón y deja de hacerlo al recogerlo.
+  - `ArteMundo3PlayModeTests`: la llama de la antorcha y su tocón se esperan 0,5 s, no 0,2. El
+    Animator tarda dos fotogramas en cambiar y, justo después de regenerar, Unity compila el shader
+    de su luz al encenderla por primera vez: la prueba fallaba por tiempo, no por la antorcha (lo
+    comprobó un diagnóstico fotograma a fotograma, ya borrado).
+- El verificador del Nivel 3 falla si el fragmento del Pavor no brilla o si su luz no alumbra.
+- **573 EditMode y 252 PlayMode en verde**, con todo lo de arriba ya hecho.
+
+---
+
+## Mundo 3, cierre de la fase E y fase F: las puertas y las cinemáticas (2026-10-16)
+
+Misma rama `nivel3-recorrido`, sobre la fase E (sin commit todavía). El autor generó lo que faltaba
+(«ya están todas las imágenes que me solicitabas exceptuando la de kael que no se va a realizar»)
+y pidió terminar la fase E y empezar la F: el primer plano de abajo del fondo, las cuatro
+cinemáticas del jefe, la puerta, la verja, el checkpoint y la salida. El sigilo de Kael
+(apartado I) no se hará. `EnemyController`, `PlayerMovement`, `GameManager` y `BossController` no
+se tocan.
+
+### 1. La limpieza: 14 imágenes
+
+- **Problema.** Dos no salieron como pedía su prompt. El primer plano de abajo trae, encima de los
+  helechos, un cielo opaco de nubes con lluvia (se pidió todo magenta): como capa del fondo,
+  taparía el cielo, la luna y los dos bosques. Y en el segundo plano de la derrota el jefe sigue de
+  pie y entero a la derecha, justo después de deshacerse en hojas, y la gema de Kael es verde y no
+  violeta.
+- **Causa.** Gemini rellena una capa «16:9» con lo que suele ir en un paisaje entero, y no sigue la
+  historia de un plano al siguiente.
+- **Solución.** Se preguntó antes de tocarlas y el autor eligió:
+  - **Se borran las nubes** (`sin_nubes`, en `limpiar_mundo3.py`): en la mitad de arriba, lo gris
+    azulado, la lluvia y el borde rosa donde las nubes se mezclaban con el magenta. Los helechos
+    son negros y verdes y se quedan enteros, también las puntas que se metían en las nubes.
+  - **La derrota se monta con su plano tal como llegó**, para repetirlo (PENDIENTES N45). El prompt
+    de edición está en `Prompts_Mundo3.md`; al repetirlo basta con limpiar y traer.
+- Lo demás se usa tal cual: los seis planos en la rejilla de 480 (480 × 268), la puerta en la de 319
+  (273 × 234), la verja en la de 155 (137 × 436) y el checkpoint en la de 125 (101 × 291). La puerta,
+  la verja, el checkpoint y los planos de la salida los limpia `limpiar_puertas.py`, con los de los
+  otros mundos; los trae `traer_arte_puertas.py`.
+
+### 2. Las puertas del bosque y los helechos (cierre de la fase E)
+
+- **Problema.** La salida del Nivel 3 era un rectángulo translúcido, los checkpoints una bandera y
+  la verja de la arena un bloque gris.
+- **Solución.** `ConstructorPuertas.Miedo`, el tercer juego de puertas, con lo que ya hacía para los
+  otros dos mundos:
+  - **La puerta**, un arco tallado en un árbol muerto y sellado por raíces, que se abre con su farol
+    encendido y la luz ocre de la guerra al otro lado: 4 u de alto, como las otras, y 4,7 de ancho,
+    porque sus raíces se abren.
+    - **Problema:** en x 136 se metía 0,3 u en la pared de la arena.
+    - **Solución:** la salida pasa a x 135,5 (`DisenoNivel3.Version` 6), donde cabe entera entre
+      la rama de la derecha (acaba en 134) y la pared (138).
+  - **La verja**, un muro de raíces con espinas sobre una empalizada: 4 u, repetida hasta el techo,
+    como la de la Ira.
+  - **El checkpoint**, una lámpara de trinchera colgada de una estaca con su cinta, apagada y
+    encendida: 3,3 u, con el pivote en el pie de la estaca para que no salte al encenderse.
+- **Los helechos** (`ConstructorFondoMundo3.Helechos`) son la séptima capa del fondo, delante de la
+  niebla y detrás del juego, y se oscurecen con la luz del nivel como las demás.
+  - **Problema:** siguiendo a la cámara, como las ramas de arriba, en las copas y en el puesto del
+    vigía se veían debajo de las plataformas, en el aire.
+  - **Solución:** van anclados al suelo del bosque, como las algas del Mundo 2: sus puntas llegan a
+    1,5 u sobre el suelo y lo más espeso queda por debajo, donde solo se ve en la trinchera, el
+    barranco y la hondonada.
+
+### 3. Las cinemáticas del Espectro del Pavor (fase F)
+
+- **Problema.** Al cruzar la verja salía la presentación genérica, y al vencerlo no se veía nada.
+- **Solución.** `ConstructorCinematicasNivel3`, como el de la Doncella, y «Regenerar todo» lo llama:
+  - **Presentación** (`Cinematica_Jefe_Miedo`), 9,8 s, una vez por partida. Primero el claro a
+    oscuras, con Kael en el círculo de su luz y las grietas de una máscara mirándolo desde lejos;
+    dice «Él aprendió a desaparecer para seguir vivo.» en el negro que queda entre los dos. Después
+    él de cerca, medio deshecho en la oscuridad: «Yo soy todo lo que dejó escondido.» Al final, su
+    rótulo y el nombre del mundo.
+    - **Problema:** de cerca ocupa el centro y su espada la derecha; centrado, el texto caía sobre
+      sus venas encendidas.
+    - **Solución:** su frase y, cuando se ha ido, su rótulo van arriba a la izquierda, donde todo
+      es negro. Una prueba mide que cada texto cae sobre una zona oscura de su plano.
+  - **Derrota** (`Cinematica_Derrota_Miedo`), cuando termina de caer: se deshace en una tormenta de
+    hojas y el bosque se ve con luz por primera vez. Dura 4,5 s por plano, sin texto, como las otras
+    dos. Después se vuelve al juego, con el fragmento sobre su montón de hojas.
+- **La salida del Miedo** (`Cinematica_Cierre_Miedo`): el claro con la puerta abierta y Kael ante
+  ella, con las tres frases del cierre del guion abajo, sobre lo oscuro.
+  - **Problema:** «El bosque no era un laberinto: era un lugar donde nadie había encendido una
+    luz.» tiene 80 letras, y las frases del plano general duraban 2,6 s: más de 30 letras por
+    segundo.
+  - **Solución:** cada frase dura lo que pide su largo (`ConstructorPuertas.ParaLeer`): esa, 2,7 s.
+    El plano sigue durando 6,4 s, y las salidas de la Ira y la Tristeza no cambian.
+- **El verificador del Nivel 3** comprueba también estas cinemáticas: que estén en la rejilla de sus
+  planos, que tengan todos sus planos y que el nivel las use.
+- `CapturaCinematica.CapturarPavor` saca sus fotos (`Docs/Cinematicas/Pavor_*.png` y
+  `Miedo_Salida_*.png`).
+- Sin sonido: en el proyecto todavía no hay audio.
+
+### 4. El Espectro, al tamaño y al ritmo del Eco
+
+- **Problema.** El autor pidió «recuerda el tamaño y velocidad de ataque del enemigo común». El
+  Espectro iba a escala 1 y atacaba a su ritmo (avisaba 0,5 s y descansaba 1 s), aunque el diseño
+  aprobado del Nivel 3 lo pedía «a la escala de los Ecos (1,8 × 1,5) y con su ritmo de ataque».
+- **Causa.** En la fase E dejé su ataque sin acelerar para que se le viera venir (solo se le ve
+  entero al atacar), y la escala de los Ecos, que pone la escena, no se le aplicó al colocarlo.
+- **Solución.** Como el Lamento en el Mundo 2 (PENDIENTES N37):
+  - `DisenoNivel3.EscalaEspectro` = `DisenoNivel1.EscalaEco` (1,8 × 1,5), aplicada al colocarlo en
+    la escena (`DisenoNivel3.Version` 7). Mide 0,76 × 1,5 u, como los Ecos y los Lamentos.
+  - `ConstructorEspectro.VelocidadAtaque` = la del Eco de la Ira (1,6×), y descansa 0,45 s entre
+    golpes. El ataque entero dura 0,5 s y su aviso, a1, 0,31 s. Con su fundido (5 de opacidad por
+    segundo) ya se le ve entero 0,1 s antes del golpe.
+
+### Pruebas
+
+- **Nuevas:**
+  - `CinematicaPavorTests` (6): los planos, los beats, la línea del guion repartida, el rótulo, que
+    cada texto cae sobre una zona oscura, la derrota y la frase larga de la salida.
+  - En `Nivel3PlayModeTests`, el combate entero: la presentación al cruzar la verja, la derrota
+    cuando cae, el fragmento y la puerta del árbol que se abre.
+- **Cambiadas:**
+  - `PuertasTests` mira también el Nivel 3, y `ArteMundo3Tests`, que los helechos van anclados y
+    que el Espectro va a la escala y al ritmo de los Ecos.
+  - La del Espectro de la fase C (`EnemigosMiedoTests`) ya no pide un aviso de medio segundo: pide
+    el ritmo del Eco y que se le vea entero al menos una décima antes del golpe.
+  - La prueba de la oscuridad que retrocede salta antes la cinemática de la derrota, que para el
+    tiempo.
+- **573 EditMode y 252 PlayMode en verde.**
+
+---
+
+## Mundo 3, fase E: el arte (2026-10-15)
+
+Misma rama `nivel3-recorrido`, sobre la fase D (commit `8fc7433`). El autor generó las imágenes
+del Mundo 3 hasta el primer plano de arriba del fondo («tan solo me faltan desde el
+FondoPlanoBajo hacia abajo»): los enemigos, el jefe, sus hojas y su luciérnaga, el fragmento, las
+mecánicas, el tileset, los props y el fondo. Faltan el primer plano de abajo (opcional), las
+cinemáticas del jefe y las puertas, que van con la fase F.
+
+### 1. La limpieza: 113 imágenes, 95 PNG
+
+- **Problema.** Gemini y AI Studio no entregan pixel art limpio: un píxel de arte mide de 4,6 a 29
+  px según la imagen, el fondo es magenta mezclado y algunas llegaron mal (tres fotogramas mirando
+  al otro lado, uno a otra escala, figuras fantasma).
+- **Causa.** Cada imagen es una edición independiente: el modelo no conserva siempre el lienzo, la
+  rejilla ni la orientación de la que edita.
+- **Solución.** `limpiar_mundo3.py` (repo `Tesis`), con el motor del Mundo 2. Lo que no cuadraba se
+  preguntó antes de tocarlo, y el autor eligió en las tres:
+  - **El Espectro:** R1-R3 llegaron mirando a la izquierda y se voltean, sin moverlos ni escalarlos;
+    D3, vez y media más grande, no entra (muere deshaciéndose con D2). Cada fotograma trae su propio
+    píxel: se limpia en su rejilla y **se encaja sobre la silueta del Eco** (escala y posición por
+    correlación), de donde salen su pivote y su escala. Mide lo mismo que el Eco.
+  - **El Espectro del Pavor:** en ocho fotogramas había **una copia borrosa y suelta** del jefe a
+    su izquierda (en T1, una figura entera). Se borra esa pieza, la única de más de 20.000 px a la
+    izquierda del jefe, y sus migas; las hojas sueltas se quedan. También el **rosa** que dejó el
+    magenta en un resplandor y en el montón de hojas: en su paleta no hay rosa.
+  - **Hoja2**, a otra escala, no entra: la hoja cae y se rompe.
+- Lo demás se usa tal cual llegó. El detalle, en `Imagenes/limpios/Mundo3/LEEME.md`.
+
+### 2. Los enemigos con su arte
+
+- **Problema.** El Espectro, el Centinela Ciego y el Acechador eran cápsulas de color que se
+  teñían o se ladeaban para avisar. Sus componentes (fase C) apagan su `EnemyController` mientras
+  llevan el mando, así que los parámetros de su FSM no bastan para animarlos.
+- **Causa.** El aviso del Centinela (escuchar), la carrera hacia el ruido o el aturdimiento del
+  Acechador no son estados de la FSM del enemigo: son de su pieza.
+- **Solución.** Como la Plañidera: **el Animator sigue al entero «Estado»** de su pieza
+  (`CentinelaCiego` y `Acechador` lo escriben cada fotograma); con su estado a 0 mandan los
+  parámetros de la FSM. Con arte, ni se tiñen ni se ladean ni se encogen.
+  - **`ConstructorEspectro`:** el cuerpo y el controlador de los Ecos; su ataque avisa 0,5 s, sin
+    acelerarlo (solo se le ve entero al atacar). Se funde, duerme y despierta como en la fase C;
+    al morir se deshace en polvo negro y violeta.
+  - **`ConstructorCentinelaCiego`:** 2 u de alto. Anda, escucha con la mano en la máscara, va hacia
+    el ruido, apuñala (los tiempos de sus datos), busca, se encoge al recibir un golpe y muere
+    dejando el abrigo vacío.
+  - **`ConstructorAcechador`:** 1,6 u de alto y 3,2 de largo, con la cápsula tumbada. Merodea,
+    escucha, muerde, se agazapa con el aliento verde, embiste al galope, se queda aturdido
+    sacudiendo la cabeza y muere en polvo. Su muerte llegó con el píxel un 7 % más fino: va a su
+    escala.
+  - Los dos van dibujados mirando a la izquierda: su sprite va volteado, como la Plañidera.
+
+### 3. El Espectro del Pavor con su arte
+
+- **Problema.** Sus ataques (fase D) eran tiempos y zonas: el jefe no sabía qué hacer con el cuerpo.
+- **Solución.**
+  - **`GESTOS_PAVOR`:** reposo, aparecer, desvanecerse, el aviso y el golpe de cada ataque, el
+    jadeo, la embestida, el frenazo y las hojas. Los fijan sus ataques (`EspectroDelPavor.Gesto`);
+    cada uno es un estado de su Animator con su disparador. El grito, la muerte y el destello de un
+    golpe van por `AnimacionJefe`, como en los demás jefes.
+  - **Sus sombras** llevan su mismo Animator y hacen sus mismos gestos; la verdadera solo se
+    distingue por su luciérnaga, que ahora es la dibujada (dorada o verde: el juego la tiñe).
+  - **La lluvia de hojas** (`LluviaDeHojas` y el prefab `HojasDelPavor`, que viste cada franja como
+    la erupción a la Centinela): durante el aviso brilla el suelo entre las hojas muertas; al
+    hacer daño caen sus hojas y se rompen contra el suelo.
+  - **Al caer** se queda en el montón de hojas con el fragmento del Miedo encima, que hay que
+    recoger (`FragmentoJefe`, medido en M5). Su derrota dura su muerte (1,4 s).
+  - Va a 100 px/u (3,45 u de alto) y su dibujo sigue sin depender de la luz.
+
+### 4. Las mecánicas, el fondo y el escenario
+
+- **La antorcha** (`ConstructorMecanicasMundo3`): apagada, la llama en bucle y consumida, en su
+  Animator, que sigue su estado; su cabeza queda a 1,45 u, donde su luz. **El cepo**, abierto y
+  cerrado. **La rama podrida**: a oscuras es la sana, con luz o crujiendo se ve podrida y al partirse
+  se dobla y se deshace en astillas (su caída se alarga de 0,25 a 0,4 s para verlo; vuelve igual a
+  los 4 s). **La cinta**, al viento. Cada pieza va a la escala de su tamaño en el juego.
+- **El fondo** (`ConstructorFondoMundo3`): cielo con luna, bosque lejano, bosque cercano, niebla y
+  ramas, y el árbol hueco como hito sobre la arena. **Problema:** las capas usan un material sin
+  luz y, a oscuras, el fondo se veía de día. **Solución:** `FondoConLaLuz` las tiñe con la luz
+  global del nivel: en el bosque cerrado y en la arena casi no se ven; cuando la oscuridad
+  retrocede, enteras.
+- **El escenario** (`ConstructorEscenarioMundo3`): la tierra (32 × 32 px que se repiten sin costura)
+  con su borde de musgo, las raíces del callejón, las ramas alargadas por su centro, el tocón del
+  árbol muerto en los árboles del claro y el atrezo de la trinchera (`DisenoNivel3.Decorados`: la
+  tumba del soldado, el refugio, los sacos, la caja, los cascos, los helechos, la lámpara, la lona,
+  las lianas y el tronco caído). `DisenoNivel3.Version` 5: el Nivel 3 se vuelve a montar vestido.
+
+### 5. El verificador
+
+- **`VerificadorNivel3`**, como el del Nivel 2, falla al regenerar si algo del arte del mundo no
+  cuadra: un PNG sin su regla, un clip con otros fotogramas o eventos, un estado suelto, un prefab
+  sin su controlador o con el daño encendido en reposo, el Pavor sin su luciérnaga o su fragmento,
+  las hojas sin su dibujo, el fondo sin `FondoConLaLuz` o una pieza del tileset sin cortar.
+
+### Pruebas
+
+- **Nuevas:** `ArteMundo3Tests` (10) y `ArteMundo3PlayModeTests` (7): el verificador y lo que se le
+  rompe; los enemigos, el Pavor y las mecánicas con sus piezas; el fragmento sobre el montón; el
+  fondo que se oscurece; la escena vestida; y en juego, el Centinela y el Acechador con su dibujo,
+  los gestos del Pavor, la lluvia de hojas, la antorcha y el cepo.
+- **Cambiadas:** la prueba del jefe que se desvanece usa ahora al Juez Silente (el Pavor ya tiene
+  arte); las de la rama podrida, el cepo, las cintas y los árboles miran también su dibujo.
+- **564 EditMode y 251 PlayMode en verde.**
+
+---
+
 ## Mundo 3, fase D: el Espectro del Pavor (2026-10-14)
 
 Misma rama `nivel3-recorrido`, sobre la fase C (commit `18db435`). El autor pidió seguir con la

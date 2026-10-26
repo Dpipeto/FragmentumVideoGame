@@ -8,7 +8,8 @@ namespace Fragmentum.UI
 {
     /// <summary>
     /// HUD de los niveles: barra de vida del jugador, el puntaje y el reloj, el mundo actual, un aviso breve
-    /// (checkpoint, fragmento obtenido), la tecla de Interactuar sobre lo que Kael tiene al alcance y la barra del jefe durante su combate. Vive con los sistemas persistentes (lo crea el UIManager), así
+    /// (checkpoint, fragmento obtenido), la tecla de Interactuar sobre lo que Kael tiene al alcance, cuándo vuelve
+    /// a estar lista la Invisibilidad y la barra del jefe durante su combate. Vive con los sistemas persistentes (lo crea el UIManager), así
     /// que ninguna escena de nivel necesita su propio HUD, y se engancha al jugador que registra
     /// el GameManager en cada escena.
     ///
@@ -24,12 +25,15 @@ namespace Fragmentum.UI
         private GameObject _panelJefe;
         private Text _nombreJefe;
         private LifeBar _barraJefe;
+        private Image _tramoExtra;
+        private Fragmentum.Bosses.SaludJefe _saludJefe;
         private GameObject _panelDialogo;
         private Text _hablante;
         private Text _linea;
         private float _ocultarAvisoEn;
         private bool _construido;
         private IndicadorAgua _agua;
+        private IndicadorInvisibilidad _invisibilidad;
         private ContadorPuntaje _puntaje;
         private AvisoInteraccion _interaccion;
 
@@ -44,10 +48,16 @@ namespace Fragmentum.UI
         /// <summary>La barra de aire y el velo submarino (mundo de la Tristeza).</summary>
         public IndicadorAgua Agua => _agua;
 
+        /// <summary>Cuándo vuelve a estar lista la Invisibilidad (desde el Mundo 4, junto a la vida).</summary>
+        public IndicadorInvisibilidad Invisibilidad => _invisibilidad;
+
         /// <summary>¿Se ve la barra del jefe? (Solo durante un combate de jefe.)</summary>
         public bool JefeVisible => _panelJefe != null && _panelJefe.activeSelf;
 
         public string NombreJefe => _nombreJefe != null ? _nombreJefe.text : string.Empty;
+
+        /// <summary>¿Se ve el tramo de vida de más del jefe? (El Juez, si no se miró ninguna memoria.)</summary>
+        public bool TramoExtraVisible => _tramoExtra != null && _tramoExtra.gameObject.activeSelf;
 
         /// <summary>Línea de diálogo visible ahora mismo, o vacío.</summary>
         public string LineaActual => _panelDialogo != null && _panelDialogo.activeSelf ? _linea.text : string.Empty;
@@ -96,6 +106,10 @@ namespace Fragmentum.UI
             _barra = fondo.gameObject.AddComponent<LifeBar>();
             _barra.BuscarJugador = false;
             _barra.FijarRelleno(relleno);
+
+            // Junto a la vida, la Invisibilidad: solo se ve cuando Kael la tiene.
+            _invisibilidad = gameObject.AddComponent<IndicadorInvisibilidad>();
+            _invisibilidad.Construir(raiz);
 
             _mundo = FabricaUI.Titulo(raiz, "Mundo", string.Empty, 22, new Color(1f, 1f, 1f, 0.55f), TextAnchor.UpperLeft);
             FabricaUI.Colocar(_mundo.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -66f), new Vector2(700f, 34f), new Vector2(0f, 1f));
@@ -193,6 +207,16 @@ namespace Fragmentum.UI
             _barraJefe = fondo.gameObject.AddComponent<LifeBar>();
             _barraJefe.BuscarJugador = false;
             _barraJefe.FijarRelleno(relleno);
+
+            // La vida de más (el Juez, si no se miró ninguna memoria), en rojo apagado sobre el final de la barra.
+            _tramoExtra = FabricaUI.Objeto("TramoExtra", fondo.transform).gameObject.AddComponent<Image>();
+            _tramoExtra.color = new Color(0.55f, 0.2f, 0.2f, 1f);
+            _tramoExtra.raycastTarget = false;
+            _tramoExtra.type = Image.Type.Filled;
+            _tramoExtra.fillMethod = Image.FillMethod.Horizontal;
+            _tramoExtra.fillOrigin = (int)Image.OriginHorizontal.Left;
+            _tramoExtra.sprite = SpriteBlanco();
+            _tramoExtra.gameObject.SetActive(false);
             _panelJefe.SetActive(false);
         }
 
@@ -203,6 +227,8 @@ namespace Fragmentum.UI
             _nombreJefe.text = (nombre ?? string.Empty).ToUpperInvariant();
             _panelJefe.SetActive(true);
             _barraJefe.Vincular(vida);
+            _saludJefe = vida as Fragmentum.Bosses.SaludJefe;
+            PintarTramoExtra();
         }
 
         public void OcultarJefe()
@@ -213,6 +239,8 @@ namespace Fragmentum.UI
             }
 
             _barraJefe.Vincular(null);
+            _saludJefe = null;
+            PintarTramoExtra();
             _panelJefe.SetActive(false);
         }
 
@@ -223,6 +251,7 @@ namespace Fragmentum.UI
             _barra.Vincular(jugador != null ? jugador.Vida : null);
             _agua.Vincular(jugador != null ? jugador.GetComponent<OxigenoJugador>() : null);
             _interaccion.Vincular(jugador);
+            _invisibilidad.Vincular(jugador);
         }
 
         /// <summary>Pone el nombre del mundo en una esquina (vacío fuera de los niveles).</summary>
@@ -231,6 +260,7 @@ namespace Fragmentum.UI
             Construir();
             _mundo.text = nivel != null ? nivel.Etiqueta : string.Empty;
             _mundo.color = nivel != null ? new Color(nivel.ColorAcento.r, nivel.ColorAcento.g, nivel.ColorAcento.b, 0.7f) : Color.clear;
+            _agua.FijarColorVelo(nivel != null ? nivel.reglas.colorVeloAgua : Color.clear);
         }
 
         /// <summary>Aviso breve en la parte baja de la pantalla («Punto de control»).</summary>
@@ -248,12 +278,43 @@ namespace Fragmentum.UI
             {
                 _aviso.gameObject.SetActive(false);
             }
+
+            PintarTramoExtra();
+        }
+
+        // El tramo de la vida de más: del final de la vida base al final de la barra, lleno lo que queda de él.
+        private void PintarTramoExtra()
+        {
+            if (_tramoExtra == null)
+            {
+                return;
+            }
+
+            var salud = _saludJefe;
+            var extra = salud != null && salud.VidaBase > 0 && salud.VidaMaxima > salud.VidaBase;
+            if (_tramoExtra.gameObject.activeSelf != extra)
+            {
+                _tramoExtra.gameObject.SetActive(extra);
+            }
+
+            if (!extra)
+            {
+                return;
+            }
+
+            var desde = (float)salud.VidaBase / salud.VidaMaxima;
+            var rect = _tramoExtra.rectTransform;
+            rect.anchorMin = new Vector2(desde, 0f);
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(0f, 3f);
+            rect.offsetMax = new Vector2(-3f, -3f);
+            _tramoExtra.fillAmount = Mathf.Clamp01((float)(salud.Vida - salud.VidaBase) / (salud.VidaMaxima - salud.VidaBase));
         }
 
         // Una imagen «Filled» necesita sprite para recortarse.
         private static Sprite _blanco;
 
-        private static Sprite SpriteBlanco()
+        internal static Sprite SpriteBlanco()
         {
             if (_blanco == null)
             {

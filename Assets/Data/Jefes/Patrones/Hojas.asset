@@ -17,7 +17,7 @@ MonoBehaviour:
   aviso: 1
   danio: 1
   color: {r: 0.35, g: 0.85, b: 0.4, a: 1}
-  dibujarZona: 1
+  dibujarZona: 0
   franjasMinimo: 4
   franjasMaximo: 5
   ancho: 2
@@ -26,3 +26,4 @@ MonoBehaviour:
   duracion: 0.6
   recuperacion: 0.6
   margen: 3
+  efecto: {fileID: 5133376497667893598, guid: 28e6fd1d7f583974c883d014b9ea2078, type: 3}

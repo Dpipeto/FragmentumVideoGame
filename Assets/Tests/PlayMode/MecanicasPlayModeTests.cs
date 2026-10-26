@@ -81,6 +81,37 @@ namespace Fragmentum.Tests.PlayMode
             yield return EsperarHasta(() => PiesJugador.y < -3f, 2f, "que el jugador caiga con ella");
         }
 
+        [UnityTest]
+        public IEnumerator PlataformaInestable_SeAtraviesaSaltandoDesdeAbajo_YSoloSeAgrietaAlCaerEncima()
+        {
+            Suelo(-12f, 12f);
+            var plataforma = Instanciar<PlataformaInestable>(nameof(PlataformaInestable), new Vector2(0f, 2f));
+            yield return CrearJugadorEnSuelo(new Vector2(0f, 0f));
+            Assert.IsTrue(PlataformaDeUnSentido.Es(plataforma.GetComponent<Collider2D>()), "Como todas las del mundo de la Ira.");
+
+            Input.PulsarSalto();
+            var dentro = 0;
+            var laPisoAlSubir = false;
+            var fin = Time.time + 1.5f;
+            while (Time.time < fin && !(Jugador.Sensores.EnSuelo && PiesJugador.y > 1.9f))
+            {
+                if (PiesJugador.y > 0.3f && PiesJugador.y < 1.95f)
+                {
+                    dentro++;
+                    laPisoAlSubir |= Jugador.Sensores.EnSuelo || plataforma.Estado != ESTADOS_PLATAFORMA.INTACT;
+                }
+
+                yield return null;
+            }
+
+            Input.SoltarSalto();
+            Assert.Greater(dentro, 0, "La atraviesa: no se da con la cabeza.");
+            Assert.IsFalse(laPisoAlSubir, "Mientras la atraviesa subiendo, ni la pisa ni la agrieta.");
+            Assert.IsTrue(Jugador.Sensores.EnSuelo, "Cae encima y la pisa, como siempre…");
+            Assert.AreEqual(2f, PiesJugador.y, 0.1f);
+            yield return EsperarHasta(() => plataforma.Estado == ESTADOS_PLATAFORMA.CRACKED, 0.3f, "…y entonces se agrieta");
+        }
+
         // --- Plataforma de combustión ---
 
         [UnityTest]

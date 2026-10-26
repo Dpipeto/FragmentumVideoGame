@@ -2,6 +2,7 @@ using System.Linq;
 using Fragmentum.EditorTools;
 using Fragmentum.Player;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace Fragmentum.Tests
@@ -93,6 +94,27 @@ namespace Fragmentum.Tests
             Assert.AreEqual(3, DisenoNivel1.PlataformasArena.Select(p => p.Arriba).Distinct().Count(), "Anexo A: plataformas a tres alturas.");
             Assert.Less(DisenoNivel1.PlataformasArena.Min(p => p.Abajo) - DisenoNivel1.SueloArena, 3.4f,
                 "La más baja queda por debajo de la cabeza de la Centinela (3,4 u): por eso las atraviesa.");
+        }
+
+        [Test]
+        public void DesdeLasPlataformas_LaEspadaDeKaelNoAlcanzaALaCentinelaEnElSuelo()
+        {
+            // Lo que queda la espada de Kael sobre sus pies: en el prefab, los pies están en el origen.
+            var jugador = AssetDatabase.LoadAssetAtPath<GameObject>(ConstructorJugador.RutaPrefab);
+            Assert.IsNotNull(jugador);
+            var espada = jugador.GetComponentsInChildren<BoxCollider2D>(true).Single(c => c.name == "Espada");
+            var sobreLosPies = jugador.transform.InverseTransformPoint(
+                espada.transform.TransformPoint(espada.offset - new Vector2(0f, espada.size.y * 0.5f))).y;
+
+            var centinela = GeneradorJefes.CargarDatos(ConstructorCentinela.NombreDatos);
+            Assert.IsNotNull(centinela);
+            var cabeza = DisenoNivel1.SueloArena + centinela.tamano.y;
+            foreach (var plataforma in DisenoNivel1.PlataformasArena)
+            {
+                // El fallo que encontró el segundo tester: desde la más baja, a 3 u, se le pegaba sin que ella alcanzara.
+                Assert.Greater(plataforma.Arriba + sobreLosPies, cabeza + 0.2f,
+                    $"{plataforma.Nombre}: desde ella, la espada de Kael alcanzaría la cabeza de la Centinela, y ningún ataque de ella llega allí.");
+            }
         }
 
         [Test]

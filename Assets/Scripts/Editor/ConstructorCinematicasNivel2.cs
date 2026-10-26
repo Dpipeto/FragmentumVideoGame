@@ -160,7 +160,7 @@ namespace Fragmentum.EditorTools
             cinematica.avisoSaltar = string.Empty;
             cinematica.fundidoTexto = 0.4f;
             cinematica.tamanoFuente = TamanoFuente;
-            cinematica.musica = null;
+            cinematica.musica = MusicaNiveles.DeCinematica(cinematica.id);
             cinematica.diapositivas = new List<Diapositiva>
             {
                 new Diapositiva { duracion = 0.3f },
@@ -262,6 +262,14 @@ namespace Fragmentum.EditorTools
                 }
 
                 cinematica.diapositivas.Add(new Diapositiva { imagen = plano, duracion = DuracionPlanoFinal });
+                cambia = true;
+            }
+
+            // Su música (Musica/Cinematicas), si la tiene.
+            var musica = MusicaNiveles.DeCinematica(cinematica.Id);
+            if (cinematica.musica != musica)
+            {
+                cinematica.musica = musica;
                 cambia = true;
             }
 

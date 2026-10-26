@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: EmbestidaSombra
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Bosses.Patrones.PatronEmbestidaSombra
   nombre: Embestida de sombra
-  descripcion: "Aparece junto a la pared m\xE1s lejana a Kael, destella 1 s y cruza la arena a ras de suelo (1,6 u de alto, a 11 u/s). Al otro lado se queda 1 s a la vista. Se salta o se espera en una rama."
-  aviso: 1
+  descripcion: "Aparece junto a la pared m\xE1s lejana a Kael, a su altura (a ras de suelo o en la rama donde est\xE9), destella 0,6 s y cruza la arena (1,6 u de alto, a 16 u/s). Al otro lado se queda 1 s a la vista. Se salta, o se baja de la rama."
+  aviso: 0.6
   danio: 1
   color: {r: 0.55, g: 0.9, b: 0.55, a: 1}
-  dibujarZona: 1
-  velocidad: 11
+  dibujarZona: 0
+  velocidad: 16
   alto: 1.6
   visibleAlFinal: 1

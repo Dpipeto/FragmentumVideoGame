@@ -31,7 +31,8 @@ namespace Fragmentum.EditorTools
     ///   para él: su escenario pintado, el checkpoint, la salida y la arena);
     /// - en el Nivel 2, el suyo (<see cref="DisenoNivel2"/>), que se vuelve a montar entero cuando
     ///   cambia su versión (<c>PreparadorNivelTristeza.cs</c>), y lo mismo el del Nivel 3
-    ///   (<see cref="DisenoNivel3"/>, <c>PreparadorNivelMiedo.cs</c>).
+    ///   (<see cref="DisenoNivel3"/>, <c>PreparadorNivelMiedo.cs</c>) y el del Nivel 4
+    ///   (<see cref="DisenoNivel4"/>, <c>PreparadorNivelCulpa.cs</c>).
     ///
     /// Es idempotente: ejecutarla otra vez sobre una escena preparada no cambia nada, y la
     /// escena solo se guarda si cambió.
@@ -188,6 +189,13 @@ namespace Fragmentum.EditorTools
                 cambios = true;
             }
 
+            // 1d. El del Nivel 4 (DisenoNivel4), igual.
+            if (DisenoNivel4.EsDe(nivel) && !RecorridoNivel4AlDia(escena))
+            {
+                MontarRecorridoNivel4(escena, nivel, raiz);
+                cambios = true;
+            }
+
             // 2. Checkpoints.
             if (Buscar<Checkpoint>(escena) == null)
             {
@@ -254,7 +262,8 @@ namespace Fragmentum.EditorTools
             }
 
             // 9. El fondo con parallax del mundo: el de la Ira, con los hitos repartidos según la
-            //    longitud del nivel, y el de la Tristeza, con su fondo de debajo del agua.
+            //    longitud del nivel; el de la Tristeza, con su fondo de debajo del agua; el del
+            //    Miedo, que se oscurece con la luz del nivel; y el de la Culpa, de día.
             if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.IRA && Buscar<ParallaxMovement>(escena) == null)
             {
                 cambios |= ConstructorFondoMundo1.Colocar(escena, nivel);
@@ -263,6 +272,16 @@ namespace Fragmentum.EditorTools
             if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.TRISTEZA && !ConstructorFondoMundo2.EstaColocado(escena))
             {
                 cambios |= ConstructorFondoMundo2.Colocar(escena, nivel);
+            }
+
+            if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.MIEDO && !ConstructorFondoMundo3.EstaColocado(escena))
+            {
+                cambios |= ConstructorFondoMundo3.Colocar(escena, nivel);
+            }
+
+            if (nivel.emocion != null && nivel.emocion.id == EMOCIONES.CULPA && !ConstructorFondoMundo4.EstaColocado(escena))
+            {
+                cambios |= ConstructorFondoMundo4.Colocar(escena, nivel);
             }
 
             // 10. El Golem de Ceniza sin arte (la cápsula de la Fase 4) se sustituye por el que lo
@@ -403,7 +422,10 @@ namespace Fragmentum.EditorTools
             var contenedorPlataformas = Hijo(recorrido, "PlataformasArena");
             foreach (var b in DisenoNivel1.PlataformasArena)
             {
-                plataformas.Add(Suelo(contenedorPlataformas, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorSuelo).GetComponent<Collider2D>());
+                // Se atraviesan saltando desde abajo y se pisan al caer (las de las mecánicas, también).
+                var plataforma = Suelo(contenedorPlataformas, b.Nombre, b.Desde, b.Hasta, b.Abajo, b.Arriba, colorSuelo).GetComponent<Collider2D>();
+                PlataformaDeUnSentido.Hacer(plataforma);
+                plataformas.Add(plataforma);
             }
 
             var mecanicas = Hijo(recorrido, "Mecanicas");
@@ -878,6 +900,8 @@ namespace Fragmentum.EditorTools
                     return new[] { "Lamento" };
                 case EMOCIONES.MIEDO:
                     return new[] { "Espectro", "CentinelaCiego" };
+                case EMOCIONES.CULPA:
+                    return new[] { "Penitente" };
                 default:
                     return new[] { "Generico" };
             }

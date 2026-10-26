@@ -16,7 +16,7 @@ namespace Fragmentum.EditorTools
     /// <b>puerta de salida</b> (cuatro dibujos: cerrada, entreabierta y dos de abierta), la
     /// <b>verja</b> que cierra la arena detrás de Kael, el <b>checkpoint</b> (apagado y encendido) y
     /// los dos planos de la <b>cinemática de salida</b>, la que se ve al cruzar la puerta. Hay un
-    /// juego por mundo, y de momento dos: Ira y Tristeza.
+    /// juego por mundo, y de momento cuatro: Ira, Tristeza, Miedo y Culpa.
     ///
     /// Los PNG vienen de <c>Tesis/Imagenes/…/limpios</c> (los limpia <c>limpiar_puertas.py</c> y
     /// los trae <c>Herramientas/traer_arte_puertas.py</c>) y no se retocan. Aquí están su escala y
@@ -103,7 +103,42 @@ namespace Fragmentum.EditorTools
             PuntosTexto = new[] { new Vector2Int(330, 182), new Vector2Int(240, 236) },
         };
 
-        public static readonly Juego[] Juegos = { Ira, Tristeza };
+        // La del Miedo es un arco tallado en un árbol muerto, con las raíces abiertas: más ancha que
+        // alta (4,7 × 4 u). La verja, un muro de raíces sobre una empalizada, se repite hasta el techo
+        // como la de la Ira. El checkpoint, una lámpara de trinchera colgada de una estaca.
+        public static readonly Juego Miedo = new Juego
+        {
+            Emocion = EMOCIONES.MIEDO, Clave = "Miedo",
+            LienzoPuerta = new Vector2Int(273, 234), PixelesPorUnidadPuerta = 58.5f, SueloPuerta = 234,
+            LienzoVerja = new Vector2Int(137, 436), PixelesPorUnidadVerja = 109f, SueloVerja = 436, VerjaSeRepite = true,
+            PixelesPorUnidadCheckpoint = 88f,
+            PieCheckpoint = new[] { new Vector2(101f, 50f), new Vector2(101f, 50f) },
+            CarpetaPlanos = ConstructorCinematicasNivel3.Carpeta, Planos = new[] { "SalidaMiedo1", "SalidaMiedo2" },
+            // Abajo en los dos: en el claro, sobre el camino en sombra; ante la puerta, sobre la
+            // hierba oscura (más arriba, la luz de la puerta lo ocupa todo).
+            PuntosTexto = new[] { new Vector2Int(240, 252), new Vector2Int(240, 255) },
+        };
+
+        // La de la Culpa es la de la iglesia quemada del pueblo, cerrada con cadenas de las que cuelgan placas:
+        // 4 × 3 u. Al abrirse, las cadenas caen a su pie (en Puerta2 a Puerta4 asoman 11 píxeles bajo el suelo,
+        // sobre la tierra). La verja, un muro de cadenas con placas sobre una reja, se repite hasta el techo como
+        // la del Miedo, en tramos de 4 u; no casa del todo por arriba y por abajo (arriba lleva la barra de la que
+        // cuelgan las cadenas): al repetirse, cada tramo cuelga de la reja del de debajo. El checkpoint, una
+        // bandera blanca en un fusil roto, de 3,3 u como los de los otros mundos (se pidió de 2,8).
+        public static readonly Juego Culpa = new Juego
+        {
+            Emocion = EMOCIONES.CULPA, Clave = "Culpa",
+            LienzoPuerta = new Vector2Int(127, 181), PixelesPorUnidadPuerta = 42.5f, SueloPuerta = 170,
+            LienzoVerja = new Vector2Int(41, 127), PixelesPorUnidadVerja = 31.75f, SueloVerja = 127, VerjaSeRepite = true,
+            PixelesPorUnidadCheckpoint = 22f,
+            PieCheckpoint = new[] { new Vector2(51f, 21.5f), new Vector2(51f, 21.5f) },
+            CarpetaPlanos = ConstructorCinematicasNivel4.Carpeta, Planos = new[] { "SalidaCulpa1", "SalidaCulpa2" },
+            // Abajo en los dos: en la plaza, sobre las losas en sombra; ante la puerta, sobre el suelo en
+            // penumbra (más arriba, la luz de la puerta lo ocupa todo).
+            PuntosTexto = new[] { new Vector2Int(240, 250), new Vector2Int(240, 254) },
+        };
+
+        public static readonly Juego[] Juegos = { Ira, Tristeza, Miedo, Culpa };
 
         /// <summary>La rejilla de los planos de salida: la de los de la Doncella.</summary>
         public static readonly Vector2Int Rejilla = ConstructorCinematicasNivel2.Rejilla;
@@ -314,18 +349,22 @@ namespace Fragmentum.EditorTools
 
         /// <summary>
         /// Escribe una cinemática de salida: negro 0,3 · el plano general 0,7 + 6,4 + 0,4, con las
-        /// dos primeras frases (2,6 s cada una) · negro 0,2 · Kael ante la puerta 0,6 + 4,6 + 0,8,
-        /// con la tercera (3,6 s). 14 s; se puede saltar.
+        /// dos primeras frases (2,6 s cada una, o lo que pida su largo: <see cref="ParaLeer"/>) ·
+        /// negro 0,2 · Kael ante la puerta 0,6 + 4,6 + 0,8, con la tercera (3,6 s). 14 s; se puede
+        /// saltar.
         /// </summary>
         public static void Salida(CutsceneData cinematica, Juego juego, string[] frases)
         {
+            var primera = ParaLeer(frases[0]);
+            var segunda = ParaLeer(frases[1]);
+            var inicioSegunda = Decimas(0.8f + primera + 0.3f);
             var general = new Diapositiva
             {
                 imagen = Plano(juego, 0),
                 fundidoEntrada = 0.7f,
-                duracion = 6.4f,
+                duracion = Mathf.Max(6.4f, Decimas(inicioSegunda + segunda)),
                 fundidoSalida = 0.4f,
-                carteles = { Dicho(frases[0], 0.8f, 2.6f, juego.PuntosTexto[0]), Dicho(frases[1], 3.7f, 2.6f, juego.PuntosTexto[0]) },
+                carteles = { Dicho(frases[0], 0.8f, primera, juego.PuntosTexto[0]), Dicho(frases[1], inicioSegunda, segunda, juego.PuntosTexto[0]) },
             };
             var anteLaPuerta = new Diapositiva
             {
@@ -346,6 +385,7 @@ namespace Fragmentum.EditorTools
             cinematica.bloqueoSalto = 0.5f;
             cinematica.fundidoTexto = 0.4f;
             cinematica.tamanoFuente = ConstructorCinematicasNivel2.TamanoFuente;
+            cinematica.musica = MusicaNiveles.DeCinematica(cinematica.id);
             cinematica.diapositivas = new List<Diapositiva>
             {
                 new Diapositiva { duracion = 0.3f },
@@ -354,6 +394,15 @@ namespace Fragmentum.EditorTools
                 anteLaPuerta,
             };
         }
+
+        /// <summary>
+        /// Lo que dura una frase del plano general: 2,6 s, o más si es larga, para no pasar de 30
+        /// letras por segundo (la del Miedo, «El bosque no era un laberinto…», tiene 80: 2,7 s).
+        /// </summary>
+        public static float ParaLeer(string frase) => Mathf.Max(2.6f, Mathf.Ceil((frase ?? string.Empty).Length / 30f * 10f) / 10f);
+
+        // Redondeado a la décima: 0,8 + 2,6 + 0,3 da los 3,7 de siempre y no 3,7000003.
+        private static float Decimas(float segundos) => Mathf.Round(segundos * 10f) / 10f;
 
         private static Cartel Dicho(string texto, float inicio, float duracion, Vector2Int punto) => new Cartel
         {

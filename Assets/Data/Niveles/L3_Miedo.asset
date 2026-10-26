@@ -26,21 +26,22 @@ MonoBehaviour:
   - {r: 0.101960786, g: 0.18039216, b: 0.101960786, a: 1}
   - {r: 0.22745098, g: 0.22745098, b: 0.2901961, a: 1}
   icono: {fileID: 0}
-  musica: {fileID: 0}
-  musicaJefe: {fileID: 0}
+  musica: {fileID: 8300000, guid: 226a17b345f1cca4a8a88f78015bf16a, type: 3}
+  musicaJefe: {fileID: 8300000, guid: 9b09a858280233c4690ee5e071dbe21a, type: 3}
   jefe: {fileID: 11400000, guid: bbb7d2feacd37014f8e23ff161f5b343, type: 2}
   fragmento: {fileID: 11400000, guid: 8b39dba873a829d49bdf2627500dd57c, type: 2}
   habilidadOtorgada: {fileID: 11400000, guid: 168565b4345443644a6efae65940a527, type: 2}
   cinematicaEntrada: {fileID: 0}
   cinematicaCierre: {fileID: 11400000, guid: 3a7a8e1ee0d4e8642a06997b5f3eb89d, type: 2}
   cinematicaJefe: {fileID: 11400000, guid: 725826ce794f5ca4fad94470709fa362, type: 2}
-  cinematicaJefeDerrotado: {fileID: 0}
+  cinematicaJefeDerrotado: {fileID: 11400000, guid: 1814710c402c6d94883cde4e8ac97019, type: 2}
   dialogos: {fileID: 11400000, guid: 5862d793edad30747b232dcc705a3cab, type: 2}
   reglas:
     agacharse: 0
     sigilo: 1
     oscuridad: 1
     radioLuzJugador: 3
+    colorVeloAgua: {r: 0.03, g: 0.1, b: 0.05, a: 1}
   secciones:
   - nombre: "Secci\xF3n 1"
     desdeX: 0
@@ -48,21 +49,21 @@ MonoBehaviour:
     contenido: 'La linde, con luz de luna: el tutorial de las antorchas, un barranco con una rama podrida, 2 Espectros y 3 cepos.'
   - nombre: "Secci\xF3n 2"
     desdeX: 36
-    hastaX: 84
-    contenido: "El bosque cerrado, a oscuras: la trinchera, la bifurcaci\xF3n (las copas o la hondonada, que acaba en un callej\xF3n), 3 Centinelas Ciegos y 4 Espectros."
-  - nombre: "Secci\xF3n 3"
-    desdeX: 84
     hastaX: 112
+    contenido: "El bosque cerrado, a oscuras: la trinchera, la bifurcaci\xF3n (las copas o la hondonada, que acaba en un callej\xF3n), 3 Centinelas Ciegos, 4 Espectros y la ci\xE9naga, que se cruza con el Dash Acu\xE1tico."
+  - nombre: "Secci\xF3n 3"
+    desdeX: 112
+    hastaX: 140
     contenido: "El claro, con luz de luna: el Acechador entre tres \xE1rboles. Y la antesala."
   - nombre: Arena del jefe
-    desdeX: 112
-    hastaX: 133
+    desdeX: 140
+    hastaX: 161
     contenido: 'Oscuridad total: solo la luz de Kael.'
   puntosDeControl:
   - 41
   - 82.5
-  - 109
-  tiempoConBono: 900
+  - 137
+  tiempoConBono: 960
   puntosPorSegundo: 5
   acento: {r: 0.49803922, g: 0.8784314, b: 0.6901961, a: 1}
   cita: lo que ocultas en la sombra crece

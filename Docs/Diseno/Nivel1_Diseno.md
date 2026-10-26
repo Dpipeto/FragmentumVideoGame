@@ -83,7 +83,7 @@ la de combustión mide 3,42 u (no 1,8) y la inestable, 3,83 (no 1,6). Por eso:
   subida y antes del Golem.
 - **Todos los bordes caen en unidades enteras:** el tileset pinta celdas enteras, y un bloque que
   acaba a media unidad se dibujaría medio tile fuera de su colisión.
-- **La Centinela atraviesa las plataformas de la arena.** Mide 3,4 u y las más bajas están a 3 u
+- **La Centinela atraviesa las plataformas de la arena.** Mide 3,4 u y las más bajas empiezan a 3 u
   del suelo: chocando con ellas se quedaría atascada debajo. Su salto cae siempre al suelo, y por
   eso subirse a una plataforma es esquivarlo. Las erupciones sí brotan bajo los pies de Kael,
   también en una plataforma.
@@ -109,6 +109,23 @@ examen de lo aprendido. Cada mecánica sale por tercera vez, ya junta con las ot
 La arena entera se corrió 45 u (va de 101 a 126) y no cambia por dentro. `DisenoNivel1.Version`
 (2) hace que la escena se vuelva a montar entera, como la del Nivel 2. Las secciones del
 `LevelData` son ahora cuatro: el Anexo A preveía dos y la arena (N19).
+
+### Lo que encontró el segundo tester (versión 3 del diseño, 2026-10-25)
+
+- **Desde la plataforma baja se le pegaba a la Centinela sin que ella alcanzara.** Las dos más
+  bajas de la arena estaban a 3 u del suelo, y la Centinela mide 3,4 u: su cabeza asomaba 0,4 u
+  por encima. La espada de Kael baja hasta 0,25 u bajo sus pies, así que desde la plataforma le
+  daba en la cabeza; ninguno de sus ataques llega a esa altura (el espadazo mide 2,6 u, y las
+  ondas y el salto van por el suelo). **Ahora están a 3,5 u** (de y 8 a 8,5): desde ninguna
+  plataforma se le alcanza, y siguen sirviendo para esquivar el salto y las ondas. Se suben con el
+  doble salto, como antes (desde el suelo, 3,5 u de las 4,15 que da; hasta la del medio, 2,5). Lo
+  comprueba `DisenoNivel1Tests`.
+- **Las plataformas se atraviesan saltando desde abajo** (las de la arena, las inestables y las
+  de combustión) y se pisan al caer encima, como siempre (`PlataformaDeUnSentido`). Kael no las
+  pisa mientras las atraviesa: no recupera los saltos en el aire, y la inestable solo se agrieta
+  cuando cae encima. El suelo sigue siendo sólido.
+
+`DisenoNivel1.Version` (3) vuelve a montar la escena entera.
 
 ## 4. Medidas de Kael, para que todo se pueda cruzar
 

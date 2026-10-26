@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Fragmentum.Narrative;
 using Fragmentum.UI;
 using UnityEditor;
@@ -141,6 +142,123 @@ namespace Fragmentum.EditorTools
             }
 
             Debug.Log($"[Cinemática] Cinemáticas de la Doncella capturadas en {ConstructorCamaraCinematica.CarpetaCapturas}: {rutas.Count} imágenes.");
+            return rutas;
+        }
+
+        /// <summary>Los instantes de la presentación del Pavor: el claro sube, su frase, la de cerca y el rótulo.</summary>
+        public static readonly float[] InstantesPavor = { 0.8f, 3f, 6.5f, 9f };
+
+        /// <summary>Y los de su derrota (un plano y el otro) y los de la salida del Miedo (sus tres frases).</summary>
+        public static readonly float[] InstantesDerrotaPavor = { 2f, 7f };
+
+        public static readonly float[] InstantesSalidaMiedo = { 2.5f, 5.5f, 10f };
+
+        [MenuItem("Fragmentum/Cinemáticas/Capturar las cinemáticas del Espectro del Pavor", priority = 154)]
+        public static void MenuCapturarPavor()
+        {
+            var rutas = CapturarPavor(1920, 1080);
+            if (rutas.Count > 0)
+            {
+                EditorUtility.RevealInFinder(rutas[0]);
+            }
+        }
+
+        /// <summary><c>-executeMethod Fragmentum.EditorTools.CapturaCinematica.CapturarPavorEnModoBatch -quit</c></summary>
+        public static void CapturarPavorEnModoBatch()
+        {
+            if (CapturarPavor(1920, 1080).Count == 0 && Application.isBatchMode)
+            {
+                EditorApplication.Exit(1);
+            }
+        }
+
+        /// <summary>
+        /// Captura la presentación y la derrota del Espectro del Pavor y la salida del Miedo (planos de
+        /// 480 × 268, en su rejilla). Devuelve las rutas guardadas.
+        /// </summary>
+        public static List<string> CapturarPavor(int ancho, int alto)
+        {
+            var rutas = new List<string>();
+            var presentacion = AssetDatabase.LoadAssetAtPath<CutsceneData>(ConstructorCinematicasNivel3.RutaPresentacion);
+            var derrota = AssetDatabase.LoadAssetAtPath<CutsceneData>(ConstructorCinematicasNivel3.RutaDerrota);
+            var salida = AssetDatabase.LoadAssetAtPath<CutsceneData>(ConstructorPuertas.Miedo.RutaCinematica);
+            if (presentacion == null || derrota == null || salida == null)
+            {
+                Debug.LogError($"[Cinemática] Faltan {ConstructorCinematicasNivel3.RutaPresentacion}, {ConstructorCinematicasNivel3.RutaDerrota} " +
+                               $"o {ConstructorPuertas.Miedo.RutaCinematica}.");
+                return rutas;
+            }
+
+            Directory.CreateDirectory(ConstructorCamaraCinematica.CarpetaCapturas);
+            rutas.AddRange(InstantesPavor.Select(t => Guardar(presentacion, t, ancho, alto, $"Pavor_Presentacion_{Instante(t)}s")));
+            rutas.AddRange(InstantesDerrotaPavor.Select(t => Guardar(derrota, t, ancho, alto, $"Pavor_Derrota_{Instante(t)}s")));
+            rutas.AddRange(InstantesSalidaMiedo.Select(t => Guardar(salida, t, ancho, alto, $"Miedo_Salida_{Instante(t)}s")));
+            Debug.Log($"[Cinemática] Cinemáticas del Espectro del Pavor y salida del Miedo capturadas en {ConstructorCamaraCinematica.CarpetaCapturas}: {rutas.Count} imágenes.");
+            return rutas;
+        }
+
+        /// <summary>Los instantes de la presentación del Juez (como los del Pavor), los de su derrota y uno por memoria (su línea, entera).</summary>
+        public static readonly float[] InstantesJuez = { 0.8f, 3f, 6.5f, 9f };
+
+        public static readonly float[] InstantesDerrotaJuez = { 2f, 7f };
+
+        public const float InstanteMemoria = 2.5f;
+
+        public static readonly float[] InstantesSalidaCulpa = { 2.5f, 5.5f, 10f };
+
+        [MenuItem("Fragmentum/Cinemáticas/Capturar las cinemáticas del Juez Silente y de las memorias", priority = 155)]
+        public static void MenuCapturarJuez()
+        {
+            var rutas = CapturarJuez(1920, 1080);
+            if (rutas.Count > 0)
+            {
+                EditorUtility.RevealInFinder(rutas[0]);
+            }
+        }
+
+        /// <summary><c>-executeMethod Fragmentum.EditorTools.CapturaCinematica.CapturarJuezEnModoBatch -quit</c></summary>
+        public static void CapturarJuezEnModoBatch()
+        {
+            if (CapturarJuez(1920, 1080).Count == 0 && Application.isBatchMode)
+            {
+                EditorApplication.Exit(1);
+            }
+        }
+
+        /// <summary>
+        /// Captura la presentación y la derrota del Juez Silente, las cuatro memorias y la salida de la Culpa
+        /// (planos de 480 × 268, en su rejilla). Devuelve las rutas guardadas.
+        /// </summary>
+        public static List<string> CapturarJuez(int ancho, int alto)
+        {
+            var rutas = new List<string>();
+            var presentacion = AssetDatabase.LoadAssetAtPath<CutsceneData>(ConstructorCinematicasNivel4.RutaPresentacion);
+            var derrota = AssetDatabase.LoadAssetAtPath<CutsceneData>(ConstructorCinematicasNivel4.RutaDerrota);
+            if (presentacion == null || derrota == null)
+            {
+                Debug.LogError($"[Cinemática] Faltan {ConstructorCinematicasNivel4.RutaPresentacion} o {ConstructorCinematicasNivel4.RutaDerrota}.");
+                return rutas;
+            }
+
+            Directory.CreateDirectory(ConstructorCamaraCinematica.CarpetaCapturas);
+            rutas.AddRange(InstantesJuez.Select(t => Guardar(presentacion, t, ancho, alto, $"Juez_Presentacion_{Instante(t)}s")));
+            rutas.AddRange(InstantesDerrotaJuez.Select(t => Guardar(derrota, t, ancho, alto, $"Juez_Derrota_{Instante(t)}s")));
+            foreach (var memoria in DisenoNivel4.Memorias)
+            {
+                var cinematica = GeneradorNarrativa.CargarCinematicaMemoria(memoria.Nombre);
+                if (cinematica != null)
+                {
+                    rutas.Add(Guardar(cinematica, InstanteMemoria, ancho, alto, $"Culpa_Memoria_{memoria.Nombre}"));
+                }
+            }
+
+            var salida = AssetDatabase.LoadAssetAtPath<CutsceneData>(ConstructorPuertas.Culpa.RutaCinematica);
+            if (salida != null && salida.diapositivas.Any(d => d != null && d.imagen != null))
+            {
+                rutas.AddRange(InstantesSalidaCulpa.Select(t => Guardar(salida, t, ancho, alto, $"Culpa_Salida_{Instante(t)}s")));
+            }
+
+            Debug.Log($"[Cinemática] Cinemáticas del Juez Silente y de las memorias capturadas en {ConstructorCamaraCinematica.CarpetaCapturas}: {rutas.Count} imágenes.");
             return rutas;
         }
 
