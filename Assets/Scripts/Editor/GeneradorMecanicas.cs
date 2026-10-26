@@ -115,7 +115,6 @@ namespace Fragmentum.EditorTools
 
         private static GameObject CrearBola()
         {
-            // Provisional: el círculo del proyecto, en naranja, hasta que llegue la bola (Fireball3).
             var raiz = Raiz(BolaDeFuego, Capa(Capas.EnemyWeapon), null);
             var cuerpo = raiz.AddComponent<Rigidbody2D>();
             cuerpo.bodyType = RigidbodyType2D.Kinematic;
@@ -125,14 +124,31 @@ namespace Fragmentum.EditorTools
             zona.radius = RadioBola;
             var hitbox = raiz.AddComponent<Hitbox>();
             Asignar(hitbox, "objetivos", p => p.intValue = Capas.Mascara(Capas.Player));
-            raiz.AddComponent<Proyectil>();
+            var proyectil = raiz.AddComponent<Proyectil>();
 
             var dibujo = new GameObject("Sprite") { layer = raiz.layer };
             dibujo.transform.SetParent(raiz.transform, false);
             var sprite = dibujo.AddComponent<SpriteRenderer>();
+            sprite.sortingOrder = 8;
+
+            // Con su arte: vuela en bucle (dos fotogramas) y al apagarse deja sus chispas.
+            var vuelo = CargarSprite(ConstructorMecanicas.RutaSprite(ConstructorMecanicas.BolaVuelo.Fotogramas[0]));
+            var controlador = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(ConstructorMecanicas.RutaControladorBola);
+            if (vuelo != null && controlador != null)
+            {
+                sprite.sprite = vuelo;
+                var animator = dibujo.AddComponent<Animator>();
+                animator.runtimeAnimatorController = controlador;
+                animator.applyRootMotion = false;
+                Asignar(proyectil, "restos", p => p.objectReferenceValue = CargarSprite(ConstructorMecanicas.RutaSprite(ConstructorMecanicas.FotogramaBolaDisipa)));
+                Asignar(proyectil, "duracionRestos", p => p.floatValue = ConstructorMecanicas.DuracionBolaDisipa);
+                return raiz;
+            }
+
+            // Sin arte: el círculo del proyecto, en naranja.
+            Debug.LogWarning("[Fragmentum] Falta el arte de la bola de fuego: el prefab lleva un círculo provisional.");
             sprite.sprite = SpriteCirculo;
             sprite.color = new Color(1f, 0.45f, 0.05f);
-            sprite.sortingOrder = 8;
             if (sprite.sprite != null)
             {
                 var lado = Mathf.Max(sprite.sprite.bounds.size.x, 0.01f);

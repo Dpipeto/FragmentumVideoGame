@@ -22,5 +22,8 @@
     <Reference Include="$(UnityData)\Managed\UnityEngine\UnityEditor*.dll" Private="false" />
     <Reference Include="$(Proyecto)\Library\ScriptAssemblies\Unity.InputSystem.dll" Private="false" />
     <Reference Include="$(Proyecto)\Library\ScriptAssemblies\UnityEngine.UI.dll" Private="false" />
+    <Reference Include="$(Proyecto)\Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll" Private="false" />
+    <Reference Include="$(Proyecto)\Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Runtime.dll" Private="false" />
+    <Reference Include="$(Proyecto)\Library\ScriptAssemblies\Unity.RenderPipelines.Universal.2D.Runtime.dll" Private="false" />
   </ItemGroup>
 </Project>

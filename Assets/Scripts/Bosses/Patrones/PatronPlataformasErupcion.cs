@@ -41,7 +41,7 @@ namespace Fragmentum.Bosses.Patrones
                 var x = jefe.CentroJugador.x + (i == 0 ? 0f : Random.Range(-dispersion, dispersion));
                 x = Mathf.Clamp(x, limites.x + tamano.x * 0.5f, limites.y - tamano.x * 0.5f);
                 var centro = new Vector2(x, jefe.SueloEn(x) + tamano.y * 0.5f);
-                jefe.CrearZona("Erupcion", centro, tamano, danio, aviso, duracion, Vector2.zero, color);
+                jefe.CrearZona("Erupcion", centro, tamano, danio, aviso, duracion, Vector2.zero, color, dibujarZona);
                 yield return new WaitForSeconds(intervalo);
             }
 

@@ -17,6 +17,7 @@ MonoBehaviour:
   aviso: 0.55
   danio: 1
   color: {r: 1, g: 0.41960785, b: 0.20784314, a: 1}
+  dibujarZona: 0
   alcance: 3
   tiempoAcercamiento: 2.5
   tamanoGolpe: {x: 2.6, y: 2.6}

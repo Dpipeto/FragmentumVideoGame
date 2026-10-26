@@ -338,6 +338,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Core.Input.FuenteInputJugador
   acciones: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   mapaJugador: Player
+  factorCaminar: 0.35
 --- !u!114 &7821389913373255066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -469,8 +470,8 @@ MonoBehaviour:
     estadoAnimator: Salto
     reiniciar: 1
   - estado: 8
-    estadoAnimator: Correr
-    reiniciar: 0
+    estadoAnimator: Dash
+    reiniciar: 1
   - estado: 9
     estadoAnimator: Ataque
     reiniciar: 1

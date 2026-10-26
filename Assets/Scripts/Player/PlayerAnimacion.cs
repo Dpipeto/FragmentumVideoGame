@@ -15,7 +15,7 @@ namespace Fragmentum.Player
     /// de estados que puedan contradecirse, que era el problema del prototipo.
     ///
     /// La tabla <see cref="clips"/> se edita en el Inspector. Un estado sin arte propio apunta
-    /// al clip más parecido (por ejemplo, DASH reproduce el de correr) hasta que exista el suyo.
+    /// al clip más parecido (por ejemplo, CROUCH reproduce el idle) hasta que exista el suyo.
     /// </summary>
     [DisallowMultipleComponent]
     public class PlayerAnimacion : MonoBehaviour
@@ -47,6 +47,7 @@ namespace Fragmentum.Player
         public const string Caida = "Caida";
         public const string CaidaBucle = "CaidaBucle";
         public const string Ataque = "Ataque";
+        public const string Dash = "Dash";
 
         [SerializeField] private PlayerController jugador;
 
@@ -60,8 +61,8 @@ namespace Fragmentum.Player
         private string _ultimo;
 
         /// <summary>
-        /// Tabla con el arte que existe hoy: idle, correr, salto (subida y caída) y ataque. Los
-        /// estados sin clip propio usan el más parecido; están en PENDIENTES.md (apartado B3).
+        /// Tabla con el arte que existe hoy: idle, correr, salto (subida y caída), ataque y dash.
+        /// Los estados sin clip propio usan el más parecido; están en PENDIENTES.md (apartado B3).
         /// </summary>
         public static List<ClipDeEstado> TablaPorDefecto() => new List<ClipDeEstado>
         {
@@ -73,7 +74,7 @@ namespace Fragmentum.Player
             new ClipDeEstado(ESTADOS_JUGADOR.FALL, Caida),
             new ClipDeEstado(ESTADOS_JUGADOR.WALL_SLIDE, Caida),
             new ClipDeEstado(ESTADOS_JUGADOR.WALL_JUMP, Salto, reiniciar: true),
-            new ClipDeEstado(ESTADOS_JUGADOR.DASH, Correr),
+            new ClipDeEstado(ESTADOS_JUGADOR.DASH, Dash, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.ATTACK, Ataque, reiniciar: true),
             new ClipDeEstado(ESTADOS_JUGADOR.DAMAGED, string.Empty),
             new ClipDeEstado(ESTADOS_JUGADOR.DEAD, Idle),
@@ -130,6 +131,12 @@ namespace Fragmentum.Player
                 // cargado, que dura más, se ve más lento sin necesitar un clip propio.
                 var duracion = Mathf.Max(0.05f, jugador.DuracionAtaqueEnCurso);
                 AnimatorParams.FijarFloat(animator, AnimatorParams.VelocidadAtaque, 1f / duracion);
+            }
+            else if (nuevo == ESTADOS_JUGADOR.DASH)
+            {
+                // Igual con el dash: su clip dura 1 s y ocupa el dash entero, dure lo que dure.
+                var duracion = Mathf.Max(0.05f, jugador.Parametros.dashDuration);
+                AnimatorParams.FijarFloat(animator, AnimatorParams.VelocidadDash, 1f / duracion);
             }
 
             if (_porEstado.TryGetValue(nuevo, out var clip))

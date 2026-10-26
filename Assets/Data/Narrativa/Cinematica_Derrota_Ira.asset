@@ -19,11 +19,37 @@ MonoBehaviour:
     carteles: []
     duracion: 4.5
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
+  - imagen: {fileID: 21300000, guid: 7a41755e927b18d469f42ce0a1c9b457, type: 3}
+    texto: 
+    carteles: []
+    duracion: 4.5
+    audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
   saltable: 1
   soloPrimeraVez: 0
+  montaje: 0
   sobreElJuego: 0
   opacidadVelo: 0.55
   escalaEntera: 1
+  fuente: {fileID: 0}
+  tamanoFuente: 8
+  interlineado: 0
+  colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
+  temblorPixeles: 1
+  temblorFotogramas: 4
   fundidoImagen: 0.6
   fundidoTexto: 0.4
   margenTexto: 0.8

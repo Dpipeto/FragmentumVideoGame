@@ -5,6 +5,9 @@
         "Fragmentum.Runtime",
         "Fragmentum.Editor",
         "Unity.InputSystem",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

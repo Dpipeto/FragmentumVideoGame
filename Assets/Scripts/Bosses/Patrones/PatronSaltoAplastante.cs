@@ -27,6 +27,10 @@ namespace Fragmentum.Bosses.Patrones
         [Tooltip("Al aterrizar suelta una onda baja hacia cada lado (se esquiva saltando).")]
         public bool ondas = true;
 
+        [Tooltip("Dibujar las ondas como rectángulos. Encendido mientras no tengan su propio arte. " +
+                 "La marca de la caída sigue a «dibujarZona».")]
+        public bool dibujarOndas = true;
+
         [Min(0)] public int danioOnda = 1;
 
         [Min(0.1f)] public float velocidadOnda = 8f;
@@ -49,7 +53,7 @@ namespace Fragmentum.Bosses.Patrones
             var destino = jefe.Saltar(jefe.CentroJugador.x, tiempoVuelo);
             var suelo = jefe.SueloEn(destino);
             jefe.CrearZona("Aterrizaje", new Vector2(destino, suelo + tamanoImpacto.y * 0.5f), tamanoImpacto, danio,
-                tiempoVuelo, duracionImpacto, Vector2.zero, color);
+                tiempoVuelo, duracionImpacto, Vector2.zero, color, dibujarZona);
 
             // Espera a tocar suelo (con un límite, por si algo lo frena en el aire). Con arte, a J5:
             // el dibujo sostiene J4 hasta que el cuerpo aterriza.
@@ -76,7 +80,7 @@ namespace Fragmentum.Bosses.Patrones
                 foreach (var direccion in new[] { -1, 1 })
                 {
                     var origen = new Vector2(jefe.Centro.x + direccion * salida, y);
-                    jefe.CrearZona("OndaDelSalto", origen, tamanoOnda, danioOnda, 0f, duracion, new Vector2(direccion * velocidadOnda, 0f), color);
+                    jefe.CrearZona("OndaDelSalto", origen, tamanoOnda, danioOnda, 0f, duracion, new Vector2(direccion * velocidadOnda, 0f), color, dibujarOndas);
                 }
             }
 

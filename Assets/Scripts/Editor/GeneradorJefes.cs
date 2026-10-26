@@ -75,6 +75,7 @@ namespace Fragmentum.EditorTools
                 p.golpes = 2;
                 p.avisoEncadenado = 0.35f;
                 p.color = Hex("FF6B35");
+                p.dibujarZona = false; // el golpe lo enseña E2
             });
 
             var espadazoFuria = Patron<PatronEspadazo>("EspadazoFuria", sobrescribir, p =>
@@ -88,6 +89,7 @@ namespace Fragmentum.EditorTools
                 p.impulsoEncadenado = 1.8f;
                 p.duracionVentana = 0.9f;
                 p.color = Hex("FF6B35");
+                p.dibujarZona = false; // el golpe lo enseña E2
             });
 
             var onda = Patron<PatronOndaSuelo>("OndaDeSuelo", sobrescribir, p =>
@@ -140,12 +142,13 @@ namespace Fragmentum.EditorTools
             var salto = Patron<PatronSaltoAplastante>("SaltoAplastante", sobrescribir, p =>
             {
                 p.nombre = "Salto aplastante";
-                p.descripcion = "Salta hacia el jugador; la caída se marca en el suelo y quema al aterrizar (2 de daño), con una onda a cada lado.";
+                p.descripcion = "Salta hacia el jugador y quema al aterrizar (2 de daño), con una onda a cada lado.";
                 p.aviso = 0.5f;
                 p.danio = 2;
                 p.tiempoVuelo = 0.8f;
                 p.danioOnda = 1;
                 p.color = Hex("E85D04");
+                p.dibujarZona = false; // la caída la enseña J4-J5
             });
 
             Completar("CentinelaArdiente", sobrescribir, j =>

@@ -86,7 +86,8 @@ namespace Fragmentum.Tests
             },
             new Grupo
             {
-                Carpeta = Cinematicas, Ancho = 240, Alto = 135, PixelesPorUnidad = 100f, Pivote = new Vector2(0.5f, 0.5f),
+                // A 1 píxel por unidad, como la cámara de cinemáticas (Pixel Perfect, Assets PPU 1).
+                Carpeta = Cinematicas, Ancho = 240, Alto = 135, PixelesPorUnidad = 1f, Pivote = new Vector2(0.5f, 0.5f),
                 Alineacion = SpriteAlignment.Center,
                 Archivos = new[] { "CinematicaJefe1", "CinematicaJefe2", "CinematicaFinalLvl1" },
             },
@@ -444,8 +445,35 @@ namespace Fragmentum.Tests
             var usados = ConstructorMecanicas.TodosLosClips.SelectMany(c => c.Fotogramas).Distinct().ToList();
             Assert.AreEqual(10, usados.Count);
             var clips = AssetDatabase.FindAssets("t:AnimationClip", new[] { AnimMecanicas }).Select(AssetDatabase.GUIDToAssetPath).ToList();
-            Assert.AreEqual(ClipsMecanicas.Length, clips.Count, string.Join("\n", clips));
+            Assert.AreEqual(ClipsMecanicas.Length + 1, clips.Count, "Y el vuelo de la bola:\n" + string.Join("\n", clips));
             Assert.IsFalse(clips.Any(c => c.Contains("Lava")), "La lava es un solo fotograma: no tiene clip.");
+        }
+
+        [Test]
+        public void LaBola_VuelaEnBucleConDosFotogramas_YDejaSusChispas()
+        {
+            ComprobarClip(new ClipEsperado
+            {
+                Ruta = AnimMecanicas + "/Bola_Vuelo.anim", Bucle = true,
+                Fotogramas = new[] { ("Bola_1_vuelo", 0.1f), ("Bola_2_vuelo", 0.1f) },
+            });
+
+            var controlador = CargarControlador(AnimMecanicas + "/Bola.controller");
+            var estados = controlador.layers[0].stateMachine.states;
+            Assert.AreEqual(1, estados.Length, "Un solo estado: el vuelo.");
+            Assert.AreEqual("Bola_Vuelo", estados[0].state.motion.name);
+            Assert.AreEqual(0, controlador.parameters.Length, "No la gobierna ningún script.");
+
+            // Las tres comparten lienzo y pivote: el centro de la bola, no del lienzo.
+            foreach (var nombre in new[] { "Bola_1_vuelo", "Bola_2_vuelo", "Bola_3_disipa" })
+            {
+                var sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/Mecanicas/{nombre}.png");
+                Assert.IsNotNull(sprite, nombre);
+                Assert.AreEqual(new Vector2(40f, 29f), sprite.rect.size, $"{nombre}: lienzo.");
+                Assert.AreEqual(24f, sprite.pixelsPerUnit, $"{nombre}: la densidad de la torreta.");
+                Assert.AreEqual(0.688f * 40f, sprite.pivot.x, 0.05f, $"{nombre}: pivote x.");
+                Assert.AreEqual(0.414f * 29f, sprite.pivot.y, 0.05f, $"{nombre}: pivote y.");
+            }
         }
 
         // --- Fase C: Animators ---
@@ -760,14 +788,17 @@ namespace Fragmentum.Tests
             Assert.AreEqual("Lava_espejo", Campo<Sprite>(lava.GetComponent<Lava>(), "franjaEspejo").name);
             Assert.AreEqual(0, lava.transform.childCount, "Las franjas no se guardan: las monta el componente.");
 
-            // La bola de la torreta: montada y referenciada, con sprite provisional.
+            // La bola de la torreta: montada y referenciada, con su arte.
             var bola = CargarPrefab($"{PrefabsMecanicas}/BolaDeFuego.prefab");
             Assert.AreEqual(LayerMask.NameToLayer(Capas.EnemyWeapon), bola.layer);
             Assert.AreEqual(RigidbodyType2D.Kinematic, bola.GetComponent<Rigidbody2D>().bodyType);
             Assert.IsTrue(bola.GetComponent<CircleCollider2D>().isTrigger);
             Assert.IsNotNull(bola.GetComponent<Fragmentum.Core.Combate.Hitbox>());
             Assert.IsNotNull(bola.GetComponent<Fragmentum.Core.Combate.Proyectil>());
-            Assert.IsNotNull(bola.GetComponentInChildren<SpriteRenderer>().sprite, "Lleva un sprite provisional (falta Fireball3).");
+            ComprobarDibujo(bola, "Bola_1_vuelo", "Bola");
+            Assert.AreEqual("Bola_3_disipa", Campo<Sprite>(bola.GetComponent<Fragmentum.Core.Combate.Proyectil>(), "restos").name,
+                "Al apagarse deja sus chispas.");
+            Assert.AreEqual(Color.white, bola.GetComponentInChildren<SpriteRenderer>().color, "Sin tinte: el color es el del dibujo.");
         }
 
         private static void ComprobarDibujo(GameObject prefab, string primerFotograma, string controlador)
@@ -793,15 +824,17 @@ namespace Fragmentum.Tests
             var presentacion = AssetDatabase.LoadAssetAtPath<Fragmentum.Narrative.CutsceneData>("Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset");
             Assert.IsTrue(presentacion.escalaEntera);
             Assert.IsFalse(presentacion.sobreElJuego, "Con los planos, opaca.");
-            Assert.AreEqual("CinematicaJefe1", presentacion.diapositivas[0].imagen.name, "Kael diminuto en la nave, la Centinela esperando.");
-            Assert.AreEqual("CinematicaJefe2", presentacion.diapositivas[1].imagen.name, "El ojo que se abre.");
+            // Por beats: negro, la sala, negro y el ojo (su guion lo comprueba CinematicaJefe1Tests).
+            Assert.AreEqual("CinematicaJefe1", presentacion.diapositivas[1].imagen.name, "Kael diminuto en la nave, la Centinela esperando.");
+            Assert.AreEqual("CinematicaJefe2", presentacion.diapositivas[3].imagen.name, "El ojo que se abre.");
 
             var derrota = AssetDatabase.LoadAssetAtPath<Fragmentum.Narrative.CutsceneData>("Assets/Data/Narrativa/Cinematica_Derrota_Ira.asset");
             Assert.IsNotNull(derrota, "Falta la cinemática de la derrota de la Centinela.");
             Assert.IsTrue(derrota.escalaEntera);
             Assert.IsFalse(derrota.soloPrimeraVez);
             Assert.AreEqual("CinematicaFinalLvl1", derrota.diapositivas[0].imagen.name, "La sala vacía, la espada clavada.");
-            Assert.IsTrue(derrota.diapositivas.All(d => d.imagen != null), "Sin plano no hay diapositiva: CinematicaFinalLvl2 entra al llegar.");
+            Assert.IsTrue(derrota.diapositivas.All(d => d.imagen != null), "Sin plano no hay diapositiva.");
+            Assert.AreEqual("CinematicaFinalLvl2", derrota.diapositivas[1].imagen.name, "Kael con el fragmento en el hombro y los huecos que faltan.");
 
             var nivel = AssetDatabase.LoadAssetAtPath<Fragmentum.Data.LevelDatabase>("Assets/Data/Niveles/LevelDatabase.asset").niveles
                 .Single(n => n != null && n.cinematicaJefe == presentacion);

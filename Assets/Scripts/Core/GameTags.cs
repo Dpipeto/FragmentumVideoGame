@@ -43,8 +43,14 @@ namespace Fragmentum.Core
         public const string PlayerWeapon = "PlayerWeapon";
         public const string EnemyWeapon = "EnemyWeapon";
 
+        /// <summary>
+        /// Las cinemáticas en pixel art: solo las ve su cámara (<c>CamaraCinematica</c>). No es de
+        /// física: no lleva colliders.
+        /// </summary>
+        public const string Cinematica = "Cinematica";
+
         /// <summary>Capas propias del juego, en el orden en que se crean.</summary>
-        public static readonly string[] Propias = { Suelo, Wall, Player, Enemy, PlayerWeapon, EnemyWeapon };
+        public static readonly string[] Propias = { Suelo, Wall, Player, Enemy, PlayerWeapon, EnemyWeapon, Cinematica };
 
         private static int _mascaraSuelo = -1;
         private static int _mascaraPared = -1;

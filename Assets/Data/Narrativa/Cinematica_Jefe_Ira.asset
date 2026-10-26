@@ -14,36 +14,135 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fragmentum.Runtime::Fragmentum.Narrative.CutsceneData
   id: Jefe_Ira
   diapositivas:
+  - imagen: {fileID: 0}
+    texto: 
+    carteles: []
+    duracion: 0.5
+    audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues:
+    - nombre: drone_sala
+      clip: {fileID: 0}
+      instante: 0
+      bucle: 1
+      hasta: 9.6
   - imagen: {fileID: 21300000, guid: 5779b510b7cf8394fa18731360f99103, type: 3}
     texto: 
     carteles:
-    - texto: CENTINELA ARDIENTE
-      inicio: 0.2
-      duracion: 2.8
-      posicion: 1
-      titulo: 1
-    - texto: "[Presentaci\xF3n \xB7 Ira \xB7 pendiente de guion]"
-      inicio: 0.6
+    - texto: "No recuerdo esta sala.\nEl calor, s\xED."
+      inicio: 3.5
       duracion: 2.4
       posicion: 2
       titulo: 0
-    duracion: 3
+      sinFundido: 0
+      enPunto: 1
+      punto: {x: 22, y: 113}
+      alineacion: 0
+    duracion: 4.9
     audio: {fileID: 0}
-  - imagen: {fileID: 21300000, guid: 8e6b3385b9adb4249982fe5310a9cd15, type: 3}
-    texto: "Centinela Ardiente: [Antes del combate \xB7 Ira \xB7 pendiente de guion] Centinela Ardiente encarna la ira."
+    fundidoEntrada: 1
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores:
+    - 1.9
+    - 3.1
+    brasas: 1
+    flashFinal: 0
+    cues:
+    - nombre: amb_forja
+      clip: {fileID: 0}
+      instante: 0
+      bucle: 1
+      hasta: 5.9
+    - nombre: golpe_escala
+      clip: {fileID: 0}
+      instante: 1.1
+      bucle: 0
+      hasta: 0
+    - nombre: respiracion_fuelle
+      clip: {fileID: 0}
+      instante: 1.5
+      bucle: 1
+      hasta: 5.5
+    - nombre: voz_kael_01
+      clip: {fileID: 0}
+      instante: 3.5
+      bucle: 0
+      hasta: 0
+  - imagen: {fileID: 0}
+    texto: 
     carteles: []
-    duracion: 4.5
+    duracion: 0.5
     audio: {fileID: 0}
+    fundidoEntrada: 0
+    fundidoSalida: 0
+    desplazamiento: {x: 0, y: 0}
+    temblores: []
+    brasas: 0
+    flashFinal: 0
+    cues: []
+  - imagen: {fileID: 21300000, guid: 8e6b3385b9adb4249982fe5310a9cd15, type: 3}
+    texto: 
+    carteles:
+    - texto: CENTINELA ARDIENTE
+      inicio: 1.1
+      duracion: 1.6
+      posicion: 2
+      titulo: 1
+      sinFundido: 1
+      enPunto: 1
+      punto: {x: 114, y: 77}
+      alineacion: 1
+    - texto: Arquitecto de la Ira
+      inicio: 1.1
+      duracion: 1.6
+      posicion: 2
+      titulo: 0
+      sinFundido: 1
+      enPunto: 1
+      punto: {x: 114, y: 90}
+      alineacion: 1
+    duracion: 1.6
+    audio: {fileID: 0}
+    fundidoEntrada: 1.1
+    fundidoSalida: 0
+    desplazamiento: {x: 17, y: 19}
+    temblores: []
+    brasas: 0
+    flashFinal: 2
+    cues:
+    - nombre: brasa_aviva
+      clip: {fileID: 0}
+      instante: 0
+      bucle: 0
+      hasta: 1.1
+    - nombre: rotulo_metal
+      clip: {fileID: 0}
+      instante: 1.1
+      bucle: 0
+      hasta: 0
   saltable: 1
-  soloPrimeraVez: 0
+  soloPrimeraVez: 1
+  montaje: 1
   sobreElJuego: 0
   opacidadVelo: 0.55
   escalaEntera: 1
+  fuente: {fileID: 0}
+  tamanoFuente: 5
+  interlineado: 0
+  colorTexto: {r: 0.94, g: 0.93, b: 0.85, a: 1}
+  temblorPixeles: 1
+  temblorFotogramas: 4
   fundidoImagen: 0.4
   fundidoTexto: 0.4
   margenTexto: 0.8
-  bloqueoSalto: 1
-  avisoSaltar: Pulsa cualquier tecla para saltar
+  bloqueoSalto: 0.5
+  avisoSaltar: 
   finAviso: 4
   opacidadAviso: 0.45
   musica: {fileID: 0}

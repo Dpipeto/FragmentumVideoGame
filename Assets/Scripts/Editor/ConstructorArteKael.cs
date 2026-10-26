@@ -65,7 +65,14 @@ namespace Fragmentum.EditorTools
         public static readonly Hoja HojaSalto = new Hoja { Archivo = "Kael_Salto", Fotogramas = 9, Pivote = new Vector2Int(40, 2) };
         public static readonly Hoja HojaAtaque = new Hoja { Archivo = "Kael_Ataque", Fotogramas = 7, Pivote = new Vector2Int(65, 5) };
 
-        public static readonly Hoja[] Hojas = { HojaIdle, HojaCorrer, HojaSalto, HojaAtaque };
+        /// <summary>
+        /// El dash (Pixelorama, lienzo de 120×120, exportado a 5× y reducido a 1×): el torso de los
+        /// dos primeros fotogramas cae en la x 42, donde el del idle. El tercero se lanza hacia
+        /// delante con la estela detrás, tal como está dibujado.
+        /// </summary>
+        public static readonly Hoja HojaDash = new Hoja { Archivo = "Kael_Dash", Fotogramas = 4, Pivote = new Vector2Int(42, 0) };
+
+        public static readonly Hoja[] Hojas = { HojaIdle, HojaCorrer, HojaSalto, HojaAtaque, HojaDash };
 
         /// <summary>Un clip: qué fotogramas de qué hoja y en qué momento empieza cada uno.</summary>
         public sealed class Clip
@@ -127,6 +134,15 @@ namespace Fragmentum.EditorTools
                 Estado = PlayerAnimacion.Ataque, Hoja = HojaAtaque, Fotogramas = Rango(0, 7),
                 Tiempos = new[] { 0f, 0.07f, 0.14f, 0.21f, 0.31f, 0.46f, 0.69f, 1f },
                 ParametroVelocidad = AnimatorParams.VelocidadAtaque.Nombre,
+            },
+            // Dura 1 s y PlayerAnimacion lo estira a la duración del dash (0,18 s por defecto):
+            // el arranque agachado, el impulso, la estela y la frenada. Los cuatro duran lo mismo,
+            // como en el proyecto de Pixelorama. Se queda en el último si el dash se alargara.
+            new Clip
+            {
+                Estado = PlayerAnimacion.Dash, Hoja = HojaDash, Fotogramas = Rango(0, 4),
+                Tiempos = Uniformes(4, 4f),
+                ParametroVelocidad = AnimatorParams.VelocidadDash.Nombre,
             },
         };
 
@@ -343,6 +359,7 @@ namespace Fragmentum.EditorTools
             AsegurarParametro(controlador, AnimatorParams.Damage.Nombre, AnimatorControllerParameterType.Bool, 0f);
             AsegurarParametro(controlador, AnimatorParams.Death.Nombre, AnimatorControllerParameterType.Bool, 0f);
             AsegurarParametro(controlador, AnimatorParams.VelocidadAtaque.Nombre, AnimatorControllerParameterType.Float, 1f);
+            AsegurarParametro(controlador, AnimatorParams.VelocidadDash.Nombre, AnimatorControllerParameterType.Float, 1f);
 
             var maquina = controlador.layers[0].stateMachine;
             var estados = new Dictionary<string, AnimatorState>();

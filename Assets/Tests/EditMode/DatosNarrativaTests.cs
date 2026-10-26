@@ -70,22 +70,24 @@ namespace Fragmentum.Tests
                 }
 
                 Assert.IsNotNull(presentacion, $"{nivel.name}: falta la presentación del jefe.");
-                if (presentacion.diapositivas.Any(d => d.imagen != null))
-                {
-                    // Con sus planos (la Centinela): opaca y a escala entera, como pixel art.
-                    Assert.IsFalse(presentacion.sobreElJuego, $"{nivel.name}: con planos, la presentación es opaca.");
-                    Assert.IsTrue(presentacion.escalaEntera, $"{nivel.name}: los planos se ven a escala entera.");
-                }
-                else
-                {
-                    Assert.IsTrue(presentacion.sobreElJuego, $"{nivel.name}: sin planos, se ve la arena detrás.");
-                }
-
-                Assert.IsFalse(presentacion.soloPrimeraVez, "Se ve cada vez que se carga el nivel (no al reintentar).");
                 Assert.IsTrue(presentacion.saltable);
                 Assert.LessOrEqual(presentacion.DuracionTotal, 10f, "Es corta.");
                 Assert.IsTrue(presentacion.diapositivas.SelectMany(d => d.carteles).Any(c => c.titulo && c.texto == nivel.jefe.nombreCanonico.ToUpperInvariant()),
                     "Presenta al jefe por su nombre.");
+
+                if (presentacion.diapositivas.Any(d => d.imagen != null))
+                {
+                    // Con sus planos y su guion (la Centinela): opaca, en pixel art y una vez por
+                    // partida. Lo demás del guion lo comprueba CinematicaJefe1Tests.
+                    Assert.IsFalse(presentacion.sobreElJuego, $"{nivel.name}: con planos, la presentación es opaca.");
+                    Assert.IsTrue(presentacion.escalaEntera, $"{nivel.name}: los planos se ven a escala entera.");
+                    Assert.IsTrue(presentacion.soloPrimeraVez, $"{nivel.name}: se ve una vez por partida.");
+                    continue;
+                }
+
+                // Sin planos ni guion todavía: el texto provisional sobre la arena.
+                Assert.IsTrue(presentacion.sobreElJuego, $"{nivel.name}: sin planos, se ve la arena detrás.");
+                Assert.IsFalse(presentacion.soloPrimeraVez, "Se ve cada vez que se carga el nivel (no al reintentar).");
                 Assert.IsTrue(presentacion.diapositivas.Any(d => d.texto != null && d.texto.StartsWith(nivel.jefe.nombreCanonico + ":")),
                     "Y lleva su diálogo antes del combate.");
             }

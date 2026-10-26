@@ -9,6 +9,586 @@
 
 ---
 
+## Respuestas a la prueba del Nivel 1 (2026-10-07)
+
+Rama `ajustes-pendientes`, que sale de `menu-mecanicas`. El autor jugó el Nivel 1 y respondió
+a PENDIENTES:
+
+- la pelea, el golpe del Eco y su tamaño están bien;
+- el encuadre del ojo se queda;
+- no hace falta fuente bitmap;
+- los textos de la guía están bien.
+
+Además pidió cinco cosas.
+
+### 1. La bola de fuego, con su arte
+
+- **Problema.** La torreta disparaba un círculo naranja provisional.
+- **Causa.** Faltaba `Fireball3`. Llegó, y con ella las tres imágenes de la bola. No venían sobre
+  el fondo magenta de las demás, sino sobre el **damero gris y negro que imita la
+  transparencia, pintado dentro del JPG**. La limpieza de siempre no sirve.
+- **Solución.** Una limpieza nueva, `Tesis/Imagenes/limpios/script/limpiar_bola.py`:
+  - **Cada casilla del damero es un píxel del dibujo** (2048 / 50 = 40,96 px), así que se
+    trabaja en la rejilla nativa de 50 × 50, donde el fondo es predecible. En una paridad de
+    casilla toca negro y en la otra gris.
+  - **Es dibujo lo que se aparta del damero en su sitio:** el color saturado, el núcleo blanco y el
+    negro donde tocaba gris (el contorno).
+  - **El contorno que cae en casilla negra se recupera por vecindad.** Solo crece alrededor de la
+    bola, no de las chispas sueltas, que no llevan contorno. Al principio la franja de abajo, que
+    tiene el damero desplazado una casilla, se colaba como contorno.
+  - **El núcleo blanco se cuantiza aparte** para que no se mezcle con el naranja.
+  - **Las tres comparten lienzo** (40 × 29) para que la bola no salte al cambiar de fotograma.
+  - **El pivote va en el centro de la bola, no del lienzo,** para que la estela quede detrás.
+    Va a 24 px/u, la misma densidad que la torreta.
+
+  En el juego:
+  - **Vuelo:** la bola vuela en bucle con sus dos fotogramas (clip `Bola_Vuelo`, controlador
+    `Bola`, un solo estado).
+  - **Al apagarse:** al golpear, al tocar escenario o al acabar su alcance, el `Proyectil` deja el
+    tercer fotograma, las chispas, 0,2 s y sin daño.
+  - **La bola se destruye en el acto,** como antes, para que no pueda golpear dos veces.
+
+### 2. El segundo plano de la derrota
+
+- `CinematicaFinalLvl2` llegó regenerada con el prompt nuevo: Kael grande, de espaldas, con el
+  fragmento en el hombro y los huecos visibles. A 240 × 135 los huecos se leen; en el intento
+  anterior eran manchas de 2 px.
+- `cine.py` se adapta a las rutas de este PC y procesa solo los planos que se le piden. El plano
+  entra solo en la cinemática de la derrota, como estaba previsto.
+- **Lo que no cuadra** (N25, opcional): flota otro fragmento sobre la espada y hay cinco huecos
+  vacíos, no cuatro. El prompt de edición está en `Docs/Diseno/Prompts_Gemini.md`. Además, llegó
+  la copia de 2000 px y no el original de 2752; se procesa igual.
+
+### 3. Sin rectángulos naranjas donde la animación ya avisa
+
+- **Problema.** Los ataques de la Centinela pintaban su zona de daño como un rectángulo naranja.
+  El autor: «por eso se hicieron las animaciones».
+- **Solución.**
+  - `PatronAtaque.dibujarZona`: el espadazo (normal y de furia) y la marca de la caída del salto
+    ya no se pintan. Siguen haciendo el mismo daño.
+  - La **onda** y las **erupciones** no tienen arte todavía y siguen pintándose: si no, harían
+    daño invisible. Para las ondas del salto hay un campo aparte, `dibujarOndas`.
+  - El prompt de la onda está en `Docs/Diseno/Prompts_Gemini.md`.
+
+### 4. Caminar con Alt
+
+- **Problema.** El sigilo del mundo del Miedo cuenta como silencioso ir por debajo del 40 % de la
+  velocidad máxima. Con teclado, A y D van siempre a fondo.
+- **Solución.**
+  - Una acción nueva, `Walk`, en Alt izquierdo.
+  - `FuenteInputJugador` deja la dirección al 35 % mientras se mantiene (`factorCaminar`). La
+    velocidad de Kael ya seguía a la dirección, así que no se toca `PlayerController`.
+  - La guía de mecánicas tiene su fila «Caminar». El generador añade a la guía los movimientos
+    nuevos sin tocar los textos que ya había.
+
+### 5. Propuestas de diseño: el Nivel 1 y el guion
+
+El autor pidió que diseñara el recorrido del Nivel 1 (N10) y el guion (N11) a partir de la tesis.
+Son propuestas: no están en la escena ni en los assets hasta que las apruebe.
+
+- **`Docs/Diseno/Nivel1_Diseno.md` y su esquema a escala (`Nivel1_Diseno.png`):**
+  - la Ira empuja a correr, y cada peligro castiga la prisa;
+  - cada mecánica aparece tres veces: sin riesgo, sobre lava y con enemigos;
+  - los recuentos del Anexo A;
+  - las medidas de Kael que limitan huecos y subidas;
+  - tres cosas del Anexo A que no cuadran.
+- **`Docs/Diseno/Guion.md`:** los seis mundos. Cada cierre nombra la habilidad como un gesto
+  emocional: contener el golpe y soltarlo, avanzar bajo el agua, ocultarse sin perderse, resistir
+  sin negar.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»:**
+  - importa la bola y crea su clip, su controlador y su prefab;
+  - mete el segundo plano en la derrota;
+  - añade «Caminar» a la guía.
+- **Pruebas EditMode: 341 correctas.** Hay 5 nuevas:
+  - la bola: su clip en bucle, su controlador de un estado, su lienzo y su pivote;
+  - los patrones que no pintan su zona y los que sí;
+  - una zona sin dibujo sigue haciendo daño;
+  - Alt deja la dirección por debajo del umbral del sigilo;
+  - la tecla de `Walk`.
+
+  Se ponen al día las del verificador del Nivel 1 (34 sprites, 14 clips y 5 Animators), la del
+  prefab de la bola y la de la cinemática de la derrota.
+- **Pruebas PlayMode: 145 correctas.** La de la bola comprueba también que deja sus chispas, que
+  no hacen daño y que se apagan solas.
+
+---
+
+## El build de Windows fallaba por las luces globales (2026-10-07)
+
+- **Problema.** *Build* y *Build and Run* fallaban en medio segundo con cuatro errores «More than
+  one global light on layer Default for light blend style index 0» y «Error building Player: 4
+  errors».
+- **Causa.** Es un fallo de URP 6000.6. Con la opción *Strip 2D Unused Variants* activada, URP
+  abre cada escena del build para ver qué luces 2D usa. La abre **junto** a la escena que está
+  abierta en el Editor. Las tres escenas (`Menu_Inicial`, `Niveles` y `Nivel1`) traen su propia
+  Global Light 2D, como deben. Al juntarse dos, URP registra un error por cada escena, y esto
+  ocurre dos veces. El botón de build del Editor compila en modo estricto, así que cualquier
+  error lo aborta. Desde un script sin modo estricto, el build terminaba con los mismos 4
+  errores.
+- **Solución.** Desactivar *Strip 2D Unused Variants*: `m_Strip2DUnusedVariants: 0` en
+  `Assets/Settings/UniversalRenderPipelineGlobalSettings.asset` (*Project Settings → Graphics →
+  URP → Shader Stripping*). URP deja de analizar las escenas y el build incluye las 64 variantes
+  del shader de luces 2D: cuesta 1 MB (de 254 a 255 MB). No se tocan las escenas: cada una
+  necesita su luz global, porque se cargan de una en una.
+- **Verificación.** Build de Windows en modo estricto con `Menu_Inicial` abierta, como lo hace
+  el Editor: antes, los 4 errores; después, 0 errores, 255 MB y 54 s. El ejecutable arranca sin
+  excepciones.
+
+---
+
+## Guía de mecánicas en los menús (2026-10-07)
+
+Rama `menu-mecanicas`, que sale de `cinematicas-pixel`. El autor pidió una sección en el menú que
+explique lo que sabe hacer Kael y que se vaya completando según se desbloquean las habilidades.
+
+### 1. Nada explicaba los controles ni las habilidades
+
+- **Problema.** Lo único que el juego decía de los controles era la ayuda al pie de la pausa
+  («↑↓ navegar · Enter seleccionar · Esc continuar»). Para saber que Shift es el dash, que se
+  puede saltar desde una pared o qué hace la habilidad recién integrada, había que leer el código
+  o el Anexo A.
+- **Causa.** Las habilidades tenían nombre y descripción (`HabilidadData`), pero solo las nombraba
+  «Yo reconstruido», sin decir cómo se usan. Los movimientos básicos no estaban descritos en
+  ningún dato.
+- **Solución.** Una pantalla nueva, **«Mecánicas»** (`PantallaMecanicas`), hecha con el mismo
+  marco que la pausa y «Yo reconstruido». Se abre desde el **menú principal** (botón nuevo entre
+  «Yo reconstruido» y «Salir») y desde la **pausa** (opción entre «Reiniciar» y «Menú
+  principal»). Tiene dos columnas:
+  - **Movimientos:** moverse, saltar, doble salto, pared, dash y atacar, cada uno con sus teclas
+    y una frase. **Agacharse** solo aparece cuando se desbloquea un mundo que lo permite (la
+    Culpa), porque en los demás la tecla no hace nada.
+  - **Habilidades:** las cuatro de los fragmentos, en el orden de los mundos. La integrada se
+    explica con el color de su emoción, sus teclas y el fragmento del que viene. La que falta se
+    ve bloqueada («? ? ?»), con el mundo donde se consigue y sin decir cuál es, igual que «Yo
+    reconstruido» no dice la habilidad de un fragmento que no tienes.
+
+  Arriba, la cuenta: «1 de 4 habilidades integradas». La pantalla se recalcula cada vez que se
+  abre, así que crece con la partida. Una habilidad cuenta como integrada si está en el progreso
+  guardado o si el jugador vivo ya la tiene: tras derrotar al jefe, la guía ya la explica antes
+  de salir del nivel.
+
+### 2. Las teclas salen del asset de input, no del texto
+
+- **Problema.** Si la guía escribiera «Shift» a mano, dejaría de ser verdad el día que cambie la
+  tecla en `InputSystem_Actions`.
+- **Solución.** Los textos nombran acciones entre llaves y `EtiquetasControles` escribe las
+  teclas que tengan asignadas: `{Jump}` → «ESPACIO», `{Attack}` → «CLIC / ENTER», «Mantén
+  {Attack}» → «Mantén CLIC / ENTER». En un compuesto se eligen las partes y sus teclas se
+  emparejan: `{Move/left,right}` → «A D / ← →». Solo se muestran teclado y ratón, como en la
+  ayuda de la pausa. Una prueba comprueba que cada acción nombrada existe y tiene tecla.
+
+### 3. Los textos son datos
+
+- **`GuiaMecanicas`** (`Assets/Data/Habilidades/GuiaMecanicas.asset`): los movimientos, con su
+  nombre, sus teclas, su frase y cuándo aparecen (`SIEMPRE` o `MUNDO_CON_AGACHARSE`). Si falta el
+  asset, la pantalla usa los mismos textos desde el código.
+- **`HabilidadData.controles`**, un campo nuevo en cada habilidad: «Mantén {Attack}», «{Sprint} en
+  el agua», «{Ability}» y «Pasiva».
+- El generador crea la guía y completa ese campo en las habilidades que ya existían, sin pisar lo
+  editado a mano. El prefab de sistemas lleva la guía (`UIManager.guiaMecanicas`), y la escena
+  `Menu_Inicial` se regeneró con el botón (es una escena generada, sin cambios a mano).
+
+### 4. Navegación
+
+- Desde la pausa, la guía **tapa** el menú de pausa en vez de sumarse a él. «Volver» o Esc
+  regresan a la pausa; otro Esc reanuda.
+- Desde el menú principal, «Volver» o Esc la cierran.
+- El juego sigue en PAUSED mientras está abierta: no hay estado nuevo en la FSM global.
+- No se tocan `PlayerController`, `EnemyController` ni `GameManager`.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** crea la guía, completa las teclas de las cuatro habilidades y monta el
+  prefab de sistemas con la guía. La escena del menú se regeneró una vez con
+  `GeneradorProgresion.RegenerarEscenasNavegacion`.
+- **Capturas a 1920 × 1080,** revisadas a ojo, sin progreso y en la pausa del Nivel 1 con tres
+  habilidades: las dos columnas caben dentro del marco y cada tecla cabe en una línea.
+- **Pruebas EditMode: 336 correctas.** Hay 17 nuevas en `GuiaMecanicasTests`:
+  - las teclas de cada acción, leídas del asset (9 casos, también una acción que no existe);
+  - cada texto de la guía y de las habilidades nombra acciones que existen y tienen tecla;
+  - sin progreso: los seis movimientos y las cuatro habilidades bloqueadas, con el mundo donde
+    se consiguen;
+  - con la Ira integrada, el Ataque Cargado con «Mantén CLIC / ENTER», su fragmento y su color;
+  - una habilidad del jugador vivo también cuenta;
+  - agacharse aparece al desbloquear el mundo de la Culpa, y dentro de él;
+  - el generador deja la guía, las teclas de cada habilidad y la guía en el prefab de sistemas;
+  - sin asset, los movimientos del diseño;
+  - el menú principal tiene el botón.
+- **Pruebas PlayMode: 145 correctas.** Hay 3 nuevas en `MenuMecanicasPlayModeTests`:
+  - desde el menú: 0 de 4 habilidades, y 2 de 4 al volver a abrirla con dos integradas;
+  - desde la pausa: tapa el menú, sigue en pausa con el color del mundo, «Volver» y Esc regresan a
+    la pausa, y otro Esc reanuda;
+  - al derrotar al jefe, la guía ya explica el Ataque Cargado.
+
+### Qué probar a mano
+
+- En `Menu_Inicial`, pulsa «Mecánicas»: con una partida nueva verás los seis movimientos y las
+  cuatro habilidades bloqueadas.
+- En el Nivel 1, pausa con Esc y entra en «Mecánicas». Derrota a la Centinela, vuelve a pausar y
+  mira cómo aparece el Ataque Cargado.
+- Los textos se cambian en `Assets/Data/Habilidades/GuiaMecanicas.asset` (movimientos) y en cada
+  habilidad de esa carpeta (campos `descripcion` y `controles`).
+
+---
+
+## Cinemáticas en pixel art: la cámara y el reproductor (2026-10-06)
+
+Rama `cinematicas-pixel`, que sale de `kael-dash`. Llegó un encargo para montar el sistema de
+cinemáticas y, con él, la entrada del jefe del Nivel 1 («El que ya estaba aquí», 9,6 s). Trae su
+guion, `Tesis/Imagenes/limpios/GUION-cinematica-jefe1.md`, y cinco fases:
+
+- A: cámara y render;
+- B: el sistema;
+- C: la cinemática;
+- D: integración;
+- E: verificación.
+
+El encargo estaba escrito para otro proyecto. Antes de empezar, el autor aceptó estas
+adaptaciones:
+
+### Decisiones que ajustan el encargo
+
+1. **Un solo sistema de cinemáticas.** Ya había uno dirigido por datos: `CutsceneData` y
+   `PantallaCinematica`, con 14 cinemáticas, y la del jefe ya estaba montada en él. Se amplía con
+   el modelo de beats del encargo en vez de escribir un segundo reproductor. Los planos en pixel
+   art se dibujan con una cámara propia; los pintados (la cinemática inicial, de 1376 × 768) siguen
+   como estaban.
+2. **La Pixel Perfect Camera de URP.** El proyecto está en Unity 6 con URP 2D, que trae la suya; el
+   paquete `2d.pixel-perfect` del encargo no se usa. El recorte «16:9» es *Windowbox*.
+3. **El input lo sigue bloqueando la máquina de estados global**, como en todas las cinemáticas.
+   Para que Kael no se mueva durante el rugido, la arena mantendrá el bloqueo hasta que acabe
+   (fase D).
+4. **La marca de «ya vista» ya está en `GameManager`** y se guarda en la partida. La cinemática
+   será «solo la primera vez».
+5. **El texto del beat 2 entra a 3,5 s y sale a 5,5 s** desde el inicio del beat, con 0,4 s de
+   fundido. El encargo decía 2,5 y 4,5, pero los temblores y el rótulo cuentan desde el inicio del
+   beat con el fundido incluido; con ese criterio, 3,5 y 5,5 son los tiempos del guion.
+6. **Varios cues por beat**, cada uno con su instante y su bucle. Con uno solo no cabe el sonido
+   del guion.
+7. **Falta la fuente bitmap.** Al final no hizo falta esperarla: el autor eligió el texto como en
+   la cinemática inicial (fase C). Con una fuente bitmap, pasa solo a la rejilla.
+8. **No se puede saltar el primer medio segundo** (el negro inicial). Así una tecla pulsada al
+   entrar en la sala no se lleva el rótulo, que es lo que importa para el estudio.
+9. **Rutas y menús de la v2:** *Fragmentum → …* y `Assets/Data/Narrativa`; los planos siguen en
+   `Assets/Sprites/Cinematicas/Nivel1`.
+
+### Fase A: cámara y render
+
+- **`CamaraCinematica`.** Es una cámara propia, aparte de la del juego, con la Pixel Perfect
+  Camera de URP:
+  - **resolución de referencia 240 × 135** y *Assets PPU* 1;
+  - ***Upscale Render Texture*:** dibuja en una textura de exactamente 240 × 135 y la amplía por
+    el mayor entero que cabe;
+  - **recorte *Windowbox*:** centra la imagen y pone negro lo que sobra;
+  - **filtro final Point.**
+
+  Vive lejos de los niveles y en su propia capa, `Cinematica` (nueva). La cámara del juego no la
+  ve y ella solo ve lo suyo. Se dibuja encima y limpia la pantalla a negro, así que no hace falta
+  apagar la cámara del juego ni pelearse con su seguimiento.
+- **Los planos del Nivel 1 van a 1 píxel por unidad** (`TablaArte`), como la cámara: un píxel del
+  plano es una unidad del mundo. Lo que se mueva en la cinemática (el encuadre, el temblor, las
+  brasas) se moverá en unidades enteras y no saldrá de la rejilla.
+- **El prefab** `Assets/Prefabs/Cinematicas/CamaraCinematica.prefab` se genera con el mismo código
+  que la monta en el juego (`ConstructorCamaraCinematica`, también en «Regenerar todo»).
+- **La captura:** *Fragmentum → Cinemáticas → Capturar la cámara de cinemáticas a 1920 × 1080*.
+  - Dibuja el plano con la cámara en una escena de vista previa (no toca la escena abierta) y
+    guarda la imagen en `Docs/Cinematicas`.
+  - Después la compara píxel a píxel con el PNG: cada píxel del plano tiene que ser un cuadrado de
+    k × k píxeles idénticos al original, y lo que sobra, negro.
+
+#### Comprobado (fase A)
+
+- **A 1920 × 1080** (`Docs/Cinematicas/CamaraCinematica_1920x1080.png`), cada píxel del plano es un
+  cuadrado de 8 × 8 píxeles idénticos al original. La diferencia máxima es 0 y la captura tiene los
+  mismos 1528 colores que el PNG: ni uno nuevo, que es lo que dejaría una interpolación.
+  `CamaraCinematica_1920x1080_detalle.png` amplía la zona de Kael con una rejilla cada 8 píxeles:
+  cada celda es un solo color.
+- **A 1280 × 720**, cuadrados de 5 × 5, centrados, con un borde negro de 40 y 22 píxeles.
+- **A 960 × 540**, de 4 × 4.
+- Las tres capturas se comprobaron también aparte, con Python, contra el PNG.
+
+### Fase B: el sistema
+
+El sistema de cinemáticas que ya había (`CutsceneData`, `LineaTiempoCinematica`,
+`PantallaCinematica`) se amplía; no hay un segundo reproductor. Las 14 cinemáticas de antes siguen
+funcionando igual.
+
+- **El montaje por beats** (`CutsceneData.montaje = BEATS`). Cada diapositiva es un beat:
+  - sube desde negro, se mantiene y baja a negro con sus propios tiempos;
+  - un fundido de 0 es un corte seco;
+  - un beat sin imagen es negro a propósito: no avisa de que le falte arte;
+  - la cinemática dura la suma de los tres tiempos de cada beat;
+  - los textos, los temblores y los cues cuentan desde el inicio del beat, con la subida incluida.
+
+  Con fundidos cruzados (el montaje de antes) nada cambia. Los campos de la tabla del encargo
+  están así en el proyecto:
+
+| Encargo | En el proyecto | Notas |
+|---|---|---|
+| `sprite` | `imagen` | Vacía: negro |
+| `fundidoEntrada`, `duracion`, `fundidoSalida` | Igual | 0 = corte seco |
+| `desplazamiento` | Igual (`Vector2Int`) | En píxeles del plano: x a la derecha, y arriba |
+| `texto`, `textoPosicion`, `textoAlineacion`, `textoEntra`, `textoSale` | `carteles` | Cada cartel lleva su texto, `inicio`, `duracion`, `punto` (píxel del plano, desde arriba a la izquierda, como en el guion) y `alineacion`; un beat puede tener varios |
+| `cueAudio` | `cues` | Lista: nombre, clip, instante, bucle y `hasta` (corte seco) |
+| `temblores` | Igual | Segundos desde el inicio del beat |
+| `brasas` | Igual | La capa llega en la fase C |
+| `flashFinal` | Igual | Fotogramas, no segundos |
+
+- **La fuente y el temblor** son de la cinemática: `fuente`, `tamanoFuente`, `interlineado`,
+  `colorTexto`, `temblorPixeles` (1) y `temblorFotogramas` (4).
+- **En pixel art** (`escalaEntera`), el reproductor lo dibuja todo con la cámara de cinemáticas:
+  - **los planos,** con su opacidad y su encuadre en píxeles enteros. Para los fundidos cruzados
+    hay dos planos;
+  - **el texto** (`TextoEnRejilla`, nuevo). Cada glifo se coloca en píxeles enteros del plano, con
+    los píxeles de la fuente del tamaño de los del plano, así que se amplía con la imagen por el
+    mismo entero. Monta su propia malla, sin `TextMesh` ni interfaz. Sin fuente bitmap usa la de
+    por defecto y avisa (N21);
+  - **el temblor:** la cámara se desplaza un píxel entero por fotograma, recorriendo las cuatro
+    direcciones, y vuelve a su sitio;
+  - **el flash:** un rectángulo blanco sobre la rejilla. Los fotogramas se cuentan en el `Update`
+    del reproductor, no con `WaitForSeconds`: dos son dos, también a 30 fps.
+
+  La interfaz se queda transparente y solo deja el aviso para saltar. Las cinemáticas pintadas
+  siguen en la interfaz, como antes.
+- **Sonido:** cada cue suena en su instante y se corta en seco en `hasta`, aunque sea en otro beat.
+  Si falta su clip, avisa por consola con su nombre, su diapositiva y su segundo, y la cinemática
+  sigue sin él. No hay audio de relleno.
+- **Saltar:** pasado el bloqueo, cualquier tecla corta la cinemática y va directo al flash final,
+  entero. Sin flash, termina como antes.
+- **Input:** lo sigue bloqueando la FSM global mientras dura (estado CUTSCENE). Al terminar, lo
+  devuelve.
+- **La cámara la monta el `UIManager`,** con los sistemas persistentes. Usa el prefab, que
+  `Sistemas.prefab` referencia; si no está, la monta por código. La escala entera que hacía la
+  interfaz se quita: ahora la hace la cámara.
+- **Las dos cinemáticas del Nivel 1 que ya eran pixel art** (la presentación y la derrota) se ven
+  ya con la cámara. Sus textos van con la fuente por defecto hasta que llegue la bitmap.
+
+### Fase C: la cinemática del jefe
+
+- **El texto, como en la cinemática inicial** (decisión del autor; ajusta la 7). No hacía falta
+  esperar a la fuente bitmap:
+  - **sin fuente bitmap** (`CutsceneData.fuente` vacía), el texto va en la interfaz, con la fuente
+    del juego y la sombra de la cinemática inicial;
+  - **pero a la escala de la imagen:** la letra mide `tamanoFuente` píxeles del plano (5, que son
+    40 px a 1080p, como en la inicial; el título, el doble) y se ancla en su píxel del plano, en
+    múltiplos de la escala;
+  - **con una fuente bitmap** en ese campo, el mismo texto pasa solo a la rejilla
+    (`TextoEnRejilla`).
+- **El texto sigue al encuadre de su plano.** El punto de un cartel es un píxel de la imagen y se
+  mueve con su desplazamiento. Así el rótulo cae bajo el ojo con (17, 19) y también con (0, 0).
+- **La cinemática** es `Cinematica_Jefe_Ira`, la «Cine01_EntradaJefe» del encargo. Conserva el
+  nombre porque el Nivel 1 y el generador de narrativa ya la usan. `ConstructorCinematicasNivel1`
+  la escribe desde el guion al regenerar, como la cinemática inicial. Conserva los clips de sonido y
+  la fuente que se pongan a mano.
+
+| Beat | Imagen | Subida · se mantiene · bajada | Lo demás |
+|---|---|---|---|
+| 1 | Negro | 0,5 s | `drone_sala` en bucle, hasta los 9,6 s |
+| 2 | `CinematicaJefe1` | 1,0 · 4,9 · 0 (corte seco) | Ver abajo |
+| 3 | Negro | 0,5 s | Silencio |
+| 4 | `CinematicaJefe2` | 1,1 · 1,6 · 0 | Ver abajo |
+
+- **Beat 2, la sala:**
+  - brasas;
+  - temblores de un píxel a los 1,9 y 3,1 s del beat (2,4 y 3,6 s de la cinemática);
+  - el texto de Kael, de los 4,0 a los 6,4 s, con fundidos de 0,4 s;
+  - cues: `amb_forja` (corte seco a los 6,4 s), `golpe_escala` (1,6 s), `respiracion_fuelle`
+    (en bucle de los 2,0 a los 6,0 s) y `voz_kael_01` (4,0 s).
+- **Beat 4, el ojo:**
+  - encuadrado (17, 19);
+  - el rótulo entra en seco a los 8,0 s y se queda hasta el final;
+  - flash de 2 fotogramas al terminar;
+  - cues: `brasa_aviva` (de los 6,9 a los 8,0 s) y `rotulo_metal` (8,0 s).
+
+- **Los textos,** medidos sobre los planos:
+  - **Kael:** «No recuerdo esta sala. / El calor, sí.», las dos líneas juntas, en la columna 22 y
+    la fila 113. Kael ocupa las columnas 22 a 25 y pisa en la fila 109: el texto queda alineado
+    bajo su silueta;
+  - **el rótulo:** «CENTINELA ARDIENTE» (título) y «Arquitecto de la Ira», centrados bajo el ojo.
+    En la imagen el ojo ocupa las columnas 73 a 155 y llega a la fila 67; el rótulo va en la fila
+    77 y el subtítulo en la 90. Entra en seco (cartel `sinFundido`, nuevo), con el golpe
+    metálico.
+- **La capa de brasas** (`CapaBrasas`, en la cámara de cinemáticas):
+  - son 16 puntos de un píxel del plano, no un dibujo;
+  - caen a entre 3 y 8 px/s, de píxel entero en píxel entero, con una deriva lateral de hasta
+    1,5 px/s;
+  - cambian de brillo a saltos cada 0,15 s, con tres colores de brasa;
+  - se apagan en el suelo de la sala (fila 110) y vuelven a caer desde arriba;
+  - su opacidad es la del plano: suben desde negro y cortan con él;
+  - dependen solo del tiempo y de una semilla, así que la cinemática se ve igual cada vez. Sus
+    valores se ajustan en el prefab.
+- **Una vez por partida** (`soloPrimeraVez`, se guarda en `GameManager`).
+- **El bloqueo para saltar es de medio segundo**, el negro inicial.
+- **Sin el aviso «pulsa cualquier tecla»** encima de los planos. Invitaría a saltarse la primera
+  vista, y el rótulo es lo que importa para el estudio. Se vuelve a poner en el asset
+  (`avisoSaltar`) si se quiere.
+- **`rugido_centinela`** no está en la cinemática: suena con el rugido del jefe, ya en el juego
+  (fase D). Si se pusiera en la cinemática, el flash la cortaría a los dos fotogramas.
+- **La captura:** *Fragmentum → Cinemáticas → Capturar la presentación del jefe del Nivel 1* la
+  fotografía como se ve en el juego, con el texto de la interfaz encima, a 1920 × 1080:
+  - a los 1,0, 4,5, 8,5 y 9,55 s;
+  - y el ojo sin el encuadre, para compararlo.
+
+  Las capturas se guardan en `Docs/Cinematicas/Presentacion_*.png`.
+
+#### Lo que no cuadra con el guion: el hueco del encuadre se ve
+
+El guion dice que, al desplazar el plano del ojo (17, 19), «el relleno que queda es negro, y el
+plano ya es negro», así que no se ve. Pero el fondo del plano no es negro: es un azul casi negro,
+RGB (16, 17, 22), y no tiene ni un píxel negro puro. Por eso se ven una franja de 17 píxeles a la
+izquierda y otra de 19 abajo, de negro (0, 0, 0). En `Presentacion_8.5s.png` se nota; en
+`Presentacion_8.5s_sin_encuadre.png` el plano llena la pantalla.
+
+Se deja como dice el guion, con el desplazamiento en el asset para compararlo con (0, 0). No se
+rellena nada: sería pintar sobre el arte (PENDIENTES N22).
+
+### Verificación (fase A)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 303 correctas.** Hay 7 nuevas en `CamaraCinematicaTests`:
+  - la cámara lleva la Pixel Perfect Camera configurada como arriba y solo ve su capa;
+  - los tres planos van a 1 píxel por unidad y miden 240 × 135 unidades;
+  - el rectángulo en pantalla es k veces la referencia, centrado (también en 16:10);
+  - se captura cada plano a 1920 × 1080, 1280 × 720 y 960 × 540: cada píxel es un cuadrado de
+    k × k idéntico al original;
+  - la comprobación detecta un plano ampliado con filtro bilineal.
+
+  La de los píxeles por unidad del Nivel 1 espera ahora 1 en los planos.
+- **Pruebas PlayMode: 135 correctas.** No cambian.
+
+### Verificación (fase B)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **Pruebas EditMode: 310 correctas.** Hay 7 nuevas en `CinematicaBeatsTests`, con los tiempos del
+  guion:
+  - la cinemática dura 9,6 s, el corte seco cae a los 6,4 s y el flash no cuenta en la duración;
+  - un beat sube desde negro, se mantiene y, con fundido 0, corta en seco;
+  - un beat sin imagen es negro a propósito, sin el aviso de arte pendiente (con fundidos
+    cruzados sigue avisando);
+  - el texto entra a los 4,0 s, los temblores caen a los 2,4 y 3,6 s, y los cues empiezan y se
+    cortan donde dice el guion;
+  - el flash son 2 fotogramas al final del último beat, y saltar va a él;
+  - el texto en la rejilla cae en píxeles enteros del plano y se ancla donde dice el cartel;
+  - los bordes del plano coinciden con los de la rejilla.
+- **Pruebas PlayMode: 140 correctas.** Hay 5 nuevas en `CinematicaRejillaPlayModeTests`, con los
+  sistemas reales:
+  - una cinemática en pixel art la dibuja la cámara, a la escala entera de la pantalla, y la
+    interfaz no tapa nada;
+  - por beats: el plano sube desde negro, corta en seco a negro, tiembla un píxel entero, el
+    segundo plano va encuadrado (17, 19) y el flash dura exactamente 2 fotogramas. Mientras dura,
+    Kael no recibe input; al acabar, sí;
+  - al saltarla, va directo al flash final, de 2 fotogramas;
+  - un cue sin clip avisa con su nombre y la cinemática sigue;
+  - el texto se escribe en su píxel del plano.
+
+  Se corrige una prueba de la torreta de la fase D que a veces fallaba. Medía el tiempo sin quemar
+  desde que aparecía Kael, pero el ciclo de la torreta empieza al crearla; ahora espera a su
+  disparo.
+
+### Verificación (fase C)
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** escribe la presentación desde el guion y rehace la cámara con su capa de
+  brasas.
+- **Las capturas** (`Docs/Cinematicas/Presentacion_*.png`) se revisaron a ojo:
+  - las brasas son cuadrados de 8 × 8, en la rejilla;
+  - el texto de Kael queda bajo su silueta, legible sobre el suelo;
+  - el rótulo, centrado bajo el ojo, con y sin encuadre.
+- **Pruebas EditMode: 319 correctas.** Hay 9 nuevas en `CinematicaJefe1Tests`, con los tiempos copiados
+  del guion:
+  - cuatro beats que suman 9,6 s (± 1 ms), con sus fundidos y sus cortes secos;
+  - brasas solo en la sala, y los dos temblores de un píxel a los 2,4 y 3,6 s;
+  - el texto de Kael de 4,0 a 6,4 s, bajo su silueta;
+  - el ojo encuadrado (17, 19), el rótulo en seco de los 8,0 s al final, sin tocar el ojo, y el
+    flash de 2 fotogramas;
+  - los siete cues, donde dice el guion;
+  - una vez por partida, con el bloqueo de medio segundo y sin aviso, y es la del Nivel 1;
+  - regenerar conserva los clips puestos a mano;
+  - las brasas ocupan píxeles enteros y caen de uno en uno;
+  - el texto se mueve con el encuadre de su plano.
+
+  Se adaptan tres pruebas de la presentación anterior. Esperaban el diálogo provisional de la
+  Centinela y que se viera cada vez que se carga el nivel.
+- **Pruebas PlayMode: 142 correctas.** Hay 2 nuevas en `CinematicaRejillaPlayModeTests`:
+  - sin fuente bitmap, el texto va en la interfaz, anclado en su píxel del plano y con la letra a
+    la escala de la imagen;
+  - la presentación entera: brasas en la sala y no en el ojo, el texto de Kael, el rótulo, el ojo
+    encuadrado y el flash de 2 fotogramas. Cada cue que aún no tiene clip avisa con su nombre.
+
+  La del texto en la rejilla lleva ahora una fuente. La de la presentación en
+  `NarrativaPlayModeTests` busca el texto de Kael.
+
+---
+
+## Dash de Kael (2026-10-06)
+
+Rama `kael-dash`, que sale de `golem-mecanicas`. Llegó el dash de Kael, dibujado en Pixelorama
+(`Tesis/Imagenes Kael/Dash`): 4 fotogramas en un lienzo de 120×120.
+
+### 1. El dash se veía como un fotograma de correr
+
+- **Problema.** Kael hacía el dash con el clip de correr, que se quedaba casi fijo durante los
+  0,18 s del dash (PENDIENTES B3).
+- **Causa.** No había clip de dash.
+- **Solución.** Se sigue el procedimiento de «Arte de Kael» (*Pasos manuales en el Editor*):
+  - **La hoja.** `Dash.png` venía exportada a 5× (2400×600). `Herramientas/reducir_hoja.py` la
+    reduce sin pérdida a 1×, de 480×120, en `Assets/Sprites/Kael/Kael_Dash.png`. Cada bloque de
+    5×5 píxeles era idéntico, así que no se pierde nada. No se recorta ni se recoloca nada.
+  - **`ConstructorArteKael`** recorta la hoja en sus 4 fotogramas y crea el clip `Kael_Dash`.
+    El pivote está en la planta de los pies y en la x 42, donde cae el torso de los dos primeros
+    fotogramas, como en el idle. Así, pasar de correr al dash no desplaza a Kael. El tercer
+    fotograma se lanza hacia delante con la estela detrás, tal como está dibujado.
+  - **`PlayerAnimacion`** reproduce `Dash` en el estado DASH, desde su primer fotograma.
+
+### 2. Que el dash dure lo que dura el dash
+
+- **El clip dura 1 s y se estira a la duración del dash,** igual que el ataque. El parámetro
+  nuevo `VelocidadDash` vale 1 / `dashDuration`. Con los 0,18 s de ahora, cada fotograma se ve
+  0,045 s; si se cambia `dashDuration` en `ParametrosJugador`, la animación lo sigue sola.
+- **Los cuatro fotogramas duran lo mismo,** como en el proyecto de Pixelorama (a 6 fps, todos
+  con duración 1):
+  - el arranque agachado;
+  - el impulso;
+  - la estela;
+  - la frenada.
+
+  No me inventé otro reparto. Si quieres que la estela se vea más, dime cuánto y lo cambio en la
+  tabla (`ConstructorArteKael.Clips`).
+- Si el dash durara más que el clip, se queda en la frenada.
+
+### Verificación
+
+- **Compilación** con `dotnet build` y en Unity en modo batch: 0 errores y 0 avisos.
+- **«Regenerar todo»** importa la hoja, crea el clip y el estado `Dash` (con su parámetro de
+  velocidad) y rehace el prefab del jugador con la tabla nueva.
+- **Pruebas EditMode: 296 correctas.**
+  - Las de `ArteKaelTests` ya recorren la hoja nueva: se recorta a 64 PPU con filtro Point, Kael
+    mide lo que su collider (1,61 u agachado en el primer fotograma) y los pies caen en el
+    pivote.
+  - Hay 2 nuevas:
+    - el clip dura 1 s, sin bucle, con los cuatro fotogramas a 0,25 s, y el estado DASH lo usa;
+    - la hoja está a 1× (fotogramas de 120×120) y el pivote, en los pies y en la x 42.
+  - La del controlador comprueba también `VelocidadDash`.
+- **Pruebas PlayMode: 135 correctas.** La del dash se reescribe
+  (`Dash_ReproduceSuClip_EstiradoALaDuracionDelDash`):
+  - al hacer el dash suena su clip, con la velocidad de 1 / `dashDuration`;
+  - mientras dura solo se ven sus fotogramas, y al acabar va por la segunda mitad;
+  - después vuelve a correr.
+
+### Qué probar a mano (`Assets/Scenes/Pruebas/PruebaJugador.unity` o el Nivel 1)
+
+- Corre y pulsa Shift: el dash se ve agacharse, lanzarse con la estela y frenar. Kael no salta
+  de sitio al empezar ni al acabar.
+- Hacia la izquierda, el sprite se voltea igual que al correr.
+- En el aire, el dash usa el mismo clip.
+
+---
+
 ## Golem de Ceniza, mecánicas y cinemáticas del Nivel 1 (2026-10-06)
 
 Rama `golem-mecanicas`, que sale de `centinela-arte`. El autor entregó 30 PNG limpios en

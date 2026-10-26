@@ -38,7 +38,9 @@ namespace Fragmentum.EditorTools
             // si algo se importó antes de que existiera su regla.
             TablaArte.AplicarATodo();
 
-            var ok = GeneradorProgresion.Construir();
+            // La cámara de las cinemáticas en pixel art, antes que los sistemas, que la usan.
+            var ok = ConstructorCamaraCinematica.CrearPrefab() != null;
+            ok &= GeneradorProgresion.Construir();
 
             // Los prefabs se regeneran siempre: Unity conserva sus identificadores. El arte de
             // Kael va antes que el prefab del jugador, que lo usa.

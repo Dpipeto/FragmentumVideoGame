@@ -15,6 +15,7 @@ MonoBehaviour:
   id: 0
   nombre: Ataque Cargado
   descripcion: "Mant\xE9n el ataque y su\xE9ltalo con la carga completa: doble da\xF1o. Detona los barriles explosivos."
+  controles: "Mant\xE9n {Attack}"
   duracion: 0
   cooldown: 0
   icono: {fileID: 0}

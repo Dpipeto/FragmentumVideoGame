@@ -180,6 +180,38 @@ namespace Fragmentum.Tests
             return datos;
         }
 
+        // --- Zonas de daño a la vista ---
+
+        [Test]
+        public void LosGolpesQueEnsenaLaAnimacion_NoPintanSuRectangulo_YLosQueNoTienenArteSi()
+        {
+            PatronAtaque Patron(string nombre) =>
+                AssetDatabase.LoadAssetAtPath<PatronAtaque>($"{GeneradorJefes.CarpetaPatrones}/{nombre}.asset");
+
+            foreach (var nombre in new[] { "Espadazo", "EspadazoFuria", "SaltoAplastante" })
+            {
+                Assert.IsFalse(Patron(nombre).dibujarZona, $"{nombre}: el golpe lo enseña la animación de la Centinela.");
+            }
+
+            foreach (var nombre in new[] { "OndaDeSuelo", "OndaDoble", "PlataformasEnErupcion", "ErupcionEnRafaga" })
+            {
+                Assert.IsTrue(Patron(nombre).dibujarZona, $"{nombre}: sin arte propio todavía, no puede hacer daño invisible.");
+            }
+
+            Assert.IsTrue(((PatronSaltoAplastante)Patron("SaltoAplastante")).dibujarOndas, "Las ondas del salto tampoco tienen arte aún.");
+        }
+
+        [Test]
+        public void UnaZonaSinDibujo_NoSeVe_PeroHaceDanio()
+        {
+            var zona = ZonaDeDanio.Crear("Prueba", Vector2.zero, Vector2.one, 1, Capas.MascaraJugador, 0f, 1f, Vector2.zero, Color.red, dibujar: false);
+            _creados.Add(zona.gameObject);
+
+            Assert.IsFalse(zona.GetComponent<SpriteRenderer>().enabled);
+            Assert.IsTrue(zona.GetComponent<BoxCollider2D>().enabled);
+            Assert.AreEqual(1, zona.Hitbox.Danio);
+        }
+
         private static List<System.Type> Tipos(FaseJefe fase) => fase.patrones.Where(p => p != null).Select(p => p.GetType()).ToList();
     }
 }

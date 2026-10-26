@@ -15,6 +15,7 @@ MonoBehaviour:
   id: 2
   nombre: Invisibilidad Parcial
   descripcion: "Durante 3 s, los enemigos que ven no te detectan (los que oyen, s\xED)."
+  controles: '{Ability}'
   duracion: 3
   cooldown: 8
   icono: {fileID: 0}

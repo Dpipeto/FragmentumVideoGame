@@ -98,6 +98,7 @@ namespace Fragmentum.EditorTools
         private static readonly Vector2Int LienzoLava = new Vector2Int(151, 64);
         private static readonly Vector2Int LienzoPlataforma = new Vector2Int(184, 142);
         private static readonly Vector2Int LienzoCombustion = new Vector2Int(166, 89);
+        private static readonly Vector2Int LienzoBola = new Vector2Int(40, 29);
         private static readonly Vector2Int LienzoCinematica = new Vector2Int(240, 135);
 
         private static readonly Regla[] Tabla = new[]
@@ -109,14 +110,18 @@ namespace Fragmentum.EditorTools
                     "Torreta: 82×42, el pivote en la base del bloque (x 16-61, y 1-40); 1,9 × 1,7 u.", LienzoTorreta),
                 new Regla(CarpetaMecanicas + "/Torreta_3_disparo", 24f, new Vector2(0.470f - CorrimientoTorretaDisparo / AnchoTorreta, 0.048f),
                     "Torreta disparando: el bloque está dibujado 15 px a la izquierda; el pivote se corre lo mismo.", LienzoTorreta),
+                new Regla(CarpetaMecanicas + "/Bola_", 24f, new Vector2(0.688f, 0.414f),
+                    "Bola de fuego: 40×29 (Imagenes/limpios/script/limpiar_bola.py). El pivote en el centro de la bola " +
+                    "(x 16-38, y 7-26), no del lienzo: la estela queda detrás. A 24 px/u, como la torreta: 0,96 × 0,83 u.", LienzoBola),
                 new Regla(CarpetaMecanicas + "/Lava", 48f, new Vector2(0f, 1f),
                     "Lava y Lava_espejo: 151×64, el pivote en la esquina de arriba a la izquierda (la costra); 3,15 × 1,33 u.", LienzoLava),
                 new Regla(CarpetaMecanicas + "/Plataforma_", 48f, new Vector2(0.5f, 0.852f),
                     "Plataforma inestable: 184×142, el pivote en la superficie (fila 21); 3,83 u de ancho.", LienzoPlataforma),
                 new Regla(CarpetaMecanicas + "/Combustion_", 48f, new Vector2(0.5f, 0.708f),
                     "Plataforma de combustión: 166×89, el pivote en la superficie (fila 26); 3,42 u de ancho.", LienzoCombustion),
-                new Regla(CarpetaCinematicasNivel1 + "/", null, null,
-                    "Planos del Nivel 1: 240×135 (16:9 exacto); se muestran a escala entera.", LienzoCinematica),
+                new Regla(CarpetaCinematicasNivel1 + "/", UI.CamaraCinematica.PixelesPorUnidad, null,
+                    "Planos del Nivel 1: 240×135 (16:9 exacto), a 1 píxel por unidad como la cámara de cinemáticas: " +
+                    "un píxel del plano es un píxel de su rejilla.", LienzoCinematica),
 
                 // Jefes: pixel art, y la Centinela con su escala y el pivote de los pies.
                 new Regla(CarpetaJefes + "/", null, null,

@@ -1,6 +1,6 @@
 # PENDIENTES — Fragmentum: Ecos de la Identidad
 
-> **Versión 0.25 — Golem de Ceniza, mecánicas y cinemáticas del Nivel 1: verificación (fase E), 2026-10-06.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
+> **Versión 0.31 — Respuestas a la prueba del Nivel 1: bola de fuego, segundo plano del final y caminar con Alt, 2026-10-07.** Este archivo vive en el proyecto **v2** (`Tesis2.0`).
 > Lista viva de lo que falta: arte, audio, texto, escenas y decisiones. Se actualiza en cada fase.
 
 ## ▶ Lo que necesito de ti
@@ -10,17 +10,12 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 
 | # | Qué | Por qué | Cómo |
 |---|---|---|---|
-| N16 | **Pelea otra vez con la Centinela Ardiente** en el Nivel 1 y dime si ya se siente la ira. | La hice más difícil: combos de espadazos, salto aplastante, ondas dobles y una tercera fase de «ira desatada» al 25 % (ver la Revisión 0.14). Ahora hay que ver si me pasé. | Juega desde `Menu_Inicial`. Si es demasiado, dime en qué ataque mueres. Las fases están en `Assets/Data/Jefes/CentinelaArdiente.asset` y los ataques (avisos, golpes, daño) en `Assets/Data/Jefes/Patrones`. |
-| N17 | **Mira la presentación del jefe** al entrar en la arena y **escribe su diálogo**. | Ya funciona: se cierra la puerta, la cámara va hacia la Centinela y aparecen su nombre y una línea sobre la arena oscurecida. Dura 7,5 s y se salta con cualquier tecla pasado 1 s. El texto es provisional. | Escribe el texto en `Assets/Data/Narrativa/Cinematica_Jefe_Ira.asset`: cada diapositiva tiene texto, carteles con tiempos y, si se dibuja, imagen. Puedes añadir diapositivas. Si prefieres pasarme el texto, lo vuelco yo. Detalle en B1. |
-| N15 | **Prueba el golpe del Eco de la Ira**, ahora más rápido. | El ataque va a 1,6×: a1 dura 0,22 s, el golpe 0,08 s y el ataque entero 0,46 s. Descansa 0,45 s entre golpes, antes 0,7. | Pelea con él en el Nivel 1 (x ≈ 12). Si sigue lento, sube `velocidadAtaque` en `EcoIra.prefab → Pivote/Sprite → EnemigoAnimacion` o baja `attackCooldown` en `Assets/Data/Enemigos/EcoIra.asset`. |
-| N18 | **¿Querías el Eco más grande?** En el Nivel 1, el Eco de x = 12,5 tiene escala 1,8 × 1,5. | Lo cambiaste en la escena y lo dejé tal cual. Con una escala distinta en X y en Y, los píxeles del dibujo quedan un 20 % más anchos que altos. Además, ese Eco mide el 90 % de Kael y los demás el 60 %. | Si lo quieres más grande en todo el juego, dime cuánto (por ejemplo, «al 80 % de Kael») y lo cambio en la importación, con la misma escala en X y en Y. Si fue una prueba, vuelve a poner la escala a 1 en la escena. |
-| N20 | **Juega el Nivel 1 con el Golem, las mecánicas y las cinemáticas.** | Ya tienen su arte y su comportamiento nuevo. Mira sobre todo:<br>• si el medio segundo de A1 del Golem se lee y su onda se salta bien;<br>• el ritmo de la torreta (reposo 1,6 s, carga 0,7 s, disparo 0,35 s) y el de la combustión (2 s, 0,8 s y 1 s);<br>• la plataforma inestable (0,6 s agrietada);<br>• los planos del jefe a escala entera. | Los tiempos son públicos: en el inspector de cada prefab de `Assets/Prefabs/Mecanicas`. Los del Golem, en `Assets/Data/Enemigos/GolemCeniza.asset`. Si algo no se lee, dime qué y en qué tiempo. |
+| N10 | **Revisa el diseño propuesto del Nivel 1** y dime si lo monto. | Me pediste que lo diseñara a partir de la tesis. Está en `Docs/Diseno/Nivel1_Diseno.md`, con su esquema a escala (`Nivel1_Diseno.png`): la Ira empuja a correr y el nivel enseña a contener el impulso; cada mecánica aparece primero sin riesgo, luego sobre lava y luego con enemigos. | Dime «móntalo» o qué cambias. Decide también las tres cosas del Anexo A que no cuadran (sección 6): arena de 25 × 15, suelo de la arena sin lava y checkpoint en x 41. |
+| N11 | **Revisa el guion propuesto** para los seis mundos. | Me pediste que lo escribiera a partir de la tesis. Está en `Docs/Diseno/Guion.md`: apertura, eco de memoria, antes del jefe y cierre de cada mundo, y los textos de sus cinemáticas de cierre, de la entrada al final y del final. | Corrige lo que no suene a ti (es tu tesis) y dime «cárgalo»: lo paso a los assets de `Assets/Data/Narrativa`. |
+| N25 | *Opcional.* **Retoca `CinematicaFinalLvl2`.** | La que entró funciona: a 240 × 135 se leen los huecos y el hombro que brilla. Pero sigue flotando un fragmento sobre la espada y tiene cinco huecos vacíos en vez de cuatro. | El prompt de edición está en `Docs/Diseno/Prompts_Gemini.md`. Guárdala encima de la de ahora, mejor a 2752 × 1536, y se reprocesa sola con `cine.py`. |
 | N19 | **Corrige el Anexo A de `Tesis.docx`:** la plataforma de combustión ya no quema por estar encima. | Aceptaste el ciclo fijo del nuevo encargo: apagada → calienta → encendida, sin depender del jugador. El Anexo A dice que quema si te quedas encima más de 2 s. | Yo no toco `Tesis.docx`. Basta una frase: «se enciende cada pocos segundos; las brasas avisan; se resuelve esperando, no corriendo». |
-| N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después dash, wall slide y agacharse (y, para la Fase 10, nado). | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
+| N3 | *En curso.* **Clips de Kael que faltan:** daño y muerte primero; después wall slide y agacharse (y, para la Fase 10, nado). El dash ✔ ya está. | Daño y muerte se ven en cada partida; hoy daño sigue el clip anterior y la muerte usa Idle. | En Pixelorama, con el mismo lienzo y tamaño de Kael, exporta cada tira **a 1× y sin ping-pong** a `Assets/Sprites/Kael`, o pásame los PNG. Detalle en B3. |
 | N8 | *En curso.* **Arte de los demás enemigos y del jefe.** | Solo el Eco de la Ira tiene arte. | Ver «Arte que más necesito», justo debajo. |
-| N11 | *En curso.* **Guion:** el diálogo de la presentación de cada jefe (N17), los cierres de cada mundo y las líneas de Kael y de los Arquitectos. | Siguen con textos marcados como «pendiente de guion». | Edita los assets `Cinematica_*` y `Dialogos_*` de `Assets/Data/Narrativa` (detalle en B1 y B2), o pásame el texto. Prioridad: el mundo de la Ira. |
-| N10 | *Para más adelante.* **Pinta el layout definitivo del Nivel 1** (~80 u, Anexo A). | El recorrido sigue siendo el provisional: suelo plano con dos fosos y una plataforma por sección. | Sigue los «Pasos manuales en el Editor» de las Fases 6 y 9 en `CHANGELOG.md`. No bloquea. |
-| N5 | **Decide la tecla de «caminar»** para el sigilo del mundo del Miedo. | Con teclado la dirección es todo o nada: el jugador siempre corre y siempre haría ruido. | Propuesta: mantener **Alt izquierdo** para caminar al 35 %. Se implementa en la Fase 10. |
 
 ### Arte que más necesito, por urgencia
 
@@ -30,12 +25,30 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 2. **Kael: daño y muerte** (N3). Se ven en cada partida.
 3. **Golem de Ceniza:** ✔ *recibido* (15 fotogramas), en integración por fases en la rama
    `golem-mecanicas`. Opcional: rehacer **A2** (el LEEME trae el prompt); el ataque funciona sin él.
-4. **Mecánicas:** ✔ *recibidas* la lava, la torreta, la plataforma inestable y la de combustión.
-   Falta **la bola de fuego** de la torreta (Fireball3 por regenerar): hasta entonces, el
-   proyectil lleva un sprite provisional.
-5. **Cinemáticas del jefe:** ✔ *recibidas* `CinematicaJefe1`, `CinematicaJefe2` y
-   `CinematicaFinalLvl1`. Falta **`CinematicaFinalLvl2`**, el segundo plano del final, con los
-   huecos de los fragmentos visibles (el LEEME trae el prompt). El reproductor la espera.
+4. **Mecánicas:** ✔ *completas.* La lava, la torreta, la plataforma inestable, la de combustión
+   y, desde la v0.31, la bola de fuego (dos fotogramas de vuelo y uno de chispas).
+5. **Cinemáticas del jefe:** ✔ *completas.* `CinematicaJefe1`, `CinematicaJefe2`,
+   `CinematicaFinalLvl1` y `CinematicaFinalLvl2` (con un retoque opcional, N25).
+6. **Efectos de la Centinela:** **la onda** (prompt listo en `Docs/Diseno/Prompts_Gemini.md`) y
+   **las erupciones**. Mientras no lleguen se ven como rectángulos naranjas, para que no hagan
+   daño invisible. El espadazo y la caída del salto ya no pintan el suyo: los enseña su animación.
+
+### Resuelto en la v0.31
+
+- **N15 y N16:** el golpe del Eco y la pelea con la Centinela están bien así.
+- **N18:** el Eco se queda al tamaño que le diste en la escena (1,8 × 1,5).
+- **N20:** jugaste el Nivel 1. Lo que pediste:
+  - los rectángulos naranjas del espadazo y de la caída del salto ya no se pintan;
+  - el prompt de la onda está en `Docs/Diseno/Prompts_Gemini.md`.
+- **N21 y N22:** sin fuente bitmap; el encuadre del ojo (17, 19) se queda.
+- **N23:** los textos de la guía de mecánicas están bien.
+- **N5 y N24:** **Alt izquierdo camina.** Mientras se mantiene, la dirección se queda al 35 %, por
+  debajo del 40 % del sigilo. La guía de mecánicas ya tiene su fila «Caminar».
+
+### Resuelto en la v0.29
+
+- **N17:** el texto de la presentación del jefe del Nivel 1 es el del guion «El que ya estaba
+  aquí»: la frase de Kael y el rótulo con el nombre del jefe.
 
 ### Resuelto en la v0.21
 
@@ -67,6 +80,59 @@ Nada de esto bloquea el trabajo: lo que falte usa placeholders. Ordenado por urg
 - **N12:** el registro ya no pide código de participante. La pregunta se queda como está.
 - **N13:** la hitbox de la espada se queda como está.
 - **N14:** el fondo se queda como está. Los remates del muro siguen siendo opcionales (B7).
+
+## Revisión 0.31: qué cambió respecto de la v0.30
+
+- **Respuestas a tu prueba del Nivel 1,** en la rama `ajustes-pendientes`. Resueltos N5, N15, N16,
+  N18, N20, N21, N22, N23 y N24.
+- **La bola de fuego** tiene su arte. La limpieza es nueva: venía sobre un damero pintado, no
+  sobre magenta.
+- **`CinematicaFinalLvl2`** entra como segundo plano de la derrota. Nuevo N25 (retoque
+  opcional).
+- **El espadazo y la caída del salto** ya no pintan su rectángulo.
+- **Alt izquierdo camina.**
+- **N10 y N11** pasan a ser «revisa la propuesta»: el diseño del Nivel 1 y el guion están en
+  `Docs/Diseno`.
+
+## Revisión 0.30: qué cambió respecto de la v0.29
+
+- **Guía de mecánicas** (rama `menu-mecanicas`): una pantalla «Mecánicas» en el menú principal y en
+  la pausa. Explica los movimientos de Kael con las teclas del asset de input y las cuatro
+  habilidades, que aparecen según se integran.
+- **Nuevos N23** (revisar los textos) **y N24** (cómo ir en sigilo con teclado, para la Fase 10).
+- **B9:** filas nuevas para los íconos de las habilidades y las teclas del mando en la guía.
+
+## Revisión 0.29: qué cambió respecto de la v0.28
+
+- **Cinemáticas en pixel art, fase C:** la presentación del jefe del Nivel 1 sigue el guion «El
+  que ya estaba aquí» (9,6 s, cuatro beats). Lleva brasas en la rejilla, el texto de Kael, el
+  rótulo y el flash final, y se ve una vez por partida.
+- **El texto va como en la cinemática inicial**, a la escala de la imagen, por decisión tuya; N21
+  pasa a ser opcional.
+- **N17 resuelto:** el texto de la presentación es el del guion.
+- **Nuevo N22:** el encuadre del ojo deja ver un hueco negro.
+- **Los ocho cues de sonido del guion** están puestos con su nombre y sin clip. Cada uno avisa por
+  consola al sonar. El rugido irá con el del jefe en la fase D.
+
+## Revisión 0.28: qué cambió respecto de la v0.27
+
+- **Cinemáticas en pixel art, fase B:**
+  - el sistema de cinemáticas monta beats (fundidos desde y hacia negro, encuadre en píxeles,
+    temblores, flash en fotogramas y cues de sonido por nombre);
+  - el pixel art lo dibuja la cámara de cinemáticas, también el texto, en la rejilla.
+- **Paro antes de la fase C,** la cinemática del jefe: necesita la fuente bitmap (N21).
+
+## Revisión 0.27: qué cambió respecto de la v0.26
+
+- **Cinemáticas en pixel art, fase A** (rama `cinematicas-pixel`): la cámara de cinemáticas con la
+  Pixel Perfect Camera de URP, a 240 × 135, y los planos del Nivel 1 a 1 píxel por unidad. Las
+  capturas a 1920 × 1080, 1280 × 720 y 960 × 540 están en `Docs/Cinematicas`.
+- **Nuevo N21:** la fuente bitmap para el texto de las cinemáticas.
+
+## Revisión 0.26: qué cambió respecto de la v0.25
+
+- **El dash de Kael** tiene su clip (rama `kael-dash`, que sale de `golem-mecanicas`): 4
+  fotogramas estirados a la duración del dash. N3 y B3, al día. Pruébalo con el resto (N20).
 
 ## Revisión 0.25: qué cambió respecto de la v0.24
 
@@ -371,9 +437,9 @@ texto y la duración de cada diapositiva y arrastra la imagen al campo `imagen`.
 |---|---|---|---|
 | `Cinematica_Inicial` (solo la primera vez) | Antes del Nivel 1 | ✔ 12 planos y guion (80 s). Falta, opcional, la música o el sonido (campo `musica` del asset, o `audio` de cada plano) | P2 |
 | `Cinematica_Jefe_Ira` (~7,5 s, con sus planos y a escala entera) | Al entrar en la arena de la Centinela, antes del combate (una vez por carga del nivel) | ✔ Planos `CinematicaJefe1` y `CinematicaJefe2`. Falta el guion del diálogo (N17) | P1 |
-| `Cinematica_Derrota_Ira` (a escala entera) | Cuando la Centinela termina de caer, antes de recoger el fragmento | ✔ `CinematicaFinalLvl1`. Falta `CinematicaFinalLvl2` (los huecos de los fragmentos): al dejarla en `Assets/Sprites/Cinematicas/Nivel1` y regenerar, entra sola | P1 |
+| `Cinematica_Derrota_Ira` (a escala entera) | Cuando la Centinela termina de caer, antes de recoger el fragmento | ✔ `CinematicaFinalLvl1` y `CinematicaFinalLvl2` (retoque opcional, N25) | — |
 | `Cinematica_Jefe_Tristeza`, `_Miedo`, `_Culpa` | Al entrar en la arena de cada jefe | Guion; imágenes opcionales | P2 |
-| `Cinematica_Cierre_Ira` | Al superar el mundo de la Ira | Guion e imágenes | P1 |
+| `Cinematica_Cierre_Ira` | Al superar el mundo de la Ira | Guion propuesto en `Docs/Diseno/Guion.md` (N11); faltan las imágenes | P1 |
 | `Cinematica_Cierre_Tristeza`, `_Miedo`, `_Culpa` | Al superar cada mundo | Guion e imágenes | P2 |
 | `Cinematica_Cierre_Jardin` (~30 s: Kael ve al Soldado) | Al superar el Jardín | Guion e imágenes (la idea, del Anexo A, ya está) | P2 |
 | `Cinematica_Entrada_Final` (~45 s) | Antes del final | Guion e imágenes (la idea, del Anexo A, ya está) | P2 |
@@ -405,7 +471,7 @@ nivel).
 
 **Estado en la v2 (arte de Kael, 2026-09-30).** El jugador está completo en lógica (prefab
 `Assets/Prefabs/Player.prefab`, FSM de 12 estados) y **ya tiene arte**: quieto, correr, salto con
-caída y ataque, dibujados en Pixelorama. El detalle está en el CHANGELOG, entrada «Arte de Kael».
+caída, ataque y dash, dibujados en Pixelorama. El detalle está en el CHANGELOG, entrada «Arte de Kael».
 
 - **Dónde está el arte:**
   - las hojas, en `Assets/Sprites/Kael`, a escala 1× y 64 PPU;
@@ -416,6 +482,7 @@ caída y ataque, dibujados en Pixelorama. El detalle está en el CHANGELOG, entr
 - **Parámetros que escribe el código:**
   - `Movement` (float, u/s) acelera el clip de correr;
   - `VelocidadAtaque` (float) estira el de ataque a la duración del golpe;
+  - `VelocidadDash` (float) estira el del dash a la duración del dash;
   - `Attack`, `Damage` y `Death` (bool) se conservan del prototipo, pero ningún clip depende de
     ellos.
 - **Cómo añadir un clip:** en el CHANGELOG, «Arte de Kael» → *Pasos manuales en el Editor*.
@@ -434,7 +501,7 @@ caída y ataque, dibujados en Pixelorama. El detalle está en el CHANGELOG, entr
 | Carga y ataque cargado (Ira) | modificador de `ATTACK` | P1 | ✔ El mismo clip, más lento, con el tinte rojizo de la carga |
 | Daño | `DAMAGED` | P1 | Sigue el clip anterior y parpadea. Falta un fotograma de golpe |
 | Muerte | `DEAD` | P1 | Usa Idle. Falta su clip |
-| Dash | `DASH` | P2 | Usa Correr, que se queda fijo en un fotograma. Falta su clip |
+| Dash | `DASH` | P2 | ✔ 4 fotogramas, estirados a la duración del dash (0,18 s) |
 | Wall slide / wall jump | `WALL_SLIDE`, `WALL_JUMP` | P2 | Usan Caida y Salto. Falta el de wall slide (pegado a la pared) |
 | Agacharse | `CROUCH` | P2 | Usa Idle, así que el sprite no se encoge con el collider. Falta su clip |
 | Nado (Tristeza) | modificador de movimiento `BajoElAgua` | P2 | Usa Correr, más lento en el agua |
@@ -667,6 +734,8 @@ ningún clip importado en la v2.
 | Arte de la pantalla «yo reconstruido» (Kael en el centro) | `PantallaYoReconstruido` | ✗ Hoy es una silueta clara | P2 |
 | UI del registro emocional (escala y campo de texto) | `PantallaFinNivel` | ✔ Montada con uGUI, sin arte (Fase 8) | — |
 | Pantalla de carga / fade | `SceneLoader` | ✗ (negro sólido basta) | P3 |
+| Íconos de las 4 habilidades | `PantallaMecanicas` → `HabilidadData.icono` | ✗ La guía funciona sin ellos: cada habilidad lleva el color de su emoción. | P3 |
+| Teclas del mando en la guía de mecánicas | `EtiquetasControles` | ✗ Hoy solo teclado y ratón, como la ayuda de la pausa. Para el mando harían falta sus íconos (A, B, X, Y). | P3 |
 | Panel de opciones | `MainMenu` | ✗ **No existe**: el botón «Configuration» no hace nada | P3 |
 | Corazones y monedas | HUD | ✔ `Elementos/Corazones.png`, `coins.png`, `Animaciones/hearths.anim`, `Coin.anim` | — |
 | Logo | Menú | ✔ `Images/tituloxd.png` en la v1; falta importarlo en la v2 (hoy el título es texto) | P3 |
@@ -679,7 +748,7 @@ ningún clip importado en la v2.
 | Plataforma que se desmorona | `PlataformaInestable` | ✔ Arte final: intacta, agrietada (el aviso), rota y polvo. Se rompe aunque te bajes; los tiempos son públicos. | — |
 | Plataforma de combustión | `PlataformaCombustion` (antes `PlataformaCaliente`) | ✔ Arte final: apagada, calienta y encendida, en un ciclo fijo. Falta corregir el Anexo A (N19). | — |
 | Lava | `Lava` | ✔ Arte final: la franja y su espejo, alternados (`tramos`). Es un solo fotograma: si se quiere que se mueva, harían falta más (opcional). | P3 |
-| Torreta de fuego y su bola | `TorretaFuego` + `Proyectil` | ✔ Arte final de la torreta (reposo, carga y disparo). **Falta la bola** (Fireball3 por regenerar): el prefab `BolaDeFuego` lleva el círculo del proyecto en naranja. | P1 |
+| Torreta de fuego y su bola | `TorretaFuego` + `Proyectil` | ✔ Arte final de la torreta (reposo, carga y disparo) y de la bola: vuela en bucle con dos fotogramas y al apagarse deja sus chispas 0,2 s (sin daño). | — |
 | Checkpoint | `Checkpoint` (Fase 6) | Provisional: un mástil y un paño que se tiñe con el acento del mundo al activarse. Candidatos de la v1: `Pixel Adventure 1/Items/Checkpoints` (bandera animada) y `tileset/Puerta/respawn point_*`. El sprite va en `Nivel/Checkpoints/L1_CP1/Pano` (campo `indicador` del `Checkpoint`). | P1 |
 | Salida del nivel | `SalidaNivel` (Fase 6) | Provisional: un portal translúcido del color de acento. Falta decidir su aspecto; en los niveles con jefe (Fase 7) puede bastar la puerta de la arena. | P2 |
 | VFX del ataque cargado | modificador de `ATTACK` | ✗ | P1 |
@@ -710,6 +779,12 @@ ningún clip importado en la v2.
 
 ## Historial
 
+- **0.31 (2026-10-07)** — Respuestas a la prueba del Nivel 1: bola de fuego, `CinematicaFinalLvl2`, zonas sin rectángulo, caminar con Alt y propuestas de diseño del Nivel 1 y del guion (N10 y N11). Nuevo N25.
+- **0.30 (2026-10-07)** — Guía de mecánicas en el menú principal y en la pausa, en la rama `menu-mecanicas`. Nuevos N23 (textos de la guía) y N24 (sigilo con teclado).
+- **0.29 (2026-10-06)** — Cinemáticas en pixel art, fase C: la presentación del jefe según su guion. N17 resuelto, N21 opcional, nuevo N22 (encuadre del ojo).
+- **0.28 (2026-10-06)** — Cinemáticas en pixel art, fase B: el sistema por beats y el texto en la rejilla. La fase C espera la fuente (N21).
+- **0.27 (2026-10-06)** — Cinemáticas en pixel art, fase A: la cámara con la Pixel Perfect Camera, en la rama `cinematicas-pixel`. Nuevo N21 (fuente bitmap).
+- **0.26 (2026-10-06)** — Dash de Kael: su clip, estirado a la duración del dash, en la rama `kael-dash`.
 - **0.25 (2026-10-06)** — Golem de Ceniza y mecánicas, fase E: el menú de verificación. La integración está completa, a falta de tu prueba.
 - **0.24 (2026-10-06)** — Golem de Ceniza y mecánicas, fase D: scripts, prefabs y cinemáticas en el juego.
 - **0.23 (2026-10-06)** — Golem de Ceniza y mecánicas, fase C: los Animators.

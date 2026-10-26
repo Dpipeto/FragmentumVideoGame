@@ -53,7 +53,7 @@ namespace Fragmentum.Tests
             var problemas = VerificadorNivel1.Problemas();
             CollectionAssert.IsEmpty(problemas, Lista(problemas));
 
-            LogAssert.Expect(LogType.Log, new Regex(@"Verificación correcta: 30 sprites, 13 clips, 4 Animators, 6 prefabs"));
+            LogAssert.Expect(LogType.Log, new Regex(@"Verificación correcta: 34 sprites, 14 clips, 5 Animators, 6 prefabs"));
             Assert.IsTrue(VerificadorNivel1.Verificar());
         }
 
@@ -61,15 +61,15 @@ namespace Fragmentum.Tests
         public void RevisaLosTreintaSprites_LosTreceClips_LosCuatroAnimators_YLosSeisPrefabs()
         {
             var sprites = VerificadorNivel1.Sprites;
-            Assert.AreEqual(30, sprites.Count, "15 fotogramas del Golem, 12 de las mecánicas y 3 planos.");
+            Assert.AreEqual(34, sprites.Count, "15 fotogramas del Golem, 15 de las mecánicas (con la bola) y 4 planos.");
             Assert.AreEqual(sprites.Count, sprites.Distinct().Count());
             Assert.AreEqual(15, sprites.Count(s => s.StartsWith(TablaArte.CarpetaGolem + "/")));
-            Assert.AreEqual(12, sprites.Count(s => s.StartsWith(TablaArte.CarpetaMecanicas + "/")));
-            Assert.AreEqual(3, sprites.Count(s => s.StartsWith(TablaArte.CarpetaCinematicasNivel1 + "/")));
+            Assert.AreEqual(15, sprites.Count(s => s.StartsWith(TablaArte.CarpetaMecanicas + "/")));
+            Assert.AreEqual(4, sprites.Count(s => s.StartsWith(TablaArte.CarpetaCinematicasNivel1 + "/")));
 
-            Assert.AreEqual(13, VerificadorNivel1.Clips.Count, "4 del Golem y 9 de las mecánicas (la lava no tiene clip).");
+            Assert.AreEqual(14, VerificadorNivel1.Clips.Count, "4 del Golem, 9 de las mecánicas y el vuelo de la bola (la lava no tiene clip).");
             Assert.AreEqual(4, VerificadorNivel1.Clips.Sum(c => c.Eventos.Length), "Los eventos del golpe y de la muerte del Golem.");
-            Assert.AreEqual(4, VerificadorNivel1.Animators.Count, "El Golem, la torreta, la plataforma inestable y la combustión.");
+            Assert.AreEqual(5, VerificadorNivel1.Animators.Count, "El Golem, la torreta, la plataforma inestable, la combustión y la bola.");
             Assert.AreEqual(6, VerificadorNivel1.Prefabs.Length, "El Golem y las cinco piezas de las mecánicas (con la bola).");
         }
 

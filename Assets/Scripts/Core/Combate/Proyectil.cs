@@ -10,11 +10,18 @@ namespace Fragmentum.Core.Combate
     /// golpear a su objetivo, al tocar el suelo o una pared, o al acabar su alcance.
     ///
     /// Se crea por código o como copia de un prefab: la bola de la torreta es un prefab
-    /// (<c>Mecanicas/BolaDeFuego</c>) con sprite provisional hasta que llegue su arte.
+    /// (<c>Mecanicas/BolaDeFuego</c>) con su arte. Al apagarse puede dejar sus restos un momento
+    /// (las chispas de la bola): solo se ven, no hacen daño.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(CircleCollider2D), typeof(Hitbox))]
     public class Proyectil : MonoBehaviour
     {
+        [Tooltip("Lo que queda un momento donde se apaga (las chispas de la bola). Vacío = nada.")]
+        [SerializeField] private Sprite restos;
+
+        [Tooltip("Segundos que se ven los restos.")]
+        [SerializeField, Min(0f)] private float duracionRestos = 0.2f;
+
         private Rigidbody2D _cuerpo;
         private CircleCollider2D _zona;
         private Hitbox _hitbox;
@@ -107,10 +114,33 @@ namespace Fragmentum.Core.Combate
             // escenario (para que las zonas de daño no choquen con él), y la consulta no depende de ella.
             if (Time.time >= _muereEn || Physics2D.OverlapCircle(_cuerpo.position, _zona.radius, _capasQueLoFrenan) != null)
             {
-                Destroy(gameObject);
+                Apagar();
             }
         }
 
-        private void AlImpactar(IGolpeable objetivo, Golpe golpe) => Destroy(gameObject);
+        private void AlImpactar(IGolpeable objetivo, Golpe golpe) => Apagar();
+
+        /// <summary>Desaparece en el acto (ya no hace daño) y deja sus restos, si los tiene.</summary>
+        private void Apagar()
+        {
+            if (restos != null && duracionRestos > 0f)
+            {
+                var dibujo = GetComponentInChildren<SpriteRenderer>();
+                var objeto = new GameObject($"{name}_Restos");
+                objeto.transform.SetPositionAndRotation(dibujo != null ? dibujo.transform.position : transform.position, transform.rotation);
+                objeto.transform.localScale = transform.lossyScale;
+                var visual = objeto.AddComponent<SpriteRenderer>();
+                visual.sprite = restos;
+                if (dibujo != null)
+                {
+                    visual.sortingLayerID = dibujo.sortingLayerID;
+                    visual.sortingOrder = dibujo.sortingOrder;
+                }
+
+                Destroy(objeto, duracionRestos);
+            }
+
+            Destroy(gameObject);
+        }
     }
 }

@@ -15,6 +15,7 @@ MonoBehaviour:
   id: 1
   nombre: "Dash Acu\xE1tico"
   descripcion: "El dash tambi\xE9n funciona bajo el agua."
+  controles: '{Sprint} en el agua'
   duracion: 0.18
   cooldown: 0.6
   icono: {fileID: 0}

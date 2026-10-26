@@ -10,8 +10,13 @@ namespace Fragmentum.Core.Input
     /// Usa el mapa "Player" del asset <c>InputSystem_Actions</c>, que ya trae las acciones
     /// que necesita el juego:
     /// Move (WASD y flechas), Jump (espacio), Attack (clic izquierdo o Enter),
-    /// Sprint (Shift izquierdo, aquí el dash), Crouch (C o Ctrl izquierdo), Interact (E)
-    /// y Ability (Q, añadida en la Fase 3 para la Invisibilidad Parcial).
+    /// Sprint (Shift izquierdo, aquí el dash), Crouch (C o Ctrl izquierdo), Interact (E),
+    /// Ability (Q, añadida en la Fase 3 para la Invisibilidad Parcial) y Walk (Alt izquierdo).
+    ///
+    /// Walk es caminar: mientras se mantiene, la dirección se queda en <see cref="factorCaminar"/>
+    /// (35 %). Con teclado A y D van a fondo; así Kael puede ir por debajo del 40 % de su
+    /// velocidad, que es lo que el sigilo del mundo del Miedo cuenta como silencioso. Con mando,
+    /// el stick ya da la dirección a medias.
     ///
     /// Si falta el asset o alguna acción, avisa una vez por consola y devuelve input neutro:
     /// el juego no se rompe, solo no responde a esa acción.
@@ -30,6 +35,9 @@ namespace Fragmentum.Core.Input
         [Tooltip("Mapa de acciones del jugador dentro del asset.")]
         [SerializeField] private string mapaJugador = "Player";
 
+        [Tooltip("Fracción de la dirección mientras se mantiene caminar (Alt). Por debajo de 0,4 es sigilo.")]
+        [SerializeField, Range(0.1f, 1f)] private float factorCaminar = 0.35f;
+
         private InputActionMap _mapa;
         private InputAction _mover;
         private InputAction _saltar;
@@ -38,6 +46,7 @@ namespace Fragmentum.Core.Input
         private InputAction _agacharse;
         private InputAction _interactuar;
         private InputAction _habilidad;
+        private InputAction _caminar;
 
         private float _tiempoUltimoSalto = float.NegativeInfinity;
         private bool _saltoConsumido = true;
@@ -54,7 +63,16 @@ namespace Fragmentum.Core.Input
             set => _bloqueado = value;
         }
 
-        public float EjeHorizontal => Bloqueado || _mover == null ? 0f : _mover.ReadValue<Vector2>().x;
+        public float EjeHorizontal => Bloqueado || _mover == null ? 0f : ConCaminar(_mover.ReadValue<Vector2>().x, CaminarMantenido, factorCaminar);
+
+        /// <summary>¿Se mantiene caminar (Alt)?</summary>
+        public bool CaminarMantenido => !Bloqueado && _caminar != null && _caminar.IsPressed();
+
+        /// <summary>La fracción que se aplica a la dirección al caminar.</summary>
+        public float FactorCaminar => factorCaminar;
+
+        /// <summary>La dirección horizontal, rebajada a <paramref name="factor"/> si se camina.</summary>
+        public static float ConCaminar(float eje, bool caminando, float factor) => caminando ? eje * factor : eje;
 
         public float EjeVertical => Bloqueado || _mover == null ? 0f : _mover.ReadValue<Vector2>().y;
 
@@ -99,6 +117,7 @@ namespace Fragmentum.Core.Input
             _agacharse = Buscar("Crouch");
             _interactuar = Buscar("Interact");
             _habilidad = Buscar("Ability");
+            _caminar = Buscar("Walk");
         }
 
         private void OnEnable() => _mapa?.Enable();
